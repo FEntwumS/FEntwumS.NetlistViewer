@@ -1,16 +1,14 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="clr-namespace:Oneware.NetlistReaderFrontend.ViewModels"
+        xmlns:vm="using:Oneware.NetlistReaderFrontend.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Oneware.NetlistReaderFrontend.Views"
-        xmlns:netlistReaderFrontend="clr-namespace:Oneware.NetlistReaderFrontend"
+        x:Class="Oneware.NetlistReaderFrontend.Views.Frontend"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:DataType="vm:FrontendViewModel"
         x:CompileBindings="True"
-        xmlns:controls1="clr-namespace:Oneware.NetlistReaderFrontend.Controls"
-        xmlns:viewModels="clr-namespace:Oneware.NetlistReaderFrontend.ViewModels"
-        x:Class="Oneware.NetlistReaderFrontend.Views.Frontend">
+        xmlns:controls="clr-namespace:Oneware.NetlistReaderFrontend.Controls"
+        xmlns:viewModels="clr-namespace:Oneware.NetlistReaderFrontend.ViewModels">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -42,7 +40,7 @@
                        DockPanel.Dock="Bottom" Margin="10 0 0 0">
             </TextBlock>
 
-            <controls1:NetlistControl Items="{Binding Items}" VerticalAlignment="Stretch"
+            <controls:NetlistControl Items="{Binding Items}" VerticalAlignment="Stretch"
                                      HorizontalAlignment="Stretch" PointerMoved="InputElement_OnPointerMoved"
                                      PointerWheelChanged="InputElement_OnPointerWheelChanged" Name="NetlistControl"
                                      CurrentScale="{Binding Scale}" DeltaX="0" DeltaY="0"
@@ -54,7 +52,7 @@
                                      Tapped="NetlistControl_OnTapped"
                                      PropertyChanged="NetlistControl_OnPropertyChanged" FitToZoom="{Binding FitToZoom}"
                                      IsLoaded="{Binding IsLoaded}">
-            </controls1:NetlistControl>
+            </controls:NetlistControl>
         </DockPanel>
     </Panel>
 </Window>

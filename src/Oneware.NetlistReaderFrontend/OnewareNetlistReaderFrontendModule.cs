@@ -1,8 +1,10 @@
 using CommunityToolkit.Mvvm.Input;
+using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
 using Oneware.NetlistReaderFrontend.Services;
+using Oneware.NetlistReaderFrontend.ViewModels;
 using Prism.Ioc;
 using Prism.Modularity;
 using ReactiveUI;
@@ -26,6 +28,8 @@ public class OnewareNetlistReaderFrontendModule : IModule
         _serviceManager = new ServiceManager(containerProvider);
         
         var frontendService = containerProvider.Resolve<FrontendService>();
+        
+        containerProvider.Resolve<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
         
         containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
         {

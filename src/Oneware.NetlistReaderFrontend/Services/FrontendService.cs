@@ -1,24 +1,22 @@
-﻿using OneWare.Essentials.Models;
+﻿using OneWare.Essentials.Enums;
+using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using Oneware.NetlistReaderFrontend.ViewModels;
 
 namespace Oneware.NetlistReaderFrontend.Services;
 
-public class FrontendService
+public class FrontendService(ILogger logger, IApplicationStateService applicationStateService, IDockService dockService)
 {
-    private readonly ILogger _logger;
-    private readonly IApplicationStateService _applicationStateService;
-    private readonly IDockService _dockService;
+    private readonly ILogger _logger = logger;
+    private readonly IApplicationStateService _applicationStateService = applicationStateService;
+    private readonly IDockService _dockService = dockService;
 
-    public FrontendService(ILogger logger, IApplicationStateService applicationStateService, IDockService dockService)
+    public Task ShowViewer(IProjectFile json)
     {
-        _logger = logger;
-        _applicationStateService = applicationStateService;
-        _dockService = dockService;
-    }
-
-    public async Task ShowViewer(IProjectFile json)
-    {
-        _dockService.Show(new FrontendViewModel(json));
+        _dockService.Show(new FrontendViewModel());
+        _dockService.InitializeContent();
+        Console.WriteLine(_dockService.Layout);
+        
+        return Task.CompletedTask;
     }
 }

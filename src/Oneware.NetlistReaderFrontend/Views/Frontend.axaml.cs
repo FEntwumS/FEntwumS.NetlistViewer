@@ -1,6 +1,5 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.PanAndZoom;
 using Avalonia.Input;
 using Oneware.NetlistReaderFrontend.Controls;
 using Oneware.NetlistReaderFrontend.ViewModels;
@@ -24,10 +23,10 @@ public partial class Frontend : UserControl
     // move netlist
     private void InputElement_OnPointerMoved(object? sender, PointerEventArgs e)
     {
-        var pointerpoints = e.GetIntermediatePoints(sender as Control);
-        double dx, dy;
+        var NetlistControlElem = sender as NetlistControl;
         
-        var NetlistControlElem = this.Find<NetlistControl>("NetlistControl");
+        var pointerpoints = e.GetIntermediatePoints(NetlistControlElem);
+        double dx, dy;
 
         if (pointerpoints.Count > 1 && pointerpoints.First().Properties.IsLeftButtonPressed)
         {
@@ -49,7 +48,7 @@ public partial class Frontend : UserControl
     private void InputElement_OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
         var wheel = e.Delta;
-        var NetlistControlElem = this.Find<NetlistControl>("NetlistControl");
+        var NetlistControlElem = sender as NetlistControl;
 
         // only react to vertical scrolling for now
         NetlistControlElem.DeltaScale += wheel.Y;
