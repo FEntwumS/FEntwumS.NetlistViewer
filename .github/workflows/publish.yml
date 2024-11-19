@@ -1,0 +1,41 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Get Version
+        uses: kzrnm/get-net-sdk-project-versions-action@v1.3.0
+        id: get-version
+        with:
+          proj-path: src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj
+      - name: Build
+        run: dotnet build src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj -c Release -o publish
+      - name: Compress
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: ../Oneware.NetlistReaderFrontend_${{steps.get-version.outputs.version}}_all.zip
+          directory: ./publish
+      - name: Debug
+        run: ls
+      - uses: ncipollo/release-action@v1.14.0
+        with:
+          artifacts: "Oneware.NetlistReaderFrontend_${{steps.get-version.outputs.version}}_all.zip,./publish/compatibility.txt"
+          tag: ${{steps.get-version.outputs.version}}
+          allowUpdates: true

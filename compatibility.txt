@@ -1,0 +1,2 @@
+OneWare.Essentials : 0.11.0
+OneWare.UniversalFpgaProjectSystem : 0.41.0
