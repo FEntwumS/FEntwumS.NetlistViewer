@@ -13,7 +13,9 @@ public class FrontendService(ILogger logger, IApplicationStateService applicatio
 
     public Task ShowViewer(IProjectFile json)
     {
-        _dockService.Show(new FrontendViewModel());
+        var vm = new FrontendViewModel();
+        vm.InitializeContent();
+        _dockService.Show(vm);
         _dockService.InitializeContent();
         Console.WriteLine(_dockService.Layout);
         

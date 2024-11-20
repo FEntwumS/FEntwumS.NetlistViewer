@@ -6,11 +6,15 @@ using Oneware.NetlistReaderFrontend.ViewModels;
 
 namespace Oneware.NetlistReaderFrontend.Views;
 
-public partial class Frontend : UserControl
+// Avalonia expects the View corresponding to a given ViewModel to have the same name, but ending in just "View" instead
+// of "ViewModel" [1]
+//
+// [1]: https://docs.avaloniaui.net/docs/concepts/view-locator
+public partial class FrontendView : UserControl
 {
     private FrontendViewModel? _vm;
     
-    public Frontend()
+    public FrontendView()
     {
         InitializeComponent();
 
