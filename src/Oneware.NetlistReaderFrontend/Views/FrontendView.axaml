@@ -32,14 +32,6 @@
                 <Button Command="{Binding FitToZoomCommand}">Zoom to fit</Button>
             </StackPanel>
 
-            <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Text="{Binding TestString}"
-                       DockPanel.Dock="Bottom">
-            </TextBlock>
-            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                       Text="{Binding StatusText, StringFormat=Pattern}" Foreground="Chartreuse"
-                       DockPanel.Dock="Bottom" Margin="10 0 0 0">
-            </TextBlock>
-
             <controls:NetlistControl Items="{Binding Items}" VerticalAlignment="Stretch"
                                      HorizontalAlignment="Stretch" PointerMoved="InputElement_OnPointerMoved"
                                      PointerWheelChanged="InputElement_OnPointerWheelChanged" Name="NetlistControl"

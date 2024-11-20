@@ -8,11 +8,13 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Dock.Model.Core;
+using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.ViewModels;
 using Oneware.NetlistReaderFrontend.Services;
 using Oneware.NetlistReaderFrontend.Types;
 using ReactiveUI;
+using ILogger = OneWare.Essentials.Services.ILogger;
 
 namespace Oneware.NetlistReaderFrontend.ViewModels;
 
@@ -130,11 +132,10 @@ public class FrontendViewModel : ExtendedTool
             OnPropertyChanged();
         }
     }
+    
+public ICommand FitToZoomCommand { get; }
 
-
-public ICommand FitToZoomCommand {
-get;
-}
+private ILogger _logger { get; set; }
 public FrontendViewModel() : base("Frontend")
 {
     items = new AvaloniaList<NetlistElement>();
@@ -145,6 +146,8 @@ public FrontendViewModel() : base("Frontend")
     OffX = 0;
     OffY = 0;
     FitToZoom = false;
+
+    _logger = ServiceManager.GetLogger();
 
     // OneWare uses the Community MVVM Toolkit. If ReactiveUI is used in an extension, any access to a binded property
     // inside a ReactiveCommand leads to an exception
@@ -173,7 +176,7 @@ private async Task OpenFileImpl()
 {
         try
         {
-            StatusText = "Opening file";
+            _logger.Log("Opening file...", ConsoleColor.Blue, true, new SolidColorBrush(Colors.Blue));
 
             var fileOpener = ServiceManager.GetFileOpener();
             var jsonLoader = ServiceManager.GetJsonLoader();
@@ -182,21 +185,19 @@ private async Task OpenFileImpl()
 
             if (file is null)
             {
-                StatusText = "No file opened";
+                _logger.Error("File is empty.", null, true);
                 return;
             }
 
-            StatusText = "File loaded";
+            _logger.Log("File loaded", ConsoleColor.Blue, true, new SolidColorBrush(Colors.Blue));
 
             jsonLoader.OpenJson(file);
 
             Items.Clear();
-
-            //Dispatcher.UIThread.InvokeAsync(() => { Items.AddRange(jsonLoader.parseJson(0, 0, this).Result); });
             
             Items.AddRange(await jsonLoader.parseJson(0, 0, this));
             
-            StatusText = "JSON read";
+            _logger.Log("JSON read", ConsoleColor.Blue, true, new SolidColorBrush(Colors.Blue));
         }
         catch (Exception e)
         {

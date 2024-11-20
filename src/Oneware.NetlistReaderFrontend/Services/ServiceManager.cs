@@ -1,4 +1,5 @@
-﻿using Prism.Ioc;
+﻿using OneWare.Essentials.Services;
+using Prism.Ioc;
 
 namespace Oneware.NetlistReaderFrontend.Services;
 
@@ -19,6 +20,11 @@ public class ServiceManager
     public static IViewportDimensionService GetViewportDimensionService()
     {
         return _containerProvider.Resolve<IViewportDimensionService>();
+    }
+
+    public static ILogger GetLogger()
+    {
+        return _containerProvider.Resolve<ILogger>();
     }
 
     public static IFileOpener GetFileOpener()
