@@ -5,12 +5,14 @@ namespace Oneware.NetlistReaderFrontend.Services;
 
 public class FileOpener : IFileOpener
 {
-    private readonly Window _target;
+    private Window _target;
 
     public FileOpener(Window target)
     {
         _target = target;
     }
+    
+    public void setWindow(Window target) { _target = target; }
     
     public async Task<IStorageFile?> OpenFileAsync()
     {

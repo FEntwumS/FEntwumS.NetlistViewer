@@ -24,11 +24,10 @@ public class JsonLoader : IJsonLoader
     private long bendcnt { get; set; }
     private long charcnt { get; set; }
 
-    public async Task OpenJson(IStorageFile netlist)
+    public async Task OpenJson(FileStream netlist)
     {
         isLoading = true;
-        using FileStream stream = netlist.OpenReadAsync().Result as FileStream;
-        rootnode = await JsonNode.ParseAsync(stream);
+        rootnode = await JsonNode.ParseAsync(netlist);
         isLoading = false;
         scale = 1.0d;
     }
@@ -41,7 +40,7 @@ public class JsonLoader : IJsonLoader
         }
     }
 
-    public async Task parseJson(AvaloniaList<NetlistElement> items, double xRef, double yRef,
+    public async Task<List<NetlistElement>> parseJson(double xRef, double yRef,
         FrontendViewModel mw)
     {
         await loadingDone();
@@ -52,11 +51,11 @@ public class JsonLoader : IJsonLoader
         edgecnt = 0;
         junctioncnt = 0;
         charcnt = 0;
-        
+
         maxWidth = 0;
         maxHeight = 0;
-        
-        AvaloniaList<NetlistElement> loaded = new AvaloniaList<NetlistElement>();
+
+        List<NetlistElement> items = new List<NetlistElement>();
 
         /*JsonArray children = rootnode["children"] as JsonArray;
 
@@ -71,13 +70,11 @@ public class JsonLoader : IJsonLoader
             }
         }*/
 
-        createNode(rootnode, loaded, xRef, yRef, 0);
+        createNode(rootnode, items, xRef, yRef, 0);
 
-        items.AddRange(loaded);
-        
         // Dispose of the JSON document, as we dont need to keep it around
         rootnode = new JsonObject();
-        
+
         // Call the garbage collector to free dozens of MB of RAM
         // If the GC isn't called explicitly, the dead objects of the JSON file will just stay in the Gen 2 Heap
         GC.Collect();
@@ -92,9 +89,11 @@ public class JsonLoader : IJsonLoader
         Console.WriteLine("Average number of characters per label: " + ((float)charcnt / (float)labelcnt));
 
         mw.UpdateScaleImpl();
+
+        return items;
     }
 
-    public void createNode(JsonNode node, AvaloniaList<NetlistElement> items, double xRef, double yRef,
+    public void createNode(JsonNode node, List<NetlistElement> items, double xRef, double yRef,
         ushort depth)
     {
         Console.WriteLine(node["id"]);
@@ -108,7 +107,7 @@ public class JsonLoader : IJsonLoader
         string cellname = "";
         string path = "";
         string src = "";
-        
+
         JsonNode layoutOptions = node["layoutOptions"] as JsonNode;
 
         if (node.AsObject().ContainsKey("x"))
@@ -210,7 +209,7 @@ public class JsonLoader : IJsonLoader
         }
     }
 
-    public void createLabels(JsonArray labels, AvaloniaList<NetlistElement> items, double xRef,
+    public void createLabels(JsonArray labels, List<NetlistElement> items, double xRef,
         double yRef, ushort depth)
     {
         double x = 0;
@@ -268,7 +267,7 @@ public class JsonLoader : IJsonLoader
         }
     }
 
-    public void createPorts(JsonArray ports, AvaloniaList<NetlistElement> items, double xRef,
+    public void createPorts(JsonArray ports, List<NetlistElement> items, double xRef,
         double yRef, ushort depth)
     {
         double x = 0;
@@ -306,7 +305,7 @@ public class JsonLoader : IJsonLoader
         }
     }
 
-    public void createEdges(JsonArray edges, AvaloniaList<NetlistElement> items, double xRef,
+    public void createEdges(JsonArray edges, List<NetlistElement> items, double xRef,
         double yRef, ushort depth)
     {
         double x = 0;
@@ -331,7 +330,7 @@ public class JsonLoader : IJsonLoader
             signalname = "";
             indexInSignal = 0;
             signaltype = "";
-            
+
             sections = edge["sections"] as JsonArray;
 
             foreach (JsonNode section in sections)
@@ -528,7 +527,7 @@ public class JsonLoader : IJsonLoader
         }
     }
 
-    public void createJunctionPoints(JsonArray junctionPoints, AvaloniaList<NetlistElement> items,
+    public void createJunctionPoints(JsonArray junctionPoints, List<NetlistElement> items,
         double xRef, double yRef, ushort depth)
     {
         double x = 0;

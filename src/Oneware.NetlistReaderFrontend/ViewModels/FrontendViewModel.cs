@@ -1,8 +1,12 @@
 ﻿using System.Windows.Input;
 using Avalonia;
 using Avalonia.Collections;
+using Avalonia.Controls;
 using Avalonia.Media;
+using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Dock.Model.Core;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.ViewModels;
@@ -115,42 +119,58 @@ public class FrontendViewModel : ExtendedTool
         }
     }
 
-    public ICommand FitToZoomCommand { get; }
+    private FileStream file { get; set; }
 
-    public FrontendViewModel() : base("Frontend")
+    public FileStream File
     {
-        items = new AvaloniaList<NetlistElement>();
-        Items = new AvaloniaList<NetlistElement>();
-
-        Scale = 0.2;
-
-        OffX = 0;
-        OffY = 0;
-        FitToZoom = false;
-
-        LoadJSONCommand = ReactiveCommand.CreateFromTask(OpenFileImpl);
-
-        FitToZoomCommand = ReactiveCommand.Create(() => { FitToZoom = !FitToZoom; });
+        get => file;
+        set
+        {
+            this.file = value;
+            OnPropertyChanged();
+        }
     }
 
-    public async Task UpdateScaleImpl()
-    {
-        var jsonLoader = ServiceManager.GetJsonLoader();
-        var dimensionService = ServiceManager.GetViewportDimensionService();
 
-        dimensionService.SetHeight(jsonLoader.GetMaxHeight());
-        dimensionService.SetWidth(jsonLoader.GetMaxWidth());
+public ICommand FitToZoomCommand {
+get;
+}
+public FrontendViewModel() : base("Frontend")
+{
+    items = new AvaloniaList<NetlistElement>();
+    Items = new AvaloniaList<NetlistElement>();
 
-        IsLoaded = !IsLoaded;
+    Scale = 0.2;
 
-        Scale = 0.2;
+    OffX = 0;
+    OffY = 0;
+    FitToZoom = false;
 
-        OffX = 0;
-        OffY = 0;
-    }
+    // OneWare uses the Community MVVM Toolkit. If ReactiveUI is used in an extension, any access to a binded property
+    // inside a ReactiveCommand leads to an exception
+    LoadJSONCommand = new RelayCommand(() => OpenFileImpl());
 
-    private async Task OpenFileImpl()
-    {
+    FitToZoomCommand = new RelayCommand(() => { FitToZoom = !FitToZoom; });
+}
+
+public async Task UpdateScaleImpl()
+{
+    var jsonLoader = ServiceManager.GetJsonLoader();
+    var dimensionService = ServiceManager.GetViewportDimensionService();
+
+    dimensionService.SetHeight(jsonLoader.GetMaxHeight());
+    dimensionService.SetWidth(jsonLoader.GetMaxWidth());
+
+    IsLoaded = !IsLoaded;
+
+    Scale = 0.2;
+
+    OffX = 0;
+    OffY = 0;
+}
+
+private async Task OpenFileImpl()
+{
         try
         {
             StatusText = "Opening file";
@@ -158,7 +178,7 @@ public class FrontendViewModel : ExtendedTool
             var fileOpener = ServiceManager.GetFileOpener();
             var jsonLoader = ServiceManager.GetJsonLoader();
 
-            var file = await fileOpener.OpenFileAsync();
+            //var file = await fileOpener.OpenFileAsync();
 
             if (file is null)
             {
@@ -172,13 +192,16 @@ public class FrontendViewModel : ExtendedTool
 
             Items.Clear();
 
-            jsonLoader.parseJson(Items, 0, 0, this);
-
+            //Dispatcher.UIThread.InvokeAsync(() => { Items.AddRange(jsonLoader.parseJson(0, 0, this).Result); });
+            
+            Items.AddRange(await jsonLoader.parseJson(0, 0, this));
+            
             StatusText = "JSON read";
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
         }
-    }
+}
+
 }

@@ -8,24 +8,24 @@ namespace Oneware.NetlistReaderFrontend.Services;
 
 public interface IJsonLoader
 {
-    public Task OpenJson(IStorageFile netlist);
+    public Task OpenJson(FileStream netlist);
 
-    public Task parseJson(AvaloniaList<NetlistElement> items, double xRef, double yRef,
+    public Task<List<NetlistElement>> parseJson(double xRef, double yRef,
         FrontendViewModel mw);
 
-    public void createNode(JsonNode node, AvaloniaList<NetlistElement> items, double xRef, double
+    public void createNode(JsonNode node, List<NetlistElement> items, double xRef, double
         yRef, ushort depth);
 
-    public void createLabels(JsonArray labels, AvaloniaList<NetlistElement> items, double xRef,
+    public void createLabels(JsonArray labels, List<NetlistElement> items, double xRef,
         double yRef, ushort depth);
 
-    public void createPorts(JsonArray ports, AvaloniaList<NetlistElement> items, double xRef,
+    public void createPorts(JsonArray ports, List<NetlistElement> items, double xRef,
         double yRef, ushort depth);
 
-    public void createEdges(JsonArray edges, AvaloniaList<NetlistElement> items, double xRef,
+    public void createEdges(JsonArray edges, List<NetlistElement> items, double xRef,
         double yRef, ushort depth);
 
-    public void createJunctionPoints(JsonArray junctionPoints, AvaloniaList<NetlistElement> items,
+    public void createJunctionPoints(JsonArray junctionPoints, List<NetlistElement> items,
         double xRef, double yRef, ushort depth);
 
     public double GetMaxWidth();

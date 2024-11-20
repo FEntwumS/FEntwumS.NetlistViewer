@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using OneWare.Essentials.Enums;
+using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
@@ -33,11 +34,11 @@ public class OnewareNetlistReaderFrontendModule : IModule
         
         containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
         {
-            if (selected is [IProjectFile {Extension: ".vhd"} jsonFile])
+            if (selected is [IProjectFile {Extension: ".json"} jsonFile])
             {
-                menuItems.Add(new MenuItemViewModel("Hello World")
+                menuItems.Add(new MenuItemViewModel("NetlistViewer")
                 {
-                    Header = $"Hello World {jsonFile.Header}",
+                    Header = $"View netlist {jsonFile.Header}",
                     Command = new AsyncRelayCommand(() => frontendService.ShowViewer(jsonFile))
                 });
             }

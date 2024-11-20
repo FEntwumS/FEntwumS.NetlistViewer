@@ -15,6 +15,7 @@ public class FrontendService(ILogger logger, IApplicationStateService applicatio
     {
         var vm = new FrontendViewModel();
         vm.InitializeContent();
+        vm.File = File.Open(json.FullPath, FileMode.Open, FileAccess.Read);
         _dockService.Show(vm);
         _dockService.InitializeContent();
         Console.WriteLine(_dockService.Layout);
