@@ -172,7 +172,7 @@ public async Task UpdateScaleImpl()
     OffY = 0;
 }
 
-private async Task OpenFileImpl()
+public async Task OpenFileImpl()
 {
         try
         {

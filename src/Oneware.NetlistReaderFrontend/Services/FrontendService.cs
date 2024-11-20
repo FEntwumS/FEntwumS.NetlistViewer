@@ -19,7 +19,7 @@ public class FrontendService(ILogger logger, IApplicationStateService applicatio
         vm.File = File.Open(json.FullPath, FileMode.Open, FileAccess.Read);
         _dockService.Show(vm, DockShowLocation.Document);
         _dockService.InitializeContent();
-        Console.WriteLine(_dockService.Layout);
+        vm.OpenFileImpl();
         
         return Task.CompletedTask;
     }
