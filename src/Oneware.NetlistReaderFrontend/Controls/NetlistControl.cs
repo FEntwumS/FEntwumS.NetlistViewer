@@ -7,6 +7,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Oneware.NetlistReaderFrontend.Services;
 using Oneware.NetlistReaderFrontend.Types;
@@ -289,21 +290,12 @@ public class NetlistControl : TemplatedControl
         renderedJunctionList.Clear();
         renderedEdgeList.Clear();
 
-        var theme = Application.Current.ActualThemeVariant;
+        ThemeVariant theme = Application.Current.ActualThemeVariant;
 
-        // Pen borderPen = new Pen(new SolidColorBrush(Colors.MidnightBlue), 1.5 * CurrentScale);
-        // Pen dropShadowPen = new Pen(new SolidColorBrush(Colors.DarkGray), 2.5 * CurrentScale, null, PenLineCap.Square,
-        //     PenLineJoin.Miter, 10d);
-        // Pen edgePen = new Pen(new SolidColorBrush(Colors.Black), 1.2 * CurrentScale, null, PenLineCap.Square,
-        //     PenLineJoin.Miter, 10d);
-        // Pen bundledEdgePen = new Pen(new SolidColorBrush(Colors.Black), 2.2 * CurrentScale, null, PenLineCap.Square);
-        // Brush rectFillBrush = new SolidColorBrush(Colors.LightBlue);
-        // Brush ellipseFillBrush = new SolidColorBrush(Colors.Black);
         Brush backgroundBrush =
             new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeBackgroundColor") is Color
                 ? (Color)Application.Current!.FindResource(theme, "ThemeBackgroundColor")
                 : Colors.LightGray);
-        // Brush textBrush = new SolidColorBrush(Colors.Black);
         Pen highlightPen = new Pen(new SolidColorBrush(Colors.Yellow, 0.5d), 5.5 * CurrentScale, null, PenLineCap.Round,
             PenLineJoin.Miter, 10d);
 
