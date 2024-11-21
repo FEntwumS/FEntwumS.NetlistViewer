@@ -31,4 +31,9 @@ public class ServiceManager
     {
         return _containerProvider.Resolve<IFileOpener>();
     }
+
+    public static ICustomLogger GetCustomLogger()
+    {
+        return _containerProvider.Resolve<ICustomLogger>();
+    }
 }

@@ -345,9 +345,8 @@ public class NetlistControl : TemplatedControl
         {
             switch (element.Type)
             {
+                // Node
                 case 1:
-                    // Node
-
                     if (element.ZIndex > lastVisibleNodeZIndex + 1)
                     {
                         continue;
@@ -397,8 +396,8 @@ public class NetlistControl : TemplatedControl
 
                     break;
 
+                // Edge
                 case 2:
-                    // Edge
                     if (element.Points == null || !previousNodeInView || element.ZIndex > lastVisibleNodeZIndex + 1)
                     {
                         continue;
@@ -458,10 +457,11 @@ public class NetlistControl : TemplatedControl
 
                     break;
 
+                // Label
                 case 3:
-                    // Label
+                    // Port Labels are two levels higher than the corresponding node, therefore +2 instead of +1 is used
                     
-                    if (element.ZIndex > lastVisibleNodeZIndex + 1)
+                    if (element.ZIndex > lastVisibleNodeZIndex + 2)
                     {
                         continue;
                     }
@@ -491,9 +491,8 @@ public class NetlistControl : TemplatedControl
 
                     break;
 
+                // Junction
                 case 4:
-                    // Junction
-                    
                     if (element.ZIndex > lastVisibleNodeZIndex + 1)
                     {
                         continue;
@@ -517,9 +516,8 @@ public class NetlistControl : TemplatedControl
 
                     break;
 
+                // Port
                 case 5:
-                    // Port
-                    
                     if (element.ZIndex > lastVisibleNodeZIndex + 1)
                     {
                         continue;
@@ -554,6 +552,8 @@ public class NetlistControl : TemplatedControl
         DeltaScale -= deltaScale;
     }
 
+    #region IntersectionTests
+    
     private bool isInBounds(Point toCheck)
     {
         if (toCheck.X >= 0 && toCheck.X <= this.Bounds.Width)
@@ -822,21 +822,21 @@ public class NetlistControl : TemplatedControl
 
         return ret;
     }
+    
+    #endregion
 
     public void NetlistControl_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        Console.WriteLine("Pointer pressed");
+        return;
     }
 
     public void NetlistControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
-        Console.WriteLine("Pointer released");
+        return;
     }
 
     public void NetlistControl_OnTapped(object? sender, TappedEventArgs e)
     {
-        Console.WriteLine("Pointer tapped");
-
         NetlistElement hn = null,
             he = null,
             hj = null,
@@ -934,11 +934,6 @@ public class NetlistControl : TemplatedControl
             }
         }
         
-        Console.WriteLine("====");
-        Console.WriteLine("Width: " + this.Bounds.Width);
-        Console.WriteLine("Height: " + this.Bounds.Height);
-        Console.WriteLine("====");
-
         Redraw();
     }
 }

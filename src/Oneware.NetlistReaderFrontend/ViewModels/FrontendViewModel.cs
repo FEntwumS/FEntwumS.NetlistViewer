@@ -132,51 +132,52 @@ public class FrontendViewModel : ExtendedTool
             OnPropertyChanged();
         }
     }
-    
-public ICommand FitToZoomCommand { get; }
 
-private ILogger _logger { get; set; }
-public FrontendViewModel() : base("Frontend")
-{
-    items = new AvaloniaList<NetlistElement>();
-    Items = new AvaloniaList<NetlistElement>();
+    public ICommand FitToZoomCommand { get; }
 
-    Scale = 0.2;
+    private ICustomLogger _logger { get; set; }
 
-    OffX = 0;
-    OffY = 0;
-    FitToZoom = false;
+    public FrontendViewModel() : base("Frontend")
+    {
+        items = new AvaloniaList<NetlistElement>();
+        Items = new AvaloniaList<NetlistElement>();
 
-    _logger = ServiceManager.GetLogger();
+        Scale = 0.2;
 
-    // OneWare uses the Community MVVM Toolkit. If ReactiveUI is used in an extension, any access to a binded property
-    // inside a ReactiveCommand leads to an exception
-    LoadJSONCommand = new RelayCommand(() => OpenFileImpl());
+        OffX = 0;
+        OffY = 0;
+        FitToZoom = false;
 
-    FitToZoomCommand = new RelayCommand(() => { FitToZoom = !FitToZoom; });
-}
+        _logger = ServiceManager.GetCustomLogger();
 
-public async Task UpdateScaleImpl()
-{
-    var jsonLoader = ServiceManager.GetJsonLoader();
-    var dimensionService = ServiceManager.GetViewportDimensionService();
+        // OneWare uses the Community MVVM Toolkit. If ReactiveUI is used in an extension, any access to a binded property
+        // inside a ReactiveCommand leads to an exception
+        LoadJSONCommand = new RelayCommand(() => OpenFileImpl());
 
-    dimensionService.SetHeight(jsonLoader.GetMaxHeight());
-    dimensionService.SetWidth(jsonLoader.GetMaxWidth());
+        FitToZoomCommand = new RelayCommand(() => { FitToZoom = !FitToZoom; });
+    }
 
-    IsLoaded = !IsLoaded;
+    public async Task UpdateScaleImpl()
+    {
+        var jsonLoader = ServiceManager.GetJsonLoader();
+        var dimensionService = ServiceManager.GetViewportDimensionService();
 
-    Scale = 0.2;
+        dimensionService.SetHeight(jsonLoader.GetMaxHeight());
+        dimensionService.SetWidth(jsonLoader.GetMaxWidth());
 
-    OffX = 0;
-    OffY = 0;
-}
+        IsLoaded = !IsLoaded;
 
-public async Task OpenFileImpl()
-{
+        Scale = 0.2;
+
+        OffX = 0;
+        OffY = 0;
+    }
+
+    public async Task OpenFileImpl()
+    {
         try
         {
-            _logger.Log("Opening file...", ConsoleColor.Blue, true, new SolidColorBrush(Colors.Blue));
+            _logger.Log("Opening file...", true);
 
             var fileOpener = ServiceManager.GetFileOpener();
             var jsonLoader = ServiceManager.GetJsonLoader();
@@ -185,26 +186,25 @@ public async Task OpenFileImpl()
 
             if (file is null)
             {
-                _logger.Error("File is empty.", null, true);
+                _logger.Error("File is empty.");
                 return;
             }
 
-            _logger.Log("File loaded", ConsoleColor.Blue, true, new SolidColorBrush(Colors.Blue));
+            _logger.Log("File loaded", true);
 
             await jsonLoader.OpenJson(file);
-            
+
             File.Close();
 
             Items.Clear();
-            
+
             Items.AddRange(await jsonLoader.parseJson(0, 0, this));
-            
-            _logger.Log("JSON read", ConsoleColor.Blue, true, new SolidColorBrush(Colors.Blue));
+
+            _logger.Log("JSON read", true);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
         }
-}
-
+    }
 }

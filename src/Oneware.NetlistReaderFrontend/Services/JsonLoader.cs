@@ -25,11 +25,11 @@ public class JsonLoader : IJsonLoader
     private long portcnt { get; set; }
     private long bendcnt { get; set; }
     private long charcnt { get; set; }
-    private ILogger logger;
+    private ICustomLogger logger;
 
     public async Task OpenJson(FileStream netlist)
     {
-        logger = ServiceManager.GetLogger();
+        logger = ServiceManager.GetCustomLogger();
         isLoading = true;
         rootnode = await JsonNode.ParseAsync(netlist);
         isLoading = false;
@@ -48,6 +48,10 @@ public class JsonLoader : IJsonLoader
         FrontendViewModel mw)
     {
         await loadingDone();
+        
+        logger.Log("Start loading elements");
+        logger.Log("====");
+        
         nodecnt = 0;
         labelcnt = 0;
         portcnt = 0;
@@ -62,6 +66,10 @@ public class JsonLoader : IJsonLoader
         List<NetlistElement> items = new List<NetlistElement>();
 
         createNode(rootnode, items, xRef, yRef, 0);
+        
+        logger.Log("====");
+        logger.Log("All elements loaded");
+        logger.Log("Statistics:");
 
         // Dispose of the JSON document, as we dont need to keep it around
         rootnode = new JsonObject();
@@ -87,7 +95,7 @@ public class JsonLoader : IJsonLoader
     public void createNode(JsonNode node, List<NetlistElement> items, double xRef, double yRef,
         ushort depth)
     {
-        logger.Log(node["id"]);
+        logger.Log(node["id"].ToString());
         JsonArray children = node["children"] as JsonArray;
         double x = 0;
         double y = 0;

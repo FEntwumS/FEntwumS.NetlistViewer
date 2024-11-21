@@ -8,6 +8,7 @@ using Oneware.NetlistReaderFrontend.Services;
 using Oneware.NetlistReaderFrontend.ViewModels;
 using Prism.Ioc;
 using Prism.Modularity;
+using Prism.Services.Dialogs;
 using ReactiveUI;
 
 namespace Oneware.NetlistReaderFrontend;
@@ -22,6 +23,7 @@ public class OnewareNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IFileOpener, FileOpener>();
         containerRegistry.RegisterSingleton<IJsonLoader, JsonLoader>();
         containerRegistry.RegisterSingleton<IViewportDimensionService, ViewportDimensionService>();
+        containerRegistry.RegisterSingleton<ICustomLogger, CustomLogger>();
     }
 
     public void OnInitialized(IContainerProvider containerProvider)
