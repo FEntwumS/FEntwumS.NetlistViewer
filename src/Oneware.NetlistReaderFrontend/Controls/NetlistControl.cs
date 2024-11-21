@@ -275,6 +275,7 @@ public class NetlistControl : TemplatedControl
         List<Point> points;
 
         bool previousNodeInView = true;
+        int lastVisibleNodeZIndex = 0;
 
         renderedNodeList.Clear();
         renderedLabelList.Clear();
@@ -346,6 +347,13 @@ public class NetlistControl : TemplatedControl
             {
                 case 1:
                     // Node
+
+                    if (element.ZIndex > lastVisibleNodeZIndex + 1)
+                    {
+                        continue;
+                    }
+                    
+                    
                     height = element.Height * CurrentScale;
                     width = element.Width * CurrentScale;
                     x = ((element.xPos + element.Width / 2)) * CurrentScale;
@@ -379,6 +387,8 @@ public class NetlistControl : TemplatedControl
                         context.DrawLine(dropShadowPen, bend, end);
 
                         previousNodeInView = true;
+                        
+                        lastVisibleNodeZIndex = element.ZIndex;
                     }
                     else
                     {
@@ -389,7 +399,7 @@ public class NetlistControl : TemplatedControl
 
                 case 2:
                     // Edge
-                    if (element.Points == null || !previousNodeInView)
+                    if (element.Points == null || !previousNodeInView || element.ZIndex > lastVisibleNodeZIndex + 1)
                     {
                         continue;
                     }
@@ -450,6 +460,11 @@ public class NetlistControl : TemplatedControl
 
                 case 3:
                     // Label
+                    
+                    if (element.ZIndex > lastVisibleNodeZIndex + 1)
+                    {
+                        continue;
+                    }
 
                     height = element.Height * CurrentScale;
                     width = element.Width * CurrentScale;
@@ -478,6 +493,12 @@ public class NetlistControl : TemplatedControl
 
                 case 4:
                     // Junction
+                    
+                    if (element.ZIndex > lastVisibleNodeZIndex + 1)
+                    {
+                        continue;
+                    }
+                    
                     x = element.xPos * CurrentScale;
                     y = element.yPos * CurrentScale;
                     radius = 3.5d * CurrentScale;
@@ -498,6 +519,12 @@ public class NetlistControl : TemplatedControl
 
                 case 5:
                     // Port
+                    
+                    if (element.ZIndex > lastVisibleNodeZIndex + 1)
+                    {
+                        continue;
+                    }
+                    
                     edgeLength = 10.0d * CurrentScale;
                     x = (element.xPos + 5.0d) * CurrentScale;
                     y = (element.yPos + 5.0d) * CurrentScale;
