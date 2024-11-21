@@ -15,6 +15,11 @@ namespace Oneware.NetlistReaderFrontend.Controls;
 
 public class NetlistControl : TemplatedControl
 {
+    private static readonly FontFamily font = (Application.Current!.FindResource("MartianMono") as FontFamily)!;
+
+    private static readonly Typeface typeface =
+        new Typeface(font, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
+
     static NetlistControl()
     {
         AffectsRender<NetlistControl>(ItemsProperty, IsEnabledProperty);
@@ -261,7 +266,8 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<NetlistElement> CurrentElementProperty =
-        AvaloniaProperty.Register<NetlistControl, NetlistElement>(nameof(CurrentElement), defaultBindingMode: BindingMode.TwoWay);
+        AvaloniaProperty.Register<NetlistControl, NetlistElement>(nameof(CurrentElement),
+            defaultBindingMode: BindingMode.TwoWay);
 
     private List<DRect> renderedNodeList = new List<DRect>();
     private List<DRect> renderedLabelList = new List<DRect>();
@@ -283,21 +289,42 @@ public class NetlistControl : TemplatedControl
         renderedJunctionList.Clear();
         renderedEdgeList.Clear();
 
-        Pen borderPen = new Pen(new SolidColorBrush(Colors.MidnightBlue), 1.5 * CurrentScale);
-        Pen dropShadowPen = new Pen(new SolidColorBrush(Colors.DarkGray), 2.5 * CurrentScale, null, PenLineCap.Square,
-            PenLineJoin.Miter, 10d);
-        Pen edgePen = new Pen(new SolidColorBrush(Colors.Black), 1.2 * CurrentScale, null, PenLineCap.Square,
-            PenLineJoin.Miter, 10d);
-        Pen bundledEdgePen = new Pen(new SolidColorBrush(Colors.Black), 2.2 * CurrentScale, null, PenLineCap.Square);
-        Brush rectFillBrush = new SolidColorBrush(Colors.LightBlue);
-        Brush ellipseFillBrush = new SolidColorBrush(Colors.Black);
-        Brush backgroundBrush = new SolidColorBrush(Colors.LightGray);
-        Brush textBrush = new SolidColorBrush(Colors.Black);
+        var theme = Application.Current.ActualThemeVariant;
 
+        // Pen borderPen = new Pen(new SolidColorBrush(Colors.MidnightBlue), 1.5 * CurrentScale);
+        // Pen dropShadowPen = new Pen(new SolidColorBrush(Colors.DarkGray), 2.5 * CurrentScale, null, PenLineCap.Square,
+        //     PenLineJoin.Miter, 10d);
+        // Pen edgePen = new Pen(new SolidColorBrush(Colors.Black), 1.2 * CurrentScale, null, PenLineCap.Square,
+        //     PenLineJoin.Miter, 10d);
+        // Pen bundledEdgePen = new Pen(new SolidColorBrush(Colors.Black), 2.2 * CurrentScale, null, PenLineCap.Square);
+        // Brush rectFillBrush = new SolidColorBrush(Colors.LightBlue);
+        // Brush ellipseFillBrush = new SolidColorBrush(Colors.Black);
+        Brush backgroundBrush =
+            new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeBackgroundColor") is Color
+                ? (Color)Application.Current!.FindResource(theme, "ThemeBackgroundColor")
+                : default);
+        // Brush textBrush = new SolidColorBrush(Colors.Black);
         Pen highlightPen = new Pen(new SolidColorBrush(Colors.Yellow, 0.5d), 5.5 * CurrentScale, null, PenLineCap.Round, PenLineJoin.Miter, 10d);
 
-        FontFamily font = Application.Current?.FindResource("MartianMono") as FontFamily;
-        Typeface typeface = new Typeface(font, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
+        Pen borderPen = new Pen(Application.Current!.FindResource(theme, "ThemeBorderMidBrush") as IBrush ?? default,
+            1.5 * CurrentScale);
+        Pen dropShadowPen =
+            new Pen(Application.Current.FindResource(theme, "ThemeBorderHighColor") as IBrush ?? default,
+                1.5 * CurrentScale, null, PenLineCap.Square);
+        Pen edgePen = new Pen(Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? default,
+            1.2 * CurrentScale, null, PenLineCap.Square);
+        Pen bundledEdgePen = new Pen(Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? default,
+            2.2 * CurrentScale, null, PenLineCap.Square);
+        Brush rectFillBrush = Application.Current!.FindResource(theme, "ThemeBackgroundBrush") as SolidColorBrush ??
+                              default;
+        Brush ellipseFillBrush =
+            Application.Current!.FindResource(theme, "ThemeAccentBrush") as SolidColorBrush ?? new SolidColorBrush(Colors.Black);
+        Brush textBrush = new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeAccentColor") is Color
+            ? (Color)Application.Current!.FindResource(theme, "ThemeAccentColor")
+            : default);
+        // Pen highlightPen =
+        //     new Pen(Application.Current!.FindResource(theme, "ThemeControlHighlightHighBrush") as IBrush ?? default,
+        //         5.5 * CurrentScale, null, PenLineCap.Square);
 
         // Draw background
         context.DrawRectangle(backgroundBrush, null, new Rect(0, 0, this.Bounds.Width, this.Bounds.Height));
@@ -351,8 +378,8 @@ public class NetlistControl : TemplatedControl
                     {
                         continue;
                     }
-                    
-                    
+
+
                     height = element.Height * CurrentScale;
                     width = element.Width * CurrentScale;
                     x = ((element.xPos + element.Width / 2)) * CurrentScale;
@@ -366,7 +393,8 @@ public class NetlistControl : TemplatedControl
 
                     rect = new Rect(x, y, width, height);
 
-                    if ((height >= NodeScaleClip && width >= NodeScaleClip) && (containsBounds(rect) || intersectsBounds(rect)))
+                    if ((height >= NodeScaleClip && width >= NodeScaleClip) &&
+                        (containsBounds(rect) || intersectsBounds(rect)))
                     {
                         context.DrawRectangle(rectFillBrush, borderPen, rect);
 
@@ -386,7 +414,7 @@ public class NetlistControl : TemplatedControl
                         context.DrawLine(dropShadowPen, bend, end);
 
                         previousNodeInView = true;
-                        
+
                         lastVisibleNodeZIndex = element.ZIndex;
                     }
                     else
@@ -443,7 +471,10 @@ public class NetlistControl : TemplatedControl
 
                         if (drawLine)
                         {
-                            context.DrawLine(element.SignalType == "BUNDLED" || element.SignalType == "BUNDLED_CONSTANT" ? bundledEdgePen: edgePen, points[i - 1], points[i]);
+                            context.DrawLine(
+                                element.SignalType == "BUNDLED" || element.SignalType == "BUNDLED_CONSTANT"
+                                    ? bundledEdgePen
+                                    : edgePen, points[i - 1], points[i]);
 
                             if (element.IsHighlighted)
                             {
@@ -460,7 +491,7 @@ public class NetlistControl : TemplatedControl
                 // Label
                 case 3:
                     // Port Labels are two levels higher than the corresponding node, therefore +2 instead of +1 is used
-                    
+
                     if (element.ZIndex > lastVisibleNodeZIndex + 2)
                     {
                         continue;
@@ -484,6 +515,11 @@ public class NetlistControl : TemplatedControl
                         FormattedText text = new FormattedText(element.LabelText, CultureInfo.InvariantCulture,
                             FlowDirection.LeftToRight, typeface, 10 * CurrentScale, textBrush);
 
+                        if (element.ZIndex == 2)
+                        {
+                            context.DrawRectangle(rectFillBrush, null, boundingBox);
+                        }
+
                         context.DrawText(text, new Point(x, y));
 
                         renderedLabelList.Add(new DRect(x, y, width, height, element.ZIndex, element));
@@ -493,11 +529,11 @@ public class NetlistControl : TemplatedControl
 
                 // Junction
                 case 4:
-                    if (element.ZIndex > lastVisibleNodeZIndex + 1)
+                    if (element.ZIndex > lastVisibleNodeZIndex + 2)
                     {
                         continue;
                     }
-                    
+
                     x = element.xPos * CurrentScale;
                     y = element.yPos * CurrentScale;
                     radius = 3.5d * CurrentScale;
@@ -522,7 +558,7 @@ public class NetlistControl : TemplatedControl
                     {
                         continue;
                     }
-                    
+
                     edgeLength = 10.0d * CurrentScale;
                     x = (element.xPos + 5.0d) * CurrentScale;
                     y = (element.yPos + 5.0d) * CurrentScale;
@@ -553,7 +589,7 @@ public class NetlistControl : TemplatedControl
     }
 
     #region IntersectionTests
-    
+
     private bool isInBounds(Point toCheck)
     {
         if (toCheck.X >= 0 && toCheck.X <= this.Bounds.Width)
@@ -822,7 +858,7 @@ public class NetlistControl : TemplatedControl
 
         return ret;
     }
-    
+
     #endregion
 
     public void NetlistControl_PointerPressed(object? sender, PointerPressedEventArgs e)
@@ -871,7 +907,7 @@ public class NetlistControl : TemplatedControl
                 Console.WriteLine("Type of Signal: " + elem.element.SignalType);
 
                 elem.element.IsHighlighted = true;
-                
+
                 he = elem.element;
             }
             else
@@ -888,7 +924,7 @@ public class NetlistControl : TemplatedControl
             if (elem.Hittest(e.GetPosition(this)))
             {
                 Console.WriteLine("Port with Z-Index: " + elem.ZIndex);
-                
+
                 hp = elem.element;
             }
         }
@@ -898,7 +934,7 @@ public class NetlistControl : TemplatedControl
             if (elem.Hittest(e.GetPosition(this)))
             {
                 Console.WriteLine("Junction with Z-Index: " + elem.ZIndex);
-                
+
                 hj = elem.element;
             }
         }
@@ -908,7 +944,7 @@ public class NetlistControl : TemplatedControl
             if (elem.Hittest(e.GetPosition(this)))
             {
                 Console.WriteLine("Label with Z-Index: " + elem.ZIndex);
-                
+
                 hl = elem.element;
             }
         }
@@ -918,13 +954,16 @@ public class NetlistControl : TemplatedControl
             if (he != null)
             {
                 CurrentElement = he;
-            } else if (hj != null)
+            }
+            else if (hj != null)
             {
                 CurrentElement = hj;
-            } else if (hl != null)
+            }
+            else if (hl != null)
             {
                 CurrentElement = hl;
-            } else if (hp != null)
+            }
+            else if (hp != null)
             {
                 CurrentElement = hp;
             }
@@ -933,7 +972,7 @@ public class NetlistControl : TemplatedControl
                 CurrentElement = hn;
             }
         }
-        
+
         Redraw();
     }
 }

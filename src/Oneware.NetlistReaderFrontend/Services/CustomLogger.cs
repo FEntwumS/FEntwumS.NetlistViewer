@@ -1,6 +1,9 @@
-﻿using Avalonia.Controls.Primitives;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Media;
 using OneWare.Essentials.Services;
+using TextMateSharp.Themes;
 
 namespace Oneware.NetlistReaderFrontend.Services;
 
@@ -9,7 +12,7 @@ public class CustomLogger : ICustomLogger
     private readonly ILogger _logger;
 
     private const ConsoleColor LogMessageConsoleColor = ConsoleColor.Cyan;
-    private static readonly IBrush LogMessageBrush = new SolidColorBrush(Colors.Cyan);
+    private static readonly IBrush LogMessageBrush = (Application.Current!.GetResourceObservable("ThemeAccentBrush") as IBrush)!;
 
     private readonly string _assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name!;
 

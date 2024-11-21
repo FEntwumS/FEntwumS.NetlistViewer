@@ -15,8 +15,16 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <viewModels:FrontendViewModel />
     </Design.DataContext>
+    
+    <Design.DesignStyle>
+        <StyleInclude Source="avares://Oneware.NetlistReaderFrontend/Icons.axaml"></StyleInclude>
+    </Design.DesignStyle>
 
     <Panel ClipToBounds="True">
+        <Panel.Styles>
+            <StyleInclude Source="avares://Oneware.NetlistReaderFrontend/Icons.axaml"></StyleInclude>
+        </Panel.Styles>
+        
         <DockPanel ClipToBounds="True">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="10 10">
                 <Button HorizontalAlignment="Left" VerticalAlignment="Top"

@@ -36,4 +36,9 @@ public class ServiceManager
     {
         return _containerProvider.Resolve<ICustomLogger>();
     }
+
+    public static ILanguageManager GetLanguageManager()
+    {
+        return _containerProvider.Resolve<ILanguageManager>();
+    }
 }
