@@ -302,29 +302,35 @@ public class NetlistControl : TemplatedControl
         Brush backgroundBrush =
             new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeBackgroundColor") is Color
                 ? (Color)Application.Current!.FindResource(theme, "ThemeBackgroundColor")
-                : default);
+                : Colors.LightGray);
         // Brush textBrush = new SolidColorBrush(Colors.Black);
-        Pen highlightPen = new Pen(new SolidColorBrush(Colors.Yellow, 0.5d), 5.5 * CurrentScale, null, PenLineCap.Round, PenLineJoin.Miter, 10d);
+        Pen highlightPen = new Pen(new SolidColorBrush(Colors.Yellow, 0.5d), 5.5 * CurrentScale, null, PenLineCap.Round,
+            PenLineJoin.Miter, 10d);
 
-        Pen borderPen = new Pen(Application.Current!.FindResource(theme, "ThemeBorderMidBrush") as IBrush ?? default,
+        Pen borderPen = new Pen(
+            Application.Current!.FindResource(theme, "ThemeBorderMidBrush") as IBrush ??
+            new SolidColorBrush(Colors.MidnightBlue),
             1.5 * CurrentScale);
         Pen dropShadowPen =
-            new Pen(Application.Current.FindResource(theme, "ThemeBorderHighColor") as IBrush ?? default,
-                1.5 * CurrentScale, null, PenLineCap.Square);
-        Pen edgePen = new Pen(Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? default,
+            new Pen(
+                new SolidColorBrush((Application.Current.FindResource(theme, "ThemeBorderHighColor") is Color
+                    ? (Color)Application.Current.FindResource(theme, "ThemeBorderHighColor")
+                    : Colors.DarkGray)),
+                2.5 * CurrentScale, null, PenLineCap.Square);
+        Pen edgePen = new Pen(
+            Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? new SolidColorBrush(Colors.Black),
             1.2 * CurrentScale, null, PenLineCap.Square);
-        Pen bundledEdgePen = new Pen(Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? default,
+        Pen bundledEdgePen = new Pen(
+            Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? new SolidColorBrush(Colors.Black),
             2.2 * CurrentScale, null, PenLineCap.Square);
         Brush rectFillBrush = Application.Current!.FindResource(theme, "ThemeBackgroundBrush") as SolidColorBrush ??
-                              default;
+                              new SolidColorBrush(Colors.LightBlue);
         Brush ellipseFillBrush =
-            Application.Current!.FindResource(theme, "ThemeAccentBrush") as SolidColorBrush ?? new SolidColorBrush(Colors.Black);
+            Application.Current!.FindResource(theme, "ThemeAccentBrush") as SolidColorBrush ??
+            new SolidColorBrush(Colors.Black);
         Brush textBrush = new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeAccentColor") is Color
             ? (Color)Application.Current!.FindResource(theme, "ThemeAccentColor")
-            : default);
-        // Pen highlightPen =
-        //     new Pen(Application.Current!.FindResource(theme, "ThemeControlHighlightHighBrush") as IBrush ?? default,
-        //         5.5 * CurrentScale, null, PenLineCap.Square);
+            : Colors.Black);
 
         // Draw background
         context.DrawRectangle(backgroundBrush, null, new Rect(0, 0, this.Bounds.Width, this.Bounds.Height));
