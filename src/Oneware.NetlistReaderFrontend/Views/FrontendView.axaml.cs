@@ -20,7 +20,7 @@ public partial class FrontendView : UserControl
 
         if (DataContext is FrontendViewModel vm)
         {
-            Initialize(vm);
+            //Initialize(vm);
         }
     }
 

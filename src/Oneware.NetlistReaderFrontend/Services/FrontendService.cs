@@ -16,6 +16,7 @@ public class FrontendService(ILogger logger, IApplicationStateService applicatio
         var vm = new FrontendViewModel();
         vm.InitializeContent();
         vm.Title = json.Name;
+        _logger.Log("Selected file: " + json.FullPath);
         vm.File = File.Open(json.FullPath, FileMode.Open, FileAccess.Read);
         _dockService.Show(vm, DockShowLocation.Document);
         _dockService.InitializeContent();

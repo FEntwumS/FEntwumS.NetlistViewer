@@ -191,7 +191,9 @@ public async Task OpenFileImpl()
 
             _logger.Log("File loaded", ConsoleColor.Blue, true, new SolidColorBrush(Colors.Blue));
 
-            jsonLoader.OpenJson(file);
+            await jsonLoader.OpenJson(file);
+            
+            File.Close();
 
             Items.Clear();
             

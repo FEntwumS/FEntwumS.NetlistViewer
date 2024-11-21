@@ -2,6 +2,8 @@
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Platform.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using OneWare.Essentials.Services;
 using Oneware.NetlistReaderFrontend.Types;
 using Oneware.NetlistReaderFrontend.ViewModels;
 
@@ -23,9 +25,11 @@ public class JsonLoader : IJsonLoader
     private long portcnt { get; set; }
     private long bendcnt { get; set; }
     private long charcnt { get; set; }
+    private ILogger logger;
 
     public async Task OpenJson(FileStream netlist)
     {
+        logger = ServiceManager.GetLogger();
         isLoading = true;
         rootnode = await JsonNode.ParseAsync(netlist);
         isLoading = false;
@@ -57,19 +61,6 @@ public class JsonLoader : IJsonLoader
 
         List<NetlistElement> items = new List<NetlistElement>();
 
-        /*JsonArray children = rootnode["children"] as JsonArray;
-
-        maxWidth = 0;
-        maxWidth = 0;
-
-        if (children != null)
-        {
-            foreach (JsonNode child in children)
-            {
-                createNode(child, items, xRef, yRef);
-            }
-        }*/
-
         createNode(rootnode, items, xRef, yRef, 0);
 
         // Dispose of the JSON document, as we dont need to keep it around
@@ -79,14 +70,14 @@ public class JsonLoader : IJsonLoader
         // If the GC isn't called explicitly, the dead objects of the JSON file will just stay in the Gen 2 Heap
         GC.Collect();
 
-        Console.WriteLine("Number of Objects: " + items.Count);
-        Console.WriteLine("Number of nodes: " + nodecnt);
-        Console.WriteLine("Number of ports: " + portcnt);
-        Console.WriteLine("Number of edges: " + edgecnt);
-        Console.WriteLine("Average number of bendpoints per edge: " + ((float)bendcnt / (float)edgecnt));
-        Console.WriteLine("Number of junctions: " + junctioncnt);
-        Console.WriteLine("Number of labels: " + labelcnt);
-        Console.WriteLine("Average number of characters per label: " + ((float)charcnt / (float)labelcnt));
+        logger.Log("Number of Objects: " + items.Count);
+        logger.Log("Number of nodes: " + nodecnt);
+        logger.Log("Number of ports: " + portcnt);
+        logger.Log("Number of edges: " + edgecnt);
+        logger.Log("Average number of bendpoints per edge: " + ((float)bendcnt / (float)edgecnt));
+        logger.Log("Number of junctions: " + junctioncnt);
+        logger.Log("Number of labels: " + labelcnt);
+        logger.Log("Average number of characters per label: " + ((float)charcnt / (float)labelcnt));
 
         mw.UpdateScaleImpl();
 
@@ -96,7 +87,7 @@ public class JsonLoader : IJsonLoader
     public void createNode(JsonNode node, List<NetlistElement> items, double xRef, double yRef,
         ushort depth)
     {
-        Console.WriteLine(node["id"]);
+        logger.Log(node["id"]);
         JsonArray children = node["children"] as JsonArray;
         double x = 0;
         double y = 0;
@@ -333,6 +324,11 @@ public class JsonLoader : IJsonLoader
 
             sections = edge["sections"] as JsonArray;
 
+            if (sections == null)
+            {
+                continue;
+            }
+
             foreach (JsonNode section in sections)
             {
                 start = section["startPoint"];
@@ -566,13 +562,13 @@ public class JsonLoader : IJsonLoader
 
     public double GetMaxWidth()
     {
-        Console.WriteLine("Maxwidth: " + maxWidth);
+        logger.Log("Maxwidth: " + maxWidth);
         return maxWidth;
     }
 
     public double GetMaxHeight()
     {
-        Console.WriteLine("Maxheight: " + maxHeight);
+        logger.Log("Maxheight: " + maxHeight);
         return maxHeight;
     }
 }

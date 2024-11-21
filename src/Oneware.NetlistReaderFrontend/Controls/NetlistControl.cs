@@ -274,11 +274,11 @@ public class NetlistControl : TemplatedControl
         double x = 0, y = 0, width = 0, height = 0, radius = 0, edgeLength = 0;
         List<Point> points;
 
-        renderedNodeList = new List<DRect>();
-        renderedLabelList = new List<DRect>();
-        renderedPortList = new List<DRect>();
-        renderedJunctionList = new List<DCircle>();
-        renderedEdgeList = new List<DLine>();
+        renderedNodeList.Clear();
+        renderedLabelList.Clear();
+        renderedPortList.Clear();
+        renderedJunctionList.Clear();
+        renderedEdgeList.Clear();
 
         Pen borderPen = new Pen(new SolidColorBrush(Colors.MidnightBlue), 1.5 * CurrentScale);
         Pen dropShadowPen = new Pen(new SolidColorBrush(Colors.DarkGray), 2.5 * CurrentScale, null, PenLineCap.Square,
@@ -389,7 +389,7 @@ public class NetlistControl : TemplatedControl
                         continue;
                     }
 
-                    points = new List<Point>();
+                    points = new List<Point>(element.Points.Count);
 
                     previousPointInBounds = true;
                     drawLine = false;
