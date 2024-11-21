@@ -274,6 +274,8 @@ public class NetlistControl : TemplatedControl
         double x = 0, y = 0, width = 0, height = 0, radius = 0, edgeLength = 0;
         List<Point> points;
 
+        bool previousNodeInView = true;
+
         renderedNodeList.Clear();
         renderedLabelList.Clear();
         renderedPortList.Clear();
@@ -311,8 +313,6 @@ public class NetlistControl : TemplatedControl
         // Apply offset from user interaction
         OffsetX += deltaX;
         OffsetY += deltaY;
-        
-        var watch = System.Diagnostics.Stopwatch.StartNew();
 
         if (deltaScale != 0)
         {
@@ -359,8 +359,7 @@ public class NetlistControl : TemplatedControl
 
                     rect = new Rect(x, y, width, height);
 
-                    if ((containsBounds(rect) || intersectsBounds(rect)) &&
-                        (height >= NodeScaleClip || width >= NodeScaleClip))
+                    if ((height >= NodeScaleClip && width >= NodeScaleClip) && (containsBounds(rect) || intersectsBounds(rect)))
                     {
                         context.DrawRectangle(rectFillBrush, borderPen, rect);
 
@@ -378,13 +377,19 @@ public class NetlistControl : TemplatedControl
 
                         context.DrawLine(dropShadowPen, start, bend);
                         context.DrawLine(dropShadowPen, bend, end);
+
+                        previousNodeInView = true;
+                    }
+                    else
+                    {
+                        previousNodeInView = false;
                     }
 
                     break;
 
                 case 2:
                     // Edge
-                    if (element.Points == null)
+                    if (element.Points == null || !previousNodeInView)
                     {
                         continue;
                     }
@@ -445,6 +450,7 @@ public class NetlistControl : TemplatedControl
 
                 case 3:
                     // Label
+
                     height = element.Height * CurrentScale;
                     width = element.Width * CurrentScale;
                     x = (element.xPos + (element.Width / 2)) * CurrentScale;
@@ -458,7 +464,7 @@ public class NetlistControl : TemplatedControl
 
                     boundingBox = new Rect(x, y, width, height);
 
-                    if ((intersectsBounds(boundingBox) || containsBounds(boundingBox)) && height >= LabelScaleClip)
+                    if (height >= LabelScaleClip && (intersectsBounds(boundingBox) || containsBounds(boundingBox)))
                     {
                         FormattedText text = new FormattedText(element.LabelText, CultureInfo.InvariantCulture,
                             FlowDirection.LeftToRight, typeface, 10 * CurrentScale, textBrush);
@@ -481,7 +487,7 @@ public class NetlistControl : TemplatedControl
 
                     center = new Point(x, y);
 
-                    if (isInBounds(center) && radius * 2 >= JunctionScaleClip)
+                    if (radius * 2 >= JunctionScaleClip && isInBounds(center))
                     {
                         context.DrawEllipse(ellipseFillBrush, null, center, radius, radius);
 
@@ -501,7 +507,7 @@ public class NetlistControl : TemplatedControl
 
                     rect = new Rect(x - edgeLength / 2, y - edgeLength / 2, edgeLength, edgeLength);
 
-                    if ((intersectsBounds(rect) || containsBounds(rect)) && edgeLength >= PortScaleClip)
+                    if (edgeLength >= PortScaleClip && (intersectsBounds(rect) || containsBounds(rect)))
                     {
                         context.DrawRectangle(rectFillBrush, borderPen, rect);
 
@@ -519,14 +525,6 @@ public class NetlistControl : TemplatedControl
         DeltaX -= deltaX;
         DeltaY -= deltaY;
         DeltaScale -= deltaScale;
-        
-        watch.Stop();
-        
-        Console.WriteLine($"Elapsed time: {watch.ElapsedMilliseconds} ms");
-        int maxThreads;
-        ThreadPool.GetMaxThreads(workerThreads: out maxThreads, out var portthreads);
-        Console.WriteLine(maxThreads);
-        Console.WriteLine(Environment.ProcessorCount);
     }
 
     private bool isInBounds(Point toCheck)
