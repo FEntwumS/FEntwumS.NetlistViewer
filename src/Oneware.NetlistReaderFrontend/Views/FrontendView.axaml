@@ -26,7 +26,8 @@
         </Panel.Styles>
         
         <DockPanel ClipToBounds="True">
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="10 10">
+            <Border BorderBrush="{StaticResource ThemeBorderLowBrush}" BorderThickness="0 0 0 1" DockPanel.Dock="Top">
+            <StackPanel Orientation="Horizontal" Margin="10 10">
                 <Button HorizontalAlignment="Left" VerticalAlignment="Top"
                         Command="{Binding LoadJSONCommand}">
                     <StackPanel Orientation="Horizontal">
@@ -39,6 +40,7 @@
                 </Button>
                 <Button Command="{Binding FitToZoomCommand}">Zoom to fit</Button>
             </StackPanel>
+            </Border>
 
             <controls:NetlistControl Items="{Binding Items}" VerticalAlignment="Stretch"
                                      HorizontalAlignment="Stretch" PointerMoved="InputElement_OnPointerMoved"
