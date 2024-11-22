@@ -314,7 +314,7 @@ public class NetlistControl : TemplatedControl
             1.2 * CurrentScale, null, PenLineCap.Square);
         Pen bundledEdgePen = new Pen(
             Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? new SolidColorBrush(Colors.Black),
-            2.2 * CurrentScale, null, PenLineCap.Square);
+            2.8 * CurrentScale, null, PenLineCap.Square);
         Brush rectFillBrush = Application.Current!.FindResource(theme, "ThemeBackgroundBrush") as SolidColorBrush ??
                               new SolidColorBrush(Colors.LightBlue);
         Brush ellipseFillBrush =
@@ -474,7 +474,7 @@ public class NetlistControl : TemplatedControl
                                     ? bundledEdgePen
                                     : edgePen, points[i - 1], points[i]);
 
-                            if (element.IsHighlighted)
+                            if (element.IsHighlighted && i != points.Count - 2)
                             {
                                 context.DrawLine(highlightPen, points[i - 1], points[i]);
                             }
@@ -534,7 +534,7 @@ public class NetlistControl : TemplatedControl
 
                     x = element.xPos * CurrentScale;
                     y = element.yPos * CurrentScale;
-                    radius = 3.5d * CurrentScale;
+                    radius = 3.8d * CurrentScale;
 
                     x += OffsetX;
                     y += OffsetY;
