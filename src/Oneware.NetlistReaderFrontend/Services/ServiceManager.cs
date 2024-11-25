@@ -41,4 +41,9 @@ public class ServiceManager
     {
         return _containerProvider.Resolve<ILanguageManager>();
     }
+
+    public static IHashService GetHashService()
+    {
+        return _containerProvider.Resolve<IHashService>();
+    }
 }
