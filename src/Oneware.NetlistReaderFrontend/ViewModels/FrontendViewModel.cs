@@ -175,36 +175,41 @@ public class FrontendViewModel : ExtendedTool
 
     public async Task OpenFileImpl()
     {
-        try
+        var fileOpener = ServiceManager.GetFileOpener();
+        var jsonLoader = ServiceManager.GetJsonLoader();
+        
+        await Task.Run(() =>
         {
-            _logger.Log("Opening file...", true);
-
-            var fileOpener = ServiceManager.GetFileOpener();
-            var jsonLoader = ServiceManager.GetJsonLoader();
-
-            //var file = await fileOpener.OpenFileAsync();
-
-            if (file is null)
+            try
             {
-                _logger.Error("File is empty.");
-                return;
+                _logger.Log("Opening file...", true);
+
+                //var file = fileOpener.OpenFileAsync();
+
+                if (file is null)
+                {
+                    _logger.Error("File is empty.");
+                    return;
+                }
+
+                _logger.Log("File loaded", true);
+
+                Task t = jsonLoader.OpenJson(file);
+                t.Wait();
+
+                File.Close();
+
+                Items.Clear();
+
+                Items.AddRange(jsonLoader.parseJson(0, 0, this).Result);
+
+                _logger.Log("JSON read", true);
             }
-
-            _logger.Log("File loaded", true);
-
-            await jsonLoader.OpenJson(file);
-
-            File.Close();
-
-            Items.Clear();
-
-            Items.AddRange(await jsonLoader.parseJson(0, 0, this));
-
-            _logger.Log("JSON read", true);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        });
+        
     }
 }
