@@ -8,7 +8,7 @@ namespace Oneware.NetlistReaderFrontend.Services;
 
 public interface IJsonLoader
 {
-    public Task OpenJson(FileStream netlist);
+    public Task OpenJson(Stream netlist);
 
     public Task<List<NetlistElement>> parseJson(double xRef, double yRef,
         FrontendViewModel mw);

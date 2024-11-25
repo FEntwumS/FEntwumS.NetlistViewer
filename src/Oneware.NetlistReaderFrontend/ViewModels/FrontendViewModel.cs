@@ -121,9 +121,9 @@ public class FrontendViewModel : ExtendedTool
         }
     }
 
-    private FileStream file { get; set; }
+    private Stream file { get; set; }
 
-    public FileStream File
+    public Stream File
     {
         get => file;
         set
@@ -150,7 +150,7 @@ public class FrontendViewModel : ExtendedTool
 
         _logger = ServiceManager.GetCustomLogger();
 
-        // OneWare uses the Community MVVM Toolkit. If ReactiveUI is used in an extension, any access to a binded property
+        // OneWare uses the Community MVVM Toolkit. If ReactiveUI is used in an extension, any access to a bound property
         // inside a ReactiveCommand leads to an exception
         LoadJSONCommand = new RelayCommand(() => OpenFileImpl());
 

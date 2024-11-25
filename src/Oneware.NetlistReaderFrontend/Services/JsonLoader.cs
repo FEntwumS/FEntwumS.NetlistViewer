@@ -27,7 +27,7 @@ public class JsonLoader : IJsonLoader
     private long charcnt { get; set; }
     private ICustomLogger logger;
 
-    public async Task OpenJson(FileStream netlist)
+    public async Task OpenJson(Stream netlist)
     {
         logger = ServiceManager.GetCustomLogger();
         isLoading = true;
