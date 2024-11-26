@@ -46,4 +46,9 @@ public class ServiceManager
     {
         return _containerProvider.Resolve<IHashService>();
     }
+
+    public static T GetService<T>()
+    {
+        return _containerProvider.Resolve<T>();
+    }
 }

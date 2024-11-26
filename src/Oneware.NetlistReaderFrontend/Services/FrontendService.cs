@@ -1,4 +1,7 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Diagnostics;
+using System.Net.Http.Headers;
+using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
@@ -13,6 +16,13 @@ public class FrontendService(ILogger logger, IApplicationStateService applicatio
     private readonly IApplicationStateService _applicationStateService = applicationStateService;
     private readonly IDockService _dockService = dockService;
 
+    public async Task CreateNetlist(IProjectFile vhdl)
+    {
+        IGhdlService ghdlService = ServiceManager.GetService<IGhdlService>();
+        
+        await ghdlService.AnalyseDesignAsync(vhdl);
+    }
+
     public async Task ShowViewer(IProjectFile json)
     {
         HttpClient client = new();
@@ -21,18 +31,26 @@ public class FrontendService(ILogger logger, IApplicationStateService applicatio
         client.DefaultRequestHeaders.Add("User-Agent", "Oneware.NetlistReaderFrontend");
         client.BaseAddress = new Uri("http://localhost:8080");
 
-        //var content = File.ReadAllText(json.FullPath);
+        var content = await File.ReadAllTextAsync(json.FullPath);
+
+        IHashService hashService = ServiceManager.GetHashService();
+        var contentByteSpan = new ReadOnlySpan<Byte>(Encoding.UTF8.GetBytes(content));
+        
+        ServiceManager.GetCustomLogger().Log("GetHashCode() hash: " + json.FullPath.GetHashCode(), true);
+        ServiceManager.GetCustomLogger().Log("OAAT hash: " + ServiceManager.GetHashService().ComputeHash(new ReadOnlySpan<byte>(Encoding.UTF8.GetBytes(json.FullPath))), true);
+        
+        var watch = Stopwatch.StartNew();
+        UInt32 computedHash = hashService.ComputeHash(contentByteSpan);
+        watch.Stop();
+        ServiceManager.GetCustomLogger().Log("Full file hash is: " + computedHash, true);
+        ServiceManager.GetCustomLogger().Log("Took " + watch.ElapsedMilliseconds + " milliseconds", true);
 
         MultipartFormDataContent formDataContent = new MultipartFormDataContent()
         {
             {new StreamContent(File.Open(json.FullPath, FileMode.Open, FileAccess.Read)), "file", json.Name}
         };
     
-        //formDataContent.Add(new StreamContent(File.Open(json.FullPath, FileMode.Open, FileAccess.Read)), "file");
-    
         var resp = await client.PostAsync("/graphRemoteFile", formDataContent);
-    
-        //Console.WriteLine(resp.Content.ReadAsStringAsync().Result);
     
     
     

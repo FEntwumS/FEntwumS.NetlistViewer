@@ -24,11 +24,16 @@ public class OnewareNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IJsonLoader, JsonLoader>();
         containerRegistry.RegisterSingleton<IViewportDimensionService, ViewportDimensionService>();
         containerRegistry.RegisterSingleton<ICustomLogger, CustomLogger>();
+        containerRegistry.RegisterSingleton<IHashService, OAATHashService>();
+        containerRegistry.RegisterSingleton<IGhdlService, GhdlService>();
+        containerRegistry.RegisterSingleton<IYosysService, YosysService>();
     }
 
     public void OnInitialized(IContainerProvider containerProvider)
     {
         _serviceManager = new ServiceManager(containerProvider);
+        
+        ISettingsService settingsService = ServiceManager.GetService<ISettingsService>();
         
         var frontendService = containerProvider.Resolve<FrontendService>();
         
@@ -43,7 +48,19 @@ public class OnewareNetlistReaderFrontendModule : IModule
                     Header = $"View netlist {jsonFile.Header}",
                     Command = new AsyncRelayCommand(() => frontendService.ShowViewer(jsonFile))
                 });
+            } else if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
+            {
+                menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateNetlist")
+                {
+                    Header = $"View netlist for {vhdlFile.Header}",
+                    Command = new AsyncRelayCommand(() => frontendService.CreateNetlist(vhdlFile))
+                });
             }
         });
+        
+        settingsService.RegisterSettingCategory("Netlist Viewer");
+        settingsService.RegisterSettingSubCategory("Netlist Viewer", "VHDL");
+        
+        settingsService.RegisterSetting("Netlist Viewer", "VHDL", "NetlistViewer_VHDL_Standard", new ComboBoxSetting("VHDL Standard", "93c", [ "87", "93", "93c", "00", "02", "08", "19"]));
     }
 }
