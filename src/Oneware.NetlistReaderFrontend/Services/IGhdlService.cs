@@ -6,5 +6,5 @@ namespace Oneware.NetlistReaderFrontend.Services;
 public interface IGhdlService
 {
     Task<bool> AnalyseDesignAsync(IProjectFile file);
-    Task<bool> CrossCompileDesignAsync();
+    Task<bool> CrossCompileDesignAsync(IProjectFile file);
 }

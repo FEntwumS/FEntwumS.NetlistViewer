@@ -21,6 +21,7 @@ public class FrontendService(ILogger logger, IApplicationStateService applicatio
         IGhdlService ghdlService = ServiceManager.GetService<IGhdlService>();
         
         await ghdlService.AnalyseDesignAsync(vhdl);
+        await ghdlService.CrossCompileDesignAsync(vhdl);
     }
 
     public async Task ShowViewer(IProjectFile json)

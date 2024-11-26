@@ -57,7 +57,6 @@ public class GhdlService : IGhdlService
             .Where(x=> !root.TestBenches.Contains(x))       // Exclude testbenches
             .Select(x => x.FullPath);
         
-        string top = Path.GetFileNameWithoutExtension(file.FullPath);
         string workingDirectory = Path.Combine(file.Root!.FullPath, "build", "netlist");
 
         if (Directory.Exists(workingDirectory))
@@ -100,14 +99,56 @@ public class GhdlService : IGhdlService
             return true;
         });
         
-        _logger.Log(output, true);
+        _logger.Log(output, false);
         
         return success;
     }
 
-    public async Task<bool> CrossCompileDesignAsync()
+    public async Task<bool> CrossCompileDesignAsync(IProjectFile file)
     {
-        throw new NotImplementedException();
+        string workingDirectory = Path.Combine(file.Root!.FullPath, "build", "netlist");
+        
+        string top = Path.GetFileNameWithoutExtension(file.FullPath);
+
+        List<string> ghdlOptions = [ "--out=verilog" ];
+        // ghdlOptions.Add("-o=design.v");  // TODO rework
+        // When a new version of GHDL is available, this parameter will allow us to write the result directly to a file,
+        // instead of needing to use File.WriteAllTextAsync
+
+        List<string> ghdlSynthArgs = ["--synth"];
+        ghdlSynthArgs.AddRange(ghdlOptions);
+        ghdlSynthArgs.Add(top);
+        
+        bool success = false;
+        string output = string.Empty;
+        
+        (success, output) = await _childProcessService.ExecuteShellAsync(_ghdlPath, ghdlSynthArgs, workingDirectory, "", AppState.Loading, false, x =>
+        {
+            if (x.StartsWith("ghdl:error:"))
+            {
+                _logger.Error(x);
+                return false;
+            }
+
+            _logger.Log(x);
+            return true;
+        }, x =>
+        {
+            if (x.StartsWith("ghdl:error:"))
+            {
+                _logger.Error(x);
+                return false;
+            }
+                
+            _logger.Log(x);
+            return true;
+        });
+        
+        _logger.Log(output);
+        
+        await File.WriteAllTextAsync(Path.Combine(workingDirectory, "design.v"), output);
+        
+        return success;
     }
 
     private async Task<bool> CheckIfGhdlIsInstalledAsync()
