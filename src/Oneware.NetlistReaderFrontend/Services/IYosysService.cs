@@ -1,8 +1,10 @@
-﻿namespace Oneware.NetlistReaderFrontend.Services;
+﻿using OneWare.Essentials.Models;
+
+namespace Oneware.NetlistReaderFrontend.Services;
 
 public interface IYosysService
 {
-    Task LoadVhdlAsync();
-    Task LoadVerilogAsync();
-    Task CreateJsonNetlistAsync();
+    Task<bool> LoadVhdlAsync(IProjectFile file);
+    Task<bool> LoadVerilogAsync(IProjectFile file);
+    Task<bool> CreateJsonNetlistAsync();
 }
