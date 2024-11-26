@@ -1,6 +1,8 @@
 ﻿using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
+using OneWare.ProjectSystem.Models;
+using OneWare.UniversalFpgaProjectSystem.Models;
 
 namespace Oneware.NetlistReaderFrontend.Services;
 
@@ -42,6 +44,12 @@ public class YosysService : IYosysService
         }
         else
         {
+            UniversalFpgaProjectRoot root = file.Root as UniversalFpgaProjectRoot;
+            IEnumerable<string> vhdlFiles = root.Files
+                .Where(x => !root.CompileExcluded.Contains(x))  // Exclude excluded files
+                .Where(x => x.Extension is ".v" or ".sv")       // Include only Verilog and SystemVerilog files
+                .Where(x=> !root.TestBenches.Contains(x))       // Exclude testbenches
+                .Select(x => x.FullPath);
             // TODO
             // get verilog files
         }
@@ -60,7 +68,7 @@ public class YosysService : IYosysService
                 return false;
             }
 
-            _logger.Error(x);
+            _logger.Log(x);
             return true;
         }, x =>
         {
@@ -70,7 +78,7 @@ public class YosysService : IYosysService
                 return false;
             }
                 
-            _logger.Error(x);
+            _logger.Log(x);
             return true;
         });
         
