@@ -65,29 +65,10 @@ public class YosysService : IYosysService
             [ "-p", $"read_verilog \"{string.Join("\" \"", files)}\"; hierarchy -top {top}; proc; memory -nomap; flatten -scopename; write_json -compat-int netlist.json" ];
         
         bool success = false;
-        string output = string.Empty;
+        string stdout = string.Empty;
+        string stderr = string.Empty;
         
-        (success, output) = await _childProcessService.ExecuteShellAsync(_yosysPath, yosysArgs, workingDirectory, "", AppState.Loading, false, x =>
-        {
-            if (x.StartsWith("ghdl:error:"))
-            {
-                _logger.Error(x);
-                return false;
-            }
-
-            _logger.Log(x);
-            return true;
-        }, x =>
-        {
-            if (x.StartsWith("ghdl:error:"))
-            {
-                _logger.Error(x);
-                return false;
-            }
-                
-            _logger.Log(x);
-            return true;
-        });
+        (success, stdout, stderr) = await ExecuteYosysAsync(_yosysPath, yosysArgs, workingDirectory);
         
         return success;
     }
@@ -117,15 +98,34 @@ public class YosysService : IYosysService
             ["-m", "slang", "-p", $"slang \"{string.Join("\" \"", files)}\"; hierarchy -top {top}; proc; memory -nomap; opt -full; flatten -scopename; write_json -compat-int netlist.json" ];
         
         bool success = false;
-        string output = string.Empty;
+        string stdout = string.Empty;
+        string stderr = string.Empty;
+
+        (success, stdout, stderr) = await ExecuteYosysAsync(_yosysPath, yosysArgs, workingDirectory);
         
-        (success, output) = await _childProcessService.ExecuteShellAsync(_yosysPath, yosysArgs, workingDirectory, "", AppState.Loading, false, x =>
+        return success;
+    }
+
+    public async Task<bool> CreateJsonNetlistAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<(bool success, string stdout, string stderr)> ExecuteYosysAsync(string yosysPath, IReadOnlyList<string> yosysArgs, string workingDirectory)
+    {
+        bool success = false;
+        string stdout = string.Empty;
+        string stderr = string.Empty;
+        
+        (success, _) = await _childProcessService.ExecuteShellAsync(yosysPath, yosysArgs, workingDirectory, "", AppState.Loading, false, x =>
         {
             if (x.StartsWith("ghdl:error:"))
             {
                 _logger.Error(x);
                 return false;
             }
+
+            stdout += x + "\n";
 
             //_logger.Log(x);
             return true;
@@ -136,16 +136,13 @@ public class YosysService : IYosysService
                 _logger.Error(x);
                 return false;
             }
+            
+            stderr += x + "\n";
                 
             _logger.Log(x);
             return true;
         });
         
-        return success;
-    }
-
-    public async Task<bool> CreateJsonNetlistAsync()
-    {
-        throw new NotImplementedException();
+        return (success, stdout, stderr);
     }
 }
