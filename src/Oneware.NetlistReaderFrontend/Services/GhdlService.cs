@@ -74,7 +74,6 @@ public class GhdlService : IGhdlService
         List<string> ghdlOptions = [];
         
         ghdlOptions.Add("--std=" + _vhdlStandard);
-        ghdlOptions.Add("--work=neorv32");
         ghdlOptions.Add("-Pbuild");
 
         List<string> ghdlImportArgs = ["-i"];
@@ -119,7 +118,7 @@ public class GhdlService : IGhdlService
         // When a new version of GHDL is available, this parameter will allow us to write the result directly to a file,
         // instead of needing to use File.WriteAllTextAsync
 
-        List<string> ghdlSynthArgs = ["--synth", "--work=neorv32", "--no-formal", "-Pbuild" ];
+        List<string> ghdlSynthArgs = ["--synth", "--no-formal", "-Pbuild" ];
         ghdlSynthArgs.AddRange(ghdlOptions);
         ghdlSynthArgs.Add(top);
         

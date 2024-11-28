@@ -16,10 +16,9 @@ namespace Oneware.NetlistReaderFrontend;
 public class OnewareNetlistReaderFrontendModule : IModule
 {
     private ServiceManager _serviceManager;
-    
+
     public void RegisterTypes(IContainerRegistry containerRegistry)
     {
-        containerRegistry.RegisterSingleton<FrontendService>();
         containerRegistry.RegisterSingleton<IFileOpener, FileOpener>();
         containerRegistry.RegisterSingleton<IJsonLoader, JsonLoader>();
         containerRegistry.RegisterSingleton<IViewportDimensionService, ViewportDimensionService>();
@@ -28,42 +27,46 @@ public class OnewareNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IGhdlService, GhdlService>();
         containerRegistry.RegisterSingleton<IYosysService, YosysService>();
         containerRegistry.RegisterSingleton<IToolExecuterService, ToolExecuterService>();
+        containerRegistry.RegisterSingleton<FrontendService>();
     }
 
     public void OnInitialized(IContainerProvider containerProvider)
     {
         _serviceManager = new ServiceManager(containerProvider);
-        
+
         ISettingsService settingsService = ServiceManager.GetService<ISettingsService>();
-        
+
         var frontendService = containerProvider.Resolve<FrontendService>();
-        
+
         containerProvider.Resolve<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
-        
+
         containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
         {
-            if (selected is [IProjectFile {Extension: ".json"} jsonFile])
+            if (selected is [IProjectFile { Extension: ".json" } jsonFile])
             {
                 menuItems.Add(new MenuItemViewModel("NetlistViewer")
                 {
                     Header = $"View netlist {jsonFile.Header}",
                     Command = new AsyncRelayCommand(() => frontendService.ShowViewer(jsonFile))
                 });
-            } else if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
+            }
+            else if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
             {
                 menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateNetlist")
                 {
                     Header = $"View netlist for {vhdlFile.Header}",
                     Command = new AsyncRelayCommand(() => frontendService.CreateVhdlNetlist(vhdlFile))
                 });
-            } else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
+            }
+            else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
             {
                 menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateVerilogNetlist")
                 {
                     Header = $"View netlist for {verilogFile.Header}",
                     Command = new AsyncRelayCommand(() => frontendService.CreateVerilogNetlist(verilogFile))
                 });
-            } else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
+            }
+            else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
             {
                 menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateSystemVerilogNetlist")
                 {
@@ -72,10 +75,23 @@ public class OnewareNetlistReaderFrontendModule : IModule
                 });
             }
         });
-        
+
         settingsService.RegisterSettingCategory("Netlist Viewer");
         settingsService.RegisterSettingSubCategory("Netlist Viewer", "VHDL");
+
+        settingsService.RegisterSetting("Netlist Viewer", "VHDL", "NetlistViewer_VHDL_Standard",
+            new ComboBoxSetting("VHDL Standard", "93c", ["87", "93", "93c", "00", "02", "08", "19"]));
+
+        settingsService.RegisterSettingSubCategory("Netlist Viewer", "Backend");
+
+        settingsService.RegisterSetting("Netlist Viewer", "Backend", "NetlistViewer_Backend_Address",
+            new TextBoxSetting("Server address", "127.0.0.1", null));
+        settingsService.RegisterSetting("Netlist Viewer", "Backend", "NetlistViewer_Backend_Port",
+            new TextBoxSetting("Port", "8080", null));
+        settingsService.RegisterSetting("Netlist Viewer", "Backend", "NetlistViewer_Backend_RequestTimeout",
+            new TextBoxSetting("Request Timeout (in seconds)", "5000", null));
         
-        settingsService.RegisterSetting("Netlist Viewer", "VHDL", "NetlistViewer_VHDL_Standard", new ComboBoxSetting("VHDL Standard", "93c", [ "87", "93", "93c", "00", "02", "08", "19"]));
+        // Subscribe the FrontendService _AFTER_ the relevant settings have been registered
+        ServiceManager.GetService<FrontendService>().SubscribeToSettings();
     }
 }
