@@ -12,6 +12,7 @@ public class YosysService : IYosysService
     private ISettingsService _settingsService;
     private ICustomLogger _logger;
     private IChildProcessService _childProcessService;
+    private IToolExecuterService _toolExecuterService;
     
     private string _yosysPath = string.Empty;
 
@@ -21,6 +22,7 @@ public class YosysService : IYosysService
         _settingsService = ServiceManager.GetService<ISettingsService>();
         _logger = ServiceManager.GetCustomLogger();
         _childProcessService = ServiceManager.GetService<IChildProcessService>();
+        _toolExecuterService = ServiceManager.GetService<IToolExecuterService>();
         
         _settingsService.GetSettingObservable<string>("OssCadSuite_Path").Subscribe(x => _yosysPath = Path.Combine(x, "bin", "yosys.exe"));
     }
@@ -68,7 +70,7 @@ public class YosysService : IYosysService
         string stdout = string.Empty;
         string stderr = string.Empty;
         
-        (success, stdout, stderr) = await ExecuteYosysAsync(_yosysPath, yosysArgs, workingDirectory);
+        (success, stdout, stderr) = await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
         
         return success;
     }
@@ -101,7 +103,7 @@ public class YosysService : IYosysService
         string stdout = string.Empty;
         string stderr = string.Empty;
 
-        (success, stdout, stderr) = await ExecuteYosysAsync(_yosysPath, yosysArgs, workingDirectory);
+        (success, stdout, stderr) = await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
         
         return success;
     }
@@ -109,40 +111,5 @@ public class YosysService : IYosysService
     public async Task<bool> CreateJsonNetlistAsync()
     {
         throw new NotImplementedException();
-    }
-
-    public async Task<(bool success, string stdout, string stderr)> ExecuteYosysAsync(string yosysPath, IReadOnlyList<string> yosysArgs, string workingDirectory)
-    {
-        bool success = false;
-        string stdout = string.Empty;
-        string stderr = string.Empty;
-        
-        (success, _) = await _childProcessService.ExecuteShellAsync(yosysPath, yosysArgs, workingDirectory, "", AppState.Loading, false, x =>
-        {
-            if (x.StartsWith("ghdl:error:"))
-            {
-                _logger.Error(x);
-                return false;
-            }
-
-            stdout += x + "\n";
-
-            //_logger.Log(x);
-            return true;
-        }, x =>
-        {
-            if (x.StartsWith("ghdl:error:"))
-            {
-                _logger.Error(x);
-                return false;
-            }
-            
-            stderr += x + "\n";
-                
-            _logger.Log(x);
-            return true;
-        });
-        
-        return (success, stdout, stderr);
     }
 }

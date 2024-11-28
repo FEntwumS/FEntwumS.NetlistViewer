@@ -18,12 +18,31 @@ public class FrontendService(ILogger logger, IApplicationStateService applicatio
 
     public async Task CreateVhdlNetlist(IProjectFile vhdl)
     {
+        bool success = false;
+        
         IGhdlService ghdlService = ServiceManager.GetService<IGhdlService>();
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
         
-        await ghdlService.ElaborateDesignAsync(vhdl);
-        await ghdlService.CrossCompileDesignAsync(vhdl);
-        await yosysService.LoadVerilogAsync(vhdl);
+        success = await ghdlService.ElaborateDesignAsync(vhdl);
+
+        if (!success)
+        {
+            return;
+        }
+        
+        success = await ghdlService.CrossCompileDesignAsync(vhdl);
+        
+        if (!success)
+        {
+            return;
+        }
+        
+        success = await yosysService.LoadVerilogAsync(vhdl);
+        
+        if (!success)
+        {
+            return;
+        }
         
         // ---------------
         // Big duplicate

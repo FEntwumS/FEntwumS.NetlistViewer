@@ -8,5 +8,4 @@ public interface IYosysService
     Task<bool> LoadVerilogAsync(IProjectFile file);
     Task<bool> LoadSystemVerilogAsync(IProjectFile file);
     Task<bool> CreateJsonNetlistAsync();
-    Task<(bool success, string stdout, string stderr)> ExecuteYosysAsync(string yosysPath, IReadOnlyList<string> yosysArgs, string workingDirectory);
 }

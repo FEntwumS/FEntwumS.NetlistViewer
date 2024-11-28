@@ -27,6 +27,7 @@ public class OnewareNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IHashService, OAATHashService>();
         containerRegistry.RegisterSingleton<IGhdlService, GhdlService>();
         containerRegistry.RegisterSingleton<IYosysService, YosysService>();
+        containerRegistry.RegisterSingleton<IToolExecuterService, ToolExecuterService>();
     }
 
     public void OnInitialized(IContainerProvider containerProvider)

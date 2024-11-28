@@ -12,6 +12,7 @@ public class GhdlService : IGhdlService
     private ICustomLogger _logger;
     private ISettingsService _settingsService;
     private IChildProcessService _childProcessService;
+    private IToolExecuterService _toolExecuterService;
     
     private string _ghdlPath = string.Empty;
     private string _vhdlStandard = string.Empty;
@@ -22,6 +23,7 @@ public class GhdlService : IGhdlService
         _logger = ServiceManager.GetCustomLogger();
         _settingsService = ServiceManager.GetService<ISettingsService>();
         _childProcessService = ServiceManager.GetService<IChildProcessService>();
+        _toolExecuterService = ServiceManager.GetService<IToolExecuterService>();
 
         // This key is copied from https://github.com/one-ware/OneWare.GhdlExtension/blob/21d98f5d948370d59b79fbe5be99d63fd044a633/src/OneWare.GhdlExtension/GhdlExtensionModule.cs#L140C44-L140C63
         // and might need updating in the future
@@ -83,7 +85,7 @@ public class GhdlService : IGhdlService
         string stdout = string.Empty;
         string stderr = string.Empty;
 
-        (success, stdout, stderr) = await RunGhdlAsync(_ghdlPath, ghdlImportArgs, workingDirectory);
+        (success, stdout, stderr) = await _toolExecuterService.ExecuteToolAsync(_ghdlPath, ghdlImportArgs, workingDirectory);
 
         if (!success)
         {
@@ -95,7 +97,7 @@ public class GhdlService : IGhdlService
         ghdlMakeArgs.AddRange(ghdlOptions);
         ghdlMakeArgs.Add(top);
         
-        (success, stdout, stderr) = await RunGhdlAsync(_ghdlPath, ghdlMakeArgs, workingDirectory);
+        (success, stdout, stderr) = await _toolExecuterService.ExecuteToolAsync(_ghdlPath, ghdlMakeArgs, workingDirectory);
 
         if (!success)
         {
@@ -125,46 +127,11 @@ public class GhdlService : IGhdlService
         string stderr = string.Empty;
         string stdout = string.Empty;
         
-        (success, stdout, stderr) = await RunGhdlAsync(_ghdlPath, ghdlSynthArgs, workingDirectory);
+        (success, stdout, stderr) = await _toolExecuterService.ExecuteToolAsync(_ghdlPath, ghdlSynthArgs, workingDirectory);
         
         await File.WriteAllTextAsync(Path.Combine(workingDirectory, "design.v"), stdout);
         
         return success;
-    }
-
-    public async Task<(bool success, string stdout, string stderr)> RunGhdlAsync(string ghdlPath, IReadOnlyCollection<string> ghdlArgs, string workingDirectory)
-    {
-        string stdout = string.Empty;
-        string stderr = string.Empty;
-        bool success = false;
-        
-        (success, _) = await _childProcessService.ExecuteShellAsync(_ghdlPath, ghdlArgs, workingDirectory, "", AppState.Loading, false, outputLine =>
-        {   // output action
-            if (outputLine.StartsWith("ghdl:error:"))
-            {
-                _logger.Error(outputLine);
-                return false;
-            }
-            
-            stdout += outputLine + "\n";
-
-            // _logger.Log(outputLine);
-            return true;
-        }, errorLine => // error action
-        {
-            if (errorLine.StartsWith("ghdl:error:"))
-            {
-                _logger.Error(errorLine);
-                return false;
-            }
-            
-            stderr += errorLine + "\n";
-                
-            _logger.Log(errorLine, true);
-            return true;
-        });
-        
-        return (success, stdout, stderr);
     }
 
     private async Task<bool> CheckIfGhdlIsInstalledAsync()
