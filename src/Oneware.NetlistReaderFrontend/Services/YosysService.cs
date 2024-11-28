@@ -34,28 +34,35 @@ public class YosysService : IYosysService
     {
         string workingDirectory = Path.Combine(file.Root!.FullPath, "build", "netlist");
         
+        if (!Directory.Exists(workingDirectory))
+        {
+            Directory.CreateDirectory(workingDirectory);
+        }
+        
         string top = Path.GetFileNameWithoutExtension(file.FullPath);
 
         List<string> files = new List<string>();
 
         if (File.Exists(Path.Combine(workingDirectory, "design.v")))
         {
-            files.Add("\"" + Path.Combine(workingDirectory, "design.v") + "\"");
+            files.Add(Path.Combine(workingDirectory, "design.v"));
         }
         else
         {
             UniversalFpgaProjectRoot root = file.Root as UniversalFpgaProjectRoot;
-            IEnumerable<string> vhdlFiles = root.Files
+            IEnumerable<string> verilogFiles = root.Files
                 .Where(x => !root.CompileExcluded.Contains(x))  // Exclude excluded files
-                .Where(x => x.Extension is ".v" or ".sv")       // Include only Verilog and SystemVerilog files
+                .Where(x => x.Extension is ".v")                // Include only Verilog and SystemVerilog files
                 .Where(x=> !root.TestBenches.Contains(x))       // Exclude testbenches
                 .Select(x => x.FullPath);
             // TODO
             // get verilog files
+            
+            files.AddRange(verilogFiles);
         }
 
         List<string> yosysArgs =
-            [ "-p", $"read_verilog {string.Join(' ', files)}; hierarchy -top {top}; proc; memory -nomap; flatten -scopename; write_json -compat-int netlist.json" ];
+            [ "-p", $"read_verilog \"{string.Join("\" \"", files)}\"; hierarchy -top {top}; proc; memory -nomap; flatten -scopename; write_json -compat-int netlist.json" ];
         
         bool success = false;
         string output = string.Empty;
@@ -69,6 +76,58 @@ public class YosysService : IYosysService
             }
 
             _logger.Log(x);
+            return true;
+        }, x =>
+        {
+            if (x.StartsWith("ghdl:error:"))
+            {
+                _logger.Error(x);
+                return false;
+            }
+                
+            _logger.Log(x);
+            return true;
+        });
+        
+        return success;
+    }
+    
+    public async Task<bool> LoadSystemVerilogAsync(IProjectFile file)
+    {
+        string workingDirectory = Path.Combine(file.Root!.FullPath, "build", "netlist");
+        
+        if (!Directory.Exists(workingDirectory))
+        {
+            Directory.CreateDirectory(workingDirectory);
+        }
+        
+        string top = Path.GetFileNameWithoutExtension(file.FullPath);
+
+        
+        UniversalFpgaProjectRoot root = file.Root as UniversalFpgaProjectRoot;
+        IEnumerable<string> files = root.Files
+            .Where(x => !root.CompileExcluded.Contains(x))  // Exclude excluded files
+            .Where(x => x.Extension is ".sv")                // Include only SystemVerilog files
+            .Where(x=> !root.TestBenches.Contains(x))       // Exclude testbenches
+            .Select(x => x.FullPath);
+        // TODO
+        // get verilog files
+
+        List<string> yosysArgs =
+            ["-m", "slang", "-p", $"slang \"{string.Join("\" \"", files)}\"; hierarchy -top {top}; proc; memory -nomap; opt -full; flatten -scopename; write_json -compat-int netlist.json" ];
+        
+        bool success = false;
+        string output = string.Empty;
+        
+        (success, output) = await _childProcessService.ExecuteShellAsync(_yosysPath, yosysArgs, workingDirectory, "", AppState.Loading, false, x =>
+        {
+            if (x.StartsWith("ghdl:error:"))
+            {
+                _logger.Error(x);
+                return false;
+            }
+
+            //_logger.Log(x);
             return true;
         }, x =>
         {

@@ -1,4 +1,5 @@
-﻿using OneWare.Essentials.Enums;
+﻿using System.Text;
+using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.UniversalFpgaProjectSystem.Models;
@@ -31,9 +32,11 @@ public class GhdlService : IGhdlService
         _settingsService.GetSettingObservable<string>("NetlistViewer_VHDL_Standard").Subscribe(x => _vhdlStandard = x);
     }
     
-    public async Task<bool> AnalyseDesignAsync(IProjectFile file)
+    public async Task<bool> ElaborateDesignAsync(IProjectFile file)
     {
         _dockService.Show<IOutputService>();
+        
+        string top = Path.GetFileNameWithoutExtension(file.FullPath);
 
         if (file.Root is not UniversalFpgaProjectRoot root)
         {
@@ -69,37 +72,36 @@ public class GhdlService : IGhdlService
         List<string> ghdlOptions = [];
         
         ghdlOptions.Add("--std=" + _vhdlStandard);
+        ghdlOptions.Add("--work=neorv32");
+        ghdlOptions.Add("-Pbuild");
 
-        List<string> ghdlAnalysisArgs = ["-a"];
-        ghdlAnalysisArgs.AddRange(ghdlOptions);
-        ghdlAnalysisArgs.AddRange(vhdlFiles);
+        List<string> ghdlImportArgs = ["-i"];
+        ghdlImportArgs.AddRange(ghdlOptions);
+        ghdlImportArgs.AddRange(vhdlFiles);
 
         bool success = false;
-        string output = string.Empty;
-        
-        (success, output) = await _childProcessService.ExecuteShellAsync(_ghdlPath, ghdlAnalysisArgs, workingDirectory, "", AppState.Loading, false, x =>
-        {
-            if (x.StartsWith("ghdl:error:"))
-            {
-                _logger.Error(x);
-                return false;
-            }
+        string stdout = string.Empty;
+        string stderr = string.Empty;
 
-            _logger.Error(x);
-            return true;
-        }, x =>
+        (success, stdout, stderr) = await RunGhdlAsync(_ghdlPath, ghdlImportArgs, workingDirectory);
+
+        if (!success)
         {
-            if (x.StartsWith("ghdl:error:"))
-            {
-                _logger.Error(x);
-                return false;
-            }
-                
-            _logger.Error(x);
-            return true;
-        });
+            _logger.Error("GHDL import failed");
+            return false;
+        }
         
-        _logger.Log(output, false);
+        List<string> ghdlMakeArgs = ["-m"];
+        ghdlMakeArgs.AddRange(ghdlOptions);
+        ghdlMakeArgs.Add(top);
+        
+        (success, stdout, stderr) = await RunGhdlAsync(_ghdlPath, ghdlMakeArgs, workingDirectory);
+
+        if (!success)
+        {
+            _logger.Error("GHDL import failed");
+            return false;
+        }
         
         return success;
     }
@@ -115,40 +117,54 @@ public class GhdlService : IGhdlService
         // When a new version of GHDL is available, this parameter will allow us to write the result directly to a file,
         // instead of needing to use File.WriteAllTextAsync
 
-        List<string> ghdlSynthArgs = ["--synth"];
+        List<string> ghdlSynthArgs = ["--synth", "--work=neorv32", "--no-formal", "-Pbuild" ];
         ghdlSynthArgs.AddRange(ghdlOptions);
         ghdlSynthArgs.Add(top);
         
         bool success = false;
-        string output = string.Empty;
+        string stderr = string.Empty;
+        string stdout = string.Empty;
         
-        (success, output) = await _childProcessService.ExecuteShellAsync(_ghdlPath, ghdlSynthArgs, workingDirectory, "", AppState.Loading, false, x =>
-        {
-            if (x.StartsWith("ghdl:error:"))
-            {
-                _logger.Error(x);
-                return false;
-            }
+        (success, stdout, stderr) = await RunGhdlAsync(_ghdlPath, ghdlSynthArgs, workingDirectory);
+        
+        await File.WriteAllTextAsync(Path.Combine(workingDirectory, "design.v"), stdout);
+        
+        return success;
+    }
 
-            _logger.Log(x);
-            return true;
-        }, x =>
-        {
-            if (x.StartsWith("ghdl:error:"))
+    public async Task<(bool success, string stdout, string stderr)> RunGhdlAsync(string ghdlPath, IReadOnlyCollection<string> ghdlArgs, string workingDirectory)
+    {
+        string stdout = string.Empty;
+        string stderr = string.Empty;
+        bool success = false;
+        
+        (success, _) = await _childProcessService.ExecuteShellAsync(_ghdlPath, ghdlArgs, workingDirectory, "", AppState.Loading, false, outputLine =>
+        {   // output action
+            if (outputLine.StartsWith("ghdl:error:"))
             {
-                _logger.Error(x);
+                _logger.Error(outputLine);
                 return false;
             }
+            
+            stdout += outputLine + "\n";
+
+            // _logger.Log(outputLine);
+            return true;
+        }, errorLine => // error action
+        {
+            if (errorLine.StartsWith("ghdl:error:"))
+            {
+                _logger.Error(errorLine);
+                return false;
+            }
+            
+            stderr += errorLine + "\n";
                 
-            _logger.Log(x);
+            _logger.Log(errorLine, true);
             return true;
         });
         
-        _logger.Log(output);
-        
-        await File.WriteAllTextAsync(Path.Combine(workingDirectory, "design.v"), output);
-        
-        return success;
+        return (success, stdout, stderr);
     }
 
     private async Task<bool> CheckIfGhdlIsInstalledAsync()

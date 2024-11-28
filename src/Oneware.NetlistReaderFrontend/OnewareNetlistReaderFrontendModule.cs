@@ -53,7 +53,21 @@ public class OnewareNetlistReaderFrontendModule : IModule
                 menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateNetlist")
                 {
                     Header = $"View netlist for {vhdlFile.Header}",
-                    Command = new AsyncRelayCommand(() => frontendService.CreateNetlist(vhdlFile))
+                    Command = new AsyncRelayCommand(() => frontendService.CreateVhdlNetlist(vhdlFile))
+                });
+            } else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
+            {
+                menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateVerilogNetlist")
+                {
+                    Header = $"View netlist for {verilogFile.Header}",
+                    Command = new AsyncRelayCommand(() => frontendService.CreateVerilogNetlist(verilogFile))
+                });
+            } else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
+            {
+                menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateSystemVerilogNetlist")
+                {
+                    Header = $"View netlist for {systemVerilogFile.Header}",
+                    Command = new AsyncRelayCommand(() => frontendService.CreateSystemVerilogNetlist(systemVerilogFile))
                 });
             }
         });
