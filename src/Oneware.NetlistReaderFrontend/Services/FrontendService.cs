@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO.Compression;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -21,6 +22,8 @@ public class FrontendService
     
     private string _backendAddress = string.Empty;
     private string _backendPort = string.Empty;
+    private bool _useRemoteBackend = false;
+    private int _requestTimeout = 600;
 
     public FrontendService()
     {
@@ -56,6 +59,28 @@ public class FrontendService
             else
             {
                 _logger.Error($"{x} is not a valid port");
+            }
+        });
+        
+        _settingsService.GetSettingObservable<bool>("NetlistViewer_Backend_UseRemote").Subscribe(x => _useRemoteBackend = x);
+        _settingsService.GetSettingObservable<string>("NetlistViewer_Backend_RequestTimeout").Subscribe(x =>
+        {
+            try
+            {
+                _requestTimeout = int.Parse(x);
+
+                if (_requestTimeout <= 0)
+                {
+                    _logger.Error("Request timeout not valid. Please enter a positive integer");
+                
+                    _requestTimeout = 600;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Request timeout not valid. Please enter a positive integer");
+                
+                _requestTimeout = 600;
             }
         });
     }
@@ -130,7 +155,7 @@ public class FrontendService
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
         client.DefaultRequestHeaders.Add("User-Agent", "Oneware.NetlistReaderFrontend");
         client.BaseAddress = new Uri($"http://{_backendAddress}:{_backendPort}");
-        client.Timeout = TimeSpan.FromSeconds(5000);    // TODO add setting
+        client.Timeout = TimeSpan.FromSeconds(_requestTimeout);    // TODO add setting
 
         var content = await File.ReadAllTextAsync(json.FullPath);
 
@@ -146,25 +171,56 @@ public class FrontendService
         ServiceManager.GetCustomLogger().Log("Full file hash is: " + computedHash, true);
         ServiceManager.GetCustomLogger().Log("Took " + watch.ElapsedMilliseconds + " milliseconds", true);
 
-        MultipartFormDataContent formDataContent = new MultipartFormDataContent()
-        {
-            {new StreamContent(File.Open(json.FullPath, FileMode.Open, FileAccess.Read)), "file", json.Name}
-        };
-    
-        var resp = await client.PostAsync("/graphRemoteFile", formDataContent);
-    
-    
-    
-        // Task<String> t = client.GetStringAsync("/graphLocalFile?filename=" + json.FullPath);
-        // t.Wait();
-        //
-        // Console.Write(t.Result);
-    
         var vm = new FrontendViewModel();
         vm.InitializeContent();
         vm.Title = json.Name;
         _logger.Log("Selected file: " + json.FullPath);
-        vm.File = await resp.Content.ReadAsStreamAsync();
+
+        try
+        {
+            if (_useRemoteBackend)
+            {
+                MultipartFormDataContent formDataContent = new MultipartFormDataContent()
+                {
+                    { new StreamContent(File.Open(json.FullPath, FileMode.Open, FileAccess.Read)), "file", json.Name }
+                };
+
+                var resp = await client.PostAsync("/graphRemoteFile", formDataContent);
+
+                vm.File = await resp.Content.ReadAsStreamAsync();
+            }
+            else
+            {
+
+                string t = await client.GetStringAsync("/graphLocalFile?filename=" + json.FullPath);
+
+                vm.File = new MemoryStream(Encoding.UTF8.GetBytes(t));
+            }
+        }
+        catch (InvalidOperationException e)
+        {
+            _logger.Error(
+                $"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address");
+            return;
+        }
+        catch (HttpRequestException e)
+        {
+            _logger.Error(
+                "Due to an internal error, the server could not complete the request. Please file a bug report");
+            return;
+        }
+        catch (TaskCanceledException e)
+        {
+            _logger.Error(
+                "The request has timed out. Please increase the request timeout time in the settings menu and try again");
+            return;
+        }
+        catch (UriFormatException e)
+        {
+            _logger.Error($"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address");
+            return;
+        }
+
         _dockService.Show(vm, DockShowLocation.Document);
         _dockService.InitializeContent();
         vm.OpenFileImpl();

@@ -89,8 +89,10 @@ public class OnewareNetlistReaderFrontendModule : IModule
         settingsService.RegisterSetting("Netlist Viewer", "Backend", "NetlistViewer_Backend_Port",
             new TextBoxSetting("Port", "8080", null));
         settingsService.RegisterSetting("Netlist Viewer", "Backend", "NetlistViewer_Backend_RequestTimeout",
-            new TextBoxSetting("Request Timeout (in seconds)", "5000", null));
-        
+            new TextBoxSetting("Request Timeout (in seconds)", "1", null));
+        settingsService.RegisterSetting("Netlist Viewer", "Backend", "NetlistViewer_Backend_UseRemote",
+            new CheckBoxSetting("Use remote backend server", false));
+
         // Subscribe the FrontendService _AFTER_ the relevant settings have been registered
         ServiceManager.GetService<FrontendService>().SubscribeToSettings();
     }
