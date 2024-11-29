@@ -2,6 +2,8 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Oneware.NetlistReaderFrontend.Controls;
+using Oneware.NetlistReaderFrontend.Services;
+using Oneware.NetlistReaderFrontend.Types;
 using Oneware.NetlistReaderFrontend.ViewModels;
 
 namespace Oneware.NetlistReaderFrontend.Views;
@@ -89,5 +91,10 @@ public partial class FrontendView : UserControl
     private void Initialize(FrontendViewModel vm)
     {
         _vm = vm;
+    }
+
+    private void NetlistControl_OnElementClicked(object sender, ElementClickedEventArgs e)
+    {
+        ServiceManager.GetCustomLogger().Log(e.NodePath, true);
     }
 }

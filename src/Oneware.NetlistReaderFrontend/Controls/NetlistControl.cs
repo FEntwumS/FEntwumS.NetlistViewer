@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Globalization;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
@@ -9,6 +10,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using Avalonia.Xaml.Interactions.Core;
 using Oneware.NetlistReaderFrontend.Services;
 using Oneware.NetlistReaderFrontend.Types;
 
@@ -142,6 +144,14 @@ public class NetlistControl : TemplatedControl
         get => GetValue(OffsetXProperty);
         set => SetValue(OffsetXProperty, value);
     }
+    
+    public static readonly StyledProperty<ICommand> OnClickCommandProperty = AvaloniaProperty.Register<NetlistControl, ICommand>(nameof(OnClickCommand));
+
+    public ICommand OnClickCommand
+    {
+        get => GetValue(OnClickCommandProperty);
+        set => SetValue(OnClickCommandProperty, value);
+    }
 
     public static readonly StyledProperty<double> OffsetYProperty = AvaloniaProperty.Register<NetlistControl, double>
         (nameof(OffsetY));
@@ -270,6 +280,16 @@ public class NetlistControl : TemplatedControl
         AvaloniaProperty.Register<NetlistControl, NetlistElement>(nameof(CurrentElement),
             defaultBindingMode: BindingMode.TwoWay);
 
+    public string ClickedElementPath
+    {
+        get => GetValue(ClickedElementPathProperty);
+        set => SetValue(ClickedElementPathProperty, value);
+    }
+
+    public static readonly StyledProperty<string> ClickedElementPathProperty =
+        AvaloniaProperty.Register<NetlistControl, string>(nameof(ClickedElementPath), defaultBindingMode: BindingMode.TwoWay);
+    
+    public event ElementClickedEventHandler ElementClicked;
     private List<DRect> renderedNodeList = new List<DRect>();
     private List<DRect> renderedLabelList = new List<DRect>();
     private List<DRect> renderedPortList = new List<DRect>();
@@ -315,7 +335,7 @@ public class NetlistControl : TemplatedControl
         Pen bundledEdgePen = new Pen(
             Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? new SolidColorBrush(Colors.Black),
             2.8 * CurrentScale, null, PenLineCap.Square);
-        Brush rectFillBrush = Application.Current!.FindResource(theme, "ThemeBackgroundBrush") as SolidColorBrush ??
+        Brush rectFillBrush = Application.Current!.FindResource(theme, "ThemeControlHighlightMidBrush") as SolidColorBrush ??
                               new SolidColorBrush(Colors.LightBlue);
         Brush ellipseFillBrush =
             Application.Current!.FindResource(theme, "ThemeAccentBrush") as SolidColorBrush ??
@@ -512,11 +532,6 @@ public class NetlistControl : TemplatedControl
                     {
                         FormattedText text = new FormattedText(element.LabelText, CultureInfo.InvariantCulture,
                             FlowDirection.LeftToRight, typeface, 10 * CurrentScale, textBrush);
-
-                        if (element.ZIndex == 2)
-                        {
-                            context.DrawRectangle(rectFillBrush, null, boundingBox);
-                        }
 
                         context.DrawText(text, new Point(x, y));
 
@@ -968,6 +983,10 @@ public class NetlistControl : TemplatedControl
             else
             {
                 CurrentElement = hn;
+                
+                ClickedElementPath = hn.Path;
+                
+                ElementClicked?.Invoke(this, new ElementClickedEventArgs(hn.Path));
             }
         }
 

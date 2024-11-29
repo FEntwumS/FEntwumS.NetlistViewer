@@ -53,7 +53,7 @@
                                      PointerReleased="NetlistControl_OnPointerReleased"
                                      Tapped="NetlistControl_OnTapped"
                                      PropertyChanged="NetlistControl_OnPropertyChanged" FitToZoom="{Binding FitToZoom}"
-                                     IsLoaded="{Binding IsLoaded}">
+                                     IsLoaded="{Binding IsLoaded}" ElementClicked="NetlistControl_OnElementClicked" ClickedElementPath="{Binding ClickedElementPath}">
             </controls:NetlistControl>
         </DockPanel>
     </Panel>

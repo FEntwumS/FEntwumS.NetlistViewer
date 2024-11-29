@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System.Reactive.Linq;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
@@ -133,9 +134,24 @@ public class FrontendViewModel : ExtendedTool
         }
     }
 
+    private string clickedElementPath { get; set; }
+
+    public string ClickedElementPath
+    {
+        get => clickedElementPath;
+        set
+        {
+            this.clickedElementPath = value;
+            OnPropertyChanged();
+            ClickedElementPathChanged();
+        }
+    }
+
     public ICommand FitToZoomCommand { get; }
 
     private ICustomLogger _logger { get; set; }
+    
+    private FrontendService _frontendService { get; set; }
 
     public FrontendViewModel() : base("Frontend")
     {
@@ -155,6 +171,13 @@ public class FrontendViewModel : ExtendedTool
         LoadJSONCommand = new RelayCommand(() => OpenFileImpl());
 
         FitToZoomCommand = new RelayCommand(() => { FitToZoom = !FitToZoom; });
+
+        _frontendService = ServiceManager.GetService<FrontendService>();
+    }
+
+    public async Task ClickedElementPathChanged()
+    {
+        _frontendService.ExpandNode(clickedElementPath, null, this);
     }
 
     public async Task UpdateScaleImpl()
@@ -177,7 +200,7 @@ public class FrontendViewModel : ExtendedTool
     {
         var fileOpener = ServiceManager.GetFileOpener();
         var jsonLoader = ServiceManager.GetJsonLoader();
-        
+
         await Task.Run(() =>
         {
             try
@@ -210,6 +233,5 @@ public class FrontendViewModel : ExtendedTool
                 Console.WriteLine(e);
             }
         });
-        
     }
 }

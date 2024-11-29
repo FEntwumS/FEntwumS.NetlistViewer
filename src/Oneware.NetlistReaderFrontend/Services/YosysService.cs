@@ -64,13 +64,15 @@ public class YosysService : IYosysService
         }
 
         List<string> yosysArgs =
-            [ "-p", $"read_verilog \"{string.Join("\" \"", files)}\"; hierarchy -top {top}; proc; memory -nomap; flatten -scopename; write_json -compat-int netlist.json" ];
+            [ "-p", $"read_verilog \"{string.Join("\" \"", files)}\"; hierarchy -top {top}; proc; memory -nomap; flatten -scopename; stat; write_json -compat-int netlist.json" ];
         
         bool success = false;
         string stdout = string.Empty;
         string stderr = string.Empty;
         
         (success, stdout, stderr) = await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
+        
+        _logger.Log(stdout);
         
         return success;
     }
@@ -97,13 +99,15 @@ public class YosysService : IYosysService
         // get verilog files
 
         List<string> yosysArgs =
-            ["-m", "slang", "-p", $"slang \"{string.Join("\" \"", files)}\"; hierarchy -top {top}; proc; memory -nomap; opt -full; flatten -scopename; write_json -compat-int netlist.json" ];
+            ["-m", "slang", "-p", $"slang \"{string.Join("\" \"", files)}\"; hierarchy -top {top}; proc; memory -nomap; opt -full; flatten -scopename; stat; write_json -compat-int netlist.json" ];
         
         bool success = false;
         string stdout = string.Empty;
         string stderr = string.Empty;
 
         (success, stdout, stderr) = await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
+        
+        _logger.Log(stdout);
         
         return success;
     }

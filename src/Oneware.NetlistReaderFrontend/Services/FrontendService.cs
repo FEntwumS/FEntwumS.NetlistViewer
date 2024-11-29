@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
+using Oneware.NetlistReaderFrontend.Controls;
 using Oneware.NetlistReaderFrontend.ViewModels;
 using OneWare.ProjectSystem.Models;
 using StreamContent = System.Net.Http.StreamContent;
@@ -19,11 +20,13 @@ public class FrontendService
     private readonly IApplicationStateService _applicationStateService;
     private readonly IDockService _dockService;
     private readonly ISettingsService _settingsService;
-    
+
     private string _backendAddress = string.Empty;
     private string _backendPort = string.Empty;
     private bool _useRemoteBackend = false;
     private int _requestTimeout = 600;
+
+    private UInt64 currentNetlist = 0;
 
     public FrontendService()
     {
@@ -40,7 +43,7 @@ public class FrontendService
             if (isAddressValid(x))
             {
                 _backendAddress = x;
-                
+
                 _logger.Log($"New address: {_backendAddress}", true);
             }
             else
@@ -48,7 +51,7 @@ public class FrontendService
                 _logger.Error($"{x} is not a valid address");
             }
         });
-        
+
         _settingsService.GetSettingObservable<string>("NetlistViewer_Backend_Port").Subscribe(x =>
         {
             if (isPortValid(x))
@@ -61,8 +64,9 @@ public class FrontendService
                 _logger.Error($"{x} is not a valid port");
             }
         });
-        
-        _settingsService.GetSettingObservable<bool>("NetlistViewer_Backend_UseRemote").Subscribe(x => _useRemoteBackend = x);
+
+        _settingsService.GetSettingObservable<bool>("NetlistViewer_Backend_UseRemote")
+            .Subscribe(x => _useRemoteBackend = x);
         _settingsService.GetSettingObservable<string>("NetlistViewer_Backend_RequestTimeout").Subscribe(x =>
         {
             try
@@ -72,14 +76,14 @@ public class FrontendService
                 if (_requestTimeout <= 0)
                 {
                     _logger.Error("Request timeout not valid. Please enter a positive integer");
-                
+
                     _requestTimeout = 600;
                 }
             }
             catch (Exception ex)
             {
                 _logger.Error("Request timeout not valid. Please enter a positive integer");
-                
+
                 _requestTimeout = 600;
             }
         });
@@ -88,26 +92,26 @@ public class FrontendService
     public async Task CreateVhdlNetlist(IProjectFile vhdl)
     {
         bool success = false;
-        
+
         IGhdlService ghdlService = ServiceManager.GetService<IGhdlService>();
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
-        
+
         success = await ghdlService.ElaborateDesignAsync(vhdl);
 
         if (!success)
         {
             return;
         }
-        
+
         success = await ghdlService.CrossCompileDesignAsync(vhdl);
-        
+
         if (!success)
         {
             return;
         }
-        
+
         success = await yosysService.LoadVerilogAsync(vhdl);
-        
+
         if (!success)
         {
             return;
@@ -120,7 +124,7 @@ public class FrontendService
             _logger.Error($"Netlist file not found: {netlistPath}");
             return;
         }
-        
+
         IProjectFile test = new ProjectFile(netlistPath, vhdl.TopFolder!);
 
         await ShowViewer(test);
@@ -129,47 +133,61 @@ public class FrontendService
     public async Task CreateVerilogNetlist(IProjectFile verilog)
     {
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
-        
+
         await yosysService.LoadVerilogAsync(verilog);
-        
-        IProjectFile test = new ProjectFile(Path.Combine(verilog.Root!.FullPath, "build", "netlist", "netlist.json"), verilog.TopFolder!);
+
+        string netlistPath = Path.Combine(verilog.Root!.FullPath, "build", "netlist", "netlist.json");
+
+        if (!File.Exists(netlistPath))
+        {
+            _logger.Error($"Netlist file not found: {netlistPath}");
+            return;
+        }
+
+        IProjectFile test = new ProjectFile(netlistPath, verilog.TopFolder!);
 
         await ShowViewer(test);
     }
-    
+
     public async Task CreateSystemVerilogNetlist(IProjectFile sVerilog)
     {
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
-        
+
         await yosysService.LoadSystemVerilogAsync(sVerilog);
 
-        IProjectFile test = new ProjectFile(Path.Combine(sVerilog.Root!.FullPath, "build", "netlist", "netlist.json"), sVerilog.TopFolder!);
+        IProjectFile test = new ProjectFile(Path.Combine(sVerilog.Root!.FullPath, "build", "netlist", "netlist.json"),
+            sVerilog.TopFolder!);
 
         await ShowViewer(test);
     }
-    
+
     public async Task ShowViewer(IProjectFile json)
     {
+        _applicationStateService.AddState("test", AppState.Loading);
+        
         HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear();
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
+        client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
         client.DefaultRequestHeaders.Add("User-Agent", "Oneware.NetlistReaderFrontend");
         client.BaseAddress = new Uri($"http://{_backendAddress}:{_backendPort}");
-        client.Timeout = TimeSpan.FromSeconds(_requestTimeout);    // TODO add setting
+        client.Timeout = TimeSpan.FromSeconds(_requestTimeout);
 
-        var content = await File.ReadAllTextAsync(json.FullPath);
+        string content = await File.ReadAllTextAsync(json.FullPath);
 
         IHashService hashService = ServiceManager.GetHashService();
-        var contentByteSpan = new ReadOnlySpan<Byte>(Encoding.UTF8.GetBytes(content));
+        ReadOnlySpan<byte> contentByteSpan = new ReadOnlySpan<Byte>(Encoding.UTF8.GetBytes(content));
+        ReadOnlySpan<byte> pathByteSpan = new ReadOnlySpan<byte>(Encoding.UTF8.GetBytes(json.FullPath));
+        UInt32 pathHash = hashService.ComputeHash(pathByteSpan);
+        UInt32 contenthash = hashService.ComputeHash(contentByteSpan);
+
+        UInt64 combinedHash = ((UInt64)pathHash) << 32 | contenthash;
         
-        ServiceManager.GetCustomLogger().Log("GetHashCode() hash: " + json.FullPath.GetHashCode(), true);
-        ServiceManager.GetCustomLogger().Log("OAAT hash: " + ServiceManager.GetHashService().ComputeHash(new ReadOnlySpan<byte>(Encoding.UTF8.GetBytes(json.FullPath))), true);
-        
-        var watch = Stopwatch.StartNew();
-        UInt32 computedHash = hashService.ComputeHash(contentByteSpan);
-        watch.Stop();
-        ServiceManager.GetCustomLogger().Log("Full file hash is: " + computedHash, true);
-        ServiceManager.GetCustomLogger().Log("Took " + watch.ElapsedMilliseconds + " milliseconds", true);
+        currentNetlist = combinedHash;
+
+        ServiceManager.GetCustomLogger().Log("Path hash: " + pathHash, true);
+        ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash, true);
+        ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash, true);
 
         var vm = new FrontendViewModel();
         vm.InitializeContent();
@@ -185,16 +203,14 @@ public class FrontendService
                     { new StreamContent(File.Open(json.FullPath, FileMode.Open, FileAccess.Read)), "file", json.Name }
                 };
 
-                var resp = await client.PostAsync("/graphRemoteFile", formDataContent);
+                var resp = await client.PostAsync("/graphRemoteFile?hash=" + combinedHash, formDataContent);
 
                 vm.File = await resp.Content.ReadAsStreamAsync();
             }
             else
             {
-
-                string t = await client.GetStringAsync("/graphLocalFile?filename=" + json.FullPath);
-
-                vm.File = new MemoryStream(Encoding.UTF8.GetBytes(t));
+                vm.File = await client.GetStreamAsync("/graphLocalFile?filename=" + json.FullPath + "&hash=" +
+                                                      combinedHash);
             }
         }
         catch (InvalidOperationException e)
@@ -217,7 +233,8 @@ public class FrontendService
         }
         catch (UriFormatException e)
         {
-            _logger.Error($"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address");
+            _logger.Error(
+                $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address");
             return;
         }
 
@@ -226,14 +243,35 @@ public class FrontendService
         vm.OpenFileImpl();
     }
 
+    public async Task ExpandNode(string nodePath, NetlistControl control, FrontendViewModel vm)
+    {
+        HttpClient client = new();
+        client.DefaultRequestHeaders.Accept.Clear();
+        client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
+        client.DefaultRequestHeaders.Add("User-Agent", "Oneware.NetlistReaderFrontend");
+        client.BaseAddress = new Uri($"http://{_backendAddress}:{_backendPort}");
+        client.Timeout = TimeSpan.FromSeconds(_requestTimeout);
+        
+        _logger.Log("Sending request to ExpandNode", true);
+        
+        vm.File = await client.GetStreamAsync("/expandNode?hash=" + currentNetlist + "&nodePath=" + nodePath);
+        
+        _logger.Log("Answer received", true);
+        
+        await vm.OpenFileImpl();
+        
+        _logger.Log("Done", true);
+    }
+
     // Source:
     // https://stackoverflow.com/a/36760050
     private static string IpV4AddressPattern = "^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\\.(?!$)|$)){4}$";
-    
+
     private bool isAddressValid(string address)
     {
         var match = Regex.Match(address, IpV4AddressPattern);
-        
+
         return match.Success;
     }
 
@@ -242,13 +280,13 @@ public class FrontendService
         try
         {
             int portInt = Convert.ToInt32(port);
-            
-            return portInt is >= 1024 and <= 65535; 
+
+            return portInt is >= 1024 and <= 65535;
         }
         catch (IOException e)
         {
             _logger.Error(e.Message, false);
-            
+
             return false;
         }
     }
