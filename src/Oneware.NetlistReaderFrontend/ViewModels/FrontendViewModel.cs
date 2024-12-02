@@ -178,6 +178,7 @@ public class FrontendViewModel : ExtendedTool
     public async Task ClickedElementPathChanged()
     {
         _frontendService.ExpandNode(clickedElementPath, null, this);
+        FitToZoom = !FitToZoom;
     }
 
     public async Task UpdateScaleImpl()
@@ -189,6 +190,7 @@ public class FrontendViewModel : ExtendedTool
         dimensionService.SetWidth(jsonLoader.GetMaxWidth());
 
         IsLoaded = !IsLoaded;
+        FitToZoom = !FitToZoom;
 
         Scale = 0.2;
 
