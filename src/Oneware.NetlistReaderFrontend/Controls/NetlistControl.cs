@@ -983,9 +983,17 @@ public class NetlistControl : TemplatedControl
             else
             {
                 CurrentElement = hn;
-                
-                ClickedElementPath = hn.Path;
-                
+
+                // kinda bad
+                if (ClickedElementPath == hn.Path)
+                {
+                    ClickedElementPath += ' ';
+                }
+                else
+                {
+                    ClickedElementPath = hn.Path;
+                }
+
                 ElementClicked?.Invoke(this, new ElementClickedEventArgs(hn.Path));
             }
         }
