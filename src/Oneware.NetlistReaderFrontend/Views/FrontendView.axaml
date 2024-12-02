@@ -15,15 +15,15 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <viewModels:FrontendViewModel />
     </Design.DataContext>
-    
-    <Design.DesignStyle>
-        <StyleInclude Source="avares://Oneware.NetlistReaderFrontend/Icons.axaml"></StyleInclude>
-    </Design.DesignStyle>
 
     <Panel ClipToBounds="True">
-        <Panel.Styles>
-            <StyleInclude Source="avares://Oneware.NetlistReaderFrontend/Icons.axaml"></StyleInclude>
-        </Panel.Styles>
+        <Panel.Resources>
+            <ResourceDictionary>
+                <ResourceDictionary.MergedDictionaries>
+                    <MergeResourceInclude Source="avares://Oneware.NetlistReaderFrontend/Styles/Icons.axaml"></MergeResourceInclude>
+                </ResourceDictionary.MergedDictionaries>
+            </ResourceDictionary>
+        </Panel.Resources>
         
         <DockPanel ClipToBounds="True">
             <Border BorderBrush="{StaticResource ThemeBorderLowBrush}" BorderThickness="0 0 0 1" DockPanel.Dock="Top">
@@ -31,7 +31,7 @@
                 <Button HorizontalAlignment="Left" VerticalAlignment="Top"
                         Command="{Binding LoadJSONCommand}">
                     <StackPanel Orientation="Horizontal">
-                        <PathIcon Data="{StaticResource open_regular}" Margin="0 0 10 0"/>
+                        <PathIcon Data="{StaticResource netlistIcon}" Margin="0 0 10 0"/>
                         <TextBlock Text="Load JSON file"></TextBlock>
                     </StackPanel>
                 </Button>

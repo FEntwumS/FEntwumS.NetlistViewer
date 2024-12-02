@@ -1,3 +1,7 @@
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Helpers;
@@ -32,6 +36,11 @@ public class OnewareNetlistReaderFrontendModule : IModule
 
     public void OnInitialized(IContainerProvider containerProvider)
     {
+        var resourceInclude = new ResourceInclude(new Uri("avares://Oneware.NetlistReaderFrontend/Styles/Icons.axaml"))
+            { Source = new Uri("avares://Oneware.NetlistReaderFrontend/Styles/Icons.axaml")};
+        
+        Application.Current?.Resources.MergedDictionaries.Add(resourceInclude);
+        
         _serviceManager = new ServiceManager(containerProvider);
 
         ISettingsService settingsService = ServiceManager.GetService<ISettingsService>();
@@ -76,7 +85,7 @@ public class OnewareNetlistReaderFrontendModule : IModule
             }
         });
 
-        settingsService.RegisterSettingCategory("Netlist Viewer");
+        settingsService.RegisterSettingCategory("Netlist Viewer", 100, "netlistIcon");
         settingsService.RegisterSettingSubCategory("Netlist Viewer", "VHDL");
 
         settingsService.RegisterSetting("Netlist Viewer", "VHDL", "NetlistViewer_VHDL_Standard",
