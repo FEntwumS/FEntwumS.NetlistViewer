@@ -95,7 +95,11 @@ public class JsonLoader : IJsonLoader
     public void createNode(JsonNode node, List<NetlistElement> items, double xRef, double yRef,
         ushort depth)
     {
-        logger.Log(node["id"].ToString());
+        if (node.AsObject().ContainsKey("node"))
+        {
+            logger.Log(node["id"].ToString());
+        }
+
         JsonArray children = node["children"] as JsonArray;
         double x = 0;
         double y = 0;

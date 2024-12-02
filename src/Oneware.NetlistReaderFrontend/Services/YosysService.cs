@@ -72,7 +72,7 @@ public class YosysService : IYosysService
         
         (success, stdout, stderr) = await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
         
-        _logger.Log(stdout);
+        _logger.Log(stderr);
         
         return success;
     }
