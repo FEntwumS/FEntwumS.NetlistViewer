@@ -92,6 +92,7 @@ public class FrontendService
     public async Task CreateVhdlNetlist(IProjectFile vhdl)
     {
         bool success = false;
+        string top = Path.GetFileNameWithoutExtension(vhdl.FullPath);
 
         IGhdlService ghdlService = ServiceManager.GetService<IGhdlService>();
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
@@ -118,7 +119,7 @@ public class FrontendService
             return;
         }
 
-        string netlistPath = Path.Combine(vhdl.Root!.FullPath, "build", "netlist", "netlist.json");
+        string netlistPath = Path.Combine(vhdl.Root!.FullPath, "build", "netlist", $"{top}.json");
 
         if (!File.Exists(netlistPath))
         {
@@ -133,11 +134,13 @@ public class FrontendService
 
     public async Task CreateVerilogNetlist(IProjectFile verilog)
     {
+        string top = Path.GetFileNameWithoutExtension(verilog.FullPath);
+        
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
 
         await yosysService.LoadVerilogAsync(verilog);
 
-        string netlistPath = Path.Combine(verilog.Root!.FullPath, "build", "netlist", "netlist.json");
+        string netlistPath = Path.Combine(verilog.Root!.FullPath, "build", "netlist", $"{top}.json");
 
         if (!File.Exists(netlistPath))
         {
@@ -152,11 +155,13 @@ public class FrontendService
 
     public async Task CreateSystemVerilogNetlist(IProjectFile sVerilog)
     {
+        string top = Path.GetFileNameWithoutExtension(sVerilog.FullPath);
+        
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
 
         await yosysService.LoadSystemVerilogAsync(sVerilog);
 
-        IProjectFile test = new ProjectFile(Path.Combine(sVerilog.Root!.FullPath, "build", "netlist", "netlist.json"),
+        IProjectFile test = new ProjectFile(Path.Combine(sVerilog.Root!.FullPath, "build", "netlist", $"{top}.json"),
             sVerilog.TopFolder!);
 
         await ShowViewer(test);
@@ -164,6 +169,8 @@ public class FrontendService
 
     public async Task ShowViewer(IProjectFile json)
     {
+        string top = Path.GetFileNameWithoutExtension(json.FullPath);
+        
         HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.Add(
@@ -188,13 +195,13 @@ public class FrontendService
         ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash, true);
         ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash, true);
         
-        ServiceManager.GetViewportDimensionService().SetClickedElementPath(string.Empty);
-        ServiceManager.GetViewportDimensionService().SetCurrentElementCount(0);
-        ServiceManager.GetViewportDimensionService().SetZoomElementDimensions(null);
+        ServiceManager.GetViewportDimensionService().SetClickedElementPath(combinedHash, string.Empty);
+        ServiceManager.GetViewportDimensionService().SetCurrentElementCount(combinedHash, 0);
+        ServiceManager.GetViewportDimensionService().SetZoomElementDimensions(combinedHash, null);
 
         var vm = new FrontendViewModel();
         vm.InitializeContent();
-        vm.Title = json.Name;
+        vm.Title = $"Netlist: {top}";
         _logger.Log("Selected file: " + json.FullPath);
 
         try
@@ -244,6 +251,7 @@ public class FrontendService
         _dockService.Show(vm, DockShowLocation.Document);
         _dockService.InitializeContent();
         vm.OpenFileImpl();
+        vm.NetlistId = currentNetlist;
     }
 
     public async Task ExpandNode(string nodePath, NetlistControl control, FrontendViewModel vm)
@@ -258,7 +266,7 @@ public class FrontendService
         
         _logger.Log("Sending request to ExpandNode", true);
         
-        vm.File = await client.GetStreamAsync("/expandNode?hash=" + currentNetlist + "&nodePath=" + nodePath);
+        vm.File = await client.GetStreamAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath);
         
         _logger.Log("Answer received", true);
         

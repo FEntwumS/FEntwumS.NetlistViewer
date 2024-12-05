@@ -8,10 +8,10 @@ namespace Oneware.NetlistReaderFrontend.Services;
 
 public interface IJsonLoader
 {
-    public Task OpenJson(Stream netlist);
+    public Task OpenJson(Stream netlist, UInt64 netlistId);
 
     public Task<List<NetlistElement>> parseJson(double xRef, double yRef,
-        FrontendViewModel mw);
+        FrontendViewModel mw, UInt64 netlistId);
 
     public void createNode(JsonNode node, List<NetlistElement> items, double xRef, double
         yRef, ushort depth);

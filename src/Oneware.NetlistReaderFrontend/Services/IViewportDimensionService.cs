@@ -10,12 +10,12 @@ public interface IViewportDimensionService
     public void SetWidth(double Width);
     public double GetWidth();
     
-    public DRect GetZoomElementDimensions();
-    public void SetZoomElementDimensions(DRect ZoomElementDimensions);
+    public DRect GetZoomElementDimensions(UInt64 netlistId);
+    public void SetZoomElementDimensions(UInt64 netlistId, DRect ZoomElementDimensions);
     
-    public string GetClickedElementPath();
-    public void SetClickedElementPath(string ClickedElementName);
+    public string GetClickedElementPath(UInt64 netlistId);
+    public void SetClickedElementPath(UInt64 netlistId, string ClickedElementName);
     
-    public int getCurrentElementCount();
-    public void SetCurrentElementCount(int CurrentElementCount);
+    public int getCurrentElementCount(UInt64 netlistId);
+    public void SetCurrentElementCount(UInt64 netlistId, int CurrentElementCount);
 }

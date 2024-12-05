@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Dock.Model.Core;
 using Microsoft.Extensions.Logging;
+using OmniSharp.Extensions.LanguageServer.Protocol;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.ViewModels;
 using Oneware.NetlistReaderFrontend.Services;
@@ -149,8 +150,20 @@ public class FrontendViewModel : ExtendedTool
 
     public ICommand FitToZoomCommand { get; }
 
+    public UInt64 NetlistId
+    {
+        get => netlistId;
+        set
+        {
+            netlistId = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private UInt64 netlistId { get; set; }
+
     private ICustomLogger _logger { get; set; }
-    
+
     private FrontendService _frontendService { get; set; }
 
     public FrontendViewModel() : base("Frontend")
@@ -219,14 +232,14 @@ public class FrontendViewModel : ExtendedTool
 
                 _logger.Log("File loaded", true);
 
-                Task t = jsonLoader.OpenJson(file);
+                Task t = jsonLoader.OpenJson(file, netlistId);
                 t.Wait();
 
                 File.Close();
 
                 Items.Clear();
 
-                Items.AddRange(jsonLoader.parseJson(0, 0, this).Result);
+                Items.AddRange(jsonLoader.parseJson(0, 0, this, netlistId).Result);
 
                 _logger.Log("JSON read", true);
             }

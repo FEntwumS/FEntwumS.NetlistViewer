@@ -64,7 +64,7 @@ public class YosysService : IYosysService
         }
 
         List<string> yosysArgs =
-            [ "-p", $"read_verilog \"{string.Join("\" \"", files)}\"; hierarchy -top {top}; proc; memory -nomap; flatten -scopename; stat; write_json -compat-int netlist.json" ];
+            [ "-p", $"read_verilog \"{string.Join("\" \"", files)}\"; hierarchy -top {top}; proc; memory -nomap; flatten -scopename; stat; write_json -compat-int {top}.json" ];
         
         bool success = false;
         string stdout = string.Empty;

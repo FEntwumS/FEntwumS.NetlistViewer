@@ -1,15 +1,13 @@
-﻿using Oneware.NetlistReaderFrontend.Types;
+﻿using System.Collections.Concurrent;
+using Oneware.NetlistReaderFrontend.Types;
 
 namespace Oneware.NetlistReaderFrontend.Services;
 
 public class ViewportDimensionService : IViewportDimensionService
 {
+    private ConcurrentDictionary<UInt64, ViewportInformation> specificData = new ConcurrentDictionary<UInt64, ViewportInformation>();
     private double width { get; set; }
     private double height { get; set; }
-    
-    private string clickedElementPath { get; set; }
-    private int currentElementCount { get; set; }
-    private DRect zoomElement { get; set; }
 
     public void SetHeight(double Height)
     {
@@ -31,33 +29,54 @@ public class ViewportDimensionService : IViewportDimensionService
         return width;
     }
 
-    public DRect GetZoomElementDimensions()
+    public DRect GetZoomElementDimensions(UInt64 netlistId)
     {
-        return zoomElement;
+        return specificData[netlistId].ClickedElementBounds;
     }
 
-    public void SetZoomElementDimensions(DRect ZoomElementDimensions)
+    public void SetZoomElementDimensions(UInt64 netlistId, DRect ZoomElementDimensions)
     {
-        zoomElement = ZoomElementDimensions;
+        if (specificData.ContainsKey(netlistId))
+        {
+            specificData[netlistId].ClickedElementBounds = ZoomElementDimensions;
+        }
+        else
+        {
+            specificData[netlistId] = new ViewportInformation{ ClickedElementBounds = ZoomElementDimensions };
+        }
     }
 
-    public string GetClickedElementPath()
+    public string GetClickedElementPath(UInt64 netlistId)
     {
-        return clickedElementPath;
+        return specificData[netlistId].ClickedElementPath;
     }
 
-    public void SetClickedElementPath(string ClickedElementName)
+    public void SetClickedElementPath(UInt64 netlistId, string ClickedElementName)
     {
-        clickedElementPath = ClickedElementName;
+        if (specificData.ContainsKey(netlistId))
+        {
+            specificData[netlistId].ClickedElementPath = ClickedElementName;
+        }
+        else
+        {
+            specificData[netlistId] = new ViewportInformation{ ClickedElementPath = ClickedElementName };
+        }
     }
 
-    public int getCurrentElementCount()
+    public int getCurrentElementCount(UInt64 netlistId)
     {
-        return currentElementCount;
+        return specificData[netlistId].CurrentElementCount;
     }
 
-    public void SetCurrentElementCount(int CurrentElementCount)
+    public void SetCurrentElementCount(UInt64 netlistId, int CurrentElementCount)
     {
-        currentElementCount = CurrentElementCount;
+        if (specificData.ContainsKey(netlistId))
+        {
+            specificData[netlistId].CurrentElementCount = CurrentElementCount;
+        }
+        else
+        {
+            specificData[netlistId] = new ViewportInformation{ CurrentElementCount = CurrentElementCount };
+        }
     }
 }

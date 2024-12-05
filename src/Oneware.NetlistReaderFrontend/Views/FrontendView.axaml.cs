@@ -22,8 +22,10 @@ public partial class FrontendView : UserControl
 
         if (DataContext is FrontendViewModel vm)
         {
-            //Initialize(vm);
+            Initialize(vm);
         }
+        
+        ServiceManager.GetCustomLogger().Log($"FrontendView Initialized", true);
     }
 
     // move netlist

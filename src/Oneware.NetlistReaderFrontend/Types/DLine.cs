@@ -9,7 +9,7 @@ public class DLine(Point start, Point end, ushort zIndex, NetlistElement element
     public ushort ZIndex { get; set; } = zIndex;
     public NetlistElement element { get; set; } = element;
 
-    private const double lenience = 1.33d;
+    private const double lenience = 2.25d;
 
     public bool Hittest(Point pointer)
     {

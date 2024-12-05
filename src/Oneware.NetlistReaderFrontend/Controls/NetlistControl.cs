@@ -19,7 +19,7 @@ namespace Oneware.NetlistReaderFrontend.Controls;
 public class NetlistControl : TemplatedControl
 {
     private static readonly FontFamily font = (Application.Current!.FindResource("MartianMono") as FontFamily)!;
-    
+
     private static IViewportDimensionService _viewportDimensionService;
 
     private static readonly Typeface typeface =
@@ -68,48 +68,49 @@ public class NetlistControl : TemplatedControl
     private void ZoomToFit()
     {
         var dimensionService = ServiceManager.GetViewportDimensionService();
-        
-        DRect elementBounds = dimensionService.GetZoomElementDimensions();
+
+        DRect elementBounds = dimensionService.GetZoomElementDimensions(NetlistID);
 
         if (elementBounds != null)
         {
             double sx = this.Bounds.Width / elementBounds.Width;
             double sy = this.Bounds.Height / elementBounds.Height;
-            
+
             if (sx < sy)
             {
                 CurrentScale = sx;
-                
+
                 OffsetX = elementBounds.X * -CurrentScale;
-                OffsetY = ((elementBounds.Y + (elementBounds.Height / 2.0d)) * -CurrentScale) + (this.Bounds.Height / 2.0d);
+                OffsetY = ((elementBounds.Y + (elementBounds.Height / 2.0d)) * -CurrentScale) +
+                          (this.Bounds.Height / 2.0d);
             }
             else
             {
                 CurrentScale = sy;
-                
-                OffsetX = ((elementBounds.X + (elementBounds.Width / 2.0d)) * -CurrentScale) + (this.Bounds.Width / 2.0d);
+
+                OffsetX = ((elementBounds.X + (elementBounds.Width / 2.0d)) * -CurrentScale) +
+                          (this.Bounds.Width / 2.0d);
                 OffsetY = elementBounds.Y * -CurrentScale;
             }
-            
-            dimensionService.SetZoomElementDimensions(null);
+
+            dimensionService.SetZoomElementDimensions(NetlistID, null);
         }
         else
         {
-
             double sx = this.Bounds.Width / dimensionService.GetWidth();
             double sy = this.Bounds.Height / dimensionService.GetHeight();
 
             if (sx < sy)
             {
                 CurrentScale = sx;
-                
+
                 OffsetX = 0;
                 OffsetY = ((dimensionService.GetHeight() / 2) * -CurrentScale) + (this.Bounds.Height / 2.0d);
             }
             else
             {
                 CurrentScale = sy;
-                
+
                 OffsetX = ((dimensionService.GetWidth() / 2) * -CurrentScale) + (this.Bounds.Width / 2.0d);
                 OffsetY = 0;
             }
@@ -125,7 +126,7 @@ public class NetlistControl : TemplatedControl
         AvaloniaProperty.RegisterDirect<NetlistControl, IEnumerable>(
             nameof(Items),
             o => o.Items,
-            (o, v) => o.Items = v);
+            (o, v) => o.Items = v, defaultBindingMode: BindingMode.TwoWay);
 
     private IEnumerable _items = new AvaloniaList<object>();
 
@@ -136,7 +137,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> StepSizeProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(StepSize));
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(StepSize), defaultBindingMode: BindingMode.TwoWay);
 
     public double StepSize
     {
@@ -145,7 +146,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> DiagramWidthProperty = AvaloniaProperty.Register<NetlistControl,
-        double>(nameof(DiagramWidth));
+        double>(nameof(DiagramWidth), defaultBindingMode: BindingMode.TwoWay);
 
     public double DiagramWidth
     {
@@ -154,7 +155,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> DiagramHeightProperty = AvaloniaProperty.Register<NetlistControl,
-        double>(nameof(DiagramHeight));
+        double>(nameof(DiagramHeight), defaultBindingMode: BindingMode.TwoWay);
 
     public double DiagramHeight
     {
@@ -163,7 +164,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> CurrentScaleProperty = AvaloniaProperty.Register<NetlistControl,
-        double>(nameof(CurrentScale));
+        double>(nameof(CurrentScale), defaultBindingMode: BindingMode.TwoWay);
 
     public double CurrentScale
     {
@@ -172,15 +173,16 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> OffsetXProperty = AvaloniaProperty.Register<NetlistControl, double>
-        (nameof(OffsetX));
+        (nameof(OffsetX), defaultBindingMode: BindingMode.TwoWay);
 
     public double OffsetX
     {
         get => GetValue(OffsetXProperty);
         set => SetValue(OffsetXProperty, value);
     }
-    
-    public static readonly StyledProperty<ICommand> OnClickCommandProperty = AvaloniaProperty.Register<NetlistControl, ICommand>(nameof(OnClickCommand));
+
+    public static readonly StyledProperty<ICommand> OnClickCommandProperty =
+        AvaloniaProperty.Register<NetlistControl, ICommand>(nameof(OnClickCommand), defaultBindingMode: BindingMode.TwoWay);
 
     public ICommand OnClickCommand
     {
@@ -189,7 +191,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> OffsetYProperty = AvaloniaProperty.Register<NetlistControl, double>
-        (nameof(OffsetY));
+        (nameof(OffsetY), defaultBindingMode: BindingMode.TwoWay);
 
     public double OffsetY
     {
@@ -204,7 +206,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> DeltaXProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(DeltaX));
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(DeltaX), defaultBindingMode: BindingMode.TwoWay);
 
     public double DeltaY
     {
@@ -213,7 +215,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> DeltaYProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(DeltaY));
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(DeltaY), defaultBindingMode: BindingMode.TwoWay);
 
     public double DeltaScale
     {
@@ -231,7 +233,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> PointerXProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(PointerX));
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(PointerX), defaultBindingMode: BindingMode.TwoWay);
 
     public double PointerY
     {
@@ -240,7 +242,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> PointerYProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(PointerY));
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(PointerY), defaultBindingMode: BindingMode.TwoWay);
 
     public double PortScaleClip
     {
@@ -249,7 +251,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> PortScaleClipProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(PortScaleClip));
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(PortScaleClip), defaultBindingMode: BindingMode.TwoWay);
 
     public double NodeScaleClip
     {
@@ -258,7 +260,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> NodeScaleClipProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(NodeScaleClip));
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(NodeScaleClip), defaultBindingMode: BindingMode.TwoWay);
 
     public double LabelScaleClip
     {
@@ -267,7 +269,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> LabelScaleClipProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(LabelScaleClip));
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(LabelScaleClip), defaultBindingMode: BindingMode.TwoWay);
 
     public double EdgeLengthScaleClip
     {
@@ -276,7 +278,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> EdgeLengthScaleClipProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(EdgeLengthScaleClip));
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(EdgeLengthScaleClip), defaultBindingMode: BindingMode.TwoWay);
 
     public double JunctionScaleClip
     {
@@ -285,7 +287,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> JunctionScaleClipProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(JunctionScaleClip));
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(JunctionScaleClip), defaultBindingMode: BindingMode.TwoWay);
 
     public bool FitToZoom
     {
@@ -294,7 +296,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<bool> FitToZoomProperty =
-        AvaloniaProperty.Register<NetlistControl, bool>(nameof(FitToZoom));
+        AvaloniaProperty.Register<NetlistControl, bool>(nameof(FitToZoom), defaultBindingMode: BindingMode.TwoWay);
 
     public bool IsLoaded
     {
@@ -303,7 +305,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<bool> IsLoadedProperty =
-        AvaloniaProperty.Register<NetlistControl, bool>(nameof(IsLoaded));
+        AvaloniaProperty.Register<NetlistControl, bool>(nameof(IsLoaded), defaultBindingMode: BindingMode.TwoWay);
 
     public NetlistElement CurrentElement
     {
@@ -322,8 +324,18 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<string> ClickedElementPathProperty =
-        AvaloniaProperty.Register<NetlistControl, string>(nameof(ClickedElementPath), defaultBindingMode: BindingMode.TwoWay);
-    
+        AvaloniaProperty.Register<NetlistControl, string>(nameof(ClickedElementPath),
+            defaultBindingMode: BindingMode.TwoWay);
+
+    public UInt64 NetlistID
+    {
+        get => GetValue(NetlistIDProperty);
+        set => SetValue(NetlistIDProperty, value);
+    }
+
+    public static readonly StyledProperty<UInt64> NetlistIDProperty =
+        AvaloniaProperty.Register<NetlistControl, UInt64>(nameof(NetlistID), defaultBindingMode: BindingMode.TwoWay);
+
     public event ElementClickedEventHandler ElementClicked;
     private List<DRect> renderedNodeList = new List<DRect>();
     private List<DRect> renderedLabelList = new List<DRect>();
@@ -370,8 +382,9 @@ public class NetlistControl : TemplatedControl
         Pen bundledEdgePen = new Pen(
             Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? new SolidColorBrush(Colors.Black),
             2.8 * CurrentScale, null, PenLineCap.Square);
-        Brush rectFillBrush = Application.Current!.FindResource(theme, "ThemeControlHighlightMidBrush") as SolidColorBrush ??
-                              new SolidColorBrush(Colors.LightBlue);
+        Brush rectFillBrush =
+            Application.Current!.FindResource(theme, "ThemeControlHighlightMidBrush") as SolidColorBrush ??
+            new SolidColorBrush(Colors.LightBlue);
         Brush ellipseFillBrush =
             Application.Current!.FindResource(theme, "ThemeAccentBrush") as SolidColorBrush ??
             new SolidColorBrush(Colors.Black);
@@ -1028,8 +1041,8 @@ public class NetlistControl : TemplatedControl
                 {
                     ClickedElementPath = hn.Path;
                 }
-                
-                _viewportDimensionService.SetClickedElementPath(hn.Path);
+
+                _viewportDimensionService.SetClickedElementPath(NetlistID, hn.Path);
 
                 ElementClicked?.Invoke(this, new ElementClickedEventArgs(hn.Path));
             }

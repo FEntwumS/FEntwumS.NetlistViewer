@@ -39,7 +39,7 @@ public class JsonLoader : IJsonLoader
         viewportDimensionService = ServiceManager.GetViewportDimensionService();
     }
 
-    public async Task OpenJson(Stream netlist)
+    public async Task OpenJson(Stream netlist, UInt64 netlistId)
     {
         logger = ServiceManager.GetCustomLogger();
         isLoading = true;
@@ -57,11 +57,11 @@ public class JsonLoader : IJsonLoader
     }
 
     public async Task<List<NetlistElement>> parseJson(double xRef, double yRef,
-        FrontendViewModel mw)
+        FrontendViewModel mw, UInt64 netlistId)
     {
         await loadingDone();
 
-        clickedElementPath = viewportDimensionService.GetClickedElementPath();
+        clickedElementPath = viewportDimensionService.GetClickedElementPath(netlistId);
 
         if (clickedElementPath == null)
         {
@@ -99,24 +99,24 @@ public class JsonLoader : IJsonLoader
         
         // check for clicked elements
         // TODO was anything clicked????
-        if (viewportDimensionService.getCurrentElementCount() == 0)
+        if (viewportDimensionService.getCurrentElementCount(netlistId) == 0)
         {
-            viewportDimensionService.SetZoomElementDimensions(new DRect(0, 0, maxWidth, maxHeight, 0, null));
+            viewportDimensionService.SetZoomElementDimensions(netlistId, new DRect(0, 0, maxWidth, maxHeight, 0, null));
         }
-        else if (items.Count > viewportDimensionService.getCurrentElementCount())
+        else if (items.Count > viewportDimensionService.getCurrentElementCount(netlistId))
         {
             // expansion
             
-            viewportDimensionService.SetZoomElementDimensions(clickedElementRect);
+            viewportDimensionService.SetZoomElementDimensions(netlistId, clickedElementRect);
         }
         else
         {
             // collapse
             
-            viewportDimensionService.SetZoomElementDimensions(clickedElementParentRect);
+            viewportDimensionService.SetZoomElementDimensions(netlistId, clickedElementParentRect);
         }
         
-        viewportDimensionService.SetCurrentElementCount(items.Count);
+        viewportDimensionService.SetCurrentElementCount(netlistId, items.Count);
         
         logger.Log("====");
         logger.Log("All elements loaded");
