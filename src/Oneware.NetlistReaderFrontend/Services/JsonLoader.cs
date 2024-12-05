@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OneWare.Essentials.Services;
 using Oneware.NetlistReaderFrontend.Types;
 using Oneware.NetlistReaderFrontend.ViewModels;
+using ReactiveUI;
 
 namespace Oneware.NetlistReaderFrontend.Services;
 
@@ -26,6 +27,17 @@ public class JsonLoader : IJsonLoader
     private long bendcnt { get; set; }
     private long charcnt { get; set; }
     private ICustomLogger logger;
+    
+    private string clickedElementPath { get; set; }
+    private string clickedElementParentPath { get; set; }
+    private DRect clickedElementRect { get; set; }
+    private DRect clickedElementParentRect { get; set; }
+    private IViewportDimensionService viewportDimensionService { get; set; }
+
+    public JsonLoader()
+    {
+        viewportDimensionService = ServiceManager.GetViewportDimensionService();
+    }
 
     public async Task OpenJson(Stream netlist)
     {
@@ -48,6 +60,24 @@ public class JsonLoader : IJsonLoader
         FrontendViewModel mw)
     {
         await loadingDone();
+
+        clickedElementPath = viewportDimensionService.GetClickedElementPath();
+
+        if (clickedElementPath == null)
+        {
+            clickedElementPath = string.Empty;
+        }
+        
+        var clickedElementPathSplit = clickedElementPath.Split(' ');
+
+        if (clickedElementPathSplit.Length < 2)
+        {
+            clickedElementParentPath = string.Empty;
+        }
+        else
+        {
+            clickedElementParentPath = string.Join(" ", clickedElementPathSplit, 0, clickedElementPathSplit.Length - 2);
+        }
         
         logger.Log("Start loading elements");
         logger.Log("====");
@@ -66,6 +96,23 @@ public class JsonLoader : IJsonLoader
         List<NetlistElement> items = new List<NetlistElement>();
 
         createNode(rootnode, items, xRef, yRef, 0);
+        
+        // check for clicked elements
+        // TODO was anything clicked????
+        if (items.Count > viewportDimensionService.getCurrentElementCount())
+        {
+            // expansion
+            
+            viewportDimensionService.SetZoomElementDimensions(clickedElementRect);
+        }
+        else
+        {
+            // collapse
+            
+            viewportDimensionService.SetZoomElementDimensions(clickedElementParentRect);
+        }
+        
+        viewportDimensionService.SetCurrentElementCount(items.Count);
         
         logger.Log("====");
         logger.Log("All elements loaded");
@@ -86,6 +133,8 @@ public class JsonLoader : IJsonLoader
         logger.Log("Number of junctions: " + junctioncnt);
         logger.Log("Number of labels: " + labelcnt);
         logger.Log("Average number of characters per label: " + ((float)charcnt / (float)labelcnt));
+        
+        
 
         mw.UpdateScaleImpl();
 
@@ -151,6 +200,21 @@ public class JsonLoader : IJsonLoader
         if (layoutOptions.AsObject().ContainsKey("src-location"))
         {
             src = layoutOptions["src-location"].GetValue<string>();
+        }
+
+        if (path != string.Empty)
+        {
+            if (path == clickedElementPath)
+            {
+                clickedElementRect = new DRect(xRef + x, yRef + y, nWidth, nHeight, depth, null);
+            }
+            else if (path == clickedElementParentPath)
+            {
+                clickedElementParentRect = new DRect(xRef + x, yRef + y, nWidth, nHeight, depth, null);
+            }
+        } else if (clickedElementPath.Length > 0 && clickedElementParentPath == string.Empty && depth == 1)
+        {
+            clickedElementParentRect = new DRect(xRef + x, yRef + y, nWidth, nHeight, depth, null);
         }
 
         if (xRef + x + nWidth > maxWidth)

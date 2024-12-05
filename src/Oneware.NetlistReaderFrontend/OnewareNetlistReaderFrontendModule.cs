@@ -24,8 +24,8 @@ public class OnewareNetlistReaderFrontendModule : IModule
     public void RegisterTypes(IContainerRegistry containerRegistry)
     {
         containerRegistry.RegisterSingleton<IFileOpener, FileOpener>();
-        containerRegistry.RegisterSingleton<IJsonLoader, JsonLoader>();
         containerRegistry.RegisterSingleton<IViewportDimensionService, ViewportDimensionService>();
+        containerRegistry.RegisterSingleton<IJsonLoader, JsonLoader>();
         containerRegistry.RegisterSingleton<ICustomLogger, CustomLogger>();
         containerRegistry.RegisterSingleton<IHashService, OAATHashService>();
         containerRegistry.RegisterSingleton<IGhdlService, GhdlService>();

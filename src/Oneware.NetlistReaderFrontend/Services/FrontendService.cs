@@ -188,6 +188,8 @@ public class FrontendService
         ServiceManager.GetCustomLogger().Log("Path hash: " + pathHash, true);
         ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash, true);
         ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash, true);
+        
+        ServiceManager.GetViewportDimensionService().SetClickedElementPath(string.Empty);
 
         var vm = new FrontendViewModel();
         vm.InitializeContent();

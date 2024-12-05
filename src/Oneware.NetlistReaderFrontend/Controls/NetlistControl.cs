@@ -19,6 +19,8 @@ namespace Oneware.NetlistReaderFrontend.Controls;
 public class NetlistControl : TemplatedControl
 {
     private static readonly FontFamily font = (Application.Current!.FindResource("MartianMono") as FontFamily)!;
+    
+    private static IViewportDimensionService _viewportDimensionService;
 
     private static readonly Typeface typeface =
         new Typeface(font, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
@@ -26,6 +28,8 @@ public class NetlistControl : TemplatedControl
     static NetlistControl()
     {
         AffectsRender<NetlistControl>(ItemsProperty, IsEnabledProperty);
+
+        _viewportDimensionService = ServiceManager.GetViewportDimensionService();
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -64,21 +68,49 @@ public class NetlistControl : TemplatedControl
     private void ZoomToFit()
     {
         var dimensionService = ServiceManager.GetViewportDimensionService();
+        
+        DRect elementBounds = dimensionService.GetZoomElementDimensions();
 
-        double sx = this.Bounds.Width / dimensionService.GetWidth();
-        double sy = this.Bounds.Height / dimensionService.GetHeight();
-
-        if (sx < sy)
+        if (elementBounds != null)
         {
-            CurrentScale = sx;
+            double sx = this.Bounds.Width / elementBounds.Width;
+            double sy = this.Bounds.Height / elementBounds.Height;
+            
+            if (sx < sy)
+            {
+                CurrentScale = sx;
+                
+                OffsetX = elementBounds.X * -CurrentScale;
+                OffsetY = (elementBounds.Y) * -CurrentScale;
+            }
+            else
+            {
+                CurrentScale = sy;
+                
+                OffsetX = (elementBounds.X) * -CurrentScale;
+                OffsetY = elementBounds.Y * -CurrentScale;
+            }
+            
+            dimensionService.SetZoomElementDimensions(null);
         }
         else
         {
-            CurrentScale = sy;
-        }
 
-        OffsetX = 0;
-        OffsetY = 0;
+            double sx = this.Bounds.Width / dimensionService.GetWidth();
+            double sy = this.Bounds.Height / dimensionService.GetHeight();
+
+            if (sx < sy)
+            {
+                CurrentScale = sx;
+            }
+            else
+            {
+                CurrentScale = sy;
+            }
+
+            OffsetX = 0;
+            OffsetY = 0;
+        }
     }
 
     public void Redraw()
@@ -993,6 +1025,8 @@ public class NetlistControl : TemplatedControl
                 {
                     ClickedElementPath = hn.Path;
                 }
+                
+                _viewportDimensionService.SetClickedElementPath(hn.Path);
 
                 ElementClicked?.Invoke(this, new ElementClickedEventArgs(hn.Path));
             }
