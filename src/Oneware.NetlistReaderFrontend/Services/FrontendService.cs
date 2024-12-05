@@ -102,8 +102,9 @@ public class FrontendService
         {
             return;
         }
-
+        
         success = await ghdlService.CrossCompileDesignAsync(vhdl);
+        
 
         if (!success)
         {
@@ -163,8 +164,6 @@ public class FrontendService
 
     public async Task ShowViewer(IProjectFile json)
     {
-        _applicationStateService.AddState("test", AppState.Loading);
-        
         HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.Add(

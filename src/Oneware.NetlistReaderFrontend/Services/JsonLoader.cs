@@ -102,7 +102,6 @@ public class JsonLoader : IJsonLoader
         if (viewportDimensionService.getCurrentElementCount() == 0)
         {
             viewportDimensionService.SetZoomElementDimensions(new DRect(0, 0, maxWidth, maxHeight, 0, null));
-            logger.Log("New netlist detected", true);
         }
         else if (items.Count > viewportDimensionService.getCurrentElementCount())
         {
