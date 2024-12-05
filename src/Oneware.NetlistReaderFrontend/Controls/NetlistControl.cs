@@ -81,13 +81,13 @@ public class NetlistControl : TemplatedControl
                 CurrentScale = sx;
                 
                 OffsetX = elementBounds.X * -CurrentScale;
-                OffsetY = (elementBounds.Y) * -CurrentScale;
+                OffsetY = ((elementBounds.Y + (elementBounds.Height / 2.0d)) * -CurrentScale) + (this.Bounds.Height / 2.0d);
             }
             else
             {
                 CurrentScale = sy;
                 
-                OffsetX = (elementBounds.X) * -CurrentScale;
+                OffsetX = ((elementBounds.X + (elementBounds.Width / 2.0d)) * -CurrentScale) + (this.Bounds.Width / 2.0d);
                 OffsetY = elementBounds.Y * -CurrentScale;
             }
             
@@ -102,14 +102,17 @@ public class NetlistControl : TemplatedControl
             if (sx < sy)
             {
                 CurrentScale = sx;
+                
+                OffsetX = 0;
+                OffsetY = ((dimensionService.GetHeight() / 2) * -CurrentScale) + (this.Bounds.Height / 2.0d);
             }
             else
             {
                 CurrentScale = sy;
+                
+                OffsetX = ((dimensionService.GetWidth() / 2) * -CurrentScale) + (this.Bounds.Width / 2.0d);
+                OffsetY = 0;
             }
-
-            OffsetX = 0;
-            OffsetY = 0;
         }
     }
 

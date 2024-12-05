@@ -76,7 +76,7 @@ public class JsonLoader : IJsonLoader
         }
         else
         {
-            clickedElementParentPath = string.Join(" ", clickedElementPathSplit, 0, clickedElementPathSplit.Length - 2);
+            clickedElementParentPath = string.Join(" ", clickedElementPathSplit, 0, clickedElementPathSplit.Length - 1);
         }
         
         logger.Log("Start loading elements");
@@ -99,7 +99,12 @@ public class JsonLoader : IJsonLoader
         
         // check for clicked elements
         // TODO was anything clicked????
-        if (items.Count > viewportDimensionService.getCurrentElementCount())
+        if (viewportDimensionService.getCurrentElementCount() == 0)
+        {
+            viewportDimensionService.SetZoomElementDimensions(new DRect(0, 0, maxWidth, maxHeight, 0, null));
+            logger.Log("New netlist detected", true);
+        }
+        else if (items.Count > viewportDimensionService.getCurrentElementCount())
         {
             // expansion
             
@@ -214,7 +219,7 @@ public class JsonLoader : IJsonLoader
             }
         } else if (clickedElementPath.Length > 0 && clickedElementParentPath == string.Empty && depth == 1)
         {
-            clickedElementParentRect = new DRect(xRef + x, yRef + y, nWidth, nHeight, depth, null);
+            clickedElementParentRect = new DRect(0, 0, maxWidth, maxHeight, depth, null);
         }
 
         if (xRef + x + nWidth > maxWidth)

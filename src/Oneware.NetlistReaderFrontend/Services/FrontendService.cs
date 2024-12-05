@@ -190,6 +190,8 @@ public class FrontendService
         ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash, true);
         
         ServiceManager.GetViewportDimensionService().SetClickedElementPath(string.Empty);
+        ServiceManager.GetViewportDimensionService().SetCurrentElementCount(0);
+        ServiceManager.GetViewportDimensionService().SetZoomElementDimensions(null);
 
         var vm = new FrontendViewModel();
         vm.InitializeContent();
