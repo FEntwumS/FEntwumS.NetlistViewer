@@ -13,6 +13,7 @@ using Avalonia.Threading;
 using Avalonia.Xaml.Interactions.Core;
 using Oneware.NetlistReaderFrontend.Services;
 using Oneware.NetlistReaderFrontend.Types;
+using Oneware.NetlistReaderFrontend.ViewModels;
 
 namespace Oneware.NetlistReaderFrontend.Controls;
 
@@ -24,6 +25,8 @@ public class NetlistControl : TemplatedControl
 
     private static readonly Typeface typeface =
         new Typeface(font, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
+    
+    private UInt64 _currentNetlistId;
 
     static NetlistControl()
     {
@@ -59,6 +62,11 @@ public class NetlistControl : TemplatedControl
         else if (change.Property == DeltaScaleProperty)
         {
             Redraw();
+        } else if (change.Property == DataContextProperty)
+        {
+            Console.WriteLine(change.Property + " - " + change.OldValue + " - " + change.NewValue);
+            Console.WriteLine(((FrontendViewModel) change.NewValue)?.NetlistId);
+            Console.WriteLine(((FrontendViewModel) change.NewValue)?.GetHashCode());
         }
 
         //Redraw();
@@ -67,6 +75,8 @@ public class NetlistControl : TemplatedControl
 
     private void ZoomToFit()
     {
+        Console.WriteLine("ZoomToFit called");
+        
         var dimensionService = ServiceManager.GetViewportDimensionService();
 
         DRect elementBounds = dimensionService.GetZoomElementDimensions(NetlistID);
@@ -97,21 +107,21 @@ public class NetlistControl : TemplatedControl
         }
         else
         {
-            double sx = this.Bounds.Width / dimensionService.GetWidth();
-            double sy = this.Bounds.Height / dimensionService.GetHeight();
+            double sx = this.Bounds.Width / dimensionService.GetMaxWidth(NetlistID);
+            double sy = this.Bounds.Height / dimensionService.GetMaxHeight(NetlistID);
 
             if (sx < sy)
             {
                 CurrentScale = sx;
 
                 OffsetX = 0;
-                OffsetY = ((dimensionService.GetHeight() / 2) * -CurrentScale) + (this.Bounds.Height / 2.0d);
+                OffsetY = ((dimensionService.GetMaxHeight(NetlistID) / 2) * -CurrentScale) + (this.Bounds.Height / 2.0d);
             }
             else
             {
                 CurrentScale = sy;
 
-                OffsetX = ((dimensionService.GetWidth() / 2) * -CurrentScale) + (this.Bounds.Width / 2.0d);
+                OffsetX = ((dimensionService.GetMaxWidth(NetlistID) / 2) * -CurrentScale) + (this.Bounds.Width / 2.0d);
                 OffsetY = 0;
             }
         }

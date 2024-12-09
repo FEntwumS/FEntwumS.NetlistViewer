@@ -118,6 +118,10 @@ public class JsonLoader : IJsonLoader
         
         viewportDimensionService.SetCurrentElementCount(netlistId, items.Count);
         
+        viewportDimensionService.SetMaxHeight(netlistId, maxHeight);
+        viewportDimensionService.SetMaxWidth(netlistId, maxWidth);
+        
+        
         logger.Log("====");
         logger.Log("All elements loaded");
         logger.Log("Statistics:");

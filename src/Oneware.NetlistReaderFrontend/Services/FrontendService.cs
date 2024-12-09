@@ -3,12 +3,14 @@ using System.IO.Compression;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
+using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using Oneware.NetlistReaderFrontend.Controls;
 using Oneware.NetlistReaderFrontend.ViewModels;
+using Oneware.NetlistReaderFrontend.Views;
 using OneWare.ProjectSystem.Models;
 using StreamContent = System.Net.Http.StreamContent;
 
@@ -199,7 +201,7 @@ public class FrontendService
         ServiceManager.GetViewportDimensionService().SetCurrentElementCount(combinedHash, 0);
         ServiceManager.GetViewportDimensionService().SetZoomElementDimensions(combinedHash, null);
 
-        var vm = new FrontendViewModel();
+        FrontendViewModel vm = new FrontendViewModel();
         vm.InitializeContent();
         vm.Title = $"Netlist: {top}";
         _logger.Log("Selected file: " + json.FullPath);

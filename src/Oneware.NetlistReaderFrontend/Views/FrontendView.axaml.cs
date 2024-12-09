@@ -1,10 +1,13 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using Dock.Model.Core;
 using Oneware.NetlistReaderFrontend.Controls;
 using Oneware.NetlistReaderFrontend.Services;
 using Oneware.NetlistReaderFrontend.Types;
 using Oneware.NetlistReaderFrontend.ViewModels;
+using ReactiveUI;
 
 namespace Oneware.NetlistReaderFrontend.Views;
 
@@ -24,8 +27,39 @@ public partial class FrontendView : UserControl
         {
             Initialize(vm);
         }
+
+        DataContextChanged += OnDataContextChanged;
         
         ServiceManager.GetCustomLogger().Log($"FrontendView Initialized", true);
+        ServiceManager.GetCustomLogger().Log($"DataContext: {DataContext}", true);
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == DataContextProperty)
+        {
+            ServiceManager.GetCustomLogger().Log(e.Property + " - " + e.OldValue + " - " + e.NewValue, true);
+
+
+            if (_vm == null)
+            {
+                _vm = e.NewValue as FrontendViewModel;
+            }
+        }
+        
+        base.OnPropertyChanged(e);
+    }
+
+    private void OnDataContextChanged(object? sender, EventArgs e)
+    {
+        if (IsInitialized)
+        {
+            _vm = DataContext as FrontendViewModel;
+        }
+        else
+        {
+            Initialized += delegate { OnDataContextChanged(sender, e); };
+        }
     }
 
     // move netlist
@@ -92,6 +126,11 @@ public partial class FrontendView : UserControl
 
     private void Initialize(FrontendViewModel vm)
     {
+        ServiceManager.GetCustomLogger().Log($"New Frontend: {_vm == vm}", true);
+        ServiceManager.GetCustomLogger().Log($"New NetlistID: {vm.NetlistId}", true);
+        ServiceManager.GetCustomLogger().Log($"Old NetlistID: {_vm?.NetlistId}", true);
+        
+        
         _vm = vm;
     }
 

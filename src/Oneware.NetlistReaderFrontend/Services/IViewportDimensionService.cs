@@ -18,4 +18,9 @@ public interface IViewportDimensionService
     
     public int getCurrentElementCount(UInt64 netlistId);
     public void SetCurrentElementCount(UInt64 netlistId, int CurrentElementCount);
+    
+    public void SetMaxHeight(UInt64 netlistId, Double MaxHeight);
+    public double GetMaxHeight(UInt64 netlistId);
+    public void SetMaxWidth(UInt64 netlistId, Double MaxWidth);
+    public double GetMaxWidth(UInt64 netlistId);
 }

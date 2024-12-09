@@ -79,4 +79,24 @@ public class ViewportDimensionService : IViewportDimensionService
             specificData[netlistId] = new ViewportInformation{ CurrentElementCount = CurrentElementCount };
         }
     }
+
+    public void SetMaxHeight(UInt64 netlistId, double MaxHeight)
+    {
+        specificData[netlistId].MaxHeight = MaxHeight;
+    }
+
+    public double GetMaxHeight(UInt64 netlistId)
+    {
+        return specificData[netlistId].MaxHeight;
+    }
+
+    public void SetMaxWidth(UInt64 netlistId, double MaxWidth)
+    {
+        specificData[netlistId].MaxHeight = MaxWidth;
+    }
+
+    public double GetMaxWidth(UInt64 netlistId)
+    {
+        return specificData[netlistId].MaxHeight;
+    }
 }
