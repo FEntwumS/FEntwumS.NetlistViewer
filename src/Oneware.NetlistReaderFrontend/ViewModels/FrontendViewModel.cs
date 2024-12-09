@@ -196,19 +196,8 @@ public class FrontendViewModel : ExtendedTool
 
     public async Task UpdateScaleImpl()
     {
-        var jsonLoader = ServiceManager.GetJsonLoader();
-        var dimensionService = ServiceManager.GetViewportDimensionService();
-
-        dimensionService.SetHeight(jsonLoader.GetMaxHeight());
-        dimensionService.SetWidth(jsonLoader.GetMaxWidth());
-
         IsLoaded = !IsLoaded;
         FitToZoom = !FitToZoom;
-
-        Scale = 0.2;
-
-        OffX = 0;
-        OffY = 0;
     }
 
     public async Task OpenFileImpl()

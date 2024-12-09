@@ -141,6 +141,8 @@ public class JsonLoader : IJsonLoader
         logger.Log("Number of junctions: " + junctioncnt);
         logger.Log("Number of labels: " + labelcnt);
         logger.Log("Average number of characters per label: " + ((float)charcnt / (float)labelcnt));
+        logger.Log("Max width: " + maxWidth);
+        logger.Log("Max height: " + maxHeight);
         
         
 

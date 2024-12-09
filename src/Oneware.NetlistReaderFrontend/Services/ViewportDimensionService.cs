@@ -92,11 +92,11 @@ public class ViewportDimensionService : IViewportDimensionService
 
     public void SetMaxWidth(UInt64 netlistId, double MaxWidth)
     {
-        specificData[netlistId].MaxHeight = MaxWidth;
+        specificData[netlistId].MaxWidth = MaxWidth;
     }
 
     public double GetMaxWidth(UInt64 netlistId)
     {
-        return specificData[netlistId].MaxHeight;
+        return specificData[netlistId].MaxWidth;
     }
 }
