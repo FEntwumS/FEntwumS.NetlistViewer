@@ -138,4 +138,14 @@ public partial class FrontendView : UserControl
     {
         ServiceManager.GetCustomLogger().Log(e.NodePath, true);
     }
+
+    private void Button_OnClick(object? sender, RoutedEventArgs e)
+    {
+        NetlistControl netlistControl = this.Find<NetlistControl>("NetlistView");
+
+        if (netlistControl != null)
+        {
+            netlistControl.ZoomToFit();
+        }
+    }
 }

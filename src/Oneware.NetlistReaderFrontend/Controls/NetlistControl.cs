@@ -73,7 +73,7 @@ public class NetlistControl : TemplatedControl
         base.OnPropertyChanged(change);
     }
 
-    private void ZoomToFit()
+    public void ZoomToFit()
     {
         Console.WriteLine("ZoomToFit called");
         

@@ -35,7 +35,7 @@
                             <TextBlock Text="Load JSON file"></TextBlock>
                         </StackPanel>
                     </Button>
-                    <Button Command="{Binding FitToZoomCommand}">Zoom to fit</Button>
+                    <Button Click="Button_OnClick" Command="{Binding FitToZoomCommand}">Zoom to fit</Button>
                 </StackPanel>
             </Border>
 
@@ -51,7 +51,8 @@
                                      Tapped="NetlistControl_OnTapped"
                                      PropertyChanged="NetlistControl_OnPropertyChanged" FitToZoom="{Binding FitToZoom}"
                                      IsLoaded="{Binding IsLoaded}" ElementClicked="NetlistControl_OnElementClicked"
-                                     ClickedElementPath="{Binding ClickedElementPath}" NetlistID="{Binding NetlistId}">
+                                     ClickedElementPath="{Binding ClickedElementPath}" NetlistID="{Binding NetlistId}"
+                                     x:Name="NetlistView">
             </controls:NetlistControl>
         </DockPanel>
     </Panel>

@@ -197,7 +197,7 @@ public class FrontendViewModel : ExtendedTool
     public async Task UpdateScaleImpl()
     {
         IsLoaded = !IsLoaded;
-        FitToZoom = !FitToZoom;
+        // FitToZoom = !FitToZoom;
     }
 
     public async Task OpenFileImpl()
