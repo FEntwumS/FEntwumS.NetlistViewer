@@ -12,6 +12,7 @@ using Oneware.NetlistReaderFrontend.Controls;
 using Oneware.NetlistReaderFrontend.ViewModels;
 using Oneware.NetlistReaderFrontend.Views;
 using OneWare.ProjectSystem.Models;
+using Prism.Services.Dialogs;
 using StreamContent = System.Net.Http.StreamContent;
 
 namespace Oneware.NetlistReaderFrontend.Services;
@@ -233,8 +234,22 @@ public class FrontendService
         }
         catch (HttpRequestException e)
         {
-            _logger.Error(
-                "Due to an internal error, the server could not complete the request. Please file a bug report");
+            switch (e.HttpRequestError)
+            {
+                case HttpRequestError.NameResolutionError:
+                    _logger.Error($"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address");
+                    break;
+                
+                case HttpRequestError.ConnectionError:
+                    _logger.Error($"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address");
+                    break;
+                
+                default:
+                    _logger.Error(
+                        "Due to an internal error, the server could not complete the request. Please file a bug report");
+                    break;
+            }
+            
             return;
         }
         catch (TaskCanceledException e)
