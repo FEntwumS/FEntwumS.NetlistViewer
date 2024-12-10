@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -222,8 +223,10 @@ public class FrontendService
             }
             else
             {
-                vm.File = await client.GetStreamAsync("/graphLocalFile?filename=" + json.FullPath + "&hash=" +
-                                                      combinedHash);
+                var resp = await client.PostAsync("/graphLocalFile?filename=" + json.FullPath + "&hash=" +
+                                                 combinedHash, null);
+                
+                vm.File = await resp.Content.ReadAsStreamAsync();
             }
         }
         catch (InvalidOperationException e)
@@ -283,7 +286,23 @@ public class FrontendService
         
         _logger.Log("Sending request to ExpandNode", true);
         
-        vm.File = await client.GetStreamAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath);
+        var resp = await client.PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath, null);
+        
+        // vm.File = await client.GetStreamAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath);
+
+        if (!resp.IsSuccessStatusCode)
+        {
+            if (resp.StatusCode == HttpStatusCode.NotFound)
+            {
+                _logger.Error("The requested resource could not be found on the server. This could be due to a server restart. Please Re-Open your netlist.");
+            }
+            else
+            {
+                _logger.Error("An internal server error occured. Please file a bug report if this problem persists.");
+            }
+        }
+        
+        vm.File = await resp.Content.ReadAsStreamAsync();
         
         _logger.Log("Answer received", true);
         

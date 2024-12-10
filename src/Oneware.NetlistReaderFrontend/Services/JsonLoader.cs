@@ -146,7 +146,7 @@ public class JsonLoader : IJsonLoader
         
         
 
-        mw.UpdateScaleImpl();
+        //mw.UpdateScaleImpl();
 
         return items;
     }

@@ -199,7 +199,6 @@ public class FrontendViewModel : ExtendedTool
 
     public async Task OpenFileImpl()
     {
-        var fileOpener = ServiceManager.GetFileOpener();
         var jsonLoader = ServiceManager.GetJsonLoader();
 
         await Task.Run(() =>
@@ -226,6 +225,8 @@ public class FrontendViewModel : ExtendedTool
                 Items.Clear();
 
                 Items.AddRange(jsonLoader.parseJson(0, 0, this, netlistId).Result);
+
+                UpdateScaleImpl();
 
                 _logger.Log("JSON read", true);
             }

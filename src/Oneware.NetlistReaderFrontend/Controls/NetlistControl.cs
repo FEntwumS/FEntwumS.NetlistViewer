@@ -375,6 +375,12 @@ public class NetlistControl : TemplatedControl
 
     public override void Render(DrawingContext context)
     {
+        // Skip if there is nothing to see
+        if (!IsInitialized)
+        {
+            return;
+        }
+        
         double x = 0, y = 0, width = 0, height = 0, radius = 0, edgeLength = 0;
         List<Point> points;
 
@@ -1045,6 +1051,8 @@ public class NetlistControl : TemplatedControl
             if (he != null)
             {
                 CurrentElement = he;
+                
+                Redraw();
             }
             else if (hj != null)
             {
@@ -1077,7 +1085,5 @@ public class NetlistControl : TemplatedControl
                 ElementClicked?.Invoke(this, new ElementClickedEventArgs(hn.Path));
             }
         }
-
-        Redraw();
     }
 }
