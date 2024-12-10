@@ -107,9 +107,9 @@ public class FrontendService
         {
             return;
         }
-        
+
         success = await ghdlService.CrossCompileDesignAsync(vhdl);
-        
+
 
         if (!success)
         {
@@ -139,7 +139,7 @@ public class FrontendService
     public async Task CreateVerilogNetlist(IProjectFile verilog)
     {
         string top = Path.GetFileNameWithoutExtension(verilog.FullPath);
-        
+
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
 
         await yosysService.LoadVerilogAsync(verilog);
@@ -160,7 +160,7 @@ public class FrontendService
     public async Task CreateSystemVerilogNetlist(IProjectFile sVerilog)
     {
         string top = Path.GetFileNameWithoutExtension(sVerilog.FullPath);
-        
+
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
 
         await yosysService.LoadSystemVerilogAsync(sVerilog);
@@ -174,14 +174,6 @@ public class FrontendService
     public async Task ShowViewer(IProjectFile json)
     {
         string top = Path.GetFileNameWithoutExtension(json.FullPath);
-        
-        HttpClient client = new();
-        client.DefaultRequestHeaders.Accept.Clear();
-        client.DefaultRequestHeaders.Accept.Add(
-            new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
-        client.DefaultRequestHeaders.Add("User-Agent", "Oneware.NetlistReaderFrontend");
-        client.BaseAddress = new Uri($"http://{_backendAddress}:{_backendPort}");
-        client.Timeout = TimeSpan.FromSeconds(_requestTimeout);
 
         string content = await File.ReadAllTextAsync(json.FullPath);
 
@@ -192,13 +184,13 @@ public class FrontendService
         UInt32 contenthash = hashService.ComputeHash(contentByteSpan);
 
         UInt64 combinedHash = ((UInt64)pathHash) << 32 | contenthash;
-        
+
         currentNetlist = combinedHash;
 
         ServiceManager.GetCustomLogger().Log("Path hash: " + pathHash, true);
         ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash, true);
         ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash, true);
-        
+
         ServiceManager.GetViewportDimensionService().SetClickedElementPath(combinedHash, string.Empty);
         ServiceManager.GetViewportDimensionService().SetCurrentElementCount(combinedHash, 0);
         ServiceManager.GetViewportDimensionService().SetZoomElementDimensions(combinedHash, null);
@@ -208,64 +200,23 @@ public class FrontendService
         vm.Title = $"Netlist: {top}";
         _logger.Log("Selected file: " + json.FullPath);
 
-        try
+        if (_useRemoteBackend)
         {
-            if (_useRemoteBackend)
+            MultipartFormDataContent formDataContent = new MultipartFormDataContent()
             {
-                MultipartFormDataContent formDataContent = new MultipartFormDataContent()
-                {
-                    { new StreamContent(File.Open(json.FullPath, FileMode.Open, FileAccess.Read)), "file", json.Name }
-                };
+                { new StreamContent(File.Open(json.FullPath, FileMode.Open, FileAccess.Read)), "file", json.Name }
+            };
 
-                var resp = await client.PostAsync("/graphRemoteFile?hash=" + combinedHash, formDataContent);
+            var resp = await PostAsync("/graphRemoteFile?hash=" + combinedHash, formDataContent);
 
-                vm.File = await resp.Content.ReadAsStreamAsync();
-            }
-            else
-            {
-                var resp = await client.PostAsync("/graphLocalFile?filename=" + json.FullPath + "&hash=" +
-                                                 combinedHash, null);
-                
-                vm.File = await resp.Content.ReadAsStreamAsync();
-            }
+            vm.File = await resp.Content.ReadAsStreamAsync();
         }
-        catch (InvalidOperationException e)
+        else
         {
-            _logger.Error(
-                $"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address");
-            return;
-        }
-        catch (HttpRequestException e)
-        {
-            switch (e.HttpRequestError)
-            {
-                case HttpRequestError.NameResolutionError:
-                    _logger.Error($"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address");
-                    break;
-                
-                case HttpRequestError.ConnectionError:
-                    _logger.Error($"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address");
-                    break;
-                
-                default:
-                    _logger.Error(
-                        "Due to an internal error, the server could not complete the request. Please file a bug report");
-                    break;
-            }
-            
-            return;
-        }
-        catch (TaskCanceledException e)
-        {
-            _logger.Error(
-                "The request has timed out. Please increase the request timeout time in the settings menu and try again");
-            return;
-        }
-        catch (UriFormatException e)
-        {
-            _logger.Error(
-                $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address");
-            return;
+            var resp = await PostAsync("/graphLocalFile?filename=" + json.FullPath + "&hash=" +
+                                       combinedHash, null);
+
+            vm.File = await resp.Content.ReadAsStreamAsync();
         }
 
         _dockService.Show(vm, DockShowLocation.Document);
@@ -276,38 +227,16 @@ public class FrontendService
 
     public async Task ExpandNode(string nodePath, NetlistControl control, FrontendViewModel vm)
     {
-        HttpClient client = new();
-        client.DefaultRequestHeaders.Accept.Clear();
-        client.DefaultRequestHeaders.Accept.Add(
-            new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
-        client.DefaultRequestHeaders.Add("User-Agent", "Oneware.NetlistReaderFrontend");
-        client.BaseAddress = new Uri($"http://{_backendAddress}:{_backendPort}");
-        client.Timeout = TimeSpan.FromSeconds(_requestTimeout);
-        
         _logger.Log("Sending request to ExpandNode", true);
-        
-        var resp = await client.PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath, null);
-        
-        // vm.File = await client.GetStreamAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath);
 
-        if (!resp.IsSuccessStatusCode)
-        {
-            if (resp.StatusCode == HttpStatusCode.NotFound)
-            {
-                _logger.Error("The requested resource could not be found on the server. This could be due to a server restart. Please Re-Open your netlist.");
-            }
-            else
-            {
-                _logger.Error("An internal server error occured. Please file a bug report if this problem persists.");
-            }
-        }
-        
+        var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath, null);
+
         vm.File = await resp.Content.ReadAsStreamAsync();
-        
+
         _logger.Log("Answer received", true);
-        
+
         await vm.OpenFileImpl();
-        
+
         _logger.Log("Done", true);
     }
 
@@ -335,6 +264,77 @@ public class FrontendService
             _logger.Error(e.Message, false);
 
             return false;
+        }
+    }
+
+    private async Task<HttpResponseMessage> PostAsync(string URI, HttpContent? content)
+    {
+        HttpClient client = new();
+        client.DefaultRequestHeaders.Accept.Clear();
+        client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
+        client.DefaultRequestHeaders.Add("User-Agent", "Oneware.NetlistReaderFrontend");
+        client.BaseAddress = new Uri($"http://{_backendAddress}:{_backendPort}");
+        client.Timeout = TimeSpan.FromSeconds(_requestTimeout);
+
+        try
+        {
+            var resp = await client.PostAsync(URI, content);
+            
+            if (!resp.IsSuccessStatusCode)
+            {
+                if (resp.StatusCode == HttpStatusCode.NotFound)
+                {
+                    _logger.Error(
+                        "The requested resource could not be found on the server. This could be due to a server restart. Please Re-Open your netlist.");
+                }
+                else
+                {
+                    _logger.Error("An internal server error occured. Please file a bug report if this problem persists.");
+                }
+            }
+            
+            return resp;
+        }
+        catch (InvalidOperationException e)
+        {
+            _logger.Error(
+                $"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address");
+            return null;
+        }
+        catch (HttpRequestException e)
+        {
+            switch (e.HttpRequestError)
+            {
+                case HttpRequestError.NameResolutionError:
+                    _logger.Error(
+                        $"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address");
+                    break;
+
+                case HttpRequestError.ConnectionError:
+                    _logger.Error(
+                        $"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address");
+                    break;
+
+                default:
+                    _logger.Error(
+                        "Due to an internal error, the server could not complete the request. Please file a bug report");
+                    break;
+            }
+
+            return null;
+        }
+        catch (TaskCanceledException e)
+        {
+            _logger.Error(
+                "The request has timed out. Please increase the request timeout time in the settings menu and try again");
+            return null;
+        }
+        catch (UriFormatException e)
+        {
+            _logger.Error(
+                $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address");
+            return null;
         }
     }
 }

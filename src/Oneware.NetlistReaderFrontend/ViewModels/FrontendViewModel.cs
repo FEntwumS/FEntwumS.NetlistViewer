@@ -188,7 +188,6 @@ public class FrontendViewModel : ExtendedTool
     public async Task ClickedElementPathChanged()
     {
         await _frontendService.ExpandNode(clickedElementPath, null, this);
-        // FitToZoom = !FitToZoom;
     }
 
     public async Task UpdateScaleImpl()
