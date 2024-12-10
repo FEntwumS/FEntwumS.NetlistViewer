@@ -7,6 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Logging;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -43,21 +44,26 @@ public class NetlistControl : TemplatedControl
         {
             return;
         }
+        
+        Initialized += (_, __) => ServiceManager.GetCustomLogger().Log("Control initialized: " + IsInitialized);
 
         Console.WriteLine(change.Property);
 
         if (change.Property == IsLoadedProperty)
         {
-            CurrentScale = 0.2;
+            // CurrentScale = 0.2;
 
-            OffsetX = 0;
-            OffsetY = 0;
+            // OffsetX = 0;
+            // OffsetY = 0;
             Redraw();
         }
         else if (change.Property == FitToZoomProperty)
         {
-            ZoomToFit();
-            Redraw();
+            if (IsInitialized)
+            {
+                ZoomToFit();
+                Redraw();
+            }
         }
         else if (change.Property == DeltaScaleProperty)
         {
@@ -67,6 +73,20 @@ public class NetlistControl : TemplatedControl
             Console.WriteLine(change.Property + " - " + change.OldValue + " - " + change.NewValue);
             Console.WriteLine(((FrontendViewModel) change.NewValue)?.NetlistId);
             Console.WriteLine(((FrontendViewModel) change.NewValue)?.GetHashCode());
+        } else if (change.Property == NetlistIDProperty)
+        {
+            Console.WriteLine("New netlistid");
+            
+            Redraw();
+            
+        } else if (change.Property == BoundsProperty)
+        {
+            Redraw();
+        }
+
+        if (IsInitialized && CurrentScale == 0)
+        {
+            CurrentScale = 0.2;
         }
 
         //Redraw();
@@ -344,7 +364,7 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<UInt64> NetlistIDProperty =
-        AvaloniaProperty.Register<NetlistControl, UInt64>(nameof(NetlistID), defaultBindingMode: BindingMode.TwoWay);
+        AvaloniaProperty.Register<NetlistControl, UInt64>(nameof(NetlistID));
 
     public event ElementClickedEventHandler ElementClicked;
     private List<DRect> renderedNodeList = new List<DRect>();

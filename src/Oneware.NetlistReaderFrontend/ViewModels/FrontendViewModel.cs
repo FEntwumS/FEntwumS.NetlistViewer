@@ -170,11 +170,8 @@ public class FrontendViewModel : ExtendedTool
     {
         items = new AvaloniaList<NetlistElement>();
         Items = new AvaloniaList<NetlistElement>();
-
-        Scale = 0.2;
-
-        OffX = 0;
-        OffY = 0;
+        
+        
         FitToZoom = false;
 
         _logger = ServiceManager.GetCustomLogger();
