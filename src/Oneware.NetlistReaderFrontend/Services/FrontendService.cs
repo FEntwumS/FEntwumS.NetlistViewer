@@ -187,9 +187,9 @@ public class FrontendService
 
         currentNetlist = combinedHash;
 
-        ServiceManager.GetCustomLogger().Log("Path hash: " + pathHash, true);
-        ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash, true);
-        ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash, true);
+        ServiceManager.GetCustomLogger().Log("Path hash: " + pathHash);
+        ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash);
+        ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash);
 
         ServiceManager.GetViewportDimensionService().SetClickedElementPath(combinedHash, string.Empty);
         ServiceManager.GetViewportDimensionService().SetCurrentElementCount(combinedHash, 0);
