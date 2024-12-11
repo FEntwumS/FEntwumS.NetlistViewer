@@ -83,7 +83,6 @@ public partial class FrontendView : UserControl
 
         NetlistControlElem.DeltaX += dx;
         NetlistControlElem.DeltaY += dy;
-        NetlistControlElem.DeltaScale = 0;
     }
 
     // change zoom

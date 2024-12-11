@@ -208,6 +208,11 @@ public class FrontendService
             };
 
             var resp = await PostAsync("/graphRemoteFile?hash=" + combinedHash, formDataContent);
+            
+            if (resp == null)
+            {
+                return;
+            }
 
             vm.File = await resp.Content.ReadAsStreamAsync();
         }
@@ -215,6 +220,11 @@ public class FrontendService
         {
             var resp = await PostAsync("/graphLocalFile?filename=" + json.FullPath + "&hash=" +
                                        combinedHash, null);
+            
+            if (resp == null)
+            {
+                return;
+            }
 
             vm.File = await resp.Content.ReadAsStreamAsync();
         }
@@ -230,6 +240,11 @@ public class FrontendService
         _logger.Log("Sending request to ExpandNode", true);
 
         var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath, null);
+
+        if (resp == null)
+        {
+            return;
+        }
 
         vm.File = await resp.Content.ReadAsStreamAsync();
 
@@ -267,7 +282,7 @@ public class FrontendService
         }
     }
 
-    private async Task<HttpResponseMessage> PostAsync(string URI, HttpContent? content)
+    private async Task<HttpResponseMessage?> PostAsync(string URI, HttpContent? content)
     {
         HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear();

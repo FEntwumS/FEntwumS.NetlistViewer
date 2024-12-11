@@ -255,6 +255,7 @@ public class NetlistControl : TemplatedControl
 
     public static readonly StyledProperty<double> DeltaScaleProperty =
         AvaloniaProperty.Register<NetlistControl, double>(nameof(DeltaScale), defaultBindingMode: BindingMode.TwoWay);
+    private double currentDeltaScale = 0;
 
     public double PointerX
     {
@@ -438,23 +439,18 @@ public class NetlistControl : TemplatedControl
         bool previousPointInBounds, currentPointInBounds;
         bool drawLine;
 
-        double deltaX = DeltaX, deltaY = DeltaY, deltaScale = DeltaScale, step = -0.9d;
+        double deltaX = DeltaX, deltaY = DeltaY, deltaScale = DeltaScale - currentDeltaScale, step = -0.9d;
 
         // Apply offset from user interaction
         OffsetX += deltaX;
         OffsetY += deltaY;
+        
+        DeltaX -= deltaX;
+        DeltaY -= deltaY;
+        currentDeltaScale += deltaScale;
 
         if (deltaScale != 0)
         {
-            if (deltaScale > 2)
-            {
-                deltaScale = 2;
-            }
-            else if (deltaScale < -2)
-            {
-                deltaScale = -2;
-            }
-
             if (deltaScale > 0)
             {
                 step = (-1) / step;
@@ -680,9 +676,7 @@ public class NetlistControl : TemplatedControl
             }
         }
 
-        DeltaX -= deltaX;
-        DeltaY -= deltaY;
-        DeltaScale -= deltaScale;
+        
     }
 
     #region IntersectionTests
