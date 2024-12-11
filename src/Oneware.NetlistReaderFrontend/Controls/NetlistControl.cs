@@ -20,6 +20,8 @@ namespace Oneware.NetlistReaderFrontend.Controls;
 
 public class NetlistControl : TemplatedControl
 {
+    #region Properties
+
     public static readonly DirectProperty<NetlistControl, IEnumerable> ItemsProperty =
         AvaloniaProperty.RegisterDirect<NetlistControl, IEnumerable>(
             nameof(Items),
@@ -80,7 +82,8 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<ICommand> OnClickCommandProperty =
-        AvaloniaProperty.Register<NetlistControl, ICommand>(nameof(OnClickCommand), defaultBindingMode: BindingMode.TwoWay);
+        AvaloniaProperty.Register<NetlistControl, ICommand>(nameof(OnClickCommand),
+            defaultBindingMode: BindingMode.TwoWay);
 
     public ICommand OnClickCommand
     {
@@ -123,6 +126,7 @@ public class NetlistControl : TemplatedControl
 
     public static readonly StyledProperty<double> DeltaScaleProperty =
         AvaloniaProperty.Register<NetlistControl, double>(nameof(DeltaScale), defaultBindingMode: BindingMode.TwoWay);
+
     private double currentDeltaScale = 0;
 
     public double PointerX
@@ -150,7 +154,8 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> PortScaleClipProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(PortScaleClip), defaultBindingMode: BindingMode.TwoWay);
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(PortScaleClip),
+            defaultBindingMode: BindingMode.TwoWay);
 
     public double NodeScaleClip
     {
@@ -159,7 +164,8 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> NodeScaleClipProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(NodeScaleClip), defaultBindingMode: BindingMode.TwoWay);
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(NodeScaleClip),
+            defaultBindingMode: BindingMode.TwoWay);
 
     public double LabelScaleClip
     {
@@ -168,7 +174,8 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> LabelScaleClipProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(LabelScaleClip), defaultBindingMode: BindingMode.TwoWay);
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(LabelScaleClip),
+            defaultBindingMode: BindingMode.TwoWay);
 
     public double EdgeLengthScaleClip
     {
@@ -177,7 +184,8 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> EdgeLengthScaleClipProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(EdgeLengthScaleClip), defaultBindingMode: BindingMode.TwoWay);
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(EdgeLengthScaleClip),
+            defaultBindingMode: BindingMode.TwoWay);
 
     public double JunctionScaleClip
     {
@@ -186,7 +194,8 @@ public class NetlistControl : TemplatedControl
     }
 
     public static readonly StyledProperty<double> JunctionScaleClipProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(JunctionScaleClip), defaultBindingMode: BindingMode.TwoWay);
+        AvaloniaProperty.Register<NetlistControl, double>(nameof(JunctionScaleClip),
+            defaultBindingMode: BindingMode.TwoWay);
 
     public bool FitToZoom
     {
@@ -235,6 +244,8 @@ public class NetlistControl : TemplatedControl
     public static readonly StyledProperty<UInt64> NetlistIDProperty =
         AvaloniaProperty.Register<NetlistControl, UInt64>(nameof(NetlistID));
 
+    #endregion
+
     public event ElementClickedEventHandler ElementClicked;
     private List<DRect> renderedNodeList = new List<DRect>();
     private List<DRect> renderedLabelList = new List<DRect>();
@@ -243,10 +254,12 @@ public class NetlistControl : TemplatedControl
     private List<DLine> renderedEdgeList = new List<DLine>();
     private static readonly FontFamily font = (Application.Current!.FindResource("MartianMono") as FontFamily)!;
     private static IViewportDimensionService _viewportDimensionService;
+
     private static readonly Typeface typeface =
         new Typeface(font, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
+
     private UInt64 _currentNetlistId;
-    
+
     static NetlistControl()
     {
         AffectsRender<NetlistControl>(ItemsProperty, IsEnabledProperty);
@@ -263,30 +276,29 @@ public class NetlistControl : TemplatedControl
             return;
         }
 
+        if (!IsInitialized)
+        {
+            return;
+        }
+
         if (change.Property == IsLoadedProperty)
         {
-            // CurrentScale = 0.2;
-
-            // OffsetX = 0;
-            // OffsetY = 0;
             Redraw();
         }
         else if (change.Property == FitToZoomProperty)
         {
-            if (IsInitialized)
-            {
-                ZoomToFit();
-                Redraw();
-            }
+            ZoomToFit();
+            Redraw();
         }
         else if (change.Property == DeltaScaleProperty)
         {
             Redraw();
-        } else if (change.Property == NetlistIDProperty)
+        }
+        else if (change.Property == NetlistIDProperty)
         {
             Redraw();
-            
-        } else if (change.Property == BoundsProperty)
+        }
+        else if (change.Property == BoundsProperty)
         {
             Redraw();
         }
@@ -340,7 +352,8 @@ public class NetlistControl : TemplatedControl
                 CurrentScale = sx;
 
                 OffsetX = 0;
-                OffsetY = ((dimensionService.GetMaxHeight(NetlistID) / 2) * -CurrentScale) + (this.Bounds.Height / 2.0d);
+                OffsetY = ((dimensionService.GetMaxHeight(NetlistID) / 2) * -CurrentScale) +
+                          (this.Bounds.Height / 2.0d);
             }
             else
             {
@@ -364,7 +377,7 @@ public class NetlistControl : TemplatedControl
         {
             return;
         }
-        
+
         double x = 0, y = 0, width = 0, height = 0, radius = 0, edgeLength = 0;
         List<Point> points;
 
@@ -427,7 +440,7 @@ public class NetlistControl : TemplatedControl
         // Apply offset from user interaction
         OffsetX += deltaX;
         OffsetY += deltaY;
-        
+
         DeltaX -= deltaX;
         DeltaY -= deltaY;
         currentDeltaScale += deltaScale;
@@ -658,8 +671,6 @@ public class NetlistControl : TemplatedControl
                     continue;
             }
         }
-
-        
     }
 
     #region IntersectionTests
@@ -935,6 +946,8 @@ public class NetlistControl : TemplatedControl
 
     #endregion
 
+    #region EventHandlers
+
     public void NetlistControl_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         return;
@@ -1028,7 +1041,7 @@ public class NetlistControl : TemplatedControl
             if (he != null)
             {
                 CurrentElement = he;
-                
+
                 Redraw();
             }
             else if (hj != null)
@@ -1063,4 +1076,6 @@ public class NetlistControl : TemplatedControl
             }
         }
     }
+
+    #endregion
 }
