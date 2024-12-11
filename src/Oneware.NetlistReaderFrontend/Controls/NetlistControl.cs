@@ -44,10 +44,6 @@ public class NetlistControl : TemplatedControl
         {
             return;
         }
-        
-        Initialized += (_, __) => ServiceManager.GetCustomLogger().Log("Control initialized: " + IsInitialized);
-
-        Console.WriteLine(change.Property);
 
         if (change.Property == IsLoadedProperty)
         {
@@ -68,15 +64,8 @@ public class NetlistControl : TemplatedControl
         else if (change.Property == DeltaScaleProperty)
         {
             Redraw();
-        } else if (change.Property == DataContextProperty)
-        {
-            Console.WriteLine(change.Property + " - " + change.OldValue + " - " + change.NewValue);
-            Console.WriteLine(((FrontendViewModel) change.NewValue)?.NetlistId);
-            Console.WriteLine(((FrontendViewModel) change.NewValue)?.GetHashCode());
         } else if (change.Property == NetlistIDProperty)
         {
-            Console.WriteLine("New netlistid");
-            
             Redraw();
             
         } else if (change.Property == BoundsProperty)
@@ -95,8 +84,6 @@ public class NetlistControl : TemplatedControl
 
     public void ZoomToFit()
     {
-        Console.WriteLine("ZoomToFit called");
-        
         var dimensionService = ServiceManager.GetViewportDimensionService();
 
         DRect elementBounds = dimensionService.GetZoomElementDimensions(NetlistID);
