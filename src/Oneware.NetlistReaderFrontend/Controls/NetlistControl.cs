@@ -20,125 +20,6 @@ namespace Oneware.NetlistReaderFrontend.Controls;
 
 public class NetlistControl : TemplatedControl
 {
-    private static readonly FontFamily font = (Application.Current!.FindResource("MartianMono") as FontFamily)!;
-
-    private static IViewportDimensionService _viewportDimensionService;
-
-    private static readonly Typeface typeface =
-        new Typeface(font, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
-    
-    private UInt64 _currentNetlistId;
-
-    static NetlistControl()
-    {
-        AffectsRender<NetlistControl>(ItemsProperty, IsEnabledProperty);
-
-        _viewportDimensionService = ServiceManager.GetViewportDimensionService();
-    }
-
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-    {
-        if (change.Property == ItemsProperty || change.Property == OffsetXProperty ||
-            change.Property == OffsetYProperty || change.Property == CurrentScaleProperty ||
-            change.Property == IsPointerOverProperty)
-        {
-            return;
-        }
-
-        if (change.Property == IsLoadedProperty)
-        {
-            // CurrentScale = 0.2;
-
-            // OffsetX = 0;
-            // OffsetY = 0;
-            Redraw();
-        }
-        else if (change.Property == FitToZoomProperty)
-        {
-            if (IsInitialized)
-            {
-                ZoomToFit();
-                Redraw();
-            }
-        }
-        else if (change.Property == DeltaScaleProperty)
-        {
-            Redraw();
-        } else if (change.Property == NetlistIDProperty)
-        {
-            Redraw();
-            
-        } else if (change.Property == BoundsProperty)
-        {
-            Redraw();
-        }
-
-        if (IsInitialized && CurrentScale == 0)
-        {
-            CurrentScale = 0.2;
-        }
-
-        //Redraw();
-        base.OnPropertyChanged(change);
-    }
-
-    public void ZoomToFit()
-    {
-        var dimensionService = ServiceManager.GetViewportDimensionService();
-
-        DRect elementBounds = dimensionService.GetZoomElementDimensions(NetlistID);
-
-        if (elementBounds != null)
-        {
-            double sx = this.Bounds.Width / elementBounds.Width;
-            double sy = this.Bounds.Height / elementBounds.Height;
-
-            if (sx < sy)
-            {
-                CurrentScale = sx;
-
-                OffsetX = elementBounds.X * -CurrentScale;
-                OffsetY = ((elementBounds.Y + (elementBounds.Height / 2.0d)) * -CurrentScale) +
-                          (this.Bounds.Height / 2.0d);
-            }
-            else
-            {
-                CurrentScale = sy;
-
-                OffsetX = ((elementBounds.X + (elementBounds.Width / 2.0d)) * -CurrentScale) +
-                          (this.Bounds.Width / 2.0d);
-                OffsetY = elementBounds.Y * -CurrentScale;
-            }
-
-            dimensionService.SetZoomElementDimensions(NetlistID, null);
-        }
-        else
-        {
-            double sx = this.Bounds.Width / dimensionService.GetMaxWidth(NetlistID);
-            double sy = this.Bounds.Height / dimensionService.GetMaxHeight(NetlistID);
-
-            if (sx < sy)
-            {
-                CurrentScale = sx;
-
-                OffsetX = 0;
-                OffsetY = ((dimensionService.GetMaxHeight(NetlistID) / 2) * -CurrentScale) + (this.Bounds.Height / 2.0d);
-            }
-            else
-            {
-                CurrentScale = sy;
-
-                OffsetX = ((dimensionService.GetMaxWidth(NetlistID) / 2) * -CurrentScale) + (this.Bounds.Width / 2.0d);
-                OffsetY = 0;
-            }
-        }
-    }
-
-    public void Redraw()
-    {
-        _ = Dispatcher.UIThread.InvokeAsync(InvalidateVisual, DispatcherPriority.Render);
-    }
-
     public static readonly DirectProperty<NetlistControl, IEnumerable> ItemsProperty =
         AvaloniaProperty.RegisterDirect<NetlistControl, IEnumerable>(
             nameof(Items),
@@ -360,6 +241,121 @@ public class NetlistControl : TemplatedControl
     private List<DRect> renderedPortList = new List<DRect>();
     private List<DCircle> renderedJunctionList = new List<DCircle>();
     private List<DLine> renderedEdgeList = new List<DLine>();
+    private static readonly FontFamily font = (Application.Current!.FindResource("MartianMono") as FontFamily)!;
+    private static IViewportDimensionService _viewportDimensionService;
+    private static readonly Typeface typeface =
+        new Typeface(font, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
+    private UInt64 _currentNetlistId;
+    
+    static NetlistControl()
+    {
+        AffectsRender<NetlistControl>(ItemsProperty, IsEnabledProperty);
+
+        _viewportDimensionService = ServiceManager.GetViewportDimensionService();
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        if (change.Property == ItemsProperty || change.Property == OffsetXProperty ||
+            change.Property == OffsetYProperty || change.Property == CurrentScaleProperty ||
+            change.Property == IsPointerOverProperty)
+        {
+            return;
+        }
+
+        if (change.Property == IsLoadedProperty)
+        {
+            // CurrentScale = 0.2;
+
+            // OffsetX = 0;
+            // OffsetY = 0;
+            Redraw();
+        }
+        else if (change.Property == FitToZoomProperty)
+        {
+            if (IsInitialized)
+            {
+                ZoomToFit();
+                Redraw();
+            }
+        }
+        else if (change.Property == DeltaScaleProperty)
+        {
+            Redraw();
+        } else if (change.Property == NetlistIDProperty)
+        {
+            Redraw();
+            
+        } else if (change.Property == BoundsProperty)
+        {
+            Redraw();
+        }
+
+        if (IsInitialized && CurrentScale == 0)
+        {
+            CurrentScale = 0.2;
+        }
+
+        //Redraw();
+        base.OnPropertyChanged(change);
+    }
+
+    public void ZoomToFit()
+    {
+        var dimensionService = ServiceManager.GetViewportDimensionService();
+
+        DRect elementBounds = dimensionService.GetZoomElementDimensions(NetlistID);
+
+        if (elementBounds != null)
+        {
+            double sx = this.Bounds.Width / elementBounds.Width;
+            double sy = this.Bounds.Height / elementBounds.Height;
+
+            if (sx < sy)
+            {
+                CurrentScale = sx;
+
+                OffsetX = elementBounds.X * -CurrentScale;
+                OffsetY = ((elementBounds.Y + (elementBounds.Height / 2.0d)) * -CurrentScale) +
+                          (this.Bounds.Height / 2.0d);
+            }
+            else
+            {
+                CurrentScale = sy;
+
+                OffsetX = ((elementBounds.X + (elementBounds.Width / 2.0d)) * -CurrentScale) +
+                          (this.Bounds.Width / 2.0d);
+                OffsetY = elementBounds.Y * -CurrentScale;
+            }
+
+            dimensionService.SetZoomElementDimensions(NetlistID, null);
+        }
+        else
+        {
+            double sx = this.Bounds.Width / dimensionService.GetMaxWidth(NetlistID);
+            double sy = this.Bounds.Height / dimensionService.GetMaxHeight(NetlistID);
+
+            if (sx < sy)
+            {
+                CurrentScale = sx;
+
+                OffsetX = 0;
+                OffsetY = ((dimensionService.GetMaxHeight(NetlistID) / 2) * -CurrentScale) + (this.Bounds.Height / 2.0d);
+            }
+            else
+            {
+                CurrentScale = sy;
+
+                OffsetX = ((dimensionService.GetMaxWidth(NetlistID) / 2) * -CurrentScale) + (this.Bounds.Width / 2.0d);
+                OffsetY = 0;
+            }
+        }
+    }
+
+    public void Redraw()
+    {
+        _ = Dispatcher.UIThread.InvokeAsync(InvalidateVisual, DispatcherPriority.Render);
+    }
 
     public override void Render(DrawingContext context)
     {
