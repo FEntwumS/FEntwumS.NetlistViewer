@@ -1,29 +1,18 @@
-﻿using System.Reactive.Linq;
+﻿using System.Runtime.Serialization;
 using System.Windows.Input;
-using Avalonia;
 using Avalonia.Collections;
-using Avalonia.Controls;
-using Avalonia.Media;
-using Avalonia.Platform.Storage;
-using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Dock.Model.Core;
-using Microsoft.Extensions.Logging;
-using OmniSharp.Extensions.LanguageServer.Protocol;
-using OneWare.Essentials.Models;
 using OneWare.Essentials.ViewModels;
 using Oneware.NetlistReaderFrontend.Services;
 using Oneware.NetlistReaderFrontend.Types;
-using ReactiveUI;
-using ILogger = OneWare.Essentials.Services.ILogger;
 
 namespace Oneware.NetlistReaderFrontend.ViewModels;
+
 
 public class FrontendViewModel : ExtendedTool
 {
     public ICommand LoadJSONCommand { get; }
-
+    
     public string? StatusText
     {
         get { return statusText; }
@@ -160,6 +149,7 @@ public class FrontendViewModel : ExtendedTool
         }
     }
 
+    [DataMember]
     private UInt64 netlistId { get; set; }
 
     private ICustomLogger _logger { get; set; }
@@ -170,7 +160,6 @@ public class FrontendViewModel : ExtendedTool
     {
         items = new AvaloniaList<NetlistElement>();
         Items = new AvaloniaList<NetlistElement>();
-        
         
         FitToZoom = false;
 
@@ -187,7 +176,12 @@ public class FrontendViewModel : ExtendedTool
 
     public async Task ClickedElementPathChanged()
     {
-        await _frontendService.ExpandNode(clickedElementPath, null, this);
+        await _frontendService.ExpandNode(clickedElementPath, this);
+    }
+
+    public override bool OnClose()
+    {
+        return base.OnClose();
     }
 
     public async Task UpdateScaleImpl()

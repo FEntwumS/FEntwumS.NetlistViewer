@@ -235,7 +235,7 @@ public class FrontendService
         vm.NetlistId = currentNetlist;
     }
 
-    public async Task ExpandNode(string nodePath, NetlistControl control, FrontendViewModel vm)
+    public async Task ExpandNode(string nodePath, FrontendViewModel vm)
     {
         _logger.Log("Sending request to ExpandNode", true);
 
@@ -261,7 +261,18 @@ public class FrontendService
 
     private bool isAddressValid(string address)
     {
-        var match = Regex.Match(address, IpV4AddressPattern);
+        Match match;
+        
+        try
+        {
+            match = Regex.Match(address, IpV4AddressPattern);
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e.Message);
+            
+            return false;
+        }
 
         return match.Success;
     }
