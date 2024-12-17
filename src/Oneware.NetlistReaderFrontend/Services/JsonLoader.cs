@@ -503,11 +503,11 @@ public class JsonLoader : IJsonLoader
                 // Angle of 30 degrees
                 double xUp = 0.86 * xDir - (0.5) * yDir;
                 double yUp = (0.5) * xDir + 0.86 * yDir;
-                double xDown = (-0.86) * xDir - (-0.5) * yDir;
-                double yDown = (-0.5) * xDir + (-0.86) * yDir;
+                double xDown = (-0.86) * xDir - (0.5) * yDir;
+                double yDown = (0.5) * xDir + (-0.86) * yDir;
 
                 Point upPoint = new Point(ePoint.X + xUp, ePoint.Y + yUp);
-                Point downPoint = new Point(ePoint.X - xDown, ePoint.Y + yDown);
+                Point downPoint = new Point(ePoint.X - xDown, ePoint.Y - yDown);
 
                 pointList.Add(upPoint);
                 pointList.Add(ePoint);
