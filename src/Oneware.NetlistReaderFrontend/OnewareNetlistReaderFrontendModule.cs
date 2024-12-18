@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml.Styling;
@@ -6,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
+using OneWare.Essentials.PackageManager;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
 using Oneware.NetlistReaderFrontend.Services;
@@ -19,7 +21,77 @@ namespace Oneware.NetlistReaderFrontend;
 
 public class OnewareNetlistReaderFrontendModule : IModule
 {
+    public static readonly Package NetlistPackage = new()
+    {
+        Category = "Binaries",
+        Id = "NetlistReaderFrontend",
+        Type = "NativeTool",
+        Name = "FEntwumS NetlistReaderFrontend",
+        Description = "Netlist viewer built on Yosys",
+        License = "MIT License",
+        Links =
+        [
+            new PackageLink()
+            {
+                Name = "GitHub",
+                Url = "https://github.com/FEntwumS/NetlistReaderFrontend",
+            }
+        ],
+        Tabs =
+        [
+            new PackageTab()
+            {
+                Title = "License",
+                ContentUrl =
+                    "https://raw.githubusercontent.com/FEntwumS/NetlistReaderBackend/refs/heads/master/LICENSE.txt"
+            }
+        ],
+        Versions =
+        [
+            new PackageVersion()
+            {
+                Version = "0.5.1",
+                Targets =
+                [
+                    new PackageTarget()
+                    {
+                        Target = "win-x64",
+                        Url =
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.5.1/fentwums-netlist-reader-server-v0.5.1.tar.gz",
+                        AutoSetting = [
+                        new PackageAutoSetting()
+                        {
+                            RelativePath = "fentwums-netlist-reader",
+                            SettingKey = NetlistPathSetting,
+                        }]
+                    }
+                ]
+            },
+            new PackageVersion()
+            {
+                Version = "0.5.2",
+                Targets =
+                [
+                    new PackageTarget()
+                    {
+                        Target = "win-x64",
+                        Url =
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.5.2/fentwums-netlist-reader-server-v0.5.2.tar.gz",
+                        AutoSetting = [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-netlist-reader",
+                                SettingKey = NetlistPathSetting,
+                            }]
+                    }
+                ]
+            }
+        ]
+    };
+    
     private ServiceManager _serviceManager;
+    
+    public const string NetlistPathSetting = "FEntwumS_NetlistReaderBackend";
 
     public void RegisterTypes(IContainerRegistry containerRegistry)
     {
@@ -37,6 +109,10 @@ public class OnewareNetlistReaderFrontendModule : IModule
 
     public void OnInitialized(IContainerProvider containerProvider)
     {
+        containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistPackage);
+        
+        containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", NetlistPathSetting, new FolderPathSetting("Path to folder containing server jar", "fentwums-netlist-reader", "", NetlistPathSetting, Path.Exists));
+        
         var resourceInclude = new ResourceInclude(new Uri("avares://Oneware.NetlistReaderFrontend/Styles/Icons.axaml"))
             { Source = new Uri("avares://Oneware.NetlistReaderFrontend/Styles/Icons.axaml")};
         

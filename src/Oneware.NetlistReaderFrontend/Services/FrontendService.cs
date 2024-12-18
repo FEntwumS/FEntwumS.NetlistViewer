@@ -29,6 +29,7 @@ public class FrontendService
     private string _backendPort = string.Empty;
     private bool _useRemoteBackend = false;
     private int _requestTimeout = 600;
+    private string _backendJarFolder = string.Empty;
 
     private UInt64 currentNetlist = 0;
 
@@ -46,9 +47,8 @@ public class FrontendService
         {
             if (isAddressValid(x))
             {
+                _logger.Log($"New address: {x}", _backendAddress != string.Empty);
                 _backendAddress = x;
-
-                _logger.Log($"New address: {_backendAddress}", true);
             }
             else
             {
@@ -60,8 +60,8 @@ public class FrontendService
         {
             if (isPortValid(x))
             {
+                _logger.Log($"New port: {x}", _backendPort != string.Empty);
                 _backendPort = x;
-                _logger.Log($"New port: {_backendPort}", true);
             }
             else
             {
@@ -91,10 +91,14 @@ public class FrontendService
                 _requestTimeout = 600;
             }
         });
+
+        _settingsService.GetSettingObservable<string>(OnewareNetlistReaderFrontendModule.NetlistPathSetting).Subscribe(x => _backendJarFolder = x);
     }
 
     public async Task CreateVhdlNetlist(IProjectFile vhdl)
     {
+        StartBackendIfNotStarted();
+        
         bool success = false;
         string top = Path.GetFileNameWithoutExtension(vhdl.FullPath);
 
@@ -133,11 +137,15 @@ public class FrontendService
 
         IProjectFile test = new ProjectFile(netlistPath, vhdl.TopFolder!);
 
+        await ServerStartedAsync();
+        
         await ShowViewer(test);
     }
 
     public async Task CreateVerilogNetlist(IProjectFile verilog)
     {
+        StartBackendIfNotStarted();
+        
         string top = Path.GetFileNameWithoutExtension(verilog.FullPath);
 
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
@@ -154,11 +162,15 @@ public class FrontendService
 
         IProjectFile test = new ProjectFile(netlistPath, verilog.TopFolder!);
 
+        await ServerStartedAsync();
+        
         await ShowViewer(test);
     }
 
     public async Task CreateSystemVerilogNetlist(IProjectFile sVerilog)
     {
+        StartBackendIfNotStarted();
+        
         string top = Path.GetFileNameWithoutExtension(sVerilog.FullPath);
 
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
@@ -168,6 +180,8 @@ public class FrontendService
         IProjectFile test = new ProjectFile(Path.Combine(sVerilog.Root!.FullPath, "build", "netlist", $"{top}.json"),
             sVerilog.TopFolder!);
 
+        await ServerStartedAsync();
+        
         await ShowViewer(test);
     }
 
@@ -361,6 +375,81 @@ public class FrontendService
             _logger.Error(
                 $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address");
             return null;
+        }
+    }
+
+    private async Task<bool> StartBackendIfNotStarted()
+    {
+        HttpClient client = new();
+        client.DefaultRequestHeaders.Accept.Clear();
+        client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
+        client.DefaultRequestHeaders.Add("User-Agent", "Oneware.NetlistReaderFrontend");
+        client.BaseAddress = new Uri($"http://{_backendAddress}:{_backendPort}");
+        client.Timeout = TimeSpan.FromSeconds(_requestTimeout);
+        
+        // First check if server is already started
+        try
+        {
+            var res = await client.GetAsync("/server-active");
+            _logger.Log("Server already started", true);
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            // ignored
+        }
+
+        _logger.Log("Server not started. Looking for server jar", true);
+
+        var serverJar = Directory.GetFiles(_backendJarFolder).Where(x =>
+            Regex.Match(x, @".*fentwums-netlist-reader-server-(\d+\.)(\d+\.)(\d+)-exec\.jar").Success);
+
+        var enumeratedResults = serverJar.ToList();
+        if (!enumeratedResults.Any())
+        {
+            _logger.Error("No jar found. Please reinstall the plugin");
+            
+            return false;
+        }
+        
+        var serverJarFile = enumeratedResults.First();
+        
+        // Start server to run independently
+#pragma warning disable VSTHRD110
+        ServiceManager.GetService<IChildProcessService>().ExecuteShellAsync("java", [ "-jar", serverJarFile], Path.GetDirectoryName(serverJarFile), "");
+#pragma warning restore VSTHRD110
+        
+        _logger.Log("Server started", true);
+
+        return true;
+    }
+
+    private async Task ServerStartedAsync()
+    {
+        HttpClient client = new();
+        client.DefaultRequestHeaders.Accept.Clear();
+        client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
+        client.DefaultRequestHeaders.Add("User-Agent", "Oneware.NetlistReaderFrontend");
+        client.BaseAddress = new Uri($"http://{_backendAddress}:{_backendPort}");
+        client.Timeout = TimeSpan.FromSeconds(_requestTimeout);
+        bool done = false;
+
+        while (!done)
+        {
+            try
+            {
+                var res = await client.GetAsync("/server-active");
+                _logger.Log("Server is awaiting requests", true);
+                done = true;
+            }
+            catch (Exception e)
+            {
+                _logger.Log("No response. Trying again in 10 ms", true);
+                await Task.Delay(10);
+            }
         }
     }
 }
