@@ -85,6 +85,25 @@ public class OnewareNetlistReaderFrontendModule : IModule
                             }]
                     }
                 ]
+            },
+            new PackageVersion()
+            {
+                Version = "0.5.3",
+                Targets =
+                [
+                    new PackageTarget()
+                    {
+                        Target = "win-x64",
+                        Url =
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.5.3/fentwums-netlist-reader-server-v0.5.3.tar.gz",
+                        AutoSetting = [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-netlist-reader",
+                                SettingKey = NetlistPathSetting,
+                            }]
+                    }
+                ]
             }
         ]
     };

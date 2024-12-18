@@ -70,7 +70,17 @@ public class FrontendService
         });
 
         _settingsService.GetSettingObservable<bool>("NetlistViewer_Backend_UseRemote")
-            .Subscribe(x => _useRemoteBackend = x);
+            .Subscribe(x =>
+            {
+                _useRemoteBackend = x;
+                if (!_useRemoteBackend)
+                {
+                    ServiceManager.GetService<ISettingsService>()
+                        .SetSettingValue("NetlistViewer_Backend_Address", "127.0.0.1");
+                    ServiceManager.GetService<ISettingsService>()
+                        .SetSettingValue("NetlistViewer_Backend_Port", "8080");
+                }
+            });
         _settingsService.GetSettingObservable<string>("NetlistViewer_Backend_RequestTimeout").Subscribe(x =>
         {
             try
@@ -92,14 +102,19 @@ public class FrontendService
             }
         });
 
-        _settingsService.GetSettingObservable<string>(OnewareNetlistReaderFrontendModule.NetlistPathSetting).Subscribe(x => _backendJarFolder = x);
+        _settingsService.GetSettingObservable<string>(OnewareNetlistReaderFrontendModule.NetlistPathSetting)
+            .Subscribe(x => _backendJarFolder = x);
     }
 
     public async Task CreateVhdlNetlist(IProjectFile vhdl)
     {
-        StartBackendIfNotStarted();
-        
-        bool success = false;
+        bool success = await StartBackendIfNotStartedAsync();
+
+        if (!success)
+        {
+            return;
+        }
+
         string top = Path.GetFileNameWithoutExtension(vhdl.FullPath);
 
         IGhdlService ghdlService = ServiceManager.GetService<IGhdlService>();
@@ -137,15 +152,25 @@ public class FrontendService
 
         IProjectFile test = new ProjectFile(netlistPath, vhdl.TopFolder!);
 
-        await ServerStartedAsync();
-        
+        success = await ServerStartedAsync();
+
+        if (!success)
+        {
+            return;
+        }
+
         await ShowViewer(test);
     }
 
     public async Task CreateVerilogNetlist(IProjectFile verilog)
     {
-        StartBackendIfNotStarted();
-        
+        bool success = await StartBackendIfNotStartedAsync();
+
+        if (!success)
+        {
+            return;
+        }
+
         string top = Path.GetFileNameWithoutExtension(verilog.FullPath);
 
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
@@ -162,15 +187,25 @@ public class FrontendService
 
         IProjectFile test = new ProjectFile(netlistPath, verilog.TopFolder!);
 
-        await ServerStartedAsync();
-        
+        success = await ServerStartedAsync();
+
+        if (!success)
+        {
+            return;
+        }
+
         await ShowViewer(test);
     }
 
     public async Task CreateSystemVerilogNetlist(IProjectFile sVerilog)
     {
-        StartBackendIfNotStarted();
-        
+        bool success = await StartBackendIfNotStartedAsync();
+
+        if (!success)
+        {
+            return;
+        }
+
         string top = Path.GetFileNameWithoutExtension(sVerilog.FullPath);
 
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
@@ -180,8 +215,13 @@ public class FrontendService
         IProjectFile test = new ProjectFile(Path.Combine(sVerilog.Root!.FullPath, "build", "netlist", $"{top}.json"),
             sVerilog.TopFolder!);
 
-        await ServerStartedAsync();
-        
+        success = await ServerStartedAsync();
+
+        if (!success)
+        {
+            return;
+        }
+
         await ShowViewer(test);
     }
 
@@ -222,7 +262,7 @@ public class FrontendService
             };
 
             var resp = await PostAsync("/graphRemoteFile?hash=" + combinedHash, formDataContent);
-            
+
             if (resp == null)
             {
                 return;
@@ -234,7 +274,7 @@ public class FrontendService
         {
             var resp = await PostAsync("/graphLocalFile?filename=" + json.FullPath + "&hash=" +
                                        combinedHash, null);
-            
+
             if (resp == null)
             {
                 return;
@@ -276,7 +316,7 @@ public class FrontendService
     private bool isAddressValid(string address)
     {
         Match match;
-        
+
         try
         {
             match = Regex.Match(address, IpV4AddressPattern);
@@ -284,7 +324,7 @@ public class FrontendService
         catch (Exception e)
         {
             _logger.Error(e.Message);
-            
+
             return false;
         }
 
@@ -320,7 +360,7 @@ public class FrontendService
         try
         {
             var resp = await client.PostAsync(URI, content);
-            
+
             if (!resp.IsSuccessStatusCode)
             {
                 if (resp.StatusCode == HttpStatusCode.NotFound)
@@ -330,10 +370,11 @@ public class FrontendService
                 }
                 else
                 {
-                    _logger.Error("An internal server error occured. Please file a bug report if this problem persists.");
+                    _logger.Error(
+                        "An internal server error occured. Please file a bug report if this problem persists.");
                 }
             }
-            
+
             return resp;
         }
         catch (InvalidOperationException e)
@@ -378,7 +419,7 @@ public class FrontendService
         }
     }
 
-    private async Task<bool> StartBackendIfNotStarted()
+    private async Task<bool> StartBackendIfNotStartedAsync()
     {
         HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear();
@@ -387,7 +428,7 @@ public class FrontendService
         client.DefaultRequestHeaders.Add("User-Agent", "Oneware.NetlistReaderFrontend");
         client.BaseAddress = new Uri($"http://{_backendAddress}:{_backendPort}");
         client.Timeout = TimeSpan.FromSeconds(_requestTimeout);
-        
+
         // First check if server is already started
         try
         {
@@ -401,6 +442,12 @@ public class FrontendService
             // ignored
         }
 
+        if (_useRemoteBackend)
+        {
+            _logger.Error("The remote server could not be reached. Make sure the server is started and reachable or switch to the local server");
+            return false;
+        }
+
         _logger.Log("Server not started. Looking for server jar", true);
 
         var serverJar = Directory.GetFiles(_backendJarFolder).Where(x =>
@@ -410,23 +457,24 @@ public class FrontendService
         if (!enumeratedResults.Any())
         {
             _logger.Error("No jar found. Please reinstall the plugin");
-            
+
             return false;
         }
-        
+
         var serverJarFile = enumeratedResults.First();
-        
+
         // Start server to run independently
-#pragma warning disable VSTHRD110
-        ServiceManager.GetService<IChildProcessService>().ExecuteShellAsync("java", [ "-jar", serverJarFile], Path.GetDirectoryName(serverJarFile), "");
-#pragma warning restore VSTHRD110
-        
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        ServiceManager.GetService<IToolExecuterService>()
+            .ExecuteToolAsync("java", ["-jar", serverJarFile], Path.GetDirectoryName(serverJarFile));
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+
         _logger.Log("Server started", true);
 
         return true;
     }
 
-    private async Task ServerStartedAsync()
+    private async Task<bool> ServerStartedAsync()
     {
         HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear();
@@ -447,9 +495,24 @@ public class FrontendService
             }
             catch (Exception e)
             {
+                if (_useRemoteBackend)
+                {
+                    _logger.Error(
+                        "The remote server could not be reached. Make sure the server is started and reachable or switch to the local server");
+
+                    return false;
+                }
+
                 _logger.Log("No response. Trying again in 10 ms", true);
                 await Task.Delay(10);
             }
         }
+
+        return true;
+    }
+
+    public async Task CloseNetlistOnServerAsync(UInt64 netlistId)
+    {
+        await PostAsync("/close-netlist?hash=" + netlistId, null);
     }
 }

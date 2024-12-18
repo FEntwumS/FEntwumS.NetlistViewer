@@ -181,6 +181,8 @@ public class FrontendViewModel : ExtendedTool
 
     public override bool OnClose()
     {
+        ServiceManager.GetService<FrontendService>().CloseNetlistOnServerAsync(netlistId);
+        
         return base.OnClose();
     }
 
