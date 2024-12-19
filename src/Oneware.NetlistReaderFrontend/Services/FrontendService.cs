@@ -227,6 +227,7 @@ public class FrontendService
 
     public async Task ShowViewer(IProjectFile json)
     {
+        HttpResponseMessage? resp = null;
         string top = Path.GetFileNameWithoutExtension(json.FullPath);
 
         if (!File.Exists(json.FullPath))
@@ -267,7 +268,7 @@ public class FrontendService
                 { new StreamContent(File.Open(json.FullPath, FileMode.Open, FileAccess.Read)), "file", json.Name }
             };
 
-            var resp = await PostAsync("/graphRemoteFile?hash=" + combinedHash, formDataContent);
+            resp = await PostAsync("/graphRemoteFile?hash=" + combinedHash, formDataContent);
 
             if (resp == null)
             {
@@ -278,7 +279,7 @@ public class FrontendService
         }
         else
         {
-            var resp = await PostAsync("/graphLocalFile?filename=" + json.FullPath + "&hash=" +
+            resp = await PostAsync("/graphLocalFile?filename=" + json.FullPath + "&hash=" +
                                        combinedHash, null);
 
             if (resp == null)
@@ -287,6 +288,11 @@ public class FrontendService
             }
 
             vm.File = await resp.Content.ReadAsStreamAsync();
+        }
+
+        if (!resp.IsSuccessStatusCode)
+        {
+            return;
         }
 
         _dockService.Show(vm, DockShowLocation.Document);
