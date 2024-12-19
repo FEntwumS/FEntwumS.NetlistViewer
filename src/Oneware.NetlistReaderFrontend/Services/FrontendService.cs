@@ -229,6 +229,12 @@ public class FrontendService
     {
         string top = Path.GetFileNameWithoutExtension(json.FullPath);
 
+        if (!File.Exists(json.FullPath))
+        {
+            _logger.Error("No json netlist was generated. Please ensure you are using the yosys from the OSS CAD Suite");
+            return;
+        }
+
         string content = await File.ReadAllTextAsync(json.FullPath);
 
         IHashService hashService = ServiceManager.GetHashService();
