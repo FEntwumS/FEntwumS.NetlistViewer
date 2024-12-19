@@ -28,11 +28,13 @@ jobs:
         id: get-version
         with:
           proj-path: src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj
-      - name: Generate licensing information
-        run: nuget-license -i src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj -override src/Oneware.NetlistReaderFrontend/override-third-party.json -t -o Table -d src/Oneware.NetlistReaderFrontend/publish/THIRD-PARTY-LICENSES -fo src/Oneware.NetlistReaderFrontend/publish/THIRD-PARTY-NOTICE.txt
       - name: Build
         run: dotnet build src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj -c Release -o publish
+      - name: Generate licensing information
+        id: license
+        run: nuget-license -i src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj -override src/Oneware.NetlistReaderFrontend/override-third-party.json -t -o Table -d src/Oneware.NetlistReaderFrontend/publish/THIRD-PARTY-LICENSES -fo src/Oneware.NetlistReaderFrontend/publish/THIRD-PARTY-NOTICE.txt
       - name: Compress
+        if: steps.license.outcome == 'success'
         uses: thedoctor0/zip-release@0.7.1
         with:
           type: 'zip'
