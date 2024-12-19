@@ -16,7 +16,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: |
+            8.0.x  # Currently needed for nuget-license; See https://github.com/sensslen/nuget-license/pull/110
+            9.0.x
       - name: Install licensing information tool
         run: dotnet tool install --global nuget-license --version 3.0.14
       - name: Get Version
