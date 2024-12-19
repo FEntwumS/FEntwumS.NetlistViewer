@@ -28,10 +28,10 @@ jobs:
         id: get-version
         with:
           proj-path: src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj
-      - name: Build
-        run: dotnet build src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj -c Release -o publish
       - name: Generate licensing information
         run: nuget-license -i src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj -override src/Oneware.NetlistReaderFrontend/override-third-party.json -t -o Table -d src/Oneware.NetlistReaderFrontend/publish/THIRD-PARTY-LICENSES -fo src/Oneware.NetlistReaderFrontend/publish/THIRD-PARTY-NOTICE.txt
+      - name: Build
+        run: dotnet build src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj -c Release -o publish
       - name: Compress
         uses: thedoctor0/zip-release@0.7.1
         with:
@@ -39,7 +39,7 @@ jobs:
           filename: ../Oneware.NetlistReaderFrontend_${{steps.get-version.outputs.version}}_all.zip
           directory: ./publish
       - name: Debug
-        run: ls
+        run: ls && ls -lshaR publish
       - uses: ncipollo/release-action@v1.14.0
         with:
           artifacts: "Oneware.NetlistReaderFrontend_${{steps.get-version.outputs.version}}_all.zip,./publish/compatibility.txt"
