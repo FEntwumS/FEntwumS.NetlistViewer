@@ -1,0 +1,309 @@
+[
+  {
+    "Id": "Avalonia.BuildServices",
+    "Version": "0.0.29",
+    "ProjectUrl": "https://avaloniaui.net/",
+    "Copyright": "Copyright 2023-2024 \u00A9 The AvaloniaUI Project",
+    "Authors": "Avalonia.BuildServices",
+    "License": "MIT",
+    "LicenseUrl": "https://licenses.nuget.org/MIT",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "Avalonia.Controls.TreeDataGrid",
+    "Version": "11.0.10",
+    "ProjectUrl": "https://github.com/AvaloniaUI/Avalonia.Controls.TreeDataGrid",
+    "Copyright": "Copyright \u00A9 AvaloniaUI 2023",
+    "Authors": "Steven Kirk",
+    "License":"MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/AvaloniaUI/Avalonia.Controls.TreeDataGrid/refs/heads/master/licence.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "HarfBuzzSharp",
+    "Version": "7.3.0.2",
+    "ProjectUrl": "https://go.microsoft.com/fwlink/?linkid=868515",
+    "Copyright": "\u00A9 Microsoft Corporation. All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/mono/SkiaSharp/refs/heads/main/LICENSE.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "HarfBuzzSharp.NativeAssets.Linux",
+    "Version": "7.3.0.2",
+    "ProjectUrl": "https://go.microsoft.com/fwlink/?linkid=868515",
+    "Copyright": "\u00A9 Microsoft Corporation. All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/mono/SkiaSharp/refs/heads/main/LICENSE.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "HarfBuzzSharp.NativeAssets.macOS",
+    "Version": "7.3.0.2",
+    "ProjectUrl": "https://go.microsoft.com/fwlink/?linkid=868515",
+    "Copyright": "\u00A9 Microsoft Corporation. All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/mono/SkiaSharp/refs/heads/main/LICENSE.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "HarfBuzzSharp.NativeAssets.Win32",
+    "Version": "7.3.0.2",
+    "ProjectUrl": "https://go.microsoft.com/fwlink/?linkid=868515",
+    "Copyright": "\u00A9 Microsoft Corporation. All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/mono/SkiaSharp/refs/heads/main/LICENSE.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "Microsoft.NETCore.Targets",
+    "Version": "1.1.0",
+    "ProjectUrl": "https://dot.net/",
+    "Copyright": "\u00A9 Microsoft Corporation.  All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/license-information.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OmniSharp.Extensions.JsonRpc",
+    "Version": "0.19.9",
+    "ProjectUrl": "https://github.com/OmniSharp/csharp-language-server-protocol",
+    "Copyright": "Copyright OmniSharp and contributors \u00A9 2018",
+    "Authors": "David Driscoll",
+    "License":"MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/OmniSharp/csharp-language-server-protocol/refs/heads/master/LICENSE",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OmniSharp.Extensions.JsonRpc.Generators",
+    "Version": "0.19.9",
+    "ProjectUrl": "https://github.com/OmniSharp/csharp-language-server-protocol",
+    "Copyright": "Copyright OmniSharp and contributors \u00A9 2018",
+    "Authors": "David Driscoll",
+    "License":"MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/OmniSharp/csharp-language-server-protocol/refs/heads/master/LICENSE",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OmniSharp.Extensions.LanguageClient",
+    "Version": "0.19.9",
+    "ProjectUrl": "https://github.com/OmniSharp/csharp-language-server-protocol",
+    "Copyright": "Copyright OmniSharp and contributors \u00A9 2018",
+    "Authors": "David Driscoll",
+    "License":"MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/OmniSharp/csharp-language-server-protocol/refs/heads/master/LICENSE",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OmniSharp.Extensions.LanguageProtocol",
+    "Version": "0.19.9",
+    "ProjectUrl": "https://github.com/OmniSharp/csharp-language-server-protocol",
+    "Copyright": "Copyright OmniSharp and contributors \u00A9 2018",
+    "Authors": "David Driscoll",
+    "License":"MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/OmniSharp/csharp-language-server-protocol/refs/heads/master/LICENSE",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OmniSharp.Extensions.LanguageServer.Shared",
+    "Version": "0.19.9",
+    "ProjectUrl": "https://github.com/OmniSharp/csharp-language-server-protocol",
+    "Copyright": "Copyright OmniSharp and contributors \u00A9 2018",
+    "Authors": "David Driscoll",
+    "License":"MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/OmniSharp/csharp-language-server-protocol/refs/heads/master/LICENSE",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OneWare.ProjectSystem",
+    "Version": "0.31.2",
+    "Copyright": "Copyright \u00A9 One Ware 2024",
+    "Authors": "Hendrik Mennen",
+    "License": "MIT",
+    "LicenseUrl": "https://licenses.nuget.org/MIT",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OneWare.Settings",
+    "Version": "0.31.2",
+    "Copyright": "Copyright \u00A9 One Ware 2024",
+    "Authors": "Hendrik Mennen",
+    "License": "MIT",
+    "LicenseUrl": "https://licenses.nuget.org/MIT",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OneWare.UniversalFpgaProjectSystem",
+    "Version": "0.41.2",
+    "Copyright": "Copyright \u00A9 One Ware 2024",
+    "Authors": "Hendrik Mennen",
+    "License": "MIT",
+    "LicenseUrl": "https://licenses.nuget.org/MIT",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "Prism.Core",
+    "Version": "8.1.97",
+    "ProjectUrl": "https://github.com/PrismLibrary/Prism",
+    "Authors": "Brian Lagunas,Dan Siegel",
+    "Copyright": "Prism Library",
+    "License":"MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/PrismLibrary/Prism/627724647be45972d1101fdcf5b03cdc723d8439/LICENSE",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "SkiaSharp",
+    "Version": "2.88.8",
+    "ProjectUrl": "https://go.microsoft.com/fwlink/?linkid=868515",
+    "Copyright": "\u00A9 Microsoft Corporation. All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/mono/SkiaSharp/refs/heads/main/LICENSE.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "SkiaSharp.HarfBuzz",
+    "Version": "2.88.8",
+    "ProjectUrl": "https://go.microsoft.com/fwlink/?linkid=868515",
+    "Copyright": "\u00A9 Microsoft Corporation. All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/mono/SkiaSharp/refs/heads/main/LICENSE.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "SkiaSharp.NativeAssets.Linux",
+    "Version": "2.88.8",
+    "ProjectUrl": "https://go.microsoft.com/fwlink/?linkid=868515",
+    "Copyright": "\u00A9 Microsoft Corporation. All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/mono/SkiaSharp/refs/heads/main/LICENSE.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "SkiaSharp.NativeAssets.macOS",
+    "Version": "2.88.8",
+    "ProjectUrl": "https://go.microsoft.com/fwlink/?linkid=868515",
+    "Copyright": "\u00A9 Microsoft Corporation. All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/mono/SkiaSharp/refs/heads/main/LICENSE.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "SkiaSharp.NativeAssets.WebAssembly",
+    "Version": "2.88.8",
+    "ProjectUrl": "https://go.microsoft.com/fwlink/?linkid=868515",
+    "Copyright": "\u00A9 Microsoft Corporation. All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/mono/SkiaSharp/refs/heads/main/LICENSE.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "SkiaSharp.NativeAssets.Win32",
+    "Version": "2.88.8",
+    "ProjectUrl": "https://go.microsoft.com/fwlink/?linkid=868515",
+    "Copyright": "\u00A9 Microsoft Corporation. All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/mono/SkiaSharp/refs/heads/main/LICENSE.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "System.IO",
+    "Version": "4.3.0",
+    "ProjectUrl": "https://dot.net/",
+    "Copyright": "\u00A9 Microsoft Corporation.  All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/license-information.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "System.Reflection",
+    "Version": "4.3.0",
+    "ProjectUrl": "https://dot.net/",
+    "Copyright": "\u00A9 Microsoft Corporation.  All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/license-information.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "System.Reflection.Emit",
+    "Version": "4.3.0",
+    "ProjectUrl": "https://dot.net/",
+    "Copyright": "\u00A9 Microsoft Corporation.  All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/license-information.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "System.Reflection.Emit.ILGeneration",
+    "Version": "4.3.0",
+    "ProjectUrl": "https://dot.net/",
+    "Copyright": "\u00A9 Microsoft Corporation.  All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/license-information.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "System.Reflection.Emit.Lightweight",
+    "Version": "4.3.0",
+    "ProjectUrl": "https://dot.net/",
+    "Copyright": "\u00A9 Microsoft Corporation.  All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/license-information.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "System.Reflection.Primitives",
+    "Version": "4.3.0",
+    "ProjectUrl": "https://dot.net/",
+    "Copyright": "\u00A9 Microsoft Corporation.  All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/license-information.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "System.Runtime",
+    "Version": "4.3.0",
+    "ProjectUrl": "https://dot.net/",
+    "Copyright": "\u00A9 Microsoft Corporation.  All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/license-information.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "System.Text.Encoding",
+    "Version": "4.3.0",
+    "ProjectUrl": "https://dot.net/",
+    "Copyright": "\u00A9 Microsoft Corporation.  All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/license-information.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "System.Threading.Tasks",
+    "Version": "4.3.0",
+    "ProjectUrl": "https://dot.net/",
+    "Copyright": "\u00A9 Microsoft Corporation.  All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/license-information.md",
+    "LicenseInformationOrigin": 1
+  }
+]
