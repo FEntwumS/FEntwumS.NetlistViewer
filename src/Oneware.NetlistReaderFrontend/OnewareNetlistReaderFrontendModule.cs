@@ -1,11 +1,7 @@
-using System.Text.RegularExpressions;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Markup.Xaml.Styling;
-using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
 using OneWare.Essentials.Enums;
-using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.PackageManager;
 using OneWare.Essentials.Services;
@@ -14,8 +10,6 @@ using Oneware.NetlistReaderFrontend.Services;
 using Oneware.NetlistReaderFrontend.ViewModels;
 using Prism.Ioc;
 using Prism.Modularity;
-using Prism.Services.Dialogs;
-using ReactiveUI;
 
 namespace Oneware.NetlistReaderFrontend;
 

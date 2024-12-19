@@ -1,12 +1,7 @@
 ﻿using System.Text.Json.Nodes;
 using Avalonia;
-using Avalonia.Collections;
-using Avalonia.Platform.Storage;
-using Microsoft.Extensions.DependencyInjection;
-using OneWare.Essentials.Services;
 using Oneware.NetlistReaderFrontend.Types;
 using Oneware.NetlistReaderFrontend.ViewModels;
-using ReactiveUI;
 
 namespace Oneware.NetlistReaderFrontend.Services;
 

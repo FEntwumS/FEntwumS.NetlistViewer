@@ -2,12 +2,10 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Dock.Model.Core;
 using Oneware.NetlistReaderFrontend.Controls;
 using Oneware.NetlistReaderFrontend.Services;
 using Oneware.NetlistReaderFrontend.Types;
 using Oneware.NetlistReaderFrontend.ViewModels;
-using ReactiveUI;
 
 namespace Oneware.NetlistReaderFrontend.Views;
 

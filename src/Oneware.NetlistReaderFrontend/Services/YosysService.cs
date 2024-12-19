@@ -24,7 +24,7 @@ public class YosysService : IYosysService
         _childProcessService = ServiceManager.GetService<IChildProcessService>();
         _toolExecuterService = ServiceManager.GetService<IToolExecuterService>();
         
-        _settingsService.GetSettingObservable<string>("OssCadSuite_Path").Subscribe(x => _yosysPath = Path.Combine(x, "bin", "yosys.exe"));
+        _settingsService.GetSettingObservable<string>("OssCadSuite_Path").Subscribe(x => _yosysPath = Path.Combine(x, "bin", "yosys"));
     }
     
     public async Task<bool> LoadVhdlAsync(IProjectFile file)

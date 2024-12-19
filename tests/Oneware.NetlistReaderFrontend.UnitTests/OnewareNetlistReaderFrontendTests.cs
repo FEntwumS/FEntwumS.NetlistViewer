@@ -1,4 +1,4 @@
-﻿using Xunit;
+﻿/*using Xunit;
 
 namespace Oneware.NetlistReaderFrontend.UnitTests;
 
@@ -11,4 +11,4 @@ public class OnewareNetlistReaderFrontendTests
     {
         Assert.True(true);
     }
-}
+}*/

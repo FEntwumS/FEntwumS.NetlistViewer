@@ -8,6 +8,7 @@
         <EnableDynamicLoading>true</EnableDynamicLoading>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <SelfContained>false</SelfContained>
+        <PackageLicenseFile>License.md</PackageLicenseFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,12 +16,20 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="OneWare.Essentials" Version="0.11.2" Private="false" ExcludeAssets="runtime;Native" />
-        <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.2" Private="false" />
+      <Folder Include="Assets\Fonts\" />
     </ItemGroup>
     
     <ItemGroup>
-      <Folder Include="Assets\Fonts\" />
+        <None Include="../../License.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="OneWare.Essentials" Version="0.11.2" Private="false">
+              <PrivateAssets>all</PrivateAssets>
+      </PackageReference>
+      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.2" Private="false">
+          <PrivateAssets>all</PrivateAssets>
+      </PackageReference>
     </ItemGroup>
 
     <Target Name="GenerateCompatibilityFile" AfterTargets="Build">

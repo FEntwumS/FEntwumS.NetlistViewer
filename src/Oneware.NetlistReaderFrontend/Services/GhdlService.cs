@@ -27,9 +27,6 @@ public class GhdlService : IGhdlService
 
         // This key is copied from https://github.com/one-ware/OneWare.GhdlExtension/blob/21d98f5d948370d59b79fbe5be99d63fd044a633/src/OneWare.GhdlExtension/GhdlExtensionModule.cs#L140C44-L140C63
         // and might need updating in the future
-        
-        // TODO
-        // check if actual interop between plugins is possible
         _settingsService.GetSettingObservable<string>("GhdlModule_GhdlPath").Subscribe(x => _ghdlPath = x);
         _settingsService.GetSettingObservable<string>("NetlistViewer_VHDL_Standard").Subscribe(x => _vhdlStandard = x);
     }
