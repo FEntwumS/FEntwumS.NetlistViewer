@@ -1,10 +1,9 @@
 name: Publish
 
 on:
-  workflow_dispatch:
-  release:
-    types:
-      - published
+  push:
+    tags:
+      - "**"
 
 jobs:
   build:
@@ -19,6 +18,8 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
+      - name: Install licensing information tool
+        run: dotnet tool install --global nuget-license --version 3.0.14
       - name: Get Version
         uses: kzrnm/get-net-sdk-project-versions-action@v1.3.0
         id: get-version
@@ -26,6 +27,8 @@ jobs:
           proj-path: src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj
       - name: Build
         run: dotnet build src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj -c Release -o publish
+      - name: Generate licensing information
+        run: nuget-license -i src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj -override src/Oneware.NetlistReaderFrontend/override-third-party.json -t -o Table -d src/Oneware.NetlistReaderFrontend/publish/THIRD-PARTY-LICENSES -fo src/Oneware.NetlistReaderFrontend/publish/THIRD-PARTY-NOTICE.txt
       - name: Compress
         uses: thedoctor0/zip-release@0.7.1
         with:
