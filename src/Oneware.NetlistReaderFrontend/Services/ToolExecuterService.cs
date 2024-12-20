@@ -1,4 +1,5 @@
-﻿using OneWare.Essentials.Enums;
+﻿using Asmichi.ProcessManagement;
+using OneWare.Essentials.Enums;
 using OneWare.Essentials.Services;
 
 namespace Oneware.NetlistReaderFrontend.Services;
@@ -20,7 +21,7 @@ public class ToolExecuterService : IToolExecuterService
         string stdout = string.Empty;
         string stderr = string.Empty;
         
-        (success, _) = await _childProcessService.ExecuteShellAsync(toolPath, args, workingDirectory, "", AppState.Loading, false, x =>
+        (success, _) = await _childProcessService.ExecuteShellAsync(toolPath, args, workingDirectory, "", AppState.Idle, false, x =>
         {
             if (x.StartsWith("ghdl:error:"))
             {
@@ -47,5 +48,19 @@ public class ToolExecuterService : IToolExecuterService
         });
         
         return (success, stdout, stderr);
+    }
+
+    public async Task ExecuteBackgroundProcessAsync(string path, IReadOnlyList<string> args, string workingDirectory)
+    {
+        ChildProcessStartInfo info = new ChildProcessStartInfo
+        {
+            WorkingDirectory = workingDirectory,
+            FileName = path,
+            Arguments = args
+        };
+        
+        var process = ChildProcess.Start(info);
+        
+        await process.WaitForExitAsync();
     }
 }
