@@ -33,6 +33,9 @@ jobs:
       - name: Generate licensing information
         id: license
         run: nuget-license -i ./src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj -override ./src/Oneware.NetlistReaderFrontend/override-third-party.json -t -o Table -d ./publish/THIRD-PARTY-LICENSES -fo ./publish/THIRD-PARTY-NOTICE.txt
+      - name: Copy font license
+        id: font-license
+        run: cp ./src/Oneware.NetlistReaderFrontend/Assets/Fonts/OFL.txt ./publish/THIRD-PARTY-LICENSES/Martian-Mono-License.txt
       - name: Compress
         if: steps.license.outcome == 'success'
         uses: thedoctor0/zip-release@0.7.1
