@@ -11,6 +11,10 @@
         <PackageLicenseFile>License.md</PackageLicenseFile>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <OutputPath>../../bin/Debug</OutputPath>
+    </PropertyGroup>
+
     <ItemGroup>
         <AvaloniaResource Include="Assets\**\*.*" />
     </ItemGroup>
