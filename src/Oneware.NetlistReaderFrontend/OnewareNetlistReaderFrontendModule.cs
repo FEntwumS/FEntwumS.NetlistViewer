@@ -23,6 +23,7 @@ public class OnewareNetlistReaderFrontendModule : IModule
         Name = "FEntwumS NetlistReaderFrontend",
         Description = "Netlist viewer built on Yosys",
         License = "MIT License",
+        IconUrl = "https://avatars.githubusercontent.com/u/184253110?s=200&v=4",
         Links =
         [
             new PackageLink()
@@ -52,12 +53,14 @@ public class OnewareNetlistReaderFrontendModule : IModule
                         Target = "win-x64",
                         Url =
                             "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.5.1/fentwums-netlist-reader-server-v0.5.1.tar.gz",
-                        AutoSetting = [
-                        new PackageAutoSetting()
-                        {
-                            RelativePath = "fentwums-netlist-reader",
-                            SettingKey = NetlistPathSetting,
-                        }]
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-netlist-reader",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
                     }
                 ]
             },
@@ -71,12 +74,14 @@ public class OnewareNetlistReaderFrontendModule : IModule
                         Target = "win-x64",
                         Url =
                             "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.5.2/fentwums-netlist-reader-server-v0.5.2.tar.gz",
-                        AutoSetting = [
+                        AutoSetting =
+                        [
                             new PackageAutoSetting()
                             {
                                 RelativePath = "fentwums-netlist-reader",
                                 SettingKey = NetlistPathSetting,
-                            }]
+                            }
+                        ]
                     }
                 ]
             },
@@ -90,12 +95,14 @@ public class OnewareNetlistReaderFrontendModule : IModule
                         Target = "win-x64",
                         Url =
                             "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.5.3/fentwums-netlist-reader-server-v0.5.3.tar.gz",
-                        AutoSetting = [
+                        AutoSetting =
+                        [
                             new PackageAutoSetting()
                             {
                                 RelativePath = "fentwums-netlist-reader",
                                 SettingKey = NetlistPathSetting,
-                            }]
+                            }
+                        ]
                     }
                 ]
             },
@@ -109,12 +116,14 @@ public class OnewareNetlistReaderFrontendModule : IModule
                         Target = "win-x64",
                         Url =
                             "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.5.4/fentwums-netlist-reader-server-v0.5.4.tar.gz",
-                        AutoSetting = [
+                        AutoSetting =
+                        [
                             new PackageAutoSetting()
                             {
                                 RelativePath = "fentwums-netlist-reader",
                                 SettingKey = NetlistPathSetting,
-                            }]
+                            }
+                        ]
                     }
                 ]
             },
@@ -128,20 +137,71 @@ public class OnewareNetlistReaderFrontendModule : IModule
                         Target = "win-x64",
                         Url =
                             "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.5.5/fentwums-netlist-reader-server-v0.5.5.tar.gz",
-                        AutoSetting = [
+                        AutoSetting =
+                        [
                             new PackageAutoSetting()
                             {
                                 RelativePath = "fentwums-netlist-reader",
                                 SettingKey = NetlistPathSetting,
-                            }]
+                            }
+                        ]
+                    }
+                ]
+            },
+            new PackageVersion()
+            {
+                Version = "0.5.6",
+                Targets =
+                [
+                    new PackageTarget()
+                    {
+                        Target = "win-x64",
+                        Url =
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.5.6/fentwums-netlist-reader-server-v0.5.6.tar.gz",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-netlist-reader",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
+                    },
+                    new PackageTarget()
+                    {
+                        Target = "linux-x64",
+                        Url =
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.5.6/fentwums-netlist-reader-server-v0.5.6.tar.gz",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-netlist-reader",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
+                    },
+                    new PackageTarget()
+                    {
+                        Target = "osx-x64",
+                        Url =
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.5.6/fentwums-netlist-reader-server-v0.5.6.tar.gz",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-netlist-reader",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
                     }
                 ]
             }
         ]
     };
-    
+
     private ServiceManager _serviceManager;
-    
+
     public const string NetlistPathSetting = "FEntwumS_NetlistReaderBackend";
 
     public void RegisterTypes(IContainerRegistry containerRegistry)
@@ -161,14 +221,16 @@ public class OnewareNetlistReaderFrontendModule : IModule
     public void OnInitialized(IContainerProvider containerProvider)
     {
         containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistPackage);
-        
-        containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", NetlistPathSetting, new FolderPathSetting("Path to folder containing server jar", "fentwums-netlist-reader", "", NetlistPathSetting, Path.Exists));
-        
+
+        containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", NetlistPathSetting,
+            new FolderPathSetting("Path to folder containing server jar", "fentwums-netlist-reader", "",
+                NetlistPathSetting, Path.Exists));
+
         var resourceInclude = new ResourceInclude(new Uri("avares://Oneware.NetlistReaderFrontend/Styles/Icons.axaml"))
-            { Source = new Uri("avares://Oneware.NetlistReaderFrontend/Styles/Icons.axaml")};
-        
+            { Source = new Uri("avares://Oneware.NetlistReaderFrontend/Styles/Icons.axaml") };
+
         Application.Current?.Resources.MergedDictionaries.Add(resourceInclude);
-        
+
         _serviceManager = new ServiceManager(containerProvider);
 
         ISettingsService settingsService = ServiceManager.GetService<ISettingsService>();
