@@ -214,6 +214,7 @@ public class OnewareNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IGhdlService, GhdlService>();
         containerRegistry.RegisterSingleton<IYosysService, YosysService>();
         containerRegistry.RegisterSingleton<IToolExecuterService, ToolExecuterService>();
+        containerRegistry.RegisterSingleton<IFpgaBbService, FpgaBbService>();
         containerRegistry.RegisterSingleton<FrontendService>();
         containerRegistry.Register<FrontendViewModel>();
     }
@@ -281,6 +282,19 @@ public class OnewareNetlistReaderFrontendModule : IModule
         settingsService.RegisterSetting("Netlist Viewer", "VHDL", "NetlistViewer_VHDL_Standard",
             new ComboBoxSetting("VHDL Standard", "93c", ["87", "93", "93c", "00", "02", "08", "19"]));
 
+        settingsService.RegisterSettingSubCategory("Netlist Viewer", "FPGA");
+
+        settingsService.RegisterSetting("Netlist Viewer", "FPGA", "NetlistViewer_FPGA_Manufacturer",
+            new ComboBoxSetting("FPGA manufacturer", "gatemate",
+            [
+                "achronix", "anlogic", "coolrunner2", "ecp5", "efinix", "fabulous", "gatemate", "gowin", "greenpak4",
+                "ice40", "intel", "intel_alm", "lattice", "microchip", "nanoxplore", "nexus", "quicklogic", "sf2",
+                "xilinx"
+            ]));
+
+        settingsService.RegisterSetting("Netlist Viewer", "FPGA", "NetlistViewer_FPGA_DeviceFamily",
+            new TextBoxSetting("Device family", "", null));
+
         settingsService.RegisterSettingSubCategory("Netlist Viewer", "Backend");
 
         settingsService.RegisterSetting("Netlist Viewer", "Backend", "NetlistViewer_Backend_Address",
@@ -294,5 +308,6 @@ public class OnewareNetlistReaderFrontendModule : IModule
 
         // Subscribe the FrontendService _AFTER_ the relevant settings have been registered
         ServiceManager.GetService<FrontendService>().SubscribeToSettings();
+        ServiceManager.GetService<IFpgaBbService>().SubscribeToSettings();
     }
 }

@@ -13,7 +13,8 @@ public class YosysService : IYosysService
     private ICustomLogger _logger;
     private IChildProcessService _childProcessService;
     private IToolExecuterService _toolExecuterService;
-    
+    private IFpgaBbService _fpgaBbService;
+
     private string _yosysPath = string.Empty;
 
     public YosysService()
@@ -23,10 +24,12 @@ public class YosysService : IYosysService
         _logger = ServiceManager.GetCustomLogger();
         _childProcessService = ServiceManager.GetService<IChildProcessService>();
         _toolExecuterService = ServiceManager.GetService<IToolExecuterService>();
-        
-        _settingsService.GetSettingObservable<string>("OssCadSuite_Path").Subscribe(x => _yosysPath = Path.Combine(x, "bin", "yosys"));
+        _fpgaBbService = ServiceManager.GetService<IFpgaBbService>();
+
+        _settingsService.GetSettingObservable<string>("OssCadSuite_Path")
+            .Subscribe(x => _yosysPath = Path.Combine(x, "bin", "yosys"));
     }
-    
+
     public async Task<bool> LoadVhdlAsync(IProjectFile file)
     {
         throw new NotImplementedException();
@@ -35,12 +38,12 @@ public class YosysService : IYosysService
     public async Task<bool> LoadVerilogAsync(IProjectFile file)
     {
         string workingDirectory = Path.Combine(file.Root!.FullPath, "build", "netlist");
-        
+
         if (!Directory.Exists(workingDirectory))
         {
             Directory.CreateDirectory(workingDirectory);
         }
-        
+
         string top = Path.GetFileNameWithoutExtension(file.FullPath);
 
         List<string> files = new List<string>();
@@ -53,62 +56,70 @@ public class YosysService : IYosysService
         {
             UniversalFpgaProjectRoot root = file.Root as UniversalFpgaProjectRoot;
             IEnumerable<string> verilogFiles = root.Files
-                .Where(x => !root.CompileExcluded.Contains(x))  // Exclude excluded files
-                .Where(x => x.Extension is ".v")                // Include only Verilog and SystemVerilog files
-                .Where(x=> !root.TestBenches.Contains(x))       // Exclude testbenches
+                .Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
+                .Where(x => x.Extension is ".v") // Include only Verilog and SystemVerilog files
+                .Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
                 .Select(x => x.FullPath);
             // TODO
             // get verilog files
-            
+
             files.AddRange(verilogFiles);
         }
 
         List<string> yosysArgs =
-            [ "-p", $"read_verilog \"{string.Join("\" \"", files)}\"; read_verilog -lib -specify +/gatemate/cells_sim.v +/gatemate/cells_bb.v; hierarchy -check -top {top}; proc; memory -nomap; flatten -scopename; write_json -compat-int {top}.json" ];
-        
+        [
+            "-p",
+            $"read_verilog \"{string.Join("\" \"", files)}\"; {_fpgaBbService.getBbCommand()} hierarchy -check -top {top}; proc; memory -nomap; flatten -scopename; write_json -compat-int {top}.json"
+        ];
+
         bool success = false;
         string stdout = string.Empty;
         string stderr = string.Empty;
-        
-        (success, stdout, stderr) = await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
-        
+
+        (success, stdout, stderr) =
+            await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
+
         _logger.Log(stderr);
-        
+
         return success;
     }
-    
+
     public async Task<bool> LoadSystemVerilogAsync(IProjectFile file)
     {
         string workingDirectory = Path.Combine(file.Root!.FullPath, "build", "netlist");
-        
+
         if (!Directory.Exists(workingDirectory))
         {
             Directory.CreateDirectory(workingDirectory);
         }
-        
+
         string top = Path.GetFileNameWithoutExtension(file.FullPath);
 
-        
+
         UniversalFpgaProjectRoot root = file.Root as UniversalFpgaProjectRoot;
         IEnumerable<string> files = root.Files
-            .Where(x => !root.CompileExcluded.Contains(x))  // Exclude excluded files
-            .Where(x => x.Extension is ".sv")                // Include only SystemVerilog files
-            .Where(x=> !root.TestBenches.Contains(x))       // Exclude testbenches
+            .Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
+            .Where(x => x.Extension is ".sv") // Include only SystemVerilog files
+            .Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
             .Select(x => x.FullPath);
         // TODO
         // get verilog files
 
         List<string> yosysArgs =
-            ["-m", "slang", "-p", $"slang \"{string.Join("\" \"", files)}\"; hierarchy -top {top}; proc; memory -nomap; opt -full; flatten -scopename; write_json -compat-int netlist.json" ];
-        
+        [
+            "-m", "slang", "-p",
+            $"slang \"{string.Join("\" \"", files)}\"; hierarchy -top {top}; proc; memory -nomap; opt -full; flatten -scopename; write_json -compat-int netlist.json"
+        ];
+
         bool success = false;
         string stdout = string.Empty;
         string stderr = string.Empty;
 
-        (success, stdout, stderr) = await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
-        
+        (success, stdout, stderr) =
+            await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
+
         _logger.Log(stdout);
-        
+
         return success;
     }
 
