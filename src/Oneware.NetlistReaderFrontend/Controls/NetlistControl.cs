@@ -29,6 +29,8 @@ public class NetlistControl : TemplatedControl
             (o, v) => o.Items = v, defaultBindingMode: BindingMode.TwoWay);
 
     private IEnumerable _items = new AvaloniaList<object>();
+    
+    private IEnumerable _renderableItems = new AvaloniaList<object>();
 
     public IEnumerable Items
     {
@@ -259,6 +261,8 @@ public class NetlistControl : TemplatedControl
         new Typeface(font, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
 
     private UInt64 _currentNetlistId;
+    
+    private bool _itemsInvalidated = false;
 
     static NetlistControl()
     {
@@ -269,7 +273,7 @@ public class NetlistControl : TemplatedControl
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
-        if (change.Property == ItemsProperty || change.Property == OffsetXProperty ||
+        if (change.Property == OffsetXProperty ||
             change.Property == OffsetYProperty || change.Property == CurrentScaleProperty ||
             change.Property == IsPointerOverProperty)
         {
@@ -279,6 +283,12 @@ public class NetlistControl : TemplatedControl
         if (!IsInitialized)
         {
             return;
+        }
+
+        if (change.Property == ItemsProperty)
+        {
+            _itemsInvalidated = true;
+            Redraw();
         }
 
         if (change.Property == IsLoadedProperty)
@@ -462,215 +472,225 @@ public class NetlistControl : TemplatedControl
             OffsetY += PointerY - PointerY * step * deltaScale;
         }
 
-        foreach (NetlistElement element in _items)
+        if (!_itemsInvalidated)
         {
-            switch (element.Type)
+            foreach (NetlistElement element in _items)
             {
-                // Node
-                case 1:
-                    if (element.ZIndex > lastVisibleNodeZIndex + 1)
-                    {
-                        continue;
-                    }
-
-
-                    height = element.Height * CurrentScale;
-                    width = element.Width * CurrentScale;
-                    x = ((element.xPos + element.Width / 2)) * CurrentScale;
-                    y = ((element.yPos + element.Height / 2)) * CurrentScale;
-
-                    x -= width / 2;
-                    y -= height / 2;
-
-                    x += OffsetX;
-                    y += OffsetY;
-
-                    rect = new Rect(x, y, width, height);
-
-                    if ((height >= NodeScaleClip && width >= NodeScaleClip) &&
-                        (containsBounds(rect) || intersectsBounds(rect)))
-                    {
-                        context.DrawRectangle(rectFillBrush, borderPen, rect);
-
-                        renderedNodeList.Add(new DRect(x, y, width, height, element.ZIndex, element));
-
-                        // Dropshadow
-
-                        // border width + drop shadow width / 2
-                        x += 2d * CurrentScale;
-                        y += 2d * CurrentScale;
-
-                        start = new Point(x, y + height);
-                        bend = new Point(x + width, y + height);
-                        end = new Point(x + width, y);
-
-                        context.DrawLine(dropShadowPen, start, bend);
-                        context.DrawLine(dropShadowPen, bend, end);
-
-                        previousNodeInView = true;
-
-                        lastVisibleNodeZIndex = element.ZIndex;
-                    }
-                    else
-                    {
-                        previousNodeInView = false;
-                    }
-
-                    break;
-
-                // Edge
-                case 2:
-                    if (element.Points == null || !previousNodeInView || element.ZIndex > lastVisibleNodeZIndex + 1)
-                    {
-                        continue;
-                    }
-
-                    points = new List<Point>(element.Points.Count);
-
-                    previousPointInBounds = true;
-                    drawLine = false;
-
-                    foreach (Point point in element.Points)
-                    {
-                        points.Add(new Point((point.X + element.xPos) * CurrentScale + OffsetX,
-                            (point.Y + element.yPos) * CurrentScale + OffsetY));
-                    }
-
-                    for (int i = 1; i < points.Count; i++)
-                    {
-                        drawLine = false;
-                        currentPointInBounds = isInBounds(points[i]);
-
-                        if ((points[i - 1].X - points[i].X) * (points[i - 1].X - points[i].X) +
-                            (points[i - 1].Y - points[i].Y) * (points[i - 1].Y - points[i].Y) <=
-                            EdgeLengthScaleClip * EdgeLengthScaleClip)
+                switch (element.Type)
+                {
+                    // Node
+                    case 1:
+                        if (element.ZIndex > lastVisibleNodeZIndex + 1)
                         {
                             continue;
                         }
 
-                        if (previousPointInBounds)
+
+                        height = element.Height * CurrentScale;
+                        width = element.Width * CurrentScale;
+                        x = ((element.xPos + element.Width / 2)) * CurrentScale;
+                        y = ((element.yPos + element.Height / 2)) * CurrentScale;
+
+                        x -= width / 2;
+                        y -= height / 2;
+
+                        x += OffsetX;
+                        y += OffsetY;
+
+                        rect = new Rect(x, y, width, height);
+
+                        if ((height >= NodeScaleClip && width >= NodeScaleClip) &&
+                            (containsBounds(rect) || intersectsBounds(rect)))
                         {
-                            drawLine = true;
+                            context.DrawRectangle(rectFillBrush, borderPen, rect);
+
+                            renderedNodeList.Add(new DRect(x, y, width, height, element.ZIndex, element));
+
+                            // Dropshadow
+
+                            // border width + drop shadow width / 2
+                            x += 2d * CurrentScale;
+                            y += 2d * CurrentScale;
+
+                            start = new Point(x, y + height);
+                            bend = new Point(x + width, y + height);
+                            end = new Point(x + width, y);
+
+                            context.DrawLine(dropShadowPen, start, bend);
+                            context.DrawLine(dropShadowPen, bend, end);
+
+                            previousNodeInView = true;
+
+                            lastVisibleNodeZIndex = element.ZIndex;
                         }
-                        else if (currentPointInBounds)
+                        else
                         {
-                            drawLine = true;
-                        }
-                        else if (intersectsBounds(points[i - 1], points[i]))
-                        {
-                            drawLine = true;
+                            previousNodeInView = false;
                         }
 
-                        previousPointInBounds = currentPointInBounds;
+                        break;
 
-                        if (drawLine)
+                    // Edge
+                    case 2:
+                        if (element.Points == null || !previousNodeInView || element.ZIndex > lastVisibleNodeZIndex + 1)
                         {
-                            context.DrawLine(
-                                element.SignalType == "BUNDLED" || element.SignalType == "BUNDLED_CONSTANT"
-                                    ? bundledEdgePen
-                                    : edgePen, points[i - 1], points[i]);
+                            continue;
+                        }
 
-                            if (element.IsHighlighted && i != points.Count - 2)
+                        points = new List<Point>(element.Points.Count);
+
+                        previousPointInBounds = true;
+                        drawLine = false;
+
+                        foreach (Point point in element.Points)
+                        {
+                            points.Add(new Point((point.X + element.xPos) * CurrentScale + OffsetX,
+                                (point.Y + element.yPos) * CurrentScale + OffsetY));
+                        }
+
+                        for (int i = 1; i < points.Count; i++)
+                        {
+                            drawLine = false;
+                            currentPointInBounds = isInBounds(points[i]);
+
+                            if ((points[i - 1].X - points[i].X) * (points[i - 1].X - points[i].X) +
+                                (points[i - 1].Y - points[i].Y) * (points[i - 1].Y - points[i].Y) <=
+                                EdgeLengthScaleClip * EdgeLengthScaleClip)
                             {
-                                context.DrawLine(highlightPen, points[i - 1], points[i]);
+                                continue;
                             }
 
-                            renderedEdgeList.Add(new DLine(points[i - 1], points[i], element.ZIndex, element));
+                            if (previousPointInBounds)
+                            {
+                                drawLine = true;
+                            }
+                            else if (currentPointInBounds)
+                            {
+                                drawLine = true;
+                            }
+                            else if (intersectsBounds(points[i - 1], points[i]))
+                            {
+                                drawLine = true;
+                            }
+
+                            previousPointInBounds = currentPointInBounds;
+
+                            if (drawLine)
+                            {
+                                context.DrawLine(
+                                    element.SignalType == "BUNDLED" || element.SignalType == "BUNDLED_CONSTANT"
+                                        ? bundledEdgePen
+                                        : edgePen, points[i - 1], points[i]);
+
+                                if (element.IsHighlighted && i != points.Count - 2)
+                                {
+                                    context.DrawLine(highlightPen, points[i - 1], points[i]);
+                                }
+
+                                renderedEdgeList.Add(new DLine(points[i - 1], points[i], element.ZIndex, element));
+                            }
                         }
-                    }
 
 
-                    break;
+                        break;
 
-                // Label
-                case 3:
-                    // Port Labels are two levels higher than the corresponding node, therefore +2 instead of +1 is used
+                    // Label
+                    case 3:
+                        // Port Labels are two levels higher than the corresponding node, therefore +2 instead of +1 is used
 
-                    if (element.ZIndex > lastVisibleNodeZIndex + 2)
-                    {
+                        if (element.ZIndex > lastVisibleNodeZIndex + 2)
+                        {
+                            continue;
+                        }
+
+                        height = element.Height * CurrentScale;
+                        width = element.Width * CurrentScale;
+                        x = (element.xPos + (element.Width / 2)) * CurrentScale;
+                        y = (element.yPos + (element.Height / 2)) * CurrentScale;
+
+                        x -= width / 2;
+                        y -= height / 2;
+
+                        x += OffsetX;
+                        y += OffsetY;
+
+                        boundingBox = new Rect(x, y, width, height);
+
+                        if (height >= LabelScaleClip && (intersectsBounds(boundingBox) || containsBounds(boundingBox)))
+                        {
+                            FormattedText text = new FormattedText(element.LabelText, CultureInfo.InvariantCulture,
+                                FlowDirection.LeftToRight, typeface, 10 * CurrentScale, textBrush);
+
+                            context.DrawText(text, new Point(x, y));
+
+                            renderedLabelList.Add(new DRect(x, y, width, height, element.ZIndex, element));
+                        }
+
+                        break;
+
+                    // Junction
+                    case 4:
+                        if (element.ZIndex > lastVisibleNodeZIndex + 2)
+                        {
+                            continue;
+                        }
+
+                        x = element.xPos * CurrentScale;
+                        y = element.yPos * CurrentScale;
+                        radius = 3.8d * CurrentScale;
+
+                        x += OffsetX;
+                        y += OffsetY;
+
+                        center = new Point(x, y);
+
+                        if (radius * 2 >= JunctionScaleClip && isInBounds(center))
+                        {
+                            context.DrawEllipse(ellipseFillBrush, null, center, radius, radius);
+
+                            renderedJunctionList.Add(new DCircle(x, y, radius, element.ZIndex, element));
+                        }
+
+                        break;
+
+                    // Port
+                    case 5:
+                        if (element.ZIndex > lastVisibleNodeZIndex + 1)
+                        {
+                            continue;
+                        }
+
+                        edgeLength = 10.0d * CurrentScale;
+                        x = (element.xPos + 5.0d) * CurrentScale;
+                        y = (element.yPos + 5.0d) * CurrentScale;
+
+                        x += OffsetX;
+                        y += OffsetY;
+
+                        rect = new Rect(x - edgeLength / 2, y - edgeLength / 2, edgeLength, edgeLength);
+
+                        if (edgeLength >= PortScaleClip && (intersectsBounds(rect) || containsBounds(rect)))
+                        {
+                            context.DrawRectangle(rectFillBrush, borderPen, rect);
+
+                            renderedPortList.Add(new DRect(rect.X, rect.Y, edgeLength, edgeLength, element.ZIndex,
+                                element));
+                        }
+
+                        break;
+
+                    default:
                         continue;
-                    }
+                }
 
-                    height = element.Height * CurrentScale;
-                    width = element.Width * CurrentScale;
-                    x = (element.xPos + (element.Width / 2)) * CurrentScale;
-                    y = (element.yPos + (element.Height / 2)) * CurrentScale;
-
-                    x -= width / 2;
-                    y -= height / 2;
-
-                    x += OffsetX;
-                    y += OffsetY;
-
-                    boundingBox = new Rect(x, y, width, height);
-
-                    if (height >= LabelScaleClip && (intersectsBounds(boundingBox) || containsBounds(boundingBox)))
-                    {
-                        FormattedText text = new FormattedText(element.LabelText, CultureInfo.InvariantCulture,
-                            FlowDirection.LeftToRight, typeface, 10 * CurrentScale, textBrush);
-
-                        context.DrawText(text, new Point(x, y));
-
-                        renderedLabelList.Add(new DRect(x, y, width, height, element.ZIndex, element));
-                    }
-
+                if (_itemsInvalidated)
+                {
                     break;
-
-                // Junction
-                case 4:
-                    if (element.ZIndex > lastVisibleNodeZIndex + 2)
-                    {
-                        continue;
-                    }
-
-                    x = element.xPos * CurrentScale;
-                    y = element.yPos * CurrentScale;
-                    radius = 3.8d * CurrentScale;
-
-                    x += OffsetX;
-                    y += OffsetY;
-
-                    center = new Point(x, y);
-
-                    if (radius * 2 >= JunctionScaleClip && isInBounds(center))
-                    {
-                        context.DrawEllipse(ellipseFillBrush, null, center, radius, radius);
-
-                        renderedJunctionList.Add(new DCircle(x, y, radius, element.ZIndex, element));
-                    }
-
-                    break;
-
-                // Port
-                case 5:
-                    if (element.ZIndex > lastVisibleNodeZIndex + 1)
-                    {
-                        continue;
-                    }
-
-                    edgeLength = 10.0d * CurrentScale;
-                    x = (element.xPos + 5.0d) * CurrentScale;
-                    y = (element.yPos + 5.0d) * CurrentScale;
-
-                    x += OffsetX;
-                    y += OffsetY;
-
-                    rect = new Rect(x - edgeLength / 2, y - edgeLength / 2, edgeLength, edgeLength);
-
-                    if (edgeLength >= PortScaleClip && (intersectsBounds(rect) || containsBounds(rect)))
-                    {
-                        context.DrawRectangle(rectFillBrush, borderPen, rect);
-
-                        renderedPortList.Add(new DRect(rect.X, rect.Y, edgeLength, edgeLength, element.ZIndex,
-                            element));
-                    }
-
-                    break;
-
-                default:
-                    continue;
+                }
             }
         }
+        
+        _itemsInvalidated = false;
     }
 
     #region IntersectionTests
