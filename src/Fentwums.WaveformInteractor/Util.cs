@@ -4,13 +4,7 @@ namespace FEntwumS.WfInteractor;
 
 public class Util
 {
-    public static uint ComputeOneAtATimeHash(string input)
-    {
-        // Convert the string to a byte array using UTF8 encoding
-        byte[] data = Encoding.UTF8.GetBytes(input);
-        return ComputeOneAtATimeHash(data);
-    }
-    public static uint ComputeOneAtATimeHash(byte[] data)
+    public static uint ComputeOneAtATimeHash(ReadOnlySpan<byte> data)
     {
         uint hash = 0;
         for (int i = 0; i < data.Length; ++i)

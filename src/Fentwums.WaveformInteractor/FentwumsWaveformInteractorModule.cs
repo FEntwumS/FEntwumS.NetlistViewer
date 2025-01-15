@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
+using System.Text;
 using FEntwumS.WfInteractor.Common;
+using ImTools;
 using Newtonsoft.Json.Linq;
 using OneWare.Essentials.Services;
 using OneWare.Vcd.Parser.Data;
@@ -60,30 +62,14 @@ public class FentwumsWaveformInteractorModule : IModule
                         _fentwumsScopes.Add(extendedScopeModel);
                     }
                         
-                    // get Bit indices and hdlname from backend
-                    IProjectManagerService projectManagerService = containerProvider.Resolve<IProjectManagerService>();
                     IProjectExplorerService projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
-                    
-                    // netlist hash is uint64, generated from oneAtATime(absolutepathtonetlist) 32 MSBs OneAtATime(netlistcontent) 32 LSBs
-                    // netlist path is always in ${ONEWAREPROJECTROOT}/build/netlist/<toplevelEntity>.json
-                    // compute hash of netlist
-                    // TODO: RootFolderPath is only first open Project, not the Root of open .vcd file
-                    // string netlistPath = projectExplorerService.ActiveProject.RootFolderPath + "build/netlist/netlists.json";
-                    // byte[] fileContent = File.ReadAllBytes(netlistPath);
-                    // UInt32 hashPath = Util.ComputeOneAtATimeHash(netlistPath);
-                    // UInt32 hashContent = Util.ComputeOneAtATimeHash(fileContent);
-                    //
-                    // UInt64 netHash = ((UInt64)hashPath << 32) | hashContent;
-                    
-                    // get netlist information
-                    // Task<JObject> respObj = GetNetInformation(netHash.ToString());
-                    // for now just use hardcoded "1"
-                    Task<JObject> respObj = GetNetInformationAsync("1");
-                    JObject netInfo = respObj.Result;
-                    ParseNetInformation(netInfo);
-                    
-                    // TODO: parse response and add bitindices to vcdScopeModel Signals
-                    Console.WriteLine($"Loaded {_fentwumsScopes.Count} scopes");
+                    string netlistPath =  projectExplorerService.ActiveProject.RootFolderPath + "/build/netlist/netlist.json";
+
+                    Task.Run(async () =>
+                    {
+                        JObject netInfo = await GetNetInformationAsync(netlistPath);
+                        ParseNetInformation(netInfo);
+                    });
                 };
 
                     
@@ -91,6 +77,8 @@ public class FentwumsWaveformInteractorModule : IModule
         };
         
     }
+    
+    
     
     private async Task InitializeHttpAsync()
     {
@@ -115,8 +103,29 @@ public class FentwumsWaveformInteractorModule : IModule
     }
     
     // retrieves information about the netlist form the backend
-    private async Task<JObject> GetNetInformationAsync(string netHash)
+    private async Task<JObject> GetNetInformationAsync(string netlistPath)
     {
+        // get Bit indices and hdlname from backend
+
+        // netlist hash is uint64, generated from oneAtATime(absolutepathtonetlist) 32 MSBs OneAtATime(netlistcontent) 32 LSBs
+        // netlist path is always in ${ONEWAREPROJECTROOT}/build/netlist/<toplevelEntity>.json
+        // compute hash of netlist
+        if (!File.Exists(netlistPath))
+        {
+            Console.WriteLine("File not found.");
+            return null;
+        }
+
+        string fileContent = await File.ReadAllTextAsync(netlistPath);
+        
+        ReadOnlySpan<byte> contentByteSpan = new ReadOnlySpan<Byte>(Encoding.UTF8.GetBytes(fileContent));
+        ReadOnlySpan<byte> pathByteSpan = new ReadOnlySpan<byte>(Encoding.UTF8.GetBytes(netlistPath));
+                    
+        UInt32 hashPath = Util.ComputeOneAtATimeHash(pathByteSpan);
+        UInt32 hashContent = Util.ComputeOneAtATimeHash(contentByteSpan);
+                    
+        UInt64 netHash = ((UInt64)hashPath << 32) | hashContent;
+        
         Console.WriteLine("Requesting Backend to populate Signals with bitindeces and hdlname/scope");
         string url = "http://localhost:8080/get-net-information";
         
@@ -124,8 +133,8 @@ public class FentwumsWaveformInteractorModule : IModule
         {
             // Create MultipartFormDataContent for form data
             var formData = new MultipartFormDataContent();
-            formData.Add(new StringContent(netHash), "hash");
-
+            formData.Add(new StringContent(netHash.ToString()), "hash");
+            
             // Send POST request
             var response = await _httpClient.PostAsync(url, formData).ConfigureAwait(false);            
             response.EnsureSuccessStatusCode();
@@ -147,43 +156,69 @@ public class FentwumsWaveformInteractorModule : IModule
     
     public void ParseNetInformation(JObject netInfo)
     {
+        // write to .json
+        string jsonString = netInfo.ToString();
+        File.WriteAllText("/home/jonas/tin/fentwums/uart-verilog/yosys_verilog/netinfo.json", jsonString);
+        
         // Check if the "signals" key exists
         if (!netInfo.TryGetValue("signals", out JToken signalsToken) || signalsToken is not JObject signalsObject)
         {
             Console.WriteLine("The provided netInfo does not contain valid 'signals' data.");
             return;
         }
-        // Iterate over signals
-        foreach (var signal in signalsObject)
+        // Iterate over signals and search corresponding signals from Json
+        foreach (var scopeModel in _fentwumsScopes)
         {
-            string signalName = signal.Key;
-            JObject signalDetails = signal.Value as JObject;
-
-            if (signalDetails == null)
-            {
-                Console.WriteLine($"Signal {signalName} does not have valid details.");
-                continue;
-            }
-            // Extract "scope"
-            string scope = signalDetails.GetValue("scope")?.ToString() ?? "Unknown";
-
-            // Extract "bits"
-            JToken bitsToken = signalDetails.GetValue("bits");
-            if (bitsToken is JArray bitsArray)
-            {
-                List<int> bits = bitsArray.Select(bit => bit.ToObject<int>()).ToList();
-
-                // Output parsed data
-                Console.WriteLine($"Signal: {signalName}");
-                Console.WriteLine($"  Scope: {scope}");
-                Console.WriteLine($"  Bits: {string.Join(", ", bits)}");
-            }
-            else
-            {
-                Console.WriteLine($"Signal {signalName} does not have valid 'bits' data.");
-            }
+            SearchSignalsInScope(scopeModel, signalsObject);
         }
     }
 
+    private void SearchSignalsInScope(ExtendedVcdScopeModel scope, JObject signalsObject)
+    {
+        // Iterate over all the signals in the scope
+        foreach (var signal in scope.ExtendedSignals)
+        {
+            // Search for the signal in the JObject
+            if (signalsObject.ContainsKey(signal.OriginalSignal.Name))
+            {
+                JObject? signalDetails = signalsObject[signal.OriginalSignal.Name] as JObject;
+
+                if (signalDetails == null)
+                {
+                    Console.WriteLine($"Signal {signal.OriginalSignal.Name} does not have valid details.");
+                    continue;
+                }
+                
+                // at first only print out scopeName associated with signal, without reconstructing the former scope hierarchy
+                string scopeName = signalDetails.GetValue("scope")?.ToString() ?? "Unknown";
+
+                // write bit indices to signal as property
+                JToken bitsToken = signalDetails.GetValue("bits");
+                if (bitsToken is JArray bitsArray)
+                {
+                    List<int> bits = bitsArray.Select(bit => bit.ToObject<int>()).ToList();
+                    // use first bit index to identify the signal
+                    int signalId = bits.FirstOrDefault(); 
+                    signal.BitIndexId = signalId;
+                    signal.BitIndices = bits;
+                }
+                else
+                {
+                    Console.WriteLine($"Signal {signal.OriginalSignal.Name} does not have valid 'bits' data.");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Signal {signal.OriginalSignal.Name} not found in JObject.");
+            }
+        }
+
+        // Recursively search through subscopes - unnecessary for flattened netlists, since only one layer exists.
+        foreach (var vcdScopeModel in scope.Scopes)
+        {
+            var subScope = (ExtendedVcdScopeModel)vcdScopeModel;
+            SearchSignalsInScope(subScope, signalsObject); // Recurse into subscopes
+        }
+    }
 }
 

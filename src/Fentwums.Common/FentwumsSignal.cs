@@ -24,7 +24,8 @@ namespace OneWare.Vcd.Viewer.Models
 
             public IVcdSignal OriginalSignal { get; }
 
-            public string BitIndices { get; set; }
+            public List<int> BitIndices { get; set; }
+            public int BitIndexId { get; set; }
         }
     }
 }
