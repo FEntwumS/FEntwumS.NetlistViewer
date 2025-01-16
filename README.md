@@ -56,6 +56,9 @@ The recommended command to generate a netlist is
 `hierarchy -check -top <top>; proc; memory -nomap; flatten -scopename; write_json -compat-int <top>.json`. This sequence
 expects the HDL files to be fully loaded.
 
+While the viewing of post-synthesis netlists is currently not well-supported, you should be able to view most
+post-synthesis netlists.
+
 # Troubleshooting
 
 ## ERROR: Module ... is not part of the design
@@ -72,3 +75,13 @@ to right-click your toplevel entity and use the "View netlist for [...]" option.
 ## I generated a netlist myself, but I can't seem to find it in the project explorer
 
 By default, OneWare Studio does not display `.json` files in the project explorer.
+
+## An internal server error occured. Please file a bug report if this problem persists.
+
+First, please make sure that you have selected the correct device manufacturer and device family in the settings. If the
+design you are trying to view is written in VHDL, make sure that you have set the correct VHDL standard level in the
+settings (the default is 93c). You can find a detailed explanation of the VHDL standard levels in
+the [GHDL documentation](https://ghdl.github.io/ghdl/using/ImplementationOfVHDL.html#vhdl-standards).
+
+Please file a bug report including the netlist that you wanted to view. If you used our plugin to generate the netlist,
+you can find the file under `build/netlist/<top>.json` in your project directory.
