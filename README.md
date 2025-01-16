@@ -3,7 +3,7 @@
 This is a beta release. Bugs are to be expected. If you notice any issues, please submit bug reports to help us improve
 the software.
 
-![](https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/assets/netlist-view.jpg)
+![](https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/assets/netlist-view.png)
 
 # About
 
