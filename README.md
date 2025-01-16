@@ -3,6 +3,8 @@
 This is a beta release. Bugs are to be expected. If you notice any issues, please submit bug reports to help us improve
 the software.
 
+![](https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/assets/netlist-view.jpg)
+
 # About
 
 This repository contains two plugins for [OneWare Studio](https://github.com/one-ware/OneWare). They are developed by
