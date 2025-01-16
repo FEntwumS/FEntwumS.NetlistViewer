@@ -35,7 +35,7 @@ public class ToolExecuterService : IToolExecuterService
             return true;
         }, x =>
         {
-            if (x.StartsWith("ghdl:error:"))
+            if (x.StartsWith("ghdl:error:") || x.StartsWith("ERROR:"))
             {
                 _logger.Error(x);
                 return false;
