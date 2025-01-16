@@ -5,8 +5,8 @@ the software.
 
 # About
 
-This repository contains two plugins for [OneWare Studio](https://github.com/one-ware/OneWare). These are developed by
-TH Köln (University of Applied Sciences Cologne) as part of
+This repository contains two plugins for [OneWare Studio](https://github.com/one-ware/OneWare). They are developed by
+TH Köln (Cologne University of Applied Sciences) as part of
 the [FEntwumS research project](https://www.th-koeln.de/informations-medien-und-elektrotechnik/forschungsprojekt-fentwums_121126.php).
 
 ## Netlist viewer
@@ -66,3 +66,7 @@ the [Yosys documentation](https://yosyshq.readthedocs.io/projects/yosys/en/lates
 
 The builtin Json Netlist generation does not output a flattened netlist. If you want to expand your entities, you need
 to right-click your toplevel entity and use the "View netlist for [...]" option.
+
+## I generated a netlist myself, but I can't seem to find it in the project explorer
+
+By default, OneWare Studio does not display `.json` files in the project explorer.
