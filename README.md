@@ -85,3 +85,10 @@ the [GHDL documentation](https://ghdl.github.io/ghdl/using/ImplementationOfVHDL.
 
 Please file a bug report including the netlist that you wanted to view. If you used our plugin to generate the netlist,
 you can find the file under `build/netlist/<top>.json` in your project directory.
+
+## The server could not be reached or The address ... could not be resolved
+
+If you are using a remote backend installation, please make sure that you have entered the correct backend address and 
+port and that the provided address is reachable.
+
+If you are using a local backend installation, please file a bug report.
