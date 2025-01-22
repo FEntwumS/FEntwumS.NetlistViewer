@@ -65,6 +65,11 @@ entry `*.json` to the list `Files to Include`.
 
 # Troubleshooting
 
+## I started OneWare Studio and the tab that should show my netlist is empty
+
+Currently, it is not possible to store the netlist when OneWare Studio is closed. Please close the tab and regenerate
+the netlist.
+
 ## ERROR: Module ... is not part of the design
 
 Please make sure that you have specified the correct device manufacturer and device family in the settings.
