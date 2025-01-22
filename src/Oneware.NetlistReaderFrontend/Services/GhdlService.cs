@@ -60,7 +60,7 @@ public class GhdlService : IGhdlService
 
         if (vhdlStandard == null)
         {
-            _logger.Error("GHDL standard is not set");
+            _logger.Error("ERROR: GHDL standard is not set");
             return false;
         }
         
