@@ -78,7 +78,12 @@ Please edit your project settings to include the used VHDL-Standard.
 
 Please make sure that you have specified the correct device manufacturer and device family in the settings.
 The available options are listed on the synth_<...> pages in
-the [Yosys documentation](https://yosyshq.readthedocs.io/projects/yosys/en/latest/cmd_ref.html)
+the [Yosys documentation](https://yosyshq.readthedocs.io/projects/yosys/en/latest/cmd_ref.html).
+
+## `ERROR: Module <...> not found!`
+
+If you have recently updated any plugins, e.g. the OSS Cad Suite integration plugin, please restart OneWare Studio. If
+this issue persists after a restart, please file a bug report.
 
 ## I generated a netlist using the OneWare Studio command, but I can't see all my entity instances
 
