@@ -17,7 +17,7 @@ The FEntwumS Netlist Viewer plugin allows users to automatically generate and in
 designs inside OneWare Studio. It is a frontend building on
 the [FEntwumS Netlist Reader Backend](https://github.com/FEntwumS/NetlistReaderBackend). You can run the backend, which
 does all the layouting, either on your local machine or on a remote server in your local network. The default (and
-recommended) comfiguration is to run the backend locally. If this is all you need, you just need to install the plugin.
+recommended) configuration is to run the backend locally. If this is all you need, you just need to install the plugin.
 It will install and start the backend automatically.
 
 ### Using a remote backend
@@ -54,10 +54,14 @@ using.
 
 The recommended command to generate a netlist is
 `hierarchy -check -top <top>; proc; memory -nomap; flatten -scopename; write_json -compat-int <top>.json`. This sequence
-expects the HDL files to be fully loaded.
+expects the HDL files to be fully loaded (e.g. using the `read_verilog` command).
 
 While the viewing of post-synthesis netlists is currently not well-supported, you should be able to view most
 post-synthesis netlists.
+
+Since OneWare Studio does not show json files in the Project Explorer, you will need to add the `.json` filetype
+manually. To do this, please right click on the project containing the netlist, choose the `Edit` option and add an
+entry `*.json` to the list `Files to Include`.
 
 # Troubleshooting
 
@@ -69,8 +73,8 @@ the [Yosys documentation](https://yosyshq.readthedocs.io/projects/yosys/en/lates
 
 ## I generated a netlist using the OneWare Studio command, but I can't see all my entity instances
 
-The builtin Json Netlist generation does not output a flattened netlist. If you want to expand your entities, you need
-to right-click your toplevel entity and use the "View netlist for [...]" option.
+The builtin Json Netlist generation does not output a flattened netlist. If you want to be able to expand your entities,
+you need to right-click your toplevel entity and use the "View netlist for [...]" option.
 
 ## I generated a netlist myself, but I can't seem to find it in the project explorer
 
@@ -86,9 +90,9 @@ the [GHDL documentation](https://ghdl.github.io/ghdl/using/ImplementationOfVHDL.
 Please file a bug report including the netlist that you wanted to view. If you used our plugin to generate the netlist,
 you can find the file under `build/netlist/<top>.json` in your project directory.
 
-## The server could not be reached or The address ... could not be resolved
+## `The server could not be reached` or `The address ... could not be resolved`
 
-If you are using a remote backend installation, please make sure that you have entered the correct backend address and 
+If you are using a remote backend installation, please make sure that you have entered the correct backend address and
 port and that the provided address is reachable.
 
 If you are using a local backend installation, please file a bug report.
