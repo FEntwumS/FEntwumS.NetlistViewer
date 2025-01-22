@@ -70,6 +70,10 @@ entry `*.json` to the list `Files to Include`.
 Currently, it is not possible to store the netlist when OneWare Studio is closed. Please close the tab and regenerate
 the netlist.
 
+## ERROR: GHDL standard is not set
+
+Please edit your project settings to include the used VHDL-Standard.
+
 ## ERROR: Module ... is not part of the design
 
 Please make sure that you have specified the correct device manufacturer and device family in the settings.
