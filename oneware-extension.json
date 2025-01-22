@@ -25,7 +25,8 @@
   "sourceUrl": "https://github.com/GithubUser/Oneware.NetlistReaderFrontend/releases/download",
   "versions": [
     {
-      "version": "0.1",
+      "version": "0.5.5",
+      "minStudioVersion": "0.21.0.0",
       "targets": [
         {
           "target": "all"
