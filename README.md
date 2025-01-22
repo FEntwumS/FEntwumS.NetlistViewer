@@ -70,11 +70,11 @@ entry `*.json` to the list `Files to Include`.
 Currently, it is not possible to store the netlist when OneWare Studio is closed. Please close the tab and regenerate
 the netlist.
 
-## ERROR: GHDL standard is not set
+## `ERROR: GHDL standard is not set`
 
 Please edit your project settings to include the used VHDL-Standard.
 
-## ERROR: Module ... is not part of the design
+## `ERROR: Module ... is not part of the design`
 
 Please make sure that you have specified the correct device manufacturer and device family in the settings.
 The available options are listed on the synth_<...> pages in
@@ -89,7 +89,7 @@ you need to right-click your toplevel entity and use the "View netlist for [...]
 
 By default, OneWare Studio does not display `.json` files in the project explorer.
 
-## An internal server error occured. Please file a bug report if this problem persists.
+## `An internal server error occured. Please file a bug report if this problem persists.`
 
 First, please make sure that you have selected the correct device manufacturer and device family in the settings. If the
 design you are trying to view is written in VHDL, make sure that you have set the correct VHDL standard level in the
