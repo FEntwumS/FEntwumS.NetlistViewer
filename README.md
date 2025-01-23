@@ -10,6 +10,11 @@ the software.
 Currently, only Windows is supported, but the plugin should work on all platforms OneWare Studio runs on. Additionally,
 your system needs to have Java 21 or higher installed.
 
+## Dependencies
+
+Your installation of OneWare Studio needs to have the OSS Cad Suite Integration installed with version 2025-01-22 or
+later.
+
 # About
 
 This repository contains two plugins for [OneWare Studio](https://github.com/one-ware/OneWare). They are developed by
