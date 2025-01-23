@@ -69,7 +69,7 @@ public class YosysService : IYosysService
         List<string> yosysArgs =
         [
             "-p",
-            $"read_verilog \"{string.Join("\" \"", files)}\"; scratchpad -set flatten.separator \"/\"; {_fpgaBbService.getBbCommand()} hierarchy -check -top {top}; proc; memory -nomap; flatten -scopename; write_json -compat-int {top}.json"
+            $"read_verilog \"{string.Join("\" \"", files)}\"; scratchpad -set flatten.separator \";\"; {_fpgaBbService.getBbCommand()} hierarchy -check -top {top}; proc; memory -nomap; flatten -scopename; write_json -compat-int {top}.json"
         ];
 
         bool success = false;
@@ -108,7 +108,7 @@ public class YosysService : IYosysService
         List<string> yosysArgs =
         [
             "-m", "slang", "-p",
-            $"read_slang \"{string.Join("\" \"", files)}\"; scratchpad -set flatten.separator \"/\"; hierarchy -top {top}; proc; memory -nomap; opt -full; flatten -scopename; write_json -compat-int netlist.json"
+            $"read_slang \"{string.Join("\" \"", files)}\"; scratchpad -set flatten.separator \";\"; hierarchy -top {top}; proc; memory -nomap; opt -full; flatten -scopename; write_json -compat-int netlist.json"
         ];
 
         bool success = false;
