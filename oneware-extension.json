@@ -5,24 +5,24 @@
   "id": "Oneware.NetlistReaderFrontend",
   "description": "Oneware.NetlistReaderFrontend for OneWare",
   "license": "MIT",
-  "iconUrl": "https://raw.githubusercontent.com/GithubUser/Oneware.NetlistReaderFrontend/main/Icon.png",
+  "iconUrl": "https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/main/Icon.png",
   "tabs": [
     {
       "title": "Readme",
-      "contentUrl": "https://raw.githubusercontent.com/GithubUser/Oneware.NetlistReaderFrontend/main/Extension.md"
+      "contentUrl": "https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/main/Extension.md"
     },
     {
       "title": "License",
-      "contentUrl": "https://raw.githubusercontent.com/GithubUser/Oneware.NetlistReaderFrontend/main/License.md"
+      "contentUrl": "https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/main/License.md"
     }
   ],
   "links": [
     {
       "name": "Github",
-      "url": "https://github.com/GithubUser/Oneware.NetlistReaderFrontend"
+      "url": "https://github.com/FEntwumS/Oneware.NetlistReaderFrontend"
     }
   ],
-  "sourceUrl": "https://github.com/GithubUser/Oneware.NetlistReaderFrontend/releases/download",
+  "sourceUrl": "https://github.com/FEntwumS/Oneware.NetlistReaderFrontend/releases/download",
   "versions": [
     {
       "version": "0.5.5",
