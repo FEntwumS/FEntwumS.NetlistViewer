@@ -5,6 +5,11 @@ the software.
 
 ![](https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/assets/netlist-view.png)
 
+## System requirements
+
+Currently, only Windows is supported, but the plugin should work on all platforms OneWare Studio runs on. Additionally,
+your system needs to have Java 21 or higher installed.
+
 # About
 
 This repository contains two plugins for [OneWare Studio](https://github.com/one-ware/OneWare). They are developed by
