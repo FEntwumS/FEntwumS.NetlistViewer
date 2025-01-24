@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
+using Asmichi.ProcessManagement;
 using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using OneWare.Essentials.Enums;
@@ -32,6 +33,8 @@ public class FrontendService
     private string _backendJarFolder = string.Empty;
 
     private UInt64 currentNetlist = 0;
+
+    private static IChildProcess? backendProcess;
 
     public FrontendService()
     {
@@ -232,7 +235,8 @@ public class FrontendService
 
         if (!File.Exists(json.FullPath))
         {
-            _logger.Error("No json netlist was generated. Please ensure you are using the yosys from the OSS CAD Suite");
+            _logger.Error(
+                "No json netlist was generated. Please ensure you are using the yosys from the OSS CAD Suite");
             return;
         }
 
@@ -280,7 +284,7 @@ public class FrontendService
         else
         {
             resp = await PostAsync("/graphLocalFile?filename=" + json.FullPath + "&hash=" +
-                                       combinedHash, null);
+                                   combinedHash, null);
 
             if (resp == null)
             {
@@ -433,6 +437,11 @@ public class FrontendService
 
     private async Task<bool> StartBackendIfNotStartedAsync()
     {
+        if (backendProcess != null)
+        {
+            return true;
+        }
+
         HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.Add(
@@ -456,7 +465,8 @@ public class FrontendService
 
         if (_useRemoteBackend)
         {
-            _logger.Error("The remote server could not be reached. Make sure the server is started and reachable or switch to the local server");
+            _logger.Error(
+                "The remote server could not be reached. Make sure the server is started and reachable or switch to the local server");
             return false;
         }
 
@@ -477,10 +487,10 @@ public class FrontendService
 
         // Start server to run independently
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-        ServiceManager.GetService<IToolExecuterService>()
+        backendProcess = await ServiceManager.GetService<IToolExecuterService>()
             .ExecuteBackgroundProcessAsync("java", ["-jar", serverJarFile], Path.GetDirectoryName(serverJarFile));
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-        
+
         _logger.Log("Server started", true);
 
         return true;

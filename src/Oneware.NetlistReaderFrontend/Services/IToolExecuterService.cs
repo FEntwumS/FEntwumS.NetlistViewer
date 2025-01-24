@@ -1,9 +1,11 @@
-﻿namespace Oneware.NetlistReaderFrontend.Services;
+﻿using Asmichi.ProcessManagement;
+
+namespace Oneware.NetlistReaderFrontend.Services;
 
 public interface IToolExecuterService
 {
     public Task<(bool success, string stdout, string stderr)> ExecuteToolAsync(string toolPath,
         IReadOnlyList<string> args, string workingDirectory);
     
-    public Task ExecuteBackgroundProcessAsync(string path, IReadOnlyList<string> args, string workingDirectory);
+    public Task<IChildProcess> ExecuteBackgroundProcessAsync(string path, IReadOnlyList<string> args, string workingDirectory);
 }

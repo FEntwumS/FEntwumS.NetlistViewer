@@ -50,7 +50,7 @@ public class ToolExecuterService : IToolExecuterService
         return (success, stdout, stderr);
     }
 
-    public async Task ExecuteBackgroundProcessAsync(string path, IReadOnlyList<string> args, string workingDirectory)
+    public async Task<IChildProcess> ExecuteBackgroundProcessAsync(string path, IReadOnlyList<string> args, string workingDirectory)
     {
         ChildProcessStartInfo info = new ChildProcessStartInfo
         {
@@ -61,6 +61,6 @@ public class ToolExecuterService : IToolExecuterService
         
         var process = ChildProcess.Start(info);
         
-        await process.WaitForExitAsync();
+        return process;
     }
 }
