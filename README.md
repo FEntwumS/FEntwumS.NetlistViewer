@@ -21,6 +21,18 @@ This repository contains two plugins for [OneWare Studio](https://github.com/one
 TH Köln (Cologne University of Applied Sciences) as part of
 the [FEntwumS research project](https://www.th-koeln.de/informations-medien-und-elektrotechnik/forschungsprojekt-fentwums_121126.php).
 
+## Installation
+
+Since this plugin is currently in a testing phase, it is not yet available by default from the OneWare Studio Package
+Manager. To install this plugin, you will need to add a custom package source. Please follow these steps:
+1. Open the settings menu
+2. Go to the `Package Manager` tab
+3. Add a new custom package source pointing to `https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/oneware-extension.json`
+4. Save
+5. Open the package manager
+6. Refresh the package manager
+7. Done! The plugin should now be available for you to install!
+
 ## Netlist viewer
 
 The FEntwumS Netlist Viewer plugin allows users to automatically generate and interactively view netlists for their HDL
