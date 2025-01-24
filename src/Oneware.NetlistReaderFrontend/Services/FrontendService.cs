@@ -34,6 +34,8 @@ public class FrontendService
 
     private UInt64 currentNetlist = 0;
 
+    // Used to store the process handle of the backend process. If the handle is not stored, the process will be
+    // automatically terminated
     private static IChildProcess? backendProcess;
 
     public FrontendService()
