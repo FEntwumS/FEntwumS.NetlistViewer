@@ -25,9 +25,11 @@ the [FEntwumS research project](https://www.th-koeln.de/informations-medien-und-
 
 Since this plugin is currently in a testing phase, it is not yet available by default from the OneWare Studio Package
 Manager. To install this plugin, you will need to add a custom package source. Please follow these steps:
+
 1. Open the settings menu
 2. Go to the `Package Manager` tab
-3. Add a new custom package source pointing to `https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/oneware-extension.json`
+3. Add a new custom package source pointing to
+   `https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/oneware-extension.json`
 4. Save
 5. Open the package manager
 6. Refresh the package manager
@@ -90,6 +92,11 @@ manually. To do this, please right click on the project containing the netlist, 
 entry `*.json` to the list `Files to Include`.
 
 # Troubleshooting
+
+## I cannot find a suitable OSS Cad Suite Integration plugin version
+
+As of now, the required version is not yet available in a publicly released version of OneWare Studio. You can either
+compile OneWare Studio from source or wait until a new release is available.
 
 ## I started OneWare Studio and the tab that should show my netlist is empty
 
