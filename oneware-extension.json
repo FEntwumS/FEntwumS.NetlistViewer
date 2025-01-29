@@ -1,9 +1,9 @@
 {
   "category": "Tools",
   "type": "Plugin",
-  "name": "Oneware.NetlistReaderFrontend Extension",
-  "id": "Oneware.NetlistReaderFrontend",
-  "description": "Oneware.NetlistReaderFrontend for OneWare",
+  "name": "FEntwumS.NetlistReaderFrontend Extension",
+  "id": "FEntwumS.NetlistReaderFrontend",
+  "description": "FEntwumS.NetlistReaderFrontend for OneWare",
   "license": "MIT",
   "iconUrl": "https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/master/Icon.png",
   "tabs": [

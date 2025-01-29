@@ -13,7 +13,7 @@ using Prism.Modularity;
 
 namespace FEntwumS.NetlistReaderFrontend;
 
-public class OnewareNetlistReaderFrontendModule : IModule
+public class FEntwumSNetlistReaderFrontendModule : IModule
 {
     public static readonly Package NetlistPackage = new()
     {

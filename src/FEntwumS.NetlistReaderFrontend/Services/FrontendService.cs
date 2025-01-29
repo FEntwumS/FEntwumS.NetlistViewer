@@ -107,7 +107,7 @@ public class FrontendService
             }
         });
 
-        _settingsService.GetSettingObservable<string>(OnewareNetlistReaderFrontendModule.NetlistPathSetting)
+        _settingsService.GetSettingObservable<string>(FEntwumSNetlistReaderFrontendModule.NetlistPathSetting)
             .Subscribe(x => _backendJarFolder = x);
     }
 
