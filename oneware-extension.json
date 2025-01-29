@@ -9,11 +9,11 @@
   "tabs": [
     {
       "title": "Readme",
-      "contentUrl": "https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/main/Extension.md"
+      "contentUrl": "https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/README.md"
     },
     {
       "title": "License",
-      "contentUrl": "https://github.com/FEntwumS/Oneware.NetlistReaderFrontend/main/License.md"
+      "contentUrl": "https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/License.md"
     }
   ],
   "links": [
