@@ -1,28 +1,28 @@
 {
   "category": "Tools",
   "type": "Plugin",
-  "name": "FEntwumS.NetlistReaderFrontend Extension",
-  "id": "FEntwumS.NetlistReaderFrontend",
-  "description": "FEntwumS.NetlistReaderFrontend for OneWare",
+  "name": "FEntwumS.NetlistViewer Extension",
+  "id": "FEntwumS.NetlistViewer",
+  "description": "FEntwumS.NetlistViewer for OneWare",
   "license": "MIT",
-  "iconUrl": "https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/master/Icon.png",
+  "iconUrl": "https://raw.githubusercontent.com/FEntwumS/FEntwumS.NetlistViewer/master/Icon.png",
   "tabs": [
     {
       "title": "Readme",
-      "contentUrl": "https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/README.md"
+      "contentUrl": "https://raw.githubusercontent.com/FEntwumS/FEntwumS.NetlistViewer/refs/heads/master/README.md"
     },
     {
       "title": "License",
-      "contentUrl": "https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/License.md"
+      "contentUrl": "https://raw.githubusercontent.com/FEntwumS/FEntwumS.NetlistViewer/refs/heads/master/License.md"
     }
   ],
   "links": [
     {
       "name": "Github",
-      "url": "https://github.com/FEntwumS/Oneware.NetlistReaderFrontend"
+      "url": "https://github.com/FEntwumS/FEntwumS.NetlistViewer"
     }
   ],
-  "sourceUrl": "https://github.com/FEntwumS/Oneware.NetlistReaderFrontend/releases/download",
+  "sourceUrl": "https://github.com/FEntwumS/FEntwumS.NetlistViewer/releases/download",
   "versions": [
     {
       "version": "0.6.1",
