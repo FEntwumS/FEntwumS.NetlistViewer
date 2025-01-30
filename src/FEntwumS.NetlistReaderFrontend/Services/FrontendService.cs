@@ -365,7 +365,7 @@ public class FrontendService
         }
     }
 
-    private async Task<HttpResponseMessage?> PostAsync(string URI, HttpContent? content)
+    private async Task<HttpResponseMessage?> PostAsync(string URI, HttpContent? content, bool printErrors = true)
     {
         HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear();
@@ -384,12 +384,12 @@ public class FrontendService
                 if (resp.StatusCode == HttpStatusCode.NotFound)
                 {
                     _logger.Error(
-                        "The requested resource could not be found on the server. This could be due to a server restart. Please Re-Open your netlist.");
+                        "The requested resource could not be found on the server. This could be due to a server restart. Please Re-Open your netlist.", printErrors);
                 }
                 else
                 {
                     _logger.Error(
-                        "An internal server error occured. Please file a bug report if this problem persists.");
+                        "An internal server error occured. Please file a bug report if this problem persists.", printErrors);
                 }
             }
 
@@ -398,7 +398,7 @@ public class FrontendService
         catch (InvalidOperationException e)
         {
             _logger.Error(
-                $"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address");
+                $"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address", printErrors);
             return null;
         }
         catch (HttpRequestException e)
@@ -407,17 +407,17 @@ public class FrontendService
             {
                 case HttpRequestError.NameResolutionError:
                     _logger.Error(
-                        $"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address");
+                        $"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address", printErrors);
                     break;
 
                 case HttpRequestError.ConnectionError:
                     _logger.Error(
-                        $"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address");
+                        $"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address", printErrors);
                     break;
 
                 default:
                     _logger.Error(
-                        "Due to an internal error, the server could not complete the request. Please file a bug report");
+                        "Due to an internal error, the server could not complete the request. Please file a bug report", printErrors);
                     break;
             }
 
@@ -426,13 +426,13 @@ public class FrontendService
         catch (TaskCanceledException e)
         {
             _logger.Error(
-                "The request has timed out. Please increase the request timeout time in the settings menu and try again");
+                "The request has timed out. Please increase the request timeout time in the settings menu and try again", printErrors);
             return null;
         }
         catch (UriFormatException e)
         {
             _logger.Error(
-                $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address");
+                $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address", printErrors);
             return null;
         }
     }
@@ -537,6 +537,6 @@ public class FrontendService
 
     public async Task CloseNetlistOnServerAsync(UInt64 netlistId)
     {
-        await PostAsync("/close-netlist?hash=" + netlistId, null);
+        await PostAsync("/close-netlist?hash=" + netlistId, null, false);
     }
 }
