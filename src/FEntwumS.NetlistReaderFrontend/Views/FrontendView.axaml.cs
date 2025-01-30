@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -6,6 +7,7 @@ using FEntwumS.NetlistReaderFrontend.Controls;
 using FEntwumS.NetlistReaderFrontend.Services;
 using FEntwumS.NetlistReaderFrontend.Types;
 using FEntwumS.NetlistReaderFrontend.ViewModels;
+using OneWare.Essentials.Services;
 
 namespace FEntwumS.NetlistReaderFrontend.Views;
 
@@ -16,7 +18,7 @@ namespace FEntwumS.NetlistReaderFrontend.Views;
 public partial class FrontendView : UserControl
 {
     private FrontendViewModel? _vm;
-    
+
     public FrontendView()
     {
         InitializeComponent();
@@ -38,7 +40,7 @@ public partial class FrontendView : UserControl
                 _vm = e.NewValue as FrontendViewModel;
             }
         }
-        
+
         base.OnPropertyChanged(e);
     }
 
@@ -58,14 +60,14 @@ public partial class FrontendView : UserControl
     private void InputElement_OnPointerMoved(object? sender, PointerEventArgs e)
     {
         var NetlistControlElem = sender as NetlistControl;
-        
+
         var pointerpoints = e.GetIntermediatePoints(NetlistControlElem);
         double dx, dy;
 
         if (pointerpoints.Count > 1 && pointerpoints.First().Properties.IsLeftButtonPressed)
         {
-            dx = pointerpoints.Last().Position.X -  pointerpoints.First().Position.X;
-            dy = pointerpoints.Last().Position.Y -  pointerpoints.First().Position.Y;
+            dx = pointerpoints.Last().Position.X - pointerpoints.First().Position.X;
+            dy = pointerpoints.Last().Position.Y - pointerpoints.First().Position.Y;
         }
         else
         {
@@ -85,7 +87,7 @@ public partial class FrontendView : UserControl
 
         // only react to vertical scrolling for now
         NetlistControlElem.DeltaScale += wheel.Y;
-        
+
         NetlistControlElem.PointerX = e.GetPosition(NetlistControlElem).X;
         NetlistControlElem.PointerY = e.GetPosition(NetlistControlElem).Y;
     }
@@ -94,25 +96,33 @@ public partial class FrontendView : UserControl
     {
         // Get click event to Control
         // There should be a better way
-        
-        ((NetlistControl) sender).NetlistControl_PointerPressed(sender, e);
+
+        ((NetlistControl)sender).NetlistControl_PointerPressed(sender, e);
     }
 
     private void NetlistControl_OnPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
-        ((NetlistControl) sender).NetlistControl_PointerReleased(sender, e);
+        ((NetlistControl)sender).NetlistControl_PointerReleased(sender, e);
     }
 
     private void NetlistControl_OnTapped(object? sender, TappedEventArgs e)
     {
         Console.WriteLine("Tap!");
-        
-        ((NetlistControl) sender).NetlistControl_OnTapped(sender, e);
+
+        ((NetlistControl)sender).NetlistControl_OnTapped(sender, e);
     }
 
     private void NetlistControl_OnPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
-        ((NetlistControl) sender).Redraw();
+        if (_vm != null && ((NetlistControl)sender).IsInitialized && ((NetlistControl)sender).FileLoaded &&
+            ((AvaloniaList<NetlistElement>)((NetlistControl)sender).Items).Count == 0)
+        {
+            ServiceManager.GetService<IDockService>().CloseDockable(_vm);
+        }
+        else
+        {
+            ((NetlistControl)sender).Redraw();
+        }
     }
 
     private void Initialize(FrontendViewModel vm)

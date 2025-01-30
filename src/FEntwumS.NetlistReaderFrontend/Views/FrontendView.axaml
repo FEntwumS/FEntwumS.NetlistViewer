@@ -54,6 +54,7 @@
                                      PropertyChanged="NetlistControl_OnPropertyChanged" FitToZoom="{Binding FitToZoom}"
                                      IsLoaded="{Binding IsLoaded}" ElementClicked="NetlistControl_OnElementClicked"
                                      ClickedElementPath="{Binding ClickedElementPath}" NetlistID="{Binding NetlistId}"
+                                     FileLoaded="{Binding FileLoaded}" 
                                      x:Name="NetlistView">
             </controls:NetlistControl>
         </DockPanel>

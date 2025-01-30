@@ -246,6 +246,14 @@ public class NetlistControl : TemplatedControl
     public static readonly StyledProperty<UInt64> NetlistIDProperty =
         AvaloniaProperty.Register<NetlistControl, UInt64>(nameof(NetlistID));
 
+    public bool FileLoaded
+    {
+        get => GetValue(FileLoadedProperty);
+        set => SetValue(FileLoadedProperty, value);
+    }
+    
+    public static readonly StyledProperty<bool> FileLoadedProperty = AvaloniaProperty.Register<NetlistControl, bool>(nameof(FileLoaded));
+
     #endregion
 
     public event ElementClickedEventHandler ElementClicked;
@@ -275,7 +283,7 @@ public class NetlistControl : TemplatedControl
     {
         if (change.Property == OffsetXProperty ||
             change.Property == OffsetYProperty || change.Property == CurrentScaleProperty ||
-            change.Property == IsPointerOverProperty)
+            change.Property == IsPointerOverProperty || change.Property == FileLoadedProperty)
         {
             return;
         }
@@ -285,7 +293,7 @@ public class NetlistControl : TemplatedControl
             return;
         }
 
-        if (change.Property == ItemsProperty)
+        if (change.Property == ItemsProperty && Items != null)
         {
             _itemsInvalidated = true;
             Redraw();

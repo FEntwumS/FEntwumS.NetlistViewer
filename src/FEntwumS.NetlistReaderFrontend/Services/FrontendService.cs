@@ -300,11 +300,11 @@ public class FrontendService
         {
             return;
         }
-
+        
         _dockService.Show(vm, DockShowLocation.Document);
         _dockService.InitializeContent();
-        vm.OpenFileImpl();
         vm.NetlistId = currentNetlist;
+        await vm.OpenFileImpl();
     }
 
     public async Task ExpandNode(string nodePath, FrontendViewModel vm)

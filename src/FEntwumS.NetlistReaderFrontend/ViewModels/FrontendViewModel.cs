@@ -1,18 +1,20 @@
 ﻿using System.Runtime.Serialization;
 using System.Windows.Input;
 using Avalonia.Collections;
+using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.Input;
+using FEntwumS.NetlistReaderFrontend.Controls;
 using FEntwumS.NetlistReaderFrontend.Services;
 using FEntwumS.NetlistReaderFrontend.Types;
+using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
 
 namespace FEntwumS.NetlistReaderFrontend.ViewModels;
 
-
 public class FrontendViewModel : ExtendedTool
 {
     public ICommand LoadJSONCommand { get; }
-    
+
     public string? StatusText
     {
         get { return statusText; }
@@ -112,6 +114,8 @@ public class FrontendViewModel : ExtendedTool
         }
     }
 
+    public ICommand OnInitializedCommand { get; }
+
     private Stream file { get; set; }
 
     public Stream File
@@ -149,8 +153,21 @@ public class FrontendViewModel : ExtendedTool
         }
     }
 
+    [DataMember] private UInt64 netlistId { get; set; }
+    
+    private bool fileLoaded { get; set; }
+
     [DataMember]
-    private UInt64 netlistId { get; set; }
+    public bool FileLoaded
+    {
+        get => fileLoaded;
+        set
+        {
+            fileLoaded = value;
+            OnPropertyChanged();
+        }
+    }
+
 
     private ICustomLogger _logger { get; set; }
 
@@ -160,7 +177,7 @@ public class FrontendViewModel : ExtendedTool
     {
         items = new AvaloniaList<NetlistElement>();
         Items = new AvaloniaList<NetlistElement>();
-        
+
         FitToZoom = false;
 
         _logger = ServiceManager.GetCustomLogger();
@@ -172,6 +189,8 @@ public class FrontendViewModel : ExtendedTool
         FitToZoomCommand = new RelayCommand(() => { FitToZoom = !FitToZoom; });
 
         _frontendService = ServiceManager.GetService<FrontendService>();
+        
+        FileLoaded = false;
     }
 
     public async Task ClickedElementPathChanged()
@@ -182,7 +201,7 @@ public class FrontendViewModel : ExtendedTool
     public override bool OnClose()
     {
         ServiceManager.GetService<FrontendService>().CloseNetlistOnServerAsync(netlistId);
-        
+
         return base.OnClose();
     }
 
@@ -216,12 +235,16 @@ public class FrontendViewModel : ExtendedTool
                 t.Wait();
 
                 File.Close();
+                
+                FileLoaded = false;
 
                 Items.Clear();
 
                 Items.AddRange(jsonLoader.parseJson(0, 0, this, netlistId).Result);
 
                 UpdateScaleImpl();
+                
+                FileLoaded = true;
 
                 _logger.Log("JSON read", true);
             }
