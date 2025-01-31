@@ -3,9 +3,9 @@
 name: Publish
 
 on:
-  push:
-    tags:
-      - '**'
+  release:
+    types: 
+      - published
 
 jobs:
   build:
@@ -27,26 +27,26 @@ jobs:
         uses: kzrnm/get-net-sdk-project-versions-action@v1.3.0
         id: get-version
         with:
-          proj-path: src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj
+          proj-path: src/FEntwumS.NetlistReaderFrontend/FEntwumS.NetlistReaderFrontend.csproj
       - name: Build
-        run: dotnet build src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj -c Release -o publish
+        run: dotnet build src/FEntwumS.NetlistReaderFrontend/FEntwumS.NetlistReaderFrontend.csproj -c Release -o publish
       - name: Generate licensing information
         id: license
-        run: nuget-license -i ./src/Oneware.NetlistReaderFrontend/Oneware.NetlistReaderFrontend.csproj -override ./src/Oneware.NetlistReaderFrontend/override-third-party.json -t -o Table -d ./publish/THIRD-PARTY-LICENSES -fo ./publish/THIRD-PARTY-NOTICE.txt
+        run: nuget-license -i ./src/FEntwumS.NetlistReaderFrontend/FEntwumS.NetlistReaderFrontend.csproj -override ./src/FEntwumS.NetlistReaderFrontend/override-third-party.json -t -o Table -d ./publish/THIRD-PARTY-LICENSES -fo ./publish/THIRD-PARTY-NOTICE.txt
       - name: Copy font license
         id: font-license
-        run: cp ./src/Oneware.NetlistReaderFrontend/Assets/Fonts/OFL.txt ./publish/THIRD-PARTY-LICENSES/Martian-Mono-License.txt
+        run: cp ./src/FEntwumS.NetlistReaderFrontend/Assets/Fonts/MartianMono-LICENSE.txt ./publish/THIRD-PARTY-LICENSES/Martian-Mono-License.txt
       - name: Compress
         if: steps.license.outcome == 'success'
         uses: thedoctor0/zip-release@0.7.1
         with:
           type: 'zip'
-          filename: ../Oneware.NetlistReaderFrontend_${{steps.get-version.outputs.version}}_all.zip
+          filename: ../FEntwumS.NetlistReaderFrontend_${{steps.get-version.outputs.version}}_all.zip
           directory: ./publish
       - name: Debug
         run: ls && ls -lshaR publish
       - uses: ncipollo/release-action@v1.14.0
         with:
-          artifacts: "Oneware.NetlistReaderFrontend_${{steps.get-version.outputs.version}}_all.zip,./publish/compatibility.txt"
+          artifacts: "FEntwumS.NetlistReaderFrontend_${{steps.get-version.outputs.version}}_all.zip,./publish/compatibility.txt"
           tag: ${{steps.get-version.outputs.version}}
           allowUpdates: true
