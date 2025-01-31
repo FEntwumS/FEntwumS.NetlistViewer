@@ -2,7 +2,7 @@
   "category": "Tools",
   "type": "Plugin",
   "name": "FEntwumS.NetlistViewer Extension",
-  "id": "FEntwumS.NetlistReaderFrontend",
+  "id": "FEntwumS.NetlistViewer",
   "description": "FEntwumS.NetlistViewer for OneWare",
   "license": "MIT",
   "iconUrl": "https://raw.githubusercontent.com/FEntwumS/FEntwumS.NetlistViewer/master/Icon.png",
