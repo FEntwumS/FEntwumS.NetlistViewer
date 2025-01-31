@@ -25,25 +25,7 @@
   "sourceUrl": "https://github.com/FEntwumS/FEntwumS.NetlistViewer/releases/download",
   "versions": [
     {
-      "version": "0.6.1",
-      "minStudioVersion": "0.21.0.0",
-      "targets": [
-        {
-          "target": "all"
-        }
-      ]
-    },
-    {
-      "version": "0.6.2",
-      "minStudioVersion": "0.21.0.0",
-      "targets": [
-        {
-          "target": "all"
-        }
-      ]
-    },
-    {
-      "version": "0.6.3",
+      "version": "0.6.4",
       "minStudioVersion": "0.21.0.0",
       "targets": [
         {
