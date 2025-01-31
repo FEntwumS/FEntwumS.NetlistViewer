@@ -453,7 +453,10 @@ public class NetlistControl : TemplatedControl
         bool previousPointInBounds, currentPointInBounds;
         bool drawLine;
 
-        double deltaX = DeltaX, deltaY = DeltaY, deltaScale = DeltaScale - currentDeltaScale, step = -0.9d;
+        double deltaX = DeltaX,
+            deltaY = DeltaY,
+            deltaScale = DeltaScale - currentDeltaScale,
+            step = -0.9d;   // Zoom factor for a single step (rotation by one mouse while notch)
 
         // Apply offset from user interaction
         OffsetX += deltaX;
@@ -691,6 +694,8 @@ public class NetlistControl : TemplatedControl
                         continue;
                 }
 
+                // Check whether the underlying collection has been modified to prevent a crash
+                
                 if (_itemsInvalidated)
                 {
                     break;
@@ -708,19 +713,6 @@ public class NetlistControl : TemplatedControl
         if (toCheck.X >= 0 && toCheck.X <= this.Bounds.Width)
         {
             if (toCheck.Y >= 0 && toCheck.Y <= this.Bounds.Height)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private bool isInBounds(double x, double y)
-    {
-        if (x >= 0 && x <= this.Bounds.Width)
-        {
-            if (y >= 0 && y <= this.Bounds.Height)
             {
                 return true;
             }
@@ -988,23 +980,21 @@ public class NetlistControl : TemplatedControl
 
     public void NetlistControl_OnTapped(object? sender, TappedEventArgs e)
     {
-        NetlistElement hn = null,
-            he = null,
-            hj = null,
-            hp = null,
-            hl = null;
+        NetlistElement hn = null,   // highest node
+            he = null,              // highest edge
+            hj = null,              // highest junction
+            hp = null,              // highest port
+            hl = null;              // highest label
+        
+        // Due to the underlying structure of the list of netlist elements,
+        // the last element in the subset of elements below the cursor
+        // has the highest z-index, meaning that it is rendered on top of all
+        // preceding elements
 
         foreach (var elem in renderedNodeList)
         {
             if (elem.Hittest(e.GetPosition(this)))
             {
-                Console.WriteLine("Node with Z-Index: " + elem.ZIndex);
-                Console.WriteLine("Node attributes =>");
-                Console.WriteLine("Source location: " + elem.element.SrcLocation);
-                Console.WriteLine("Cell path: " + elem.element.Path);
-                Console.WriteLine("Cell name: " + elem.element.Cellname);
-                Console.WriteLine("Cell type: " + elem.element.Celltype);
-
                 hn = elem.element;
             }
         }
@@ -1013,14 +1003,6 @@ public class NetlistControl : TemplatedControl
         {
             if (elem.Hittest(e.GetPosition(this)))
             {
-                Console.WriteLine("Line with Z_Index: " + elem.ZIndex);
-                Console.WriteLine("Edge attributes =>");
-                Console.WriteLine("Source location: " + elem.element.SrcLocation);
-                Console.WriteLine("Signal path: " + elem.element.Path);
-                Console.WriteLine("Signal name: " + elem.element.Signalname);
-                Console.WriteLine("Index in Signal: " + elem.element.IndexInSignal);
-                Console.WriteLine("Type of Signal: " + elem.element.SignalType);
-
                 elem.element.IsHighlighted = true;
 
                 he = elem.element;
@@ -1038,8 +1020,6 @@ public class NetlistControl : TemplatedControl
         {
             if (elem.Hittest(e.GetPosition(this)))
             {
-                Console.WriteLine("Port with Z-Index: " + elem.ZIndex);
-
                 hp = elem.element;
             }
         }
@@ -1048,8 +1028,6 @@ public class NetlistControl : TemplatedControl
         {
             if (elem.Hittest(e.GetPosition(this)))
             {
-                Console.WriteLine("Junction with Z-Index: " + elem.ZIndex);
-
                 hj = elem.element;
             }
         }
@@ -1058,8 +1036,6 @@ public class NetlistControl : TemplatedControl
         {
             if (elem.Hittest(e.GetPosition(this)))
             {
-                Console.WriteLine("Label with Z-Index: " + elem.ZIndex);
-
                 hl = elem.element;
             }
         }

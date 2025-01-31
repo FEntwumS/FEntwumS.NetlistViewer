@@ -94,8 +94,7 @@ public partial class FrontendView : UserControl
 
     private void NetlistControl_OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        // Get click event to Control
-        // There should be a better way
+        // Get click event to NetlistControl
 
         ((NetlistControl)sender).NetlistControl_PointerPressed(sender, e);
     }
@@ -107,8 +106,6 @@ public partial class FrontendView : UserControl
 
     private void NetlistControl_OnTapped(object? sender, TappedEventArgs e)
     {
-        Console.WriteLine("Tap!");
-
         ((NetlistControl)sender).NetlistControl_OnTapped(sender, e);
     }
 
@@ -132,7 +129,7 @@ public partial class FrontendView : UserControl
 
     private void NetlistControl_OnElementClicked(object sender, ElementClickedEventArgs e)
     {
-        ServiceManager.GetCustomLogger().Log(e.NodePath, true);
+        ServiceManager.GetCustomLogger().Log($"Toggling entity at {e.NodePath}", false);
     }
 
     private void Button_OnClick(object? sender, RoutedEventArgs e)
