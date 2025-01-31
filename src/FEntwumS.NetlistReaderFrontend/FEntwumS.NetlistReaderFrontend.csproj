@@ -35,6 +35,11 @@
           <PrivateAssets>all</PrivateAssets>
       </PackageReference>
     </ItemGroup>
+    
+    <ItemGroup>
+<!--      <ProjectReference Include="..\Fentwums.Common\Fentwums.Common.csproj" />-->
+<!--      <ProjectReference Include="..\FEntwumS.WaveformInteractor\FEntwumS.WaveformInteractor.csproj" />-->
+    </ItemGroup>
 
     <Target Name="GenerateCompatibilityFile" AfterTargets="Build">
         <ItemGroup>

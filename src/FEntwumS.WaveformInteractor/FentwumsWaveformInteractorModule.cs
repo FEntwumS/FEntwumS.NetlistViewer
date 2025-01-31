@@ -1,75 +1,112 @@
 using System.Collections.ObjectModel;
 using System.Text;
+using CommunityToolkit.Mvvm.Input;
+using FEntwumS.WaveformInteractor.Services;
+using FEntwumS.WfInteractor;
 using FEntwumS.WfInteractor.Common;
 using ImTools;
 using Newtonsoft.Json.Linq;
+using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
+using OneWare.Essentials.ViewModels;
 using OneWare.Vcd.Parser.Data;
 using OneWare.Vcd.Viewer.Models;
 using OneWare.Vcd.Viewer.ViewModels;
 using Prism.Ioc;
 using Prism.Modularity;
 
-namespace FEntwumS.WfInteractor;
+namespace Fentwums.WaveformInteractor;
 
 public class FentwumsWaveformInteractorModule : IModule
 {
     private HttpServer _httpServer;
     private HttpClient _httpClient;
-
+    private readonly IWaveformInteractorService _waveformInteractorService;
+    private IYosysSimService _yosysSimService;
+    
     private ObservableCollection<ExtendedVcdScopeModel> _fentwumsScopes;
     
     // holds all Signals
     private VcdDefinition rootScope;
     
+    public FentwumsWaveformInteractorModule(IWaveformInteractorService waveformInteractorService, IContainerProvider containerProvider)
+    {
+        _waveformInteractorService = waveformInteractorService;
+    }
+    
     public void RegisterTypes(IContainerRegistry containerRegistry)
     {
-        // Console.WriteLine("Register Service in from Plugin");
         // containerRegistry.Register<IWaveformService, WaveformService>();
-        containerRegistry.Register<Common.IWaveformInteractorService, WaveformInteractorService>();
+        containerRegistry.RegisterSingleton<IYosysSimService, YosysSimService>();
+        containerRegistry.Register<IWaveformInteractorService, WaveformInteractorService>();
     }
 
     public void OnInitialized(IContainerProvider containerProvider)
     {
+        
+        _yosysSimService = containerProvider.Resolve<IYosysSimService>(); // Resolve with containerProvider
         var dockService = containerProvider.Resolve<IDockService>();
         dockService.PropertyChanged += (sender, args) =>
         {
+            containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
+            {
+                if (selected is [IProjectFile {Extension: ".v"} verilogFile])
+                {
+                    menuItems.Add(new MenuItemViewModel("Create flattened verilog files for simulation")
+                    {
+                        Header = $"Create flattened verilog files for simulation from topllevel: {verilogFile.Header}",
+                        Command = new AsyncRelayCommand(() => _yosysSimService.LoadVerilogAsync(verilogFile))
+                    });
+                }
+            });
+            
             if (args.PropertyName != nameof(dockService.CurrentDocument)) return;
             var currentDocument = dockService.CurrentDocument;
 
             // Check if the current document is a VcdViewModel
             if (currentDocument is VcdViewModel vcdViewModel)
             {
-                // Subscribe to PropertyChanged for IsLoading
+
                 vcdViewModel.PropertyChanged += (innerSender, innerArgs) =>
                 {
-                    if (innerArgs.PropertyName != nameof(vcdViewModel.IsLoading) || vcdViewModel.IsLoading) return;
-                    // spin up http server
-                    string[] prefixes = { "http://localhost:6969/" }; // Specify the URL prefixes
-                    _httpServer = new HttpServer(prefixes);
-                    _httpClient = new HttpClient();
-                    _ = InitializeHttpAsync();
-
-                    // Copy vcdScopeModel to extended implementation of vcdScopeModel
-                    ObservableCollection<VcdScopeModel> oneWareScopes = vcdViewModel.Scopes;
-                    _fentwumsScopes = new ObservableCollection<ExtendedVcdScopeModel>();
-                    rootScope = new VcdDefinition();
-
-                    foreach (var scopeModel in oneWareScopes)
+                    switch (innerArgs.PropertyName)
                     {
-                        VcdScope scope = CreateVcdScopeFromModel(scopeModel, rootScope);
-                        ExtendedVcdScopeModel extendedScopeModel = new ExtendedVcdScopeModel(scope);
-                        _fentwumsScopes.Add(extendedScopeModel);
+                        // Subscribe to PropertyChanged for IsLoading
+                        case nameof(vcdViewModel.IsLoading):
+                            // spin up http server
+                            string[] prefixes = { "http://localhost:6969/" }; // Specify the URL prefixes
+                            _httpServer = new HttpServer(prefixes);
+                            _httpClient = new HttpClient();
+                            _ = InitializeHttpAsync();
+
+                            // Copy vcdScopeModel to extended implementation of vcdScopeModel
+                            ObservableCollection<VcdScopeModel> oneWareScopes = vcdViewModel.Scopes;
+                            _fentwumsScopes = new ObservableCollection<ExtendedVcdScopeModel>();
+                            rootScope = new VcdDefinition();
+
+                            foreach (var scopeModel in oneWareScopes)
+                            {
+                                VcdScope scope = CreateVcdScopeFromModel(scopeModel, rootScope);
+                                ExtendedVcdScopeModel extendedScopeModel = new ExtendedVcdScopeModel(scope);
+                                _fentwumsScopes.Add(extendedScopeModel);
+                            }
+                    
+                            IProjectExplorerService projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
+                            string netlistPath =  projectExplorerService.ActiveProject.RootFolderPath + "/build/netlist/netlist.json";
+                    
+                            Task.Run(async () =>
+                            {
+                                JObject netInfo = await GetNetInformationAsync(netlistPath);
+                                ParseNetInformation(netInfo);
+                            });
+                            break;
+                        // Subscribe to PropertyChanged for SelectedSignal in WaveformViewer
+                        // case nameof(vcdViewModel.WaveFormViewer.SelectedSignal):
+                        //         string selectedSignalName = vcdViewModel.SelectedSignal?.Name;
+                        //         Console.WriteLine($"SelectedSignal Name changed to: {selectedSignalName}");
+                        //         break;
                     }
-                        
-                    IProjectExplorerService projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
-                    string netlistPath =  projectExplorerService.ActiveProject.RootFolderPath + "/build/netlist/netlist.json";
 
-                    Task.Run(async () =>
-                    {
-                        JObject netInfo = await GetNetInformationAsync(netlistPath);
-                        ParseNetInformation(netInfo);
-                    });
                 };
 
                     
@@ -77,8 +114,6 @@ public class FentwumsWaveformInteractorModule : IModule
         };
         
     }
-    
-    
     
     private async Task InitializeHttpAsync()
     {

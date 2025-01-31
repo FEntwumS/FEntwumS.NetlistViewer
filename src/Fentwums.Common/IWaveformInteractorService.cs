@@ -1,17 +1,12 @@
 using OneWare.Vcd.Parser.Data;
 using OneWare.Vcd.Viewer.Models;
 
-namespace FEntwumS.WfInteractor.Common;
+namespace FEntwumS.WaveformInteractor.Common;
 
 public interface IWaveformInteractorService
 {
-    // Methods communicating with backend 
+    // Methods communicating directly via shared Interface with diagram component
     public Task<string> TransferSignalStates(ExtendedVcdScopeModel.ExtendedSignal[] signals);
     
-    // Methods communicating directly via shared Interface with diagram component
-    public void GoToSignal(string signalName);
-    
-    
-    // Methods that need to be implemented in a shared interface offered by OneWare
-    public void getSignals(string[] signalNames);
+    public void GoToSignal(int bitIndex);
 }

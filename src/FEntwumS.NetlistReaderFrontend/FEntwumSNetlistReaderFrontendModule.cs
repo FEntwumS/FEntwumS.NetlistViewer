@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Markup.Xaml.Styling;
 using CommunityToolkit.Mvvm.Input;
+using FEntwumS.WfInteractor.Common;
 using FEntwumS.NetlistReaderFrontend.Services;
 using FEntwumS.NetlistReaderFrontend.ViewModels;
 using OneWare.Essentials.Enums;
@@ -307,6 +308,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IToolExecuterService, ToolExecuterService>();
         containerRegistry.RegisterSingleton<IFpgaBbService, FpgaBbService>();
         containerRegistry.RegisterSingleton<FrontendService>();
+        containerRegistry.RegisterSingleton<IWaveformInteractorService, WaveformInteractorService>();
         containerRegistry.Register<FrontendViewModel>();
     }
 

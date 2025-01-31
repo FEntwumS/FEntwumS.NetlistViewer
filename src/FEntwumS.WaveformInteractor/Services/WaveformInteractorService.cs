@@ -7,8 +7,6 @@ using OneWare.Vcd.Viewer.Models;
 
 public class WaveformInteractorService : IWaveformInteractorService
 {
-    
-    
     public WaveformInteractorService()
     {
         Console.WriteLine($"Instance of {nameof(IWaveformInteractorService)} created at {DateTime.Now}");
@@ -20,7 +18,7 @@ public class WaveformInteractorService : IWaveformInteractorService
         throw new NotImplementedException();
     }
 
-    void FEntwumS.WfInteractor.Common.IWaveformInteractorService.GoToSignal(string signalName)
+    void IWaveformInteractorService.GoToSignal(int bitIndex)
     {
         throw new NotImplementedException();
     }
