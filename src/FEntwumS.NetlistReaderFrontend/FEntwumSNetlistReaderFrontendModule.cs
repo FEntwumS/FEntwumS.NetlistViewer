@@ -18,9 +18,9 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
     public static readonly Package NetlistPackage = new()
     {
         Category = "Binaries",
-        Id = "NetlistReaderFrontend",
+        Id = "NetlistReaderBackend",
         Type = "NativeTool",
-        Name = "FEntwumS NetlistReaderFrontend",
+        Name = "FEntwumS NetlistViewer Backend",
         Description = "Netlist viewer built on Yosys",
         License = "MIT License",
         IconUrl = "https://avatars.githubusercontent.com/u/184253110?s=200&v=4",
@@ -29,7 +29,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
             new PackageLink()
             {
                 Name = "GitHub",
-                Url = "https://github.com/FEntwumS/NetlistReaderFrontend",
+                Url = "https://github.com/FEntwumS/NetlistReaderBackend",
             }
         ],
         Tabs =
