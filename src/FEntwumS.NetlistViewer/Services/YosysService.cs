@@ -4,7 +4,7 @@ using OneWare.Essentials.Services;
 using OneWare.ProjectSystem.Models;
 using OneWare.UniversalFpgaProjectSystem.Models;
 
-namespace FEntwumS.NetlistReaderFrontend.Services;
+namespace FEntwumS.NetlistViewer.Services;
 
 public class YosysService : IYosysService
 {
