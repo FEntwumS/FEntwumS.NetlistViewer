@@ -21,7 +21,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         Id = "NetlistReaderBackend",
         Type = "NativeTool",
         Name = "FEntwumS NetlistViewer Backend",
-        Description = "Netlist viewer built on Yosys",
+        Description = "Backend for the FEntwumS Netlist Viewer",
         License = "MIT License",
         IconUrl = "https://avatars.githubusercontent.com/u/184253110?s=200&v=4",
         Links =
