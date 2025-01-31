@@ -300,7 +300,7 @@ public class FrontendService
         {
             return;
         }
-        
+
         _dockService.Show(vm, DockShowLocation.Document);
         _dockService.InitializeContent();
         vm.NetlistId = currentNetlist;
@@ -384,12 +384,14 @@ public class FrontendService
                 if (resp.StatusCode == HttpStatusCode.NotFound)
                 {
                     _logger.Error(
-                        "The requested resource could not be found on the server. This could be due to a server restart. Please Re-Open your netlist.", printErrors);
+                        "The requested resource could not be found on the server. This could be due to a server restart. Please Re-Open your netlist.",
+                        printErrors);
                 }
                 else
                 {
                     _logger.Error(
-                        "An internal server error occured. Please file a bug report if this problem persists.", printErrors);
+                        "An internal server error occured. Please file a bug report if this problem persists.",
+                        printErrors);
                 }
             }
 
@@ -398,7 +400,8 @@ public class FrontendService
         catch (InvalidOperationException e)
         {
             _logger.Error(
-                $"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address", printErrors);
+                $"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
+                printErrors);
             return null;
         }
         catch (HttpRequestException e)
@@ -407,17 +410,20 @@ public class FrontendService
             {
                 case HttpRequestError.NameResolutionError:
                     _logger.Error(
-                        $"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address", printErrors);
+                        $"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address",
+                        printErrors);
                     break;
 
                 case HttpRequestError.ConnectionError:
                     _logger.Error(
-                        $"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address", printErrors);
+                        $"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
+                        printErrors);
                     break;
 
                 default:
                     _logger.Error(
-                        "Due to an internal error, the server could not complete the request. Please file a bug report", printErrors);
+                        "Due to an internal error, the server could not complete the request. Please file a bug report",
+                        printErrors);
                     break;
             }
 
@@ -426,13 +432,15 @@ public class FrontendService
         catch (TaskCanceledException e)
         {
             _logger.Error(
-                "The request has timed out. Please increase the request timeout time in the settings menu and try again", printErrors);
+                "The request has timed out. Please increase the request timeout time in the settings menu and try again",
+                printErrors);
             return null;
         }
         catch (UriFormatException e)
         {
             _logger.Error(
-                $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address", printErrors);
+                $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address",
+                printErrors);
             return null;
         }
     }
@@ -474,13 +482,22 @@ public class FrontendService
 
         _logger.Log("Server not started. Looking for server jar", true);
 
+        if (!Directory.Exists(_backendJarFolder))
+        {
+            _logger.Error(
+                "The directory containing the server jar could not be found. Please make sure that you have installed the \"FEntwumS NetlistViewer Backend\" binary using the extension manager and set the correct path to the server jar");
+
+            return false;
+        }
+
         var serverJar = Directory.GetFiles(_backendJarFolder).Where(x =>
             Regex.Match(x, @".*fentwums-netlist-reader-server-(\d+\.)(\d+\.)(\d+)-exec\.jar").Success);
 
         var enumeratedResults = serverJar.ToList();
         if (!enumeratedResults.Any())
         {
-            _logger.Error("No jar found. Please make sure that you have installed the \"FEntwumS NetlistViewer Backend\" binary using the extension manager");
+            _logger.Error(
+                "No jar found. Please make sure that you have installed the \"FEntwumS NetlistViewer Backend\" binary using the extension manager");
 
             return false;
         }
