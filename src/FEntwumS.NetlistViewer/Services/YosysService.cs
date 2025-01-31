@@ -81,6 +81,11 @@ public class YosysService : IYosysService
 
         _logger.Log(stderr);
 
+        if (!success)
+        {
+            _logger.Error("Please make sure that you are using yosys 0.49 or higher");
+        }
+
         return success;
     }
 
