@@ -27,12 +27,12 @@ jobs:
         uses: kzrnm/get-net-sdk-project-versions-action@v1.3.0
         id: get-version
         with:
-          proj-path: src/FEntwumS.NetlistReaderFrontend/FEntwumS.NetlistReaderFrontend.csproj
+          proj-path: src/FEntwumS.NetlistReaderFrontend/FEntwumS.NetlistViewer.csproj
       - name: Build
-        run: dotnet build src/FEntwumS.NetlistReaderFrontend/FEntwumS.NetlistReaderFrontend.csproj -c Release -o publish
+        run: dotnet build src/FEntwumS.NetlistReaderFrontend/FEntwumS.NetlistViewer.csproj -c Release -o publish
       - name: Generate licensing information
         id: license
-        run: nuget-license -i ./src/FEntwumS.NetlistReaderFrontend/FEntwumS.NetlistReaderFrontend.csproj -override ./src/FEntwumS.NetlistReaderFrontend/override-third-party.json -t -o Table -d ./publish/THIRD-PARTY-LICENSES -fo ./publish/THIRD-PARTY-NOTICE.txt
+        run: nuget-license -i ./src/FEntwumS.NetlistReaderFrontend/FEntwumS.NetlistViewer.csproj -override ./src/FEntwumS.NetlistReaderFrontend/override-third-party.json -t -o Table -d ./publish/THIRD-PARTY-LICENSES -fo ./publish/THIRD-PARTY-NOTICE.txt
       - name: Copy font license
         id: font-license
         run: cp ./src/FEntwumS.NetlistReaderFrontend/Assets/Fonts/MartianMono-LICENSE.txt ./publish/THIRD-PARTY-LICENSES/Martian-Mono-License.txt
@@ -47,6 +47,6 @@ jobs:
         run: ls && ls -lshaR publish
       - uses: ncipollo/release-action@v1.14.0
         with:
-          artifacts: "FEntwumS.NetlistReaderFrontend_${{steps.get-version.outputs.version}}_all.zip,./publish/compatibility.txt"
+          artifacts: "FEntwumS.NetlistViewer${{steps.get-version.outputs.version}}_all.zip,./publish/compatibility.txt"
           tag: ${{steps.get-version.outputs.version}}
           allowUpdates: true
