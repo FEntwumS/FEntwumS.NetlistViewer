@@ -480,7 +480,7 @@ public class FrontendService
         var enumeratedResults = serverJar.ToList();
         if (!enumeratedResults.Any())
         {
-            _logger.Error("No jar found. Please reinstall the plugin");
+            _logger.Error("No jar found. Please make sure that you have installed the \"FEntwumS NetlistViewer Backend\" binary using the extension manager");
 
             return false;
         }

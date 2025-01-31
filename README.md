@@ -34,6 +34,8 @@ Manager. To install this plugin, you will need to add a custom package source. P
 5. Open the package manager
 6. Refresh the package manager
 7. Done! The plugin should now be available for you to install!
+8. Install both the `FEntwumS.NetlistViewer Extension` plugin as well as the `FEntwumS NetlistViewer Backend` binary
+   using the package manager
 
 ## Netlist viewer
 
