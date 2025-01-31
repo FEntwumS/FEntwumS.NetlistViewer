@@ -41,12 +41,12 @@ jobs:
         uses: thedoctor0/zip-release@0.7.1
         with:
           type: 'zip'
-          filename: ../FEntwumS.NetlistViewer{{steps.get-version.outputs.version}}_all.zip
+          filename: ../FEntwumS.NetlistViewer_${{steps.get-version.outputs.version}}_all.zip
           directory: ./publish
       - name: Debug
         run: ls && ls -lshaR publish
       - uses: ncipollo/release-action@v1.14.0
         with:
-          artifacts: "FEntwumS.NetlistViewer${{steps.get-version.outputs.version}}_all.zip,./publish/compatibility.txt"
+          artifacts: "FEntwumS.NetlistViewer_${{steps.get-version.outputs.version}}_all.zip,./publish/compatibility.txt"
           tag: ${{steps.get-version.outputs.version}}
           allowUpdates: true
