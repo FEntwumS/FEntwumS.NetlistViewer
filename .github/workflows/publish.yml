@@ -50,3 +50,5 @@ jobs:
           artifacts: "FEntwumS.NetlistViewer_${{steps.get-version.outputs.version}}_all.zip,./publish/compatibility.txt"
           tag: ${{steps.get-version.outputs.version}}
           allowUpdates: true
+          replacesArtifacts: false
+          generateReleaseNotes: true
