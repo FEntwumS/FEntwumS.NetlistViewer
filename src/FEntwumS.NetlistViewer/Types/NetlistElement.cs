@@ -25,6 +25,7 @@ public class NetlistElement : FlexibleWindowViewModelBase
     private int indexInSignal { get; set; }
     private string signaltype { get; set; }
     private bool isHighlighted { get; set; }
+    private double fontSize { get; set; }
 
     public double xPos
     {
@@ -212,6 +213,16 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.isHighlighted = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public double FontSize
+    {
+        get => this.fontSize;
+        set
+        {
+            this.fontSize = value;
             OnPropertyChanged();
         }
     }

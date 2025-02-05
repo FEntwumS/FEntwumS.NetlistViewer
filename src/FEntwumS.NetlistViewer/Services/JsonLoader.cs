@@ -289,6 +289,8 @@ public class JsonLoader : IJsonLoader
         double w = 0;
         double h = 0;
         string text = "";
+        double fontSize = 10.0d;
+        JsonNode layoutOptions;
         foreach (JsonNode label in labels)
         {
             x = 0;
@@ -296,6 +298,7 @@ public class JsonLoader : IJsonLoader
             w = 0;
             h = 0;
             text = "";
+            layoutOptions = label["layoutOptions"] as JsonNode;
 
             if (label.AsObject().ContainsKey("x"))
             {
@@ -324,6 +327,11 @@ public class JsonLoader : IJsonLoader
                 charcnt += text.Length;
             }
 
+            if (layoutOptions != null && layoutOptions.AsObject().ContainsKey("font-size"))
+            {
+                fontSize = double.Parse(layoutOptions["font-size"].GetValue<string>(), System.Globalization.CultureInfo.InvariantCulture);
+            }
+
             items.Add(new NetlistElement()
             {
                 LabelText = text,
@@ -332,7 +340,8 @@ public class JsonLoader : IJsonLoader
                 Type = 3,
                 Width = w,
                 Height = h,
-                ZIndex = depth
+                ZIndex = depth,
+                FontSize = fontSize
             });
 
             labelcnt++;

@@ -630,7 +630,7 @@ public class NetlistControl : TemplatedControl
                         if (height >= LabelScaleClip && (intersectsBounds(boundingBox) || containsBounds(boundingBox)))
                         {
                             FormattedText text = new FormattedText(element.LabelText, CultureInfo.InvariantCulture,
-                                FlowDirection.LeftToRight, typeface, 10 * CurrentScale, textBrush);
+                                FlowDirection.LeftToRight, typeface, element.FontSize * CurrentScale, textBrush);
 
                             context.DrawText(text, new Point(x, y));
 
