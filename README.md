@@ -23,6 +23,9 @@ the [FEntwumS research project](https://www.th-koeln.de/informations-medien-und-
 
 ## Installation
 
+Due to a dependency on the [OneWare Studio GHDL plugin](https://github.com/one-ware/OneWare.GhdlExtension), this plugin
+is currently only compatible with OneWare Studio builds built before Revision [d8731968](https://github.com/one-ware/OneWare/commit/d8731968b06a3dcb59dedd889a5f519b1b0561da).
+
 Since this plugin is currently in a testing phase, it is not yet available by default from the OneWare Studio Package
 Manager. To install this plugin, you will need to add a custom package source. Please follow these steps:
 
