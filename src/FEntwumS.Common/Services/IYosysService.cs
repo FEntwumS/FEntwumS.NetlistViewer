@@ -1,6 +1,6 @@
 ﻿using OneWare.Essentials.Models;
 
-namespace FEntwumS.NetlistReaderFrontend.Services;
+namespace FEntwumS.Common.Services;
 
 public interface IYosysService
 {
@@ -8,4 +8,5 @@ public interface IYosysService
     Task<bool> LoadVerilogAsync(IProjectFile file);
     Task<bool> LoadSystemVerilogAsync(IProjectFile file);
     Task<bool> CreateJsonNetlistAsync();
+    Task<bool> CreateVerilogAsync();
 }

@@ -6,26 +6,31 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
 
-        <PackageId>Fentwums.Common</PackageId> <!-- Package ID (name of your package) -->
-        <Version>0.0.2</Version> <!-- Version of the package -->
+        <PackageId>FEntwumS.Common</PackageId> <!-- Package ID (name of your package) -->
+        <Version>0.0.3</Version> <!-- Version of the package -->
         <Authors>Jonas Lux - TH Köln</Authors>
-        <Description>Shared interfaces for FEntwumS WfInteractor project</Description>
+        <Description>Shared interfaces for FEntwumS project</Description>
         <PackageLicenseExpression>MIT</PackageLicenseExpression> <!-- License (optional) -->
 <!--        <PackageProjectUrl>https://github.com/YourRepo</PackageProjectUrl> &lt;!&ndash; URL to the project (optional) &ndash;&gt;-->
 <!--        <RepositoryUrl>https://github.com/YourRepo</RepositoryUrl> &lt;!&ndash; URL to the source repository &ndash;&gt;-->
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <RootNamespace>FEntwumS.WfInteractor.Common</RootNamespace>
+        <RootNamespace>FEntwumS.Common</RootNamespace>
 
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <OutputPath>../../bin/Debug/net9.0/</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" />
       <PackageReference Include="OneWare.Vcd.Viewer" Version="0.31.2" />
     </ItemGroup>
 
     <!--    pushing to local nuget repo    -->
     <Target Name="PushNuGetPackage" AfterTargets="Pack">
-        <Exec Command="dotnet nuget push bin/Debug/FEntwumS.WfInteractor.Interfaces.$(Version).nupkg --source '/home/jonas/tin/fentwums/nuget'" />
+<!--        <Exec Command="dotnet nuget push bin/Debug/FEntwumS.Common.$(Version).nupkg &#45;&#45;source '$(SolutionDir)local-nuget'" />    -->
     </Target>
 
 </Project>

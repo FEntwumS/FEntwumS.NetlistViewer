@@ -1,4 +1,5 @@
-﻿using OneWare.Essentials.Enums;
+﻿using FEntwumS.Common.Services;
+using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.ProjectSystem.Models;
@@ -125,6 +126,12 @@ public class YosysService : IYosysService
 
     public async Task<bool> CreateJsonNetlistAsync()
     {
+        throw new NotImplementedException();
+    }
+    
+    public async Task<bool> CreateVerilogAsync()
+    {
+        
         throw new NotImplementedException();
     }
 }

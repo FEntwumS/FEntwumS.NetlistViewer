@@ -1,7 +1,7 @@
 using OneWare.Vcd.Parser.Data;
 using OneWare.Vcd.Viewer.Models;
 
-namespace FEntwumS.WaveformInteractor.Common;
+namespace FEntwumS.Common;
 
 public interface IWaveformInteractorService
 {

@@ -1,9 +1,10 @@
 using Avalonia;
 using Avalonia.Markup.Xaml.Styling;
 using CommunityToolkit.Mvvm.Input;
-using FEntwumS.WfInteractor.Common;
 using FEntwumS.NetlistReaderFrontend.Services;
 using FEntwumS.NetlistReaderFrontend.ViewModels;
+using FEntwumS.Common;
+using FEntwumS.Common.Services;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.PackageManager;

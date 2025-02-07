@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Asmichi.ProcessManagement;
 using Avalonia.Threading;
+using FEntwumS.Common.Services;
 using FEntwumS.NetlistReaderFrontend.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using OneWare.Essentials.Enums;
