@@ -21,10 +21,10 @@
 
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Private="false" Version="8.4.0" />
-        <PackageReference Include="OneWare.Essentials" Version="0.11.2" Private="false" ExcludeAssets="runtime;Native"/>
-        <PackageReference Include="OneWare.ProjectSystem" Version="0.31.2" Private="false"/>
-        <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.2" Private="false"/>
-        <PackageReference Include="OneWare.Vcd.Viewer" Private="false" Version="0.31.2" />
+        <PackageReference Include="OneWare.Essentials" Version="0.11.3" Private="false" ExcludeAssets="runtime;Native" />
+        <PackageReference Include="OneWare.ProjectSystem" Version="0.31.4" Private="false" />
+        <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" Private="false" />
+        <PackageReference Include="OneWare.Vcd.Viewer" Private="false" Version="0.31.4" />
     </ItemGroup>
 
     <ItemGroup>
@@ -34,8 +34,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Fentwums.Common\Fentwums.Common.csproj" />
+      <ProjectReference Include="..\FEntwumS.Common\FEntwumS.Common.csproj" />
       <PackageReference Include="OneWare.ProjectSystem" Version="0.31.2" Private="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Styles\" />
     </ItemGroup>
 
     <Target Name="GenerateCompatibilityFile" AfterTargets="Build">

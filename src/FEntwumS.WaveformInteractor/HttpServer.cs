@@ -1,4 +1,4 @@
-namespace FEntwumS.WfInteractor;
+namespace FEntwumS.WaveformInteractor;
 
 using System.Net;
 using System.Text;

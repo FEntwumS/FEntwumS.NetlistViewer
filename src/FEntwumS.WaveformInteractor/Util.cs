@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace FEntwumS.WfInteractor;
+namespace FEntwumS.WaveformInteractor;
 
 public class Util
 {
