@@ -23,6 +23,7 @@
                     <MergeResourceInclude Source="avares://FEntwumS.NetlistViewer/Styles/Icons.axaml"></MergeResourceInclude>
                 </ResourceDictionary.MergedDictionaries>
             </ResourceDictionary>
+            <FontFamily x:Key="MartianMono">avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg</FontFamily>
         </Panel.Resources>
 
         <DockPanel ClipToBounds="True">
@@ -55,7 +56,8 @@
                                      IsLoaded="{Binding IsLoaded}" ElementClicked="NetlistControl_OnElementClicked"
                                      ClickedElementPath="{Binding ClickedElementPath}" NetlistID="{Binding NetlistId}"
                                      FileLoaded="{Binding FileLoaded}" 
-                                     x:Name="NetlistView">
+                                     x:Name="NetlistView"
+                                     FontFamily="{StaticResource MartianMono}">
             </controls:NetlistControl>
         </DockPanel>
     </Panel>

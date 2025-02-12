@@ -265,8 +265,7 @@ public class NetlistControl : TemplatedControl
     private static readonly FontFamily font = (Application.Current!.FindResource("MartianMono") as FontFamily)!;
     private static IViewportDimensionService _viewportDimensionService;
 
-    private static readonly Typeface typeface =
-        new Typeface(font, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
+    private Typeface? typeface;
 
     private UInt64 _currentNetlistId;
     
@@ -319,6 +318,9 @@ public class NetlistControl : TemplatedControl
         else if (change.Property == BoundsProperty)
         {
             Redraw();
+        } else if (change.Property == FontFamilyProperty)
+        {
+            typeface = new Typeface(this.FontFamily, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
         }
 
         if (IsInitialized && CurrentScale == 0)
@@ -395,6 +397,8 @@ public class NetlistControl : TemplatedControl
         {
             return;
         }
+
+        typeface ??= new Typeface(this.FontFamily, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
 
         double x = 0, y = 0, width = 0, height = 0, radius = 0, edgeLength = 0;
         List<Point> points;
@@ -630,7 +634,7 @@ public class NetlistControl : TemplatedControl
                         if (height >= LabelScaleClip && (intersectsBounds(boundingBox) || containsBounds(boundingBox)))
                         {
                             FormattedText text = new FormattedText(element.LabelText, CultureInfo.InvariantCulture,
-                                FlowDirection.LeftToRight, typeface, element.FontSize * CurrentScale, textBrush);
+                                FlowDirection.LeftToRight, (Typeface)typeface, element.FontSize * CurrentScale, textBrush);
 
                             context.DrawText(text, new Point(x, y));
 
