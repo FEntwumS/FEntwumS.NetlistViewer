@@ -553,7 +553,7 @@ public class FrontendService
             // ignored
         }
 
-        if (_useLocalBackend)
+        if (!_useLocalBackend)
         {
             _logger.Error(
                 "The remote server could not be reached. Make sure the server is started and reachable or switch to the local server");
@@ -587,7 +587,7 @@ public class FrontendService
         // Start server to run independently
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         backendProcess = await ServiceManager.GetService<IToolExecuterService>()
-            .ExecuteBackgroundProcessAsync("java", ["-Xmx16G", "-XX:UseZGC", "-XX:ZGenerational", "-jar", serverJarFile], Path.GetDirectoryName(serverJarFile));
+            .ExecuteBackgroundProcessAsync("java", ["-Xmx16G", "-XX:+UseZGC", "-XX:+ZGenerational","-jar", serverJarFile], Path.GetDirectoryName(serverJarFile));
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
         _logger.Log("Server started", true);
