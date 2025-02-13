@@ -353,10 +353,12 @@ public class FrontendService
         vm.InitializeContent();
         vm.Title = $"Netlist: {top}";
         _logger.Log("Selected file: " + json.FullPath);
+        
+        FileStream jsonFileStream = File.Open(json.FullPath, FileMode.Open, FileAccess.Read);
 
         MultipartFormDataContent formDataContent = new MultipartFormDataContent()
         {
-            { new StreamContent(File.Open(json.FullPath, FileMode.Open, FileAccess.Read)), "file", json.Name }
+            { new StreamContent(jsonFileStream), "file", json.Name }
         };
 
         resp = await PostAsync(
@@ -364,6 +366,8 @@ public class FrontendService
             $"&cellLabelFontSize={_cellLabelFontSize}" + $"&edgeLabelFontSize={_edgeLabelFontSize}" +
             $"&portLabelFontSize={_portLabelFontSize}",
             formDataContent);
+        
+        jsonFileStream.Close();
 
         if (resp == null)
         {
