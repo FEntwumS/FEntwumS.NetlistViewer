@@ -28,9 +28,13 @@ public class FrontendService
 
     private string _backendAddress = string.Empty;
     private string _backendPort = string.Empty;
-    private bool _useRemoteBackend = false;
+    private bool _useLocalBackend = false;
     private int _requestTimeout = 600;
     private string _backendJarFolder = string.Empty;
+    private int _entityLabelFontSize = 25;
+    private int _cellLabelFontSize = 15;
+    private int _edgeLabelFontSize = 10;
+    private int _portLabelFontSize = 10;
 
     private UInt64 currentNetlist = 0;
 
@@ -74,11 +78,11 @@ public class FrontendService
             }
         });
 
-        _settingsService.GetSettingObservable<bool>("NetlistViewer_Backend_UseRemote")
+        _settingsService.GetSettingObservable<bool>("NetlistViewer_Backend_UseLocal")
             .Subscribe(x =>
             {
-                _useRemoteBackend = x;
-                if (!_useRemoteBackend)
+                _useLocalBackend = x;
+                if (_useLocalBackend)
                 {
                     ServiceManager.GetService<ISettingsService>()
                         .SetSettingValue("NetlistViewer_Backend_Address", "127.0.0.1");
@@ -109,6 +113,89 @@ public class FrontendService
 
         _settingsService.GetSettingObservable<string>(FEntwumSNetlistReaderFrontendModule.NetlistPathSetting)
             .Subscribe(x => _backendJarFolder = x);
+
+        _settingsService.GetSettingObservable<string>("NetlistViewer_EntityFontSize").Subscribe(x =>
+        {
+            try
+            {
+                _entityLabelFontSize = int.Parse(x);
+
+                if (_entityLabelFontSize <= 0)
+                {
+                    _logger.Error("Entity label font size not valid. Please enter a positive integer");
+                    _entityLabelFontSize = 25;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Entity label font size not valid. Please enter a positive integer");
+
+                _entityLabelFontSize = 25;
+            }
+        });
+
+        _settingsService.GetSettingObservable<string>("NetlistViewer_CellFontSize").Subscribe(x =>
+        {
+            try
+            {
+                _cellLabelFontSize = int.Parse(x);
+
+                if (_cellLabelFontSize <= 0)
+                {
+                    _logger.Error("Cell label font size not valid. Please enter a positive integer");
+
+                    _cellLabelFontSize = 15;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Cell label font size not valid. Please enter a positive integer");
+
+                _cellLabelFontSize = 15;
+            }
+        });
+
+        _settingsService.GetSettingObservable<string>("NetlistViewer_EdgeFontSize").Subscribe(x =>
+        {
+            try
+            {
+                _edgeLabelFontSize = int.Parse(x);
+
+                if (_edgeLabelFontSize <= 0)
+                {
+                    _logger.Error("Edge label font size not valid. Please enter a positive integer");
+
+                    _edgeLabelFontSize = 10;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Edge label font size not valid. Please enter a positive integer");
+
+                _edgeLabelFontSize = 10;
+            }
+        });
+
+        _settingsService.GetSettingObservable<string>("NetlistViewer_PortFontSize").Subscribe(x =>
+        {
+            try
+            {
+                _portLabelFontSize = int.Parse(x);
+
+                if (_portLabelFontSize <= 0)
+                {
+                    _logger.Error("Port label font size not valid. Please enter a positive integer");
+
+                    _portLabelFontSize = 10;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Port label font size not valid. Please enter a positive integer");
+
+                _portLabelFontSize = 10;
+            }
+        });
     }
 
     public async Task CreateVhdlNetlist(IProjectFile vhdl)
@@ -267,34 +354,23 @@ public class FrontendService
         vm.Title = $"Netlist: {top}";
         _logger.Log("Selected file: " + json.FullPath);
 
-        if (_useRemoteBackend)
+        MultipartFormDataContent formDataContent = new MultipartFormDataContent()
         {
-            MultipartFormDataContent formDataContent = new MultipartFormDataContent()
-            {
-                { new StreamContent(File.Open(json.FullPath, FileMode.Open, FileAccess.Read)), "file", json.Name }
-            };
+            { new StreamContent(File.Open(json.FullPath, FileMode.Open, FileAccess.Read)), "file", json.Name }
+        };
 
-            resp = await PostAsync("/graphRemoteFile?hash=" + combinedHash, formDataContent);
+        resp = await PostAsync(
+            "/graphRemoteFile" + $"?hash={combinedHash}" + $"&entityLabelFontSize={_entityLabelFontSize}" +
+            $"&cellLabelFontSize={_cellLabelFontSize}" + $"&edgeLabelFontSize={_edgeLabelFontSize}" +
+            $"&portLabelFontSize={_portLabelFontSize}",
+            formDataContent);
 
-            if (resp == null)
-            {
-                return;
-            }
-
-            vm.File = await resp.Content.ReadAsStreamAsync();
-        }
-        else
+        if (resp == null)
         {
-            resp = await PostAsync("/graphLocalFile?filename=" + json.FullPath + "&hash=" +
-                                   combinedHash, null);
-
-            if (resp == null)
-            {
-                return;
-            }
-
-            vm.File = await resp.Content.ReadAsStreamAsync();
+            return;
         }
+
+        vm.File = await resp.Content.ReadAsStreamAsync();
 
         if (!resp.IsSuccessStatusCode)
         {
@@ -473,7 +549,7 @@ public class FrontendService
             // ignored
         }
 
-        if (_useRemoteBackend)
+        if (_useLocalBackend)
         {
             _logger.Error(
                 "The remote server could not be reached. Make sure the server is started and reachable or switch to the local server");
@@ -536,7 +612,7 @@ public class FrontendService
             }
             catch (Exception e)
             {
-                if (_useRemoteBackend)
+                if (_useLocalBackend)
                 {
                     _logger.Error(
                         "The remote server could not be reached. Make sure the server is started and reachable or switch to the local server");

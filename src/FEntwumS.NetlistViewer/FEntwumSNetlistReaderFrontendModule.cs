@@ -457,19 +457,19 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
             new TextBoxSetting("Port", "8080", null));
         settingsService.RegisterSetting("Netlist Viewer", "Backend", "NetlistViewer_Backend_RequestTimeout",
             new TextBoxSetting("Request Timeout (in seconds)", "8000", null));
-        settingsService.RegisterSetting("Netlist Viewer", "Backend", "NetlistViewer_Backend_UseRemote",
-            new CheckBoxSetting("Use remote backend server", false));
+        settingsService.RegisterSetting("Netlist Viewer", "Backend", "NetlistViewer_Backend_UseLocal",
+            new CheckBoxSetting("Use local backend server", true));
 
         settingsService.RegisterSettingSubCategory("Netlist Viewer", "Font sizes");
 
         settingsService.RegisterSetting("Netlist Viewer", "Font sizes", "NetlistViewer_EntityFontSize",
-            new TextBoxSetting("Entity Label Font Size", 25, null));
+            new TextBoxSetting("Entity Label Font Size", "25", null));
         settingsService.RegisterSetting("Netlist Viewer", "Font sizes", "NetlistViewer_CellFontSize",
-            new TextBoxSetting("Cell Label Font Size", 15, null));
+            new TextBoxSetting("Cell Label Font Size", "15", null));
         settingsService.RegisterSetting("Netlist Viewer", "Font sizes", "NetlistViewer_EdgeFontSize",
-            new TextBoxSetting("Edge Label Font Size", 10, null));
+            new TextBoxSetting("Edge Label Font Size", "10", null));
         settingsService.RegisterSetting("Netlist Viewer", "Font sizes", "NetlistViewer_PortFontSize",
-            new TextBoxSetting("Port Font Size", 10, null));
+            new TextBoxSetting("Port Font Size", "10", null));
 
         // Subscribe the FrontendService _AFTER_ the relevant settings have been registered
         ServiceManager.GetService<FrontendService>().SubscribeToSettings();
