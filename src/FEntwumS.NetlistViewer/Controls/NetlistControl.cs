@@ -7,14 +7,14 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
-using Avalonia.Logging;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
-using Avalonia.Xaml.Interactions.Core;
-using FEntwumS.NetlistViewer.ViewModels;
 using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.Types;
+using OneWare.Essentials.Models;
+using OneWare.Essentials.Services;
+using OneWare.Essentials.ViewModels;
 
 namespace FEntwumS.NetlistViewer.Controls;
 
@@ -1072,19 +1072,42 @@ public class NetlistControl : TemplatedControl
             {
                 CurrentElement = hn;
 
-                // kinda bad
-                if (ClickedElementPath == hn.Path)
+                if (CurrentElement.Celltype == "HDL_ENTITY")
                 {
-                    ClickedElementPath += ' ';
+
+                    // kinda bad
+                    if (ClickedElementPath == hn.Path)
+                    {
+                        ClickedElementPath += ' ';
+                    }
+                    else
+                    {
+                        ClickedElementPath = hn.Path;
+                    }
+
+                    _viewportDimensionService.SetClickedElementPath(NetlistID, hn.Path);
+
+                    ElementClicked?.Invoke(this, new ElementClickedEventArgs(hn.Path));
                 }
                 else
                 {
-                    ClickedElementPath = hn.Path;
+                    string srcloc = CurrentElement.SrcLocation;
+
+                    int lastpos = srcloc.LastIndexOfAny([':']);
+                    string filename = srcloc.Substring(0, lastpos);
+                    string lines = srcloc.Substring(lastpos + 1);
+                    string[] linesSplit = lines.Split('.');
+                    int line = 1;
+                    if (linesSplit.Length > 0)
+                    {
+                        line = int.Parse(linesSplit[0]);
+                    }
+
+                    var document = ServiceManager.GetService<IDockService>()
+                        .OpenFileAsync(new ExternalFile(filename));
+                    (document as IEditor)?.JumpToLine(line);
+
                 }
-
-                _viewportDimensionService.SetClickedElementPath(NetlistID, hn.Path);
-
-                ElementClicked?.Invoke(this, new ElementClickedEventArgs(hn.Path));
             }
         }
     }
