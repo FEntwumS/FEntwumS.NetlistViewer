@@ -412,6 +412,7 @@ public class NetlistControl : TemplatedControl
         renderedJunctionList.Clear();
         renderedEdgeList.Clear();
 
+        #region Brushes
         ThemeVariant theme = Application.Current.ActualThemeVariant;
 
         Brush backgroundBrush =
@@ -446,6 +447,7 @@ public class NetlistControl : TemplatedControl
         Brush textBrush = new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeAccentColor") is Color
             ? (Color)Application.Current!.FindResource(theme, "ThemeAccentColor")
             : Colors.Black);
+        #endregion
 
         // Draw background
         context.DrawRectangle(backgroundBrush, null, new Rect(0, 0, this.Bounds.Width, this.Bounds.Height));
@@ -460,7 +462,7 @@ public class NetlistControl : TemplatedControl
         double deltaX = DeltaX,
             deltaY = DeltaY,
             deltaScale = DeltaScale - currentDeltaScale,
-            step = -0.9d;   // Zoom factor for a single step (rotation by one mouse while notch)
+            step = 0.9d;   // Zoom factor for a single step (rotation by one mouse while notch)
 
         // Apply offset from user interaction
         OffsetX += deltaX;
@@ -474,17 +476,19 @@ public class NetlistControl : TemplatedControl
         {
             if (deltaScale > 0)
             {
-                step = (-1) / step;
+                step = 1.1d;
             }
 
+            double completeStep = Math.Pow(step, Math.Abs(deltaScale));
+
             // Apply scale
-            CurrentScale *= step * deltaScale;
+            CurrentScale *= completeStep;
 
-            OffsetX *= step * deltaScale;
-            OffsetY *= step * deltaScale;
+            OffsetX *= completeStep;
+            OffsetY *= completeStep;
 
-            OffsetX += PointerX - PointerX * step * deltaScale;
-            OffsetY += PointerY - PointerY * step * deltaScale;
+            OffsetX += PointerX - PointerX * completeStep;
+            OffsetY += PointerY - PointerY * completeStep;
         }
 
         if (!_itemsInvalidated)
