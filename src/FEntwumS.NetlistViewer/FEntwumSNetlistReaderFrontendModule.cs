@@ -436,6 +436,20 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                     },
                     new PackageTarget()
                     {
+                        Target = "linux-arm64",
+                        Url =
+                            "https://download.java.net/java/GA/jdk23.0.2/6da2a6609d6e406f85c491fcb119101b/7/GPL/openjdk-23.0.2_linux-aarch64_bin.tar.gz",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-jdk",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
+                    },
+                    new PackageTarget()
+                    {
                         Target = "osx-x64",
                         Url =
                             "https://download.java.net/java/GA/jdk23.0.2/6da2a6609d6e406f85c491fcb119101b/7/GPL/openjdk-23.0.2_macos-x64_bin.tar.gz",
