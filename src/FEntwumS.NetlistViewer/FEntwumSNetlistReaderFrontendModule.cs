@@ -375,9 +375,102 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         ]
     };
 
+    public static readonly Package JDKPackage = new()
+    {
+        Category = "Binaries",
+        Id = "OpenJDK",
+        Type = "NativeTool",
+        Name = "OpenJDK JDK 23",
+        Description = "Production-ready open-source builds of the Java Development Kit",
+        License = "GPL 20. with Classpath Exception",
+        Links =
+        [
+            new PackageLink()
+            {
+                Name = "jdk.java.net",
+                Url = "https://jdk.java.net/23/"
+            }
+        ],
+        Tabs =
+        [
+            new PackageTab()
+            {
+                Title = "License",
+                ContentUrl = "https://openjdk.org/legal/gplv2+ce.html"
+            }
+        ],
+        Versions =
+        [
+            new PackageVersion()
+            {
+                Version = "23.0.2",
+                Targets =
+                [
+                    new PackageTarget()
+                    {
+                        Target = "win-x64",
+                        Url =
+                            "https://download.java.net/java/GA/jdk23.0.2/6da2a6609d6e406f85c491fcb119101b/7/GPL/openjdk-23.0.2_windows-x64_bin.zip",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-jdk",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
+                    },
+                    new PackageTarget()
+                    {
+                        Target = "linux-x64",
+                        Url =
+                            "https://download.java.net/java/GA/jdk23.0.2/6da2a6609d6e406f85c491fcb119101b/7/GPL/openjdk-23.0.2_linux-x64_bin.tar.gz",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-jdk",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
+                    },
+                    new PackageTarget()
+                    {
+                        Target = "osx-x64",
+                        Url =
+                            "https://download.java.net/java/GA/jdk23.0.2/6da2a6609d6e406f85c491fcb119101b/7/GPL/openjdk-23.0.2_macos-x64_bin.tar.gz",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-jdk",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
+                    },
+                    new PackageTarget()
+                    {
+                        Target = "osx-arm64",
+                        Url =
+                            "https://download.java.net/java/GA/jdk23.0.2/6da2a6609d6e406f85c491fcb119101b/7/GPL/openjdk-23.0.2_macos-aarch64_bin.tar.gz",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-jdk",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    };
+
     private ServiceManager _serviceManager;
 
     public const string NetlistPathSetting = "FEntwumS_NetlistReaderBackend";
+    public const string JavaPathSetting = "FEntwumS_JDKPath";
 
     public void RegisterTypes(IContainerRegistry containerRegistry)
     {
@@ -397,6 +490,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
     public void OnInitialized(IContainerProvider containerProvider)
     {
         containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistPackage);
+        containerProvider.Resolve<IPackageService>().RegisterPackage(JDKPackage);
 
         containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", NetlistPathSetting,
             new FolderPathSetting("Path to folder containing server jar", "fentwums-netlist-reader", "",
