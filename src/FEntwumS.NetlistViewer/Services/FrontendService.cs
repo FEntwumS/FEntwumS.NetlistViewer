@@ -1,20 +1,14 @@
-﻿using System.Diagnostics;
-using System.IO.Compression;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using Asmichi.ProcessManagement;
-using Avalonia.Threading;
-using Microsoft.Extensions.DependencyInjection;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
-using FEntwumS.NetlistViewer.Controls;
-using FEntwumS.NetlistViewer.Views;
 using FEntwumS.NetlistViewer.ViewModels;
+using OneWare.Essentials.Helpers;
 using OneWare.ProjectSystem.Models;
-using Prism.Services.Dialogs;
 using StreamContent = System.Net.Http.StreamContent;
 
 namespace FEntwumS.NetlistViewer.Services;
@@ -35,6 +29,7 @@ public class FrontendService
     private int _cellLabelFontSize = 15;
     private int _edgeLabelFontSize = 10;
     private int _portLabelFontSize = 10;
+    private string _javaBinaryFolder = string.Empty;
 
     private UInt64 currentNetlist = 0;
 
@@ -196,6 +191,9 @@ public class FrontendService
                 _portLabelFontSize = 10;
             }
         });
+
+        _settingsService.GetSettingObservable<string>(FEntwumSNetlistReaderFrontendModule.JavaPathSetting).Subscribe(
+            x => _javaBinaryFolder = x);
     }
 
     public async Task CreateVhdlNetlist(IProjectFile vhdl)
@@ -353,7 +351,7 @@ public class FrontendService
         vm.InitializeContent();
         vm.Title = $"Netlist: {top}";
         _logger.Log("Selected file: " + json.FullPath);
-        
+
         FileStream jsonFileStream = File.Open(json.FullPath, FileMode.Open, FileAccess.Read);
 
         MultipartFormDataContent formDataContent = new MultipartFormDataContent()
@@ -366,7 +364,7 @@ public class FrontendService
             $"&cellLabelFontSize={_cellLabelFontSize}" + $"&edgeLabelFontSize={_edgeLabelFontSize}" +
             $"&portLabelFontSize={_portLabelFontSize}",
             formDataContent);
-        
+
         jsonFileStream.Close();
 
         if (resp == null)
@@ -560,7 +558,7 @@ public class FrontendService
             return false;
         }
 
-        _logger.Log("Server not started. Looking for server jar", true);
+        _logger.Log("Server not started. Looking for server jar...", true);
 
         if (!Directory.Exists(_backendJarFolder))
         {
@@ -574,7 +572,7 @@ public class FrontendService
             Regex.Match(x, @".*fentwums-netlist-reader-server-(\d+\.)(\d+\.)(\d+)-exec\.jar").Success);
 
         var enumeratedResults = serverJar.ToList();
-        if (!enumeratedResults.Any())
+        if (enumeratedResults.Count == 0)
         {
             _logger.Error(
                 "No jar found. Please make sure that you have installed the \"FEntwumS NetlistViewer Backend\" binary using the extension manager");
@@ -582,12 +580,68 @@ public class FrontendService
             return false;
         }
 
+        _logger.Log("Found server jar. Looking for java binary...", true);
+
+        if (!Directory.Exists(_javaBinaryFolder))
+        {
+            _logger.Error(
+                "The directory containing the java executable could not be found. Please make sure you have installed the \"OpenJDK JDK\" binary using the extension manager");
+
+            return false;
+        }
+        
+        string prefix = string.Empty;
+        string suffix = string.Empty;
+
+        if (PlatformHelper.Platform == PlatformId.OsxArm64 || PlatformHelper.Platform == PlatformId.OsxX64)
+        {
+            var dir = Directory.GetDirectories(_javaBinaryFolder).Where(x => Regex.Match(x, @"jdk-(\d+\.)(\d+\.)(\d+)\.jdk").Success);
+            
+            if (dir.Count() == 0)
+            {
+                _logger.Error("No directory found. Please make sure that you have installed the \"OpenJDK JDK\" binary using the extension manager");
+
+                return false;
+            }
+
+            prefix = $"{dir.First()}/Contents/Home/bin";
+        } else if (PlatformHelper.Platform == PlatformId.Unknown || PlatformHelper.Platform == PlatformId.Wasm || PlatformHelper.Platform == PlatformId.WinArm64)
+        {
+            _logger.Error("Your platform is currently not supported");
+            
+            return false;
+        }
+        else
+        {
+            var dirs = Directory.GetDirectories(_javaBinaryFolder);
+            
+            var dir = Directory.GetDirectories(_javaBinaryFolder).Where(x => Regex.Match(x, @"jdk-(\d+\.)(\d+\.)(\d+)").Success);
+
+            if (dir.Count() == 0)
+            {
+                _logger.Error("No directory found. Please make sure that you have installed the \"OpenJDK JDK\" binary using the extension manager");
+
+                return false;
+            }
+            
+            prefix = $"{dir.First()}/bin";
+        }
+
+        if (PlatformHelper.Platform == PlatformId.WinX64)
+        {
+            suffix = ".exe";
+        }
+        
+        string javaBinaryFile = Path.Combine(_javaBinaryFolder, $"{prefix}/java{suffix}");
+
         var serverJarFile = enumeratedResults.First();
 
         // Start server to run independently
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         backendProcess = await ServiceManager.GetService<IToolExecuterService>()
-            .ExecuteBackgroundProcessAsync("java", ["-Xmx16G", "-XX:+UseZGC", "-XX:+ZGenerational","-jar", serverJarFile], Path.GetDirectoryName(serverJarFile));
+            .ExecuteBackgroundProcessAsync(javaBinaryFile,
+                ["-Xmx16G", "-XX:+UseZGC", "-XX:+ZGenerational", "-jar", serverJarFile],
+                Path.GetDirectoryName(serverJarFile));
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
         _logger.Log("Server started", true);
