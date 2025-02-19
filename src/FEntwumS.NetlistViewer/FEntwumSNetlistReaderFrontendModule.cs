@@ -415,8 +415,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                         [
                             new PackageAutoSetting()
                             {
-                                RelativePath = "fentwums-jdk",
-                                SettingKey = NetlistPathSetting,
+                                RelativePath = "",
+                                SettingKey = JavaPathSetting,
                             }
                         ]
                     },
@@ -429,8 +429,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                         [
                             new PackageAutoSetting()
                             {
-                                RelativePath = "fentwums-jdk",
-                                SettingKey = NetlistPathSetting,
+                                RelativePath = "",
+                                SettingKey = JavaPathSetting,
                             }
                         ]
                     },
@@ -443,8 +443,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                         [
                             new PackageAutoSetting()
                             {
-                                RelativePath = "fentwums-jdk",
-                                SettingKey = NetlistPathSetting,
+                                RelativePath = "",
+                                SettingKey = JavaPathSetting,
                             }
                         ]
                     },
@@ -457,8 +457,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                         [
                             new PackageAutoSetting()
                             {
-                                RelativePath = "fentwums-jdk",
-                                SettingKey = NetlistPathSetting,
+                                RelativePath = "",
+                                SettingKey = JavaPathSetting,
                             }
                         ]
                     },
@@ -471,8 +471,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                         [
                             new PackageAutoSetting()
                             {
-                                RelativePath = "fentwums-jdk",
-                                SettingKey = NetlistPathSetting,
+                                RelativePath = "",
+                                SettingKey = JavaPathSetting,
                             }
                         ]
                     }
@@ -509,6 +509,10 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", NetlistPathSetting,
             new FolderPathSetting("Path to folder containing server jar", "fentwums-netlist-reader", "",
                 NetlistPathSetting, Path.Exists));
+
+        containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", JavaPathSetting,
+            new FolderPathSetting("Path to folder containing java binary", "", "", JavaPathSetting,
+                Path.Exists));
 
         var resourceInclude = new ResourceInclude(new Uri("avares://FEntwumS.NetlistViewer/Styles/Icons.axaml"))
             { Source = new Uri("avares://FEntwumS.NetlistViewer/Styles/Icons.axaml") };
