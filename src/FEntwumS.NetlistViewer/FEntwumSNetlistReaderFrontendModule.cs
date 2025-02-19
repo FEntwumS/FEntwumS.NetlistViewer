@@ -371,6 +371,27 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                         ]
                     }
                 ]
+            },
+            new PackageVersion()
+            {
+                Version = "0.7.1",
+                Targets =
+                [
+                    new PackageTarget()
+                    {
+                        Target = "all",
+                        Url =
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.7.1/fentwums-netlist-reader-server-v0.7.1.tar.gz",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-netlist-reader",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
+                    }
+                ]
             }
         ]
     };
@@ -513,6 +534,11 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", JavaPathSetting,
             new FolderPathSetting("Path to folder containing java binary", "", "", JavaPathSetting,
                 Path.Exists));
+
+        containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
+            "NetlistViewer_java_args",
+            new TextBoxSetting("Extra arguments for the Java Virtual Machine", "-Xmx16G -XX:+UseZGC -XX:+ZGenerational",
+                "null"));
 
         var resourceInclude = new ResourceInclude(new Uri("avares://FEntwumS.NetlistViewer/Styles/Icons.axaml"))
             { Source = new Uri("avares://FEntwumS.NetlistViewer/Styles/Icons.axaml") };

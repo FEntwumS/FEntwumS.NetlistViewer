@@ -30,6 +30,7 @@ public class FrontendService
     private int _edgeLabelFontSize = 10;
     private int _portLabelFontSize = 10;
     private string _javaBinaryFolder = string.Empty;
+    private string extraJarArgs = string.Empty;
 
     private UInt64 currentNetlist = 0;
 
@@ -194,6 +195,8 @@ public class FrontendService
 
         _settingsService.GetSettingObservable<string>(FEntwumSNetlistReaderFrontendModule.JavaPathSetting).Subscribe(
             x => _javaBinaryFolder = x);
+        
+        _settingsService.GetSettingObservable<string>("NetlistViewer_java_args").Subscribe(x => extraJarArgs = x);
     }
 
     public async Task CreateVhdlNetlist(IProjectFile vhdl)
@@ -640,7 +643,7 @@ public class FrontendService
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         backendProcess = await ServiceManager.GetService<IToolExecuterService>()
             .ExecuteBackgroundProcessAsync(javaBinaryFile,
-                ["-Xmx16G", "-XX:+UseZGC", "-XX:+ZGenerational", "-jar", serverJarFile],
+                extraJarArgs.Split(' ').Concat( ["-jar", serverJarFile]).ToArray(),
                 Path.GetDirectoryName(serverJarFile));
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
