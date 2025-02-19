@@ -106,7 +106,7 @@ public partial class FrontendView : UserControl
 
     private void NetlistControl_OnTapped(object? sender, TappedEventArgs e)
     {
-        ((NetlistControl)sender).NetlistControl_OnTapped(sender, e);
+        _ = ((NetlistControl)sender).NetlistControl_OnTappedAsync(sender, e);
     }
 
     private void NetlistControl_OnPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)

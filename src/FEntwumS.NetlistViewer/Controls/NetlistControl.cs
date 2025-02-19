@@ -986,7 +986,7 @@ public class NetlistControl : TemplatedControl
         return;
     }
 
-    public void NetlistControl_OnTapped(object? sender, TappedEventArgs e)
+    public async Task NetlistControl_OnTappedAsync(object? sender, TappedEventArgs e)
     {
         NetlistElement hn = null,   // highest node
             he = null,              // highest edge
@@ -1113,9 +1113,11 @@ public class NetlistControl : TemplatedControl
                     {
                         line = int.Parse(linesSplit[0]);
                     }
+                    
+                    var ds = ServiceManager.GetService<IDockService>();
+                    
+                    var document = await ds.OpenFileAsync(new ExternalFile(filename));
 
-                    var document = ServiceManager.GetService<IDockService>()
-                        .OpenFileAsync(new ExternalFile(filename));
                     (document as IEditor)?.JumpToLine(line);
 
                 }
