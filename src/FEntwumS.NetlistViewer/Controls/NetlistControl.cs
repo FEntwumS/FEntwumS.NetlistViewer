@@ -1072,7 +1072,7 @@ public class NetlistControl : TemplatedControl
             {
                 CurrentElement = hn;
 
-                if (CurrentElement.Celltype == "HDL_ENTITY")
+                if (CurrentElement.Celltype is "HDL_ENTITY" or "")
                 {
 
                     // kinda bad
@@ -1093,7 +1093,18 @@ public class NetlistControl : TemplatedControl
                 {
                     string srcloc = CurrentElement.SrcLocation;
 
+                    if (srcloc == "")
+                    {
+                        return;
+                    }
+
                     int lastpos = srcloc.LastIndexOfAny([':']);
+
+                    if (lastpos == -1)
+                    {
+                        lastpos = srcloc.Length - 1;
+                    }
+                    
                     string filename = srcloc.Substring(0, lastpos);
                     string lines = srcloc.Substring(lastpos + 1);
                     string[] linesSplit = lines.Split('.');
