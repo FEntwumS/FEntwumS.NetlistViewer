@@ -59,7 +59,7 @@ remote
 backend **within local and trusted networks**.
 
 When you have your backend up and running, you will need to enter the backends IP address and port
-(the default port is 8080) in the settings. You also need to check the box for "Use remote backend".
+(the default port is 8080) in the settings. You also need to uncheck the box for "Use local backend server".
 
 ### Viewing your design
 
@@ -103,8 +103,8 @@ entry `*.json` to the list `Files to Include`.
 
 ## I cannot find a suitable OSS Cad Suite Integration plugin version
 
-As of now, the required version is not yet available in a publicly released version of OneWare Studio. You can either
-compile OneWare Studio from source or wait until a new release is available.
+Please make sure your version of OneWare Studio has all updates installed. An appropriate version of the OSS Cad Suite
+Integration plugin is available in OneWare Studio 0.21.1.0 and later.
 
 ## I started OneWare Studio and the tab that should show my netlist is empty
 
@@ -133,7 +133,9 @@ you need to right-click your toplevel entity and use the "View netlist for [...]
 
 ## I generated a netlist myself, but I can't seem to find it in the project explorer
 
-By default, OneWare Studio does not display `.json` files in the project explorer.
+By default, OneWare Studio does not display `.json` files in the project explorer. To fix this, you will need to add the
+`.json` filetype manually. To do this, please right click on the project containing the netlist, choose the `Edit`
+option and add an entry `*.json` to the list `Files to Include`.
 
 ## `An internal server error occured. Please file a bug report if this problem persists.`
 
