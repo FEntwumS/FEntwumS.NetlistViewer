@@ -7,24 +7,22 @@ the software.
 
 ## System requirements
 
-Currently, only Windows is supported, but the plugin should work on all platforms OneWare Studio runs on. Additionally,
-your system needs to have Java 21 or higher installed.
+Currently, only Windows is supported, but the plugin should work on all platforms OneWare Studio runs on, except
+browsers.
 
 ## Dependencies
 
-Your installation of OneWare Studio needs to have the OSS Cad Suite Integration installed with version 2025-01-22 or
-later.
+Your installation of OneWare Studio needs to have the `OSS Cad Suite Integration` installed with version 2025-01-22 or
+later, as well as the most recent version of the `GHDL Extension`.
 
 # About
 
-This repository contains two plugins for [OneWare Studio](https://github.com/one-ware/OneWare). They are developed by
-TH Köln (Cologne University of Applied Sciences) as part of
+This repository contains the source code for two plugins for [OneWare Studio](https://github.com/one-ware/OneWare). They
+are developed by
+TH Köln (University of Applied Sciences Cologne) as part of
 the [FEntwumS research project](https://www.th-koeln.de/informations-medien-und-elektrotechnik/forschungsprojekt-fentwums_121126.php).
 
 ## Installation
-
-Due to a dependency on the [OneWare Studio GHDL plugin](https://github.com/one-ware/OneWare.GhdlExtension), this plugin
-is currently only compatible with OneWare Studio builds built before Revision [d8731968](https://github.com/one-ware/OneWare/commit/d8731968b06a3dcb59dedd889a5f519b1b0561da).
 
 Since this plugin is currently in a testing phase, it is not yet available by default from the OneWare Studio Package
 Manager. To install this plugin, you will need to add a custom package source. Please follow these steps:
@@ -33,12 +31,12 @@ Manager. To install this plugin, you will need to add a custom package source. P
 2. Go to the `Package Manager` tab
 3. Add a new custom package source pointing to
    `https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/oneware-extension.json`
-4. Save
+4. Click `Save`, then exit the settings menu
 5. Open the package manager
 6. Refresh the package manager
 7. Done! The plugin should now be available for you to install!
-8. Install both the `FEntwumS.NetlistViewer Extension` plugin as well as the `FEntwumS NetlistViewer Backend` binary
-   using the package manager
+8. Install both the `FEntwumS.NetlistViewer Extension` plugin as well as the `FEntwumS NetlistViewer Backend`  and the
+   `Eclipse Adoptiom OpenJDK` binaries using the package manager
 
 ## Netlist viewer
 
@@ -55,8 +53,9 @@ If you plan on using a local backend install (the default and recommended case),
 
 If you want to use a remote backend, you will need to deploy it yourself. Instructions on how to do so can be
 found [here](https://github.com/FEntwumS/NetlistReaderBackend?tab=readme-ov-file#can-i-use-the-backend-separately-from-the-frontend).
-Since traffic between the backend and the viewer is neither encrypted nor authenticated, you should only use a remote
-backend within local and trusted networks.
+Since the traffic between the backend and the viewer is **neither encrypted nor authenticated**, you should only use a
+remote
+backend **within local and trusted networks**.
 
 When you have your backend up and running, you will need to enter the backends IP address and port
 (the default port is 8080) in the settings. You also need to check the box for "Use remote backend".
@@ -68,6 +67,9 @@ right-clicking your top level entity and choosing the "View netlist for [insert 
 automatically generate a netlist using yosys and then display it in a new tab. You can zoom using your mouse wheel,
 clicking and dragging with the left mouse button pans the view and left-clicking on an entity will either expand or
 collapse it (depending on whether the entity is collapsed or not).
+
+Left-clicking on a cell will open the corresponding HDL file. Synthesized Verilog code is opened for VHDL designs at the
+moment. Future work will enable the direct opening of the corresponding VHDL file.
 
 ### Viewing a generated netlist
 
