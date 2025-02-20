@@ -36,7 +36,7 @@ public class FentwumsWaveformInteractorModule : IModule
     private readonly IWaveformInteractorService _waveformInteractorService;
     private IYosysService? _yosysSimService;
     private IVerilatorService? _verilatorService;
-    private IProjectExplorerService? projectExplorerService;
+    private IProjectExplorerService? _projectExplorerService;
     private IWindowService? windowService;
     private ILogger? _logger;
     
@@ -65,7 +65,7 @@ public class FentwumsWaveformInteractorModule : IModule
         _yosysSimService = containerProvider.Resolve<IYosysService>(); // Resolve with containerProvider
         _verilatorService = containerProvider.Resolve<IVerilatorService>();
         var dockService = containerProvider.Resolve<IDockService>();
-        projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
+        _projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
         windowService = containerProvider.Resolve<IWindowService>();
         _logger = containerProvider.Resolve<ILogger>();
         
@@ -100,7 +100,7 @@ public class FentwumsWaveformInteractorModule : IModule
             });
         
         
-        projectExplorerService.RegisterConstructContextMenu((selected, menuItems) =>
+        _projectExplorerService.RegisterConstructContextMenu((selected, menuItems) =>
             {
                 if (selected is [IProjectFile { Extension: ".v" } verilogFile])
                 {
@@ -128,7 +128,7 @@ public class FentwumsWaveformInteractorModule : IModule
                         menuItems.Add(new MenuItemViewModel("Set as Verilator testbench")
                         {
                             Header = "Set as Verilator testbench",
-                            Command = new RelayCommand(() => _verilatorService.Testbench = cppFile),
+                            Command = new RelayCommand(() => _verilatorService.RegisterTestbench(cppFile)),
                             IconObservable = Application.Current!.GetResourceObservable("VSImageLib.AddTest_16x")
                         });
                     }
@@ -138,7 +138,7 @@ public class FentwumsWaveformInteractorModule : IModule
                         menuItems.Add(new MenuItemViewModel("Unset Verilator testbench")
                         {
                             Header = "Unset Verilator testbench",
-                            Command = new RelayCommand(() => _verilatorService.Testbench = null),
+                            Command = new RelayCommand(() => _verilatorService.UnRegisterTestbench(cppFile)),
                             IconObservable = Application.Current!.GetResourceObservable("VSImageLib.RemoveSingleDriverTest_16x"),
                         });
                     }
@@ -201,12 +201,30 @@ public class FentwumsWaveformInteractorModule : IModule
                 };
             }
         };
+        
+        // wait until project launches and active project may be fetched
+        _projectExplorerService.PropertyChanged += (sender, args) =>
+        {
+            if (args.PropertyName != nameof(_projectExplorerService.ActiveProject)) return;
+            var currentProject = _projectExplorerService.ActiveProject;
+
+            if (currentProject != null)
+            {
+                // set first testbench from OneWare Project as _verilatorTestbench
+                UniversalFpgaProjectRoot project = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
+                _verilatorService.RegisterTestbench(project.TestBenches.FirstOrDefault());
+                // TODO: unfortunately the "Testbenches" key in project json is always empty. even if testbench is registered
+                
+            }
+        };
+        
+
     }
     
     // executes compiled verilator binary  
     private async Task RunVerilatorExecutableFromToplevelAsync()
     {
-        UniversalFpgaProjectRoot projectRoot = projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
+        UniversalFpgaProjectRoot projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
         var path = projectRoot.TopEntity.FullPath;
         var topFile = projectRoot.Files.FirstOrDefault(file => file.FullPath == path);
         
@@ -216,7 +234,7 @@ public class FentwumsWaveformInteractorModule : IModule
     // requires verilator testbench, and toplevel entity to be set.
     private async Task CreateVerilatorBinaryAllSteps()
     {
-        UniversalFpgaProjectRoot projectRoot = projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
+        UniversalFpgaProjectRoot projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
         var path = projectRoot.TopEntity.FullPath;
         var topFile = projectRoot.Files.FirstOrDefault( file => file.FullPath == path);
         var verilatorServiceTestbench = _verilatorService.Testbench;

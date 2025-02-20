@@ -3,6 +3,7 @@ using FEntwumS.Common.Services;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
+using OneWare.UniversalFpgaProjectSystem.Models;
 using Prism.Ioc;
 
 
@@ -17,11 +18,13 @@ public class VerilatorService : IVerilatorService
     
     private IProjectFile? _testbench;
     private readonly IYosysService _yosysService;
+    private readonly IProjectExplorerService _projectExplorerService;
 
     public VerilatorService(IContainerProvider containerProvider)
     {
         _settingsService = containerProvider.Resolve<ISettingsService>();
         _childProcessService = containerProvider.Resolve<IChildProcessService>();
+        _projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
         _yosysService = containerProvider.Resolve<IYosysService>();
         _settingsService.GetSettingObservable<string>("OssCadSuite_Path")
             .Subscribe(x => _verilator = Path.Combine(x, "bin", "verilator"));
@@ -171,8 +174,27 @@ public class VerilatorService : IVerilatorService
         (bool success, string output) retVal = (success, output);
         return retVal;
     }
-        public IProjectFile? Testbench {
-            get => _testbench;
-            set => _testbench = value;
+    public void RegisterTestbench(IProjectFile? file)
+    {
+        if (file is not null)
+        {
+            UniversalFpgaProjectRoot project = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
+            project.RegisterTestBench(file);
         }
+        _testbench = file; // Allow _testbench to be null
+    }
+        
+    public void UnRegisterTestbench(IProjectFile file)
+    {
+        UniversalFpgaProjectRoot project = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
+        project.UnregisterTestBench(file);
+        _testbench = null;
+    }
+
+    public IProjectFile? Testbench
+    {
+        get => _testbench;
+        set => _testbench = value;
+    }
+
 }
