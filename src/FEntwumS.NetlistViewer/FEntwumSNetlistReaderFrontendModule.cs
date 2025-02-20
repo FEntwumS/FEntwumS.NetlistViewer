@@ -431,7 +431,21 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                     {
                         Target = "win-x64",
                         Url =
-                            "https://download.java.net/java/GA/jdk23.0.2/6da2a6609d6e406f85c491fcb119101b/7/GPL/openjdk-23.0.2_windows-x64_bin.zip",
+                            "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.6%2B7/OpenJDK21U-jre_x64_windows_hotspot_21.0.6_7.zip",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "",
+                                SettingKey = JavaPathSetting,
+                            }
+                        ]
+                    },
+                    new PackageTarget()
+                    {
+                        Target = "win-arm64",
+                        Url =
+                            "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.6%2B7/OpenJDK21U-jre_aarch64_windows_hotspot_21.0.6_7.zip",
                         AutoSetting =
                         [
                             new PackageAutoSetting()
@@ -445,7 +459,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                     {
                         Target = "linux-x64",
                         Url =
-                            "https://download.java.net/java/GA/jdk23.0.2/6da2a6609d6e406f85c491fcb119101b/7/GPL/openjdk-23.0.2_linux-x64_bin.tar.gz",
+                            "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.6%2B7/OpenJDK21U-jre_x64_linux_hotspot_21.0.6_7.tar.gz",
                         AutoSetting =
                         [
                             new PackageAutoSetting()
@@ -459,7 +473,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                     {
                         Target = "linux-arm64",
                         Url =
-                            "https://download.java.net/java/GA/jdk23.0.2/6da2a6609d6e406f85c491fcb119101b/7/GPL/openjdk-23.0.2_linux-aarch64_bin.tar.gz",
+                            "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.6%2B7/OpenJDK21U-jre_aarch64_linux_hotspot_21.0.6_7.tar.gz",
                         AutoSetting =
                         [
                             new PackageAutoSetting()
@@ -473,7 +487,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                     {
                         Target = "osx-x64",
                         Url =
-                            "https://download.java.net/java/GA/jdk23.0.2/6da2a6609d6e406f85c491fcb119101b/7/GPL/openjdk-23.0.2_macos-x64_bin.tar.gz",
+                            "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.6%2B7/OpenJDK21U-jre_x64_mac_hotspot_21.0.6_7.tar.gz",
                         AutoSetting =
                         [
                             new PackageAutoSetting()
@@ -487,7 +501,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                     {
                         Target = "osx-arm64",
                         Url =
-                            "https://download.java.net/java/GA/jdk23.0.2/6da2a6609d6e406f85c491fcb119101b/7/GPL/openjdk-23.0.2_macos-aarch64_bin.tar.gz",
+                            "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.6%2B7/OpenJDK21U-jre_aarch64_mac_hotspot_21.0.6_7.tar.gz",
                         AutoSetting =
                         [
                             new PackageAutoSetting()
