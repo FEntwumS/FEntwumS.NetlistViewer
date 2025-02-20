@@ -18,7 +18,7 @@ public class WaveformInteractorService : IWaveformInteractorService
         throw new NotImplementedException();
     }
 
-    void IWaveformInteractorService.GoToSignal(int bitIndex)
+    public void GoToSignal(int bitIndex)
     {
         throw new NotImplementedException();
     }

@@ -15,17 +15,19 @@ public class VerilatorService : IVerilatorService
 
     private string _verilator = string.Empty;
     
-    private string _testbench = string.Empty;
+    private IProjectFile? _testbench;
+    private readonly IYosysService _yosysService;
 
     public VerilatorService(IContainerProvider containerProvider)
     {
         _settingsService = containerProvider.Resolve<ISettingsService>();
         _childProcessService = containerProvider.Resolve<IChildProcessService>();
-
+        _yosysService = containerProvider.Resolve<IYosysService>();
         _settingsService.GetSettingObservable<string>("OssCadSuite_Path")
             .Subscribe(x => _verilator = Path.Combine(x, "bin", "verilator"));
     }
     
+    // Verilates Preprocessed file
     public async Task<bool> VerilateAsync(IProjectFile file)
     {
         string workingDirectory = Path.Combine(file.Root!.FullPath, "build", "simulation");
@@ -34,9 +36,12 @@ public class VerilatorService : IVerilatorService
         {
             Directory.CreateDirectory(workingDirectory);
         }
-
-        string verilog_file = Path.Combine(workingDirectory, Path.GetFileNameWithoutExtension(file.FullPath) + "_preprocessed.v" );
+        
+        string verilogFile = Path.Combine(workingDirectory, Path.GetFileNameWithoutExtension(file.FullPath) + "_preprocessed.v" );
+        string testbenchFile = _testbench.FullPath;
+        
         string top = Path.GetFileNameWithoutExtension(file.FullPath);
+        
         
         List<string> yosysArgs =
         [
@@ -46,7 +51,7 @@ public class VerilatorService : IVerilatorService
             "--trace",
             "--exe", // TODO: look into direct executable building. Probably it makes sense to add additional cc compile step
             "--build",
-            "-cc", _testbench, verilog_file,
+            "-cc", testbenchFile, verilogFile,
         ];
 
         bool success = false;
@@ -58,18 +63,56 @@ public class VerilatorService : IVerilatorService
 
         return success;
     }
-
     
     // TODO: Test and check compilation
-    public async Task<bool> CompileVerilatedAsync(IProjectFile file)
+    public async Task<bool> CompileVerilatedAsync(IProjectFile topLevelFile)
     {
-        // Use Path.Combine for OS-independent directory paths
-        var workingDirectory = Path.Combine("build", "simulation", "obj_dir");
-        string top = Path.GetFileNameWithoutExtension(file.FullPath);
+        var projectRootPath = topLevelFile.Root!.FullPath;
+        var workingDirectory = Path.Combine(projectRootPath, "build", "simulation", "obj_dir");
+        string top = Path.GetFileNameWithoutExtension(topLevelFile.FullPath);
         var processStartInfo = new ProcessStartInfo
         {
             FileName = "make",
             Arguments = $"-f V{top}.mk",
+            WorkingDirectory = workingDirectory,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+
+        using var process = new Process { StartInfo = processStartInfo };
+
+        process.OutputDataReceived += (sender, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+                Console.WriteLine(e.Data);
+        };
+
+        process.ErrorDataReceived += (sender, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+                Console.WriteLine($"Error: {e.Data}");
+        };
+
+        process.Start();
+
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+
+        await process.WaitForExitAsync();
+        return true;
+    }
+    
+    public async Task<bool> RunExecutableAsync(IProjectFile topLevelFile)
+    {
+        string top = Path.GetFileNameWithoutExtension(topLevelFile.FullPath);
+
+        var projectRootPath = topLevelFile.Root!.FullPath;
+        var workingDirectory = Path.Combine(projectRootPath);
+        var executablePath = Path.Combine(workingDirectory, "build", "simulation", "obj_dir", $"V{top}");
+        var processStartInfo = new ProcessStartInfo
+        {
+            FileName = executablePath,
             WorkingDirectory = workingDirectory,
             UseShellExecute = false,
             RedirectStandardOutput = true,
@@ -128,14 +171,8 @@ public class VerilatorService : IVerilatorService
         (bool success, string output) retVal = (success, output);
         return retVal;
     }
-
-    public void SetTestbench(string file)
-    {
-        _testbench = file;
-    }
-
-    public string GetTestbench()
-    {
-        return _testbench;
-    }
+        public IProjectFile? Testbench {
+            get => _testbench;
+            set => _testbench = value;
+        }
 }

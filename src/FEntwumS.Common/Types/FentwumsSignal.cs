@@ -5,7 +5,7 @@ namespace OneWare.Vcd.Viewer.Models
 {
     public class ExtendedVcdScopeModel : VcdScopeModel
     {
-        public ExtendedVcdScopeModel(VcdScope scope)
+        public ExtendedVcdScopeModel(VcdScope? scope)
             : base(scope)
         {
             // Initialize extended signals with BitIndices

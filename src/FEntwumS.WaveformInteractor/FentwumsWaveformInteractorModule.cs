@@ -1,48 +1,50 @@
 using System.Collections.ObjectModel;
-using System.Net.Mime;
 using System.Text;
-using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Styling;
+using Avalonia.Layout;
 using Avalonia.Markup.Xaml.Styling;
 using CommunityToolkit.Mvvm.Input;
 using FEntwumS.WaveformInteractor;
 using FEntwumS.WaveformInteractor.Services;
 using FEntwumS.Common;
 using FEntwumS.Common.Services;
-using ImTools;
+using FEntwumS.WaveformInteractor.ViewModels;
+using FEntwumS.WaveformInteractor.Views;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
-using OneWare.ProjectSystem.Models;
+using OneWare.UniversalFpgaProjectSystem;
 using OneWare.UniversalFpgaProjectSystem.Models;
+using OneWare.UniversalFpgaProjectSystem.Views;
 using OneWare.Vcd.Parser.Data;
 using OneWare.Vcd.Viewer.Models;
 using OneWare.Vcd.Viewer.ViewModels;
 
 using Prism.Ioc;
 using Prism.Modularity;
-using Prism.Regions;
+using ILogger = OneWare.Essentials.Services.ILogger;
 
 namespace Fentwums.WaveformInteractor;
 
 public class FentwumsWaveformInteractorModule : IModule
 {
-    // private HttpServer _httpServer;
-    private HttpClient _httpClient;
+    private HttpClient? _httpClient;
     private readonly IWaveformInteractorService _waveformInteractorService;
-    private IYosysService _yosysSimService;
-    private IVerilatorService _verilatorService;
+    private IYosysService? _yosysSimService;
+    private IVerilatorService? _verilatorService;
+    private IProjectExplorerService? projectExplorerService;
+    private IWindowService? windowService;
+    private ILogger? _logger;
     
-    private ObservableCollection<ExtendedVcdScopeModel> _fentwumsScopes;
+    
+    private ObservableCollection<ExtendedVcdScopeModel>? _fentwumsScopes;
     
     // holds all Signals
-    private VcdDefinition rootScope;
-    
-    private Application _resourceDictionary;
-    
+    private VcdDefinition? rootScope;
     
     public FentwumsWaveformInteractorModule(IWaveformInteractorService waveformInteractorService)
     {
@@ -55,6 +57,7 @@ public class FentwumsWaveformInteractorModule : IModule
         containerRegistry.RegisterSingleton<IYosysService, YosysSimService>();
         containerRegistry.RegisterSingleton<IVerilatorService, VerilatorService>();
         containerRegistry.Register<IWaveformInteractorService, WaveformInteractorService>();
+        containerRegistry.Register<WaveformInteractorViewModel>();
     }
 
     public void OnInitialized(IContainerProvider containerProvider)
@@ -62,15 +65,48 @@ public class FentwumsWaveformInteractorModule : IModule
         _yosysSimService = containerProvider.Resolve<IYosysService>(); // Resolve with containerProvider
         _verilatorService = containerProvider.Resolve<IVerilatorService>();
         var dockService = containerProvider.Resolve<IDockService>();
-        IProjectExplorerService projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
-
+        projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
+        windowService = containerProvider.Resolve<IWindowService>();
+        _logger = containerProvider.Resolve<ILogger>();
+        
+        var resourceInclude = new ResourceInclude(new Uri("avares://FEntwumS.WaveformInteractor/Styles/Icons.axaml")) 
+            {Source = new Uri("avares://FEntwumS.WaveformInteractor/Styles/Icons.axaml")};
+        Application.Current?.Resources.MergedDictionaries.Add(resourceInclude);
+        var resources = Application.Current!.Resources;
+        var icon = Application.Current!.GetResourceObservable("VSImageLib.AddTest_16x");
+        WaveformInteractorViewModel vm = containerProvider.Resolve<WaveformInteractorViewModel>();
+        vm.InitializeContent();
+        
+        // TODO: Extension does not show
+        windowService.RegisterUiExtension("MainWindow_Fentwums",
+            new UiExtension(x => new WaveformInteractorView
+            {
+                DataContext =  vm
+            }));
+        
+        // for now register Menu which handles functionality
+        windowService.RegisterMenuItem("MainWindow_MainMenu/FEntwumS",
+            new MenuItemViewModel("Create_Verilator_Binary")
+            {
+                Header = "Create Verilator Binary",
+                Command = new AsyncRelayCommand(CreateVerilatorBinaryAllSteps),
+                IconObservable = Application.Current!.GetResourceObservable("CreateIcon")
+            },
+            new MenuItemViewModel("Run_Verilator_Binary")
+            {
+                Header = "Run Verilator Binary",
+                Command = new AsyncRelayCommand(RunVerilatorExecutableFromToplevelAsync),
+                IconObservable = Application.Current!.GetResourceObservable("CreateIcon")
+            });
+        
+        
         projectExplorerService.RegisterConstructContextMenu((selected, menuItems) =>
             {
                 if (selected is [IProjectFile { Extension: ".v" } verilogFile])
                 {
                         menuItems.Add(new MenuItemViewModel("Create flattened verilog")
                         {
-                            Header = $"Create flattened verilog file",
+                            Header = "Create flattened verilog file",
                             Command = new AsyncRelayCommand(() => _yosysSimService.LoadVerilogAsync(verilogFile))
                         });
                         
@@ -84,13 +120,15 @@ public class FentwumsWaveformInteractorModule : IModule
                 if (selected is [IProjectFile { Extension: ".cpp" } cppFile])
                 {
                     var filepath = cppFile.FullPath; 
-                    var testbenchpath = _verilatorService.GetTestbench();
+                    var testbench = _verilatorService.Testbench;
+                    var testbenchpath = testbench != null ? testbench.FullPath : string.Empty; // Or any default value
+                    
                     if (String.Equals(filepath, testbenchpath) == false)
                     {
                         menuItems.Add(new MenuItemViewModel("Set as Verilator testbench")
                         {
                             Header = "Set as Verilator testbench",
-                            Command = new RelayCommand(() => _verilatorService.SetTestbench(cppFile.Header)),
+                            Command = new RelayCommand(() => _verilatorService.Testbench = cppFile),
                             IconObservable = Application.Current!.GetResourceObservable("VSImageLib.AddTest_16x")
                         });
                     }
@@ -100,13 +138,11 @@ public class FentwumsWaveformInteractorModule : IModule
                         menuItems.Add(new MenuItemViewModel("Unset Verilator testbench")
                         {
                             Header = "Unset Verilator testbench",
-                            Command = new RelayCommand(() => _verilatorService.SetTestbench("")),
-                            IconObservable = Application.Current!.GetResourceObservable("VSImageLib.AddTest_16x")
+                            Command = new RelayCommand(() => _verilatorService.Testbench = null),
+                            IconObservable = Application.Current!.GetResourceObservable("VSImageLib.RemoveSingleDriverTest_16x"),
                         });
                     }
                     
-                    UniversalFpgaProjectRoot root = cppFile.Root as UniversalFpgaProjectRoot;
-                    // ProjectFile toplevel = root.TopEntity.;
                     menuItems.Add(new MenuItemViewModel("Build Verilator executable")
                     {
                         Header = $"Build Verilator executable from: {cppFile.Header}",
@@ -130,12 +166,8 @@ public class FentwumsWaveformInteractorModule : IModule
                     {
                         // Subscribe to PropertyChanged for IsLoading
                         case nameof(vcdViewModel.IsLoading):
-                            // spin up http server
-                            // string[] prefixes = { "http://localhost:6969/" }; // Specify the URL prefixes
-                            // _httpServer = new HttpServer(prefixes);
                             _httpClient = new HttpClient();
-                            _ = InitializeHttpAsync();
-
+                            
                             // Copy vcdScopeModel to extended implementation of vcdScopeModel
                             ObservableCollection<VcdScopeModel> oneWareScopes = vcdViewModel.Scopes;
                             _fentwumsScopes = new ObservableCollection<ExtendedVcdScopeModel>();
@@ -143,7 +175,7 @@ public class FentwumsWaveformInteractorModule : IModule
 
                             foreach (var scopeModel in oneWareScopes)
                             {
-                                VcdScope scope = CreateVcdScopeFromModel(scopeModel, rootScope);
+                                VcdScope? scope = CreateVcdScopeFromModel(scopeModel, rootScope);
                                 ExtendedVcdScopeModel extendedScopeModel = new ExtendedVcdScopeModel(scope);
                                 _fentwumsScopes.Add(extendedScopeModel);
                             }
@@ -166,32 +198,51 @@ public class FentwumsWaveformInteractorModule : IModule
                             _waveformInteractorService.GoToSignal(bitIndex);
                             break;
                     }
-
                 };
-
-                    
             }
         };
+    }
+    
+    // executes compiled verilator binary  
+    private async Task RunVerilatorExecutableFromToplevelAsync()
+    {
+        UniversalFpgaProjectRoot projectRoot = projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
+        var path = projectRoot.TopEntity.FullPath;
+        var topFile = projectRoot.Files.FirstOrDefault(file => file.FullPath == path);
         
+        await _verilatorService.RunExecutableAsync(topFile);
     }
-    
-    private async Task InitializeHttpAsync()
+
+    // requires verilator testbench, and toplevel entity to be set.
+    private async Task CreateVerilatorBinaryAllSteps()
     {
-        // await _httpServer.StartAsync();
+        UniversalFpgaProjectRoot projectRoot = projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
+        var path = projectRoot.TopEntity.FullPath;
+        var topFile = projectRoot.Files.FirstOrDefault( file => file.FullPath == path);
+        var verilatorServiceTestbench = _verilatorService.Testbench;
+
+        if (topFile != null && verilatorServiceTestbench != null)
+        {
+            await _yosysSimService.LoadVerilogAsync(topFile);
+            await _verilatorService.VerilateAsync(topFile);
+            await _verilatorService.CompileVerilatedAsync(topFile);
+        }
+        else
+        {
+            _logger.Error("Set toplevel entity and Verilator testbench!", null, true, true);
+        }
     }
-    
-    private VcdScope CreateVcdScopeFromModel(VcdScopeModel scopeModel, IScopeHolder parentScope)
+
+    private VcdScope? CreateVcdScopeFromModel(VcdScopeModel scopeModel, IScopeHolder? parentScope)
     {
-        // Create a new VcdScope based on information from VcdScopeModel
-        VcdScope scope = new VcdScope(parentScope, scopeModel.Name); // Parent is null for simplicity, can be adjusted
+        VcdScope? scope = new VcdScope(parentScope, scopeModel.Name);
         scope.Signals.AddRange(scopeModel.Signals);
         
         // Recursively create subscopes and add them to the current scope
         foreach (var subScopeModel in scopeModel.Scopes)
         {
-            // Pass the current scope as the parent for the subscopes
-            VcdScope subScope = CreateVcdScopeFromModel(subScopeModel, scope);
-            scope.Scopes.Add(subScope); // Add the subscope to the current scope's list of subscopes
+            VcdScope? subScope = CreateVcdScopeFromModel(subScopeModel, scope);
+            scope.Scopes.Add(subScope);
         }
 
         return scope;
