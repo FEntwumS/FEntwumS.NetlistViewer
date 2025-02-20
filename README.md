@@ -45,7 +45,8 @@ designs inside OneWare Studio. It is a frontend building on
 the [FEntwumS Netlist Reader Backend](https://github.com/FEntwumS/NetlistReaderBackend). You can run the backend, which
 does all the layouting, either on your local machine or on a remote server in your local network. The default (and
 recommended) configuration is to run the backend locally. If this is all you need, you just need to install the plugin.
-It will install and start the backend automatically.
+It will install and start the backend automatically. You may be prompted to allow network access for the OpenJDK binary
+by your operating system. Please grant this access, otherwise the netlist viewer will not work.
 
 ### Using a remote backend
 
