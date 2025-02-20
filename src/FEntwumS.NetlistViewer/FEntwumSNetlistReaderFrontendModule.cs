@@ -401,15 +401,15 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         Category = "Binaries",
         Id = "OpenJDK",
         Type = "NativeTool",
-        Name = "OpenJDK JDK 23",
+        Name = "Eclipse Adoptium OpenJDK",
         Description = "Production-ready open-source builds of the Java Development Kit",
-        License = "GPL 20. with Classpath Exception",
+        License = "GPL 2.0 with Classpath Exception",
         Links =
         [
             new PackageLink()
             {
-                Name = "jdk.java.net",
-                Url = "https://jdk.java.net/23/"
+                Name = "adoptium.net",
+                Url = "https://adoptium.net/en-GB/temurin/releases/"
             }
         ],
         Tabs =
@@ -424,7 +424,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         [
             new PackageVersion()
             {
-                Version = "23.0.2",
+                Version = "21.0.6",
                 Targets =
                 [
                     new PackageTarget()
