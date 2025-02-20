@@ -38,10 +38,6 @@
       <PackageReference Include="OneWare.ProjectSystem" Version="0.31.2" Private="false" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Styles\" />
-    </ItemGroup>
-
     <Target Name="GenerateCompatibilityFile" AfterTargets="Build">
         <ItemGroup>
             <FilteredDependencies Include="@(PackageReference)" Condition="'%(Private)' == 'false'"/>
