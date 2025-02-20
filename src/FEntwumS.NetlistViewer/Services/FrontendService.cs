@@ -596,19 +596,7 @@ public class FrontendService
         string prefix = string.Empty;
         string suffix = string.Empty;
 
-        if (PlatformHelper.Platform == PlatformId.OsxArm64 || PlatformHelper.Platform == PlatformId.OsxX64)
-        {
-            var dir = Directory.GetDirectories(_javaBinaryFolder).Where(x => Regex.Match(x, @"jdk-(\d+\.)(\d+\.)(\d+)\.jdk").Success);
-            
-            if (dir.Count() == 0)
-            {
-                _logger.Error("No directory found. Please make sure that you have installed the \"OpenJDK JDK\" binary using the extension manager");
-
-                return false;
-            }
-
-            prefix = $"{dir.First()}/Contents/Home/bin";
-        } else if (PlatformHelper.Platform == PlatformId.Unknown || PlatformHelper.Platform == PlatformId.Wasm || PlatformHelper.Platform == PlatformId.WinArm64)
+        if (PlatformHelper.Platform is PlatformId.Unknown or PlatformId.Wasm)
         {
             _logger.Error("Your platform is currently not supported");
             
@@ -616,24 +604,27 @@ public class FrontendService
         }
         else
         {
-            var dirs = Directory.GetDirectories(_javaBinaryFolder);
-            
-            var dir = Directory.GetDirectories(_javaBinaryFolder).Where(x => Regex.Match(x, @"jdk-(\d+\.)(\d+\.)(\d+)").Success);
+            var dir = Directory.GetDirectories(_javaBinaryFolder).Where(x => Regex.Match(x, @"jdk-(\d+)\.(\d+)\.(\d+)\+(\d+)-jre").Success);
 
             if (dir.Count() == 0)
             {
-                _logger.Error("No directory found. Please make sure that you have installed the \"OpenJDK JDK\" binary using the extension manager");
-
+                _logger.Error("No directory found. Please make sure that you have installed the \"Eclipse Adoptium OpenJDK\" binary using the extension manager");
+                
                 return false;
             }
             
-            prefix = $"{dir.First()}/bin";
+            prefix = dir.First();
         }
 
-        if (PlatformHelper.Platform == PlatformId.WinX64)
+        if (PlatformHelper.Platform is PlatformId.WinX64 or PlatformId.WinArm64)
         {
             suffix = ".exe";
+        } else if (PlatformHelper.Platform is PlatformId.OsxX64 or PlatformId.OsxArm64)
+        {
+            prefix += "/Content/Home";
         }
+
+        prefix += "/bin";
         
         string javaBinaryFile = Path.Combine(_javaBinaryFolder, $"{prefix}/java{suffix}");
 
