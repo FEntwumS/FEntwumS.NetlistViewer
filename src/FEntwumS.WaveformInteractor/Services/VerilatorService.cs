@@ -40,7 +40,8 @@ public class VerilatorService : IVerilatorService
             Directory.CreateDirectory(workingDirectory);
         }
         
-        string verilogFile = Path.Combine(workingDirectory, Path.GetFileNameWithoutExtension(file.FullPath) + "_preprocessed.v" );
+        // string verilogFile = Path.Combine(workingDirectory, Path.GetFileNameWithoutExtension(file.FullPath) + "_preprocessed.v" );
+        string verilogFile = Path.Combine(workingDirectory, file.Header);
         string testbenchFile = _testbench.FullPath;
         
         string top = Path.GetFileNameWithoutExtension(file.FullPath);

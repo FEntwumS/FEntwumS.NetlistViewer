@@ -2,24 +2,18 @@ using System.Collections.ObjectModel;
 using System.Text;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Layout;
-using Avalonia.Markup.Xaml.Styling;
 using CommunityToolkit.Mvvm.Input;
 using FEntwumS.WaveformInteractor;
 using FEntwumS.WaveformInteractor.Services;
 using FEntwumS.Common;
 using FEntwumS.Common.Services;
+using Fentwums.WaveformInteractor.Services;
 using FEntwumS.WaveformInteractor.ViewModels;
-using FEntwumS.WaveformInteractor.Views;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
-using OneWare.UniversalFpgaProjectSystem;
 using OneWare.UniversalFpgaProjectSystem.Models;
-using OneWare.UniversalFpgaProjectSystem.Views;
 using OneWare.Vcd.Parser.Data;
 using OneWare.Vcd.Viewer.Models;
 using OneWare.Vcd.Viewer.ViewModels;
@@ -37,10 +31,11 @@ public class FentwumsWaveformInteractorModule : IModule
     private IYosysService? _yosysSimService;
     private IVerilatorService? _verilatorService;
     private IProjectExplorerService? _projectExplorerService;
-    private IWindowService? windowService;
+    private IWindowService? _windowService;
     private ILogger? _logger;
-    
-    
+    private SignalBitIndexService? _signalBitIndexService;
+
+    private ObservableCollection<VcdScopeModel> _oneWareScopes;
     private ObservableCollection<ExtendedVcdScopeModel>? _fentwumsScopes;
     
     // holds all Signals
@@ -53,9 +48,9 @@ public class FentwumsWaveformInteractorModule : IModule
     
     public void RegisterTypes(IContainerRegistry containerRegistry)
     {
-        // containerRegistry.Register<IWaveformService, WaveformService>();
         containerRegistry.RegisterSingleton<IYosysService, YosysSimService>();
         containerRegistry.RegisterSingleton<IVerilatorService, VerilatorService>();
+        containerRegistry.RegisterSingleton<SignalBitIndexService>();
         containerRegistry.Register<IWaveformInteractorService, WaveformInteractorService>();
         containerRegistry.Register<WaveformInteractorViewModel>();
     }
@@ -64,11 +59,16 @@ public class FentwumsWaveformInteractorModule : IModule
     {
         _yosysSimService = containerProvider.Resolve<IYosysService>(); // Resolve with containerProvider
         _verilatorService = containerProvider.Resolve<IVerilatorService>();
+        _signalBitIndexService = containerProvider.Resolve<SignalBitIndexService>();
+        
+        // OneWare Services
         var dockService = containerProvider.Resolve<IDockService>();
         _projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
-        windowService = containerProvider.Resolve<IWindowService>();
+        _windowService = containerProvider.Resolve<IWindowService>();
         _logger = containerProvider.Resolve<ILogger>();
         
+        /*
+        // TODO: Extension does not show
         var resourceInclude = new ResourceInclude(new Uri("avares://FEntwumS.WaveformInteractor/Styles/Icons.axaml")) 
             {Source = new Uri("avares://FEntwumS.WaveformInteractor/Styles/Icons.axaml")};
         Application.Current?.Resources.MergedDictionaries.Add(resourceInclude);
@@ -77,15 +77,15 @@ public class FentwumsWaveformInteractorModule : IModule
         WaveformInteractorViewModel vm = containerProvider.Resolve<WaveformInteractorViewModel>();
         vm.InitializeContent();
         
-        // TODO: Extension does not show
         windowService.RegisterUiExtension("MainWindow_Fentwums",
             new UiExtension(x => new WaveformInteractorView
             {
                 DataContext =  vm
             }));
+        */
         
         // for now register Menu which handles functionality
-        windowService.RegisterMenuItem("MainWindow_MainMenu/FEntwumS",
+        _windowService.RegisterMenuItem("MainWindow_MainMenu/FEntwumS",
             new MenuItemViewModel("Create_Verilator_Binary")
             {
                 Header = "Create Verilator Binary",
@@ -98,7 +98,6 @@ public class FentwumsWaveformInteractorModule : IModule
                 Command = new AsyncRelayCommand(RunVerilatorExecutableFromToplevelAsync),
                 IconObservable = Application.Current!.GetResourceObservable("CreateIcon")
             });
-        
         
         _projectExplorerService.RegisterConstructContextMenu((selected, menuItems) =>
             {
@@ -130,32 +129,37 @@ public class FentwumsWaveformInteractorModule : IModule
                 }
             });
         
-        dockService.PropertyChanged += (sender, args) =>
+        dockService.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName != nameof(dockService.CurrentDocument)) return;
             var currentDocument = dockService.CurrentDocument;
 
             if (currentDocument is VcdViewModel vcdViewModel)
             {
-                vcdViewModel.PropertyChanged += (innerSender, innerArgs) =>
+                vcdViewModel.PropertyChanged += (_, innerArgs) =>
                 {
                     switch (innerArgs.PropertyName)
                     {
                         case nameof(vcdViewModel.IsLoading):
                             _httpClient = new HttpClient();
                             
-                            // Copy vcdScopeModel to extended implementation of vcdScopeModel
-                            ObservableCollection<VcdScopeModel> oneWareScopes = vcdViewModel.Scopes;
-                            _fentwumsScopes = new ObservableCollection<ExtendedVcdScopeModel>();
-                            rootScope = new VcdDefinition();
-
-                            foreach (var scopeModel in oneWareScopes)
-                            {
-                                VcdScope? scope = CreateVcdScopeFromModel(scopeModel, rootScope);
-                                ExtendedVcdScopeModel extendedScopeModel = new ExtendedVcdScopeModel(scope);
-                                _fentwumsScopes.Add(extendedScopeModel);
-                            }
-                    
+                            // get current scopes
+                            _oneWareScopes = vcdViewModel.Scopes;
+                            
+                            
+                            //
+                            //
+                            // _fentwumsScopes = new ObservableCollection<ExtendedVcdScopeModel>();
+                            // rootScope = new VcdDefinition();
+                            //
+                            // foreach (var scopeModel in oneWareScopes)
+                            // {
+                            //     VcdScope? scope = CreateVcdScopeFromModel(scopeModel, rootScope);
+                            //     ExtendedVcdScopeModel extendedScopeModel = new ExtendedVcdScopeModel(scope);
+                            //     _fentwumsScopes.Add(extendedScopeModel);
+                            // }
+                            
+                            // Get Netlist information from backend and populate bitindeces dictionary
                             IProjectExplorerService projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
                             string netlistPath =  projectExplorerService.ActiveProject.RootFolderPath + "/build/netlist/netlist.json";
                     
@@ -164,14 +168,24 @@ public class FentwumsWaveformInteractorModule : IModule
                                 JObject netInfo = await GetNetInformationAsync(netlistPath);
                                 ParseNetInformation(netInfo);
                             });
+                            
                             break;
                         // Subscribe to PropertyChanged for SelectedSignal in WaveformViewer
                         case nameof(vcdViewModel.WaveFormViewer.SelectedSignal):
-                            string selectedSignalName = vcdViewModel.SelectedSignal?.Name;
+                            var selectedSignal = vcdViewModel.SelectedSignal;
                             // TODO: How to map from WaveformViewer to Bit Index?
                             // currently use signalname to get bit index
-                            int bitIndex = 0;                       
-                            _waveformInteractorService.GoToSignal(bitIndex);
+                            // OneWare assigns an Id to signal. This can be used to map from fentwums Signal to OneWare Signal without using the signalname
+                            // -> Signalname still have to be used initially, because otherwise no way to map from netlist to vcd
+
+                            // ExtendedVcdScopeModel.ExtendedSignal s = _fentwumsScopes
+                            //     .SelectMany(scope => scope.Signals)
+                            //     .FirstOrDefault(signal => signal.Id == selectedSignal.Id));
+
+                            
+                            // jump to selected Signal via bit index
+                            BitIndexEntry bits = _signalBitIndexService.GetMapping(selectedSignal.Id);
+                            _waveformInteractorService.GoToSignal(bits.BitIndexId);
                             break;
                     }
                 };
@@ -187,8 +201,8 @@ public class FentwumsWaveformInteractorModule : IModule
             if (currentProject != null)
             {
                 // set first testbench from OneWare Project as _verilatorTestbench
-                UniversalFpgaProjectRoot project = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
-                _verilatorService.RegisterTestbench(project.TestBenches.FirstOrDefault());
+                UniversalFpgaProjectRoot? project = _projectExplorerService.ActiveProject?.Root as UniversalFpgaProjectRoot;
+                _verilatorService.RegisterTestbench(project?.TestBenches.FirstOrDefault());
             }
         };
         
@@ -245,6 +259,54 @@ public class FentwumsWaveformInteractorModule : IModule
         return scope;
     }
     
+    private VcdScope? CreateExtendedVcdScopeFromModel(VcdScopeModel scopeModel, IScopeHolder? parentScope)
+    {
+        VcdScope? scope = new VcdScope(parentScope, scopeModel.Name);
+        scope.Signals.AddRange(scopeModel.Signals);
+        
+        // Recursively create subscopes and add them to the current scope
+        foreach (var subScopeModel in scopeModel.Scopes)
+        {
+            VcdScope? subScope = CreateVcdScopeFromModel(subScopeModel, scope);
+            scope.Scopes.Add(subScope);
+        }
+
+        return scope;
+    }
+
+    private void PopulateSignalBitMappingRecursive(JObject signalsObject, IEnumerable<VcdScopeModel> scopeModels)
+    {
+        foreach (var scope in scopeModels)
+        {
+            PopulateSignalBitMappingRecursive(signalsObject, scope.Scopes);
+            foreach (var signal in scope.Signals)
+            {
+                if (signalsObject.TryGetValue(signal.Name, out var signalToken) &&
+                    signalToken is JObject signalDetails)
+                {
+                    string scopeName = signalDetails.GetValue("scope")?.ToString() ?? "Unknown";
+                    JToken bitsToken = signalDetails.GetValue("bits");
+                
+                    if (bitsToken is JArray bitsArray)
+                    {
+                        List<int> bits = bitsArray.Select(bit => bit.ToObject<int>()).ToList();
+                        string vcdId = signal.Id;
+                    
+                        _signalBitIndexService?.AddMapping(vcdId, bits);
+                    }
+                    else
+                    {
+                        _logger.Error($"Signal {signal.Name} does not have valid 'bits' data.");
+                    }
+                }
+                else
+                {
+                    _logger.Error($"Signal {signal.Name} not found in JObject.");
+                }
+            }
+        }
+    }
+    
     // retrieves information about the netlist form the backend
     private async Task<JObject> GetNetInformationAsync(string netlistPath)
     {
@@ -255,7 +317,7 @@ public class FentwumsWaveformInteractorModule : IModule
         // compute hash of netlist
         if (!File.Exists(netlistPath))
         {
-            Console.WriteLine("File not found.");
+            _logger.Error("File not found.");
             return null;
         }
 
@@ -269,7 +331,7 @@ public class FentwumsWaveformInteractorModule : IModule
                     
         UInt64 netHash = ((UInt64)hashPath << 32) | hashContent;
         
-        Console.WriteLine("Requesting Backend to populate Signals with bitindeces and hdlname/scope");
+        _logger.Warning("Requesting Backend to populate Signals with bitindeces and hdlname/scope");
         string url = "http://localhost:8080/get-net-information";
         
         try
@@ -292,12 +354,12 @@ public class FentwumsWaveformInteractorModule : IModule
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Request to {url} failed. Error: {ex.Message}");
+            _logger.Error($"Request to {url} failed. Error: {ex.Message}");
             return null;
         }
     }
-    
-    public void ParseNetInformation(JObject netInfo)
+
+    private void ParseNetInformation(JObject netInfo)
     {
         // write to .json
         string jsonString = netInfo.ToString();
@@ -306,14 +368,10 @@ public class FentwumsWaveformInteractorModule : IModule
         // Check if the "signals" key exists
         if (!netInfo.TryGetValue("signals", out JToken signalsToken) || signalsToken is not JObject signalsObject)
         {
-            Console.WriteLine("The provided netInfo does not contain valid 'signals' data.");
+            _logger.Error("The provided netInfo does not contain valid 'signals' data.");
             return;
         }
-        // Iterate over signals and search corresponding signals from Json
-        foreach (var scopeModel in _fentwumsScopes)
-        {
-            SearchSignalsInScope(scopeModel, signalsObject);
-        }
+        PopulateSignalBitMappingRecursive(signalsObject, _oneWareScopes.OfType<VcdScopeModel>());
     }
 
     private void SearchSignalsInScope(ExtendedVcdScopeModel scope, JObject signalsObject)
@@ -328,7 +386,7 @@ public class FentwumsWaveformInteractorModule : IModule
 
                 if (signalDetails == null)
                 {
-                    Console.WriteLine($"Signal {signal.OriginalSignal.Name} does not have valid details.");
+                    _logger.Error($"Signal {signal.OriginalSignal.Name} does not have valid details.");
                     continue;
                 }
                 
@@ -347,12 +405,12 @@ public class FentwumsWaveformInteractorModule : IModule
                 }
                 else
                 {
-                    Console.WriteLine($"Signal {signal.OriginalSignal.Name} does not have valid 'bits' data.");
+                    _logger.Error($"Signal {signal.OriginalSignal.Name} does not have valid 'bits' data.");
                 }
             }
             else
             {
-                Console.WriteLine($"Signal {signal.OriginalSignal.Name} not found in JObject.");
+                _logger.Error($"Signal {signal.OriginalSignal.Name} not found in JObject.");
             }
         }
 

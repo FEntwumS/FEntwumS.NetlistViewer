@@ -70,8 +70,7 @@ public class HttpServer
         }
         
         // check if signalname is in signal list
-        
-        
+
         // Construct the response
         string responseString = signalName;
         byte[] buffer = Encoding.UTF8.GetBytes(responseString);

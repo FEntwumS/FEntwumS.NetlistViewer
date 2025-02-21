@@ -8,7 +8,7 @@ public interface IVerilatorService
     public Task<bool> CompileVerilatedAsync(IProjectFile topLevelFile);
     public Task<bool> RunExecutableAsync(IProjectFile topLevelFile);
 
-    public void RegisterTestbench(IProjectFile file);
+    public void RegisterTestbench(IProjectFile? file);
     public void UnregisterTestbench(IProjectFile file);
     
     IProjectFile? Testbench { get; set; }

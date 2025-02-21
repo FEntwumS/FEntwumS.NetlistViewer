@@ -64,7 +64,7 @@ public class YosysSimService : IYosysService
         List<string> yosysArgs =
         [
             "-p",
-            $"read_verilog -nooverwrite \"{string.Join("\" \"", files)}\"; scratchpad -set flatten.separator \";\"; hierarchy -check -top {top}; proc; memory -nomap; flatten -scopename; write_verilog {top}_preprocessed.v"
+            $"read_verilog -nooverwrite \"{string.Join("\" \"", files)}\"; scratchpad -set flatten.separator \";\"; hierarchy -check -top {top}; proc; memory -nomap; flatten -scopename; write_verilog {file.Header}"
         ];
 
         bool success = false;
