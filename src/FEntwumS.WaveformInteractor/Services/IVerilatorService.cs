@@ -9,7 +9,7 @@ public interface IVerilatorService
     public Task<bool> RunExecutableAsync(IProjectFile topLevelFile);
 
     public void RegisterTestbench(IProjectFile file);
-    public void UnRegisterTestbench(IProjectFile file);
+    public void UnregisterTestbench(IProjectFile file);
     
     IProjectFile? Testbench { get; set; }
 }

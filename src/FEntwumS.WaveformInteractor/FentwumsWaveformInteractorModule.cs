@@ -138,7 +138,7 @@ public class FentwumsWaveformInteractorModule : IModule
                         menuItems.Add(new MenuItemViewModel("Unset Verilator testbench")
                         {
                             Header = "Unset Verilator testbench",
-                            Command = new RelayCommand(() => _verilatorService.UnRegisterTestbench(cppFile)),
+                            Command = new RelayCommand(() => _verilatorService.UnregisterTestbench(cppFile)),
                             IconObservable = Application.Current!.GetResourceObservable("VSImageLib.RemoveSingleDriverTest_16x"),
                         });
                     }

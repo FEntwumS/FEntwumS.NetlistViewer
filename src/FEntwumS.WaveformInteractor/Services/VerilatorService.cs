@@ -180,14 +180,16 @@ public class VerilatorService : IVerilatorService
         {
             UniversalFpgaProjectRoot project = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
             project.RegisterTestBench(file);
+            _projectExplorerService.SaveProjectAsync(project);
         }
-        _testbench = file; // Allow _testbench to be null
+        _testbench = file;
     }
         
-    public void UnRegisterTestbench(IProjectFile file)
+    public void UnregisterTestbench(IProjectFile file)
     {
         UniversalFpgaProjectRoot project = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
         project.UnregisterTestBench(file);
+        _projectExplorerService.SaveProjectAsync(project);
         _testbench = null;
     }
 
