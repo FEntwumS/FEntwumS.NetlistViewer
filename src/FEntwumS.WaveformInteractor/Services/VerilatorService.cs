@@ -67,7 +67,6 @@ public class VerilatorService : IVerilatorService
         return success;
     }
     
-    // TODO: Test and check compilation
     public async Task<bool> CompileVerilatedAsync(IProjectFile topLevelFile)
     {
         var projectRootPath = topLevelFile.Root!.FullPath;
@@ -178,18 +177,18 @@ public class VerilatorService : IVerilatorService
     {
         if (file is not null)
         {
-            UniversalFpgaProjectRoot project = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
-            project.RegisterTestBench(file);
-            _projectExplorerService.SaveProjectAsync(project);
+            UniversalFpgaProjectRoot? project = _projectExplorerService.ActiveProject?.Root as UniversalFpgaProjectRoot;
+            project?.RegisterTestBench(file);
+            if (project != null) _projectExplorerService.SaveProjectAsync(project);
         }
         _testbench = file;
     }
         
     public void UnregisterTestbench(IProjectFile file)
     {
-        UniversalFpgaProjectRoot project = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
-        project.UnregisterTestBench(file);
-        _projectExplorerService.SaveProjectAsync(project);
+        UniversalFpgaProjectRoot? project = _projectExplorerService.ActiveProject?.Root as UniversalFpgaProjectRoot;
+        project?.UnregisterTestBench(file);
+        if (project != null) _projectExplorerService.SaveProjectAsync(project);
         _testbench = null;
     }
 

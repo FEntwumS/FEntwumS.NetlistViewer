@@ -102,26 +102,11 @@ public class FentwumsWaveformInteractorModule : IModule
         
         _projectExplorerService.RegisterConstructContextMenu((selected, menuItems) =>
             {
-                if (selected is [IProjectFile { Extension: ".v" } verilogFile])
-                {
-                        menuItems.Add(new MenuItemViewModel("Create flattened verilog")
-                        {
-                            Header = "Create flattened verilog file",
-                            Command = new AsyncRelayCommand(() => _yosysSimService.LoadVerilogAsync(verilogFile))
-                        });
-                        
-                        menuItems.Add(new MenuItemViewModel("Verilate")
-                        {
-                            Header = $"Verilate this file{verilogFile.Header}",
-                            Command = new AsyncRelayCommand(() => _verilatorService.VerilateAsync(verilogFile))
-                        });
-                }
-
                 if (selected is [IProjectFile { Extension: ".cpp" } cppFile])
                 {
                     var filepath = cppFile.FullPath; 
                     var testbench = _verilatorService.Testbench;
-                    var testbenchpath = testbench != null ? testbench.FullPath : string.Empty; // Or any default value
+                    var testbenchpath = testbench != null ? testbench.FullPath : string.Empty;
                     
                     if (String.Equals(filepath, testbenchpath) == false)
                     {
@@ -142,12 +127,6 @@ public class FentwumsWaveformInteractorModule : IModule
                             IconObservable = Application.Current!.GetResourceObservable("VSImageLib.RemoveSingleDriverTest_16x"),
                         });
                     }
-                    
-                    menuItems.Add(new MenuItemViewModel("Build Verilator executable")
-                    {
-                        Header = $"Build Verilator executable from: {cppFile.Header}",
-                        Command = new RelayCommand(() => _verilatorService.CompileVerilatedAsync(cppFile)), // TODO: Toplevel of project should be put in here!
-                    });
                 }
             });
         
@@ -156,15 +135,12 @@ public class FentwumsWaveformInteractorModule : IModule
             if (args.PropertyName != nameof(dockService.CurrentDocument)) return;
             var currentDocument = dockService.CurrentDocument;
 
-            // Check if the current document is a VcdViewModel
             if (currentDocument is VcdViewModel vcdViewModel)
             {
-
                 vcdViewModel.PropertyChanged += (innerSender, innerArgs) =>
                 {
                     switch (innerArgs.PropertyName)
                     {
-                        // Subscribe to PropertyChanged for IsLoading
                         case nameof(vcdViewModel.IsLoading):
                             _httpClient = new HttpClient();
                             
@@ -213,8 +189,6 @@ public class FentwumsWaveformInteractorModule : IModule
                 // set first testbench from OneWare Project as _verilatorTestbench
                 UniversalFpgaProjectRoot project = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
                 _verilatorService.RegisterTestbench(project.TestBenches.FirstOrDefault());
-                // TODO: unfortunately the "Testbenches" key in project json is always empty. even if testbench is registered
-                
             }
         };
         
@@ -247,7 +221,12 @@ public class FentwumsWaveformInteractorModule : IModule
         }
         else
         {
-            _logger.Error("Set toplevel entity and Verilator testbench!", null, true, true);
+            if(topFile == null && verilatorServiceTestbench != null)
+                _logger.Error("Toplevel Entity must be set!", null, true, true);
+            if(topFile != null && verilatorServiceTestbench == null)
+                _logger.Error("Verilator Testbench must be set!", null, true, true);
+            if(topFile == null && verilatorServiceTestbench == null)
+                _logger.Error("Toplevel Entity and Verilator Testbench must be set!", null, true, true);
         }
     }
 
