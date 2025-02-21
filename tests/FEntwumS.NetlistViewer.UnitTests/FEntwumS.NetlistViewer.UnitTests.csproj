@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <OutputType>Library</OutputType>
+        <IsPackable>False</IsPackable>
+        <IsTestProject>True</IsTestProject>
+        <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+        <GenerateRuntimeConfigurationFiles>True</GenerateRuntimeConfigurationFiles>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\FEntwumS.NetlistViewer\FEntwumS.NetlistViewer.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="OneWare.Essentials" Version="0.11.3" />
+      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" />
+    </ItemGroup>
+
+</Project>

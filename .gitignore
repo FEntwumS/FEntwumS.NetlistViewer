@@ -7,4 +7,3 @@ riderModule.iml
 .idea
 src/FEntwumS.NetlistReaderFrontend/publish
 FEntwumS.NetlistReaderFrontend.sln.DotSettings.user
-/local-nuget/*.nupkg

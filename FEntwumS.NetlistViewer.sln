@@ -1,0 +1,58 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FEntwumS.NetlistViewer.UnitTests", "tests\FEntwumS.NetlistViewer.UnitTests\FEntwumS.NetlistViewer.UnitTests.csproj", "{CF9E9C7A-A4F7-442B-8015-58D4DA4C6837}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FEntwumS.NetlistViewer", "src\FEntwumS.NetlistViewer\FEntwumS.NetlistViewer.csproj", "{393BAF19-4387-413C-AC2E-2D22577783FE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Properties", "Properties", "{66B7CCEF-7704-488B-BB9F-300E9516AFD0}"
+	ProjectSection(SolutionItems) = preProject
+		Extension.md = Extension.md
+		License.md = License.md
+		oneware-extension.json = oneware-extension.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{123958C7-8BF6-43F2-BD3A-8AD304EBBF9B}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\publish.yml = .github\workflows\publish.yml
+		.github\workflows\test.yml = .github\workflows\test.yml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FEntwumS.Common", "src\FEntwumS.Common\FEntwumS.Common.csproj", "{3384C3FF-3690-4DBF-8D85-8A4202AA320F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FEntwumS.WaveformInteractor", "src\FEntwumS.WaveformInteractor\FEntwumS.WaveformInteractor.csproj", "{B772FDF2-20BF-477B-B2EC-A1C11DA6C4D8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CF9E9C7A-A4F7-442B-8015-58D4DA4C6837}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF9E9C7A-A4F7-442B-8015-58D4DA4C6837}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF9E9C7A-A4F7-442B-8015-58D4DA4C6837}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF9E9C7A-A4F7-442B-8015-58D4DA4C6837}.Release|Any CPU.Build.0 = Release|Any CPU
+		{393BAF19-4387-413C-AC2E-2D22577783FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{393BAF19-4387-413C-AC2E-2D22577783FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{393BAF19-4387-413C-AC2E-2D22577783FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{393BAF19-4387-413C-AC2E-2D22577783FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3384C3FF-3690-4DBF-8D85-8A4202AA320F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3384C3FF-3690-4DBF-8D85-8A4202AA320F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3384C3FF-3690-4DBF-8D85-8A4202AA320F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3384C3FF-3690-4DBF-8D85-8A4202AA320F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B772FDF2-20BF-477B-B2EC-A1C11DA6C4D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B772FDF2-20BF-477B-B2EC-A1C11DA6C4D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B772FDF2-20BF-477B-B2EC-A1C11DA6C4D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B772FDF2-20BF-477B-B2EC-A1C11DA6C4D8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2F01758F-FFEA-408A-B6CF-7135800E934C}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+EndGlobal

@@ -1,8 +1,8 @@
 {
-  "category": "Tools",
+  "category": "Misc",
   "type": "Plugin",
   "name": "FEntwumS.NetlistViewer Extension",
-  "id": "FEntwumS.NetlistReaderFrontend",
+  "id": "FEntwumS.NetlistViewer",
   "description": "FEntwumS.NetlistViewer for OneWare",
   "license": "MIT",
   "iconUrl": "https://raw.githubusercontent.com/FEntwumS/FEntwumS.NetlistViewer/master/Icon.png",
@@ -25,7 +25,7 @@
   "sourceUrl": "https://github.com/FEntwumS/FEntwumS.NetlistViewer/releases/download",
   "versions": [
     {
-      "version": "0.6.1",
+      "version": "0.6.4",
       "minStudioVersion": "0.21.0.0",
       "targets": [
         {
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "version": "0.6.2",
+      "version": "0.6.6",
       "minStudioVersion": "0.21.0.0",
       "targets": [
         {
@@ -43,8 +43,53 @@
       ]
     },
     {
-      "version": "0.6.3",
+      "version": "0.6.7",
       "minStudioVersion": "0.21.0.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.7.1",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.7.2",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.7.3",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.7.4",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.7.5",
+      "minStudioVersion": "0.21.1.0",
       "targets": [
         {
           "target": "all"

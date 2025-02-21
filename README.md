@@ -7,18 +7,19 @@ the software.
 
 ## System requirements
 
-Currently, only Windows is supported, but the plugin should work on all platforms OneWare Studio runs on. Additionally,
-your system needs to have Java 21 or higher installed.
+Currently, only Windows is supported, but the plugin should work on all platforms OneWare Studio runs on, except
+browsers.
 
 ## Dependencies
 
-Your installation of OneWare Studio needs to have the OSS Cad Suite Integration installed with version 2025-01-22 or
-later.
+Your installation of OneWare Studio needs to have the `OSS Cad Suite Integration` installed with version 2025-01-22 or
+later, as well as the most recent version of the `GHDL Extension`.
 
 # About
 
-This repository contains two plugins for [OneWare Studio](https://github.com/one-ware/OneWare). They are developed by
-TH Köln (Cologne University of Applied Sciences) as part of
+This repository contains the source code for two plugins for [OneWare Studio](https://github.com/one-ware/OneWare). They
+are developed by
+TH Köln (University of Applied Sciences Cologne) as part of
 the [FEntwumS research project](https://www.th-koeln.de/informations-medien-und-elektrotechnik/forschungsprojekt-fentwums_121126.php).
 
 ## Installation
@@ -30,10 +31,12 @@ Manager. To install this plugin, you will need to add a custom package source. P
 2. Go to the `Package Manager` tab
 3. Add a new custom package source pointing to
    `https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/oneware-extension.json`
-4. Save
+4. Click `Save`, then exit the settings menu
 5. Open the package manager
 6. Refresh the package manager
 7. Done! The plugin should now be available for you to install!
+8. Install both the `FEntwumS.NetlistViewer Extension` plugin as well as the `FEntwumS NetlistViewer Backend`  and the
+   `Eclipse Adoptiom OpenJDK` binaries using the package manager
 
 ## Netlist viewer
 
@@ -42,7 +45,8 @@ designs inside OneWare Studio. It is a frontend building on
 the [FEntwumS Netlist Reader Backend](https://github.com/FEntwumS/NetlistReaderBackend). You can run the backend, which
 does all the layouting, either on your local machine or on a remote server in your local network. The default (and
 recommended) configuration is to run the backend locally. If this is all you need, you just need to install the plugin.
-It will install and start the backend automatically.
+It will install and start the backend automatically. You may be prompted to allow network access for the OpenJDK binary
+by your operating system. Please grant this access, otherwise the netlist viewer will not work.
 
 ### Using a remote backend
 
@@ -50,11 +54,12 @@ If you plan on using a local backend install (the default and recommended case),
 
 If you want to use a remote backend, you will need to deploy it yourself. Instructions on how to do so can be
 found [here](https://github.com/FEntwumS/NetlistReaderBackend?tab=readme-ov-file#can-i-use-the-backend-separately-from-the-frontend).
-Since traffic between the backend and the viewer is neither encrypted nor authenticated, you should only use a remote
-backend within local and trusted networks.
+Since the traffic between the backend and the viewer is **neither encrypted nor authenticated**, you should only use a
+remote
+backend **within local and trusted networks**.
 
 When you have your backend up and running, you will need to enter the backends IP address and port
-(the default port is 8080) in the settings. You also need to check the box for "Use remote backend".
+(the default port is 8080) in the settings. You also need to uncheck the box for "Use local backend server".
 
 ### Viewing your design
 
@@ -63,6 +68,9 @@ right-clicking your top level entity and choosing the "View netlist for [insert 
 automatically generate a netlist using yosys and then display it in a new tab. You can zoom using your mouse wheel,
 clicking and dragging with the left mouse button pans the view and left-clicking on an entity will either expand or
 collapse it (depending on whether the entity is collapsed or not).
+
+Left-clicking on a cell will open the corresponding HDL file. Synthesized Verilog code is opened for VHDL designs at the
+moment. Future work will enable the direct opening of the corresponding VHDL file.
 
 ### Viewing a generated netlist
 
@@ -95,8 +103,8 @@ entry `*.json` to the list `Files to Include`.
 
 ## I cannot find a suitable OSS Cad Suite Integration plugin version
 
-As of now, the required version is not yet available in a publicly released version of OneWare Studio. You can either
-compile OneWare Studio from source or wait until a new release is available.
+Please make sure your version of OneWare Studio has all updates installed. An appropriate version of the OSS Cad Suite
+Integration plugin is available in OneWare Studio 0.21.1.0 and later.
 
 ## I started OneWare Studio and the tab that should show my netlist is empty
 
@@ -125,7 +133,9 @@ you need to right-click your toplevel entity and use the "View netlist for [...]
 
 ## I generated a netlist myself, but I can't seem to find it in the project explorer
 
-By default, OneWare Studio does not display `.json` files in the project explorer.
+By default, OneWare Studio does not display `.json` files in the project explorer. To fix this, you will need to add the
+`.json` filetype manually. To do this, please right click on the project containing the netlist, choose the `Edit`
+option and add an entry `*.json` to the list `Files to Include`.
 
 ## `An internal server error occured. Please file a bug report if this problem persists.`
 
