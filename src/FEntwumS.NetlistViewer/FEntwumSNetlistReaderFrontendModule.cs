@@ -647,7 +647,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         settingsService.RegisterSettingSubCategory("Netlist Viewer", "Experimental");
 
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_ContinueOnBinaryInstallError",
-            new CheckBoxSetting("Continue if errors occur during dependency installtion", false));
+            new CheckBoxSetting("Continue if errors occur during dependency installation", false));
 
         // Subscribe the FrontendService _AFTER_ the relevant settings have been registered
         ServiceManager.GetService<FrontendService>().SubscribeToSettings();
