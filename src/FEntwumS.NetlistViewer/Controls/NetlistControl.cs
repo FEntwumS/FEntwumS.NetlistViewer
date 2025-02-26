@@ -30,7 +30,7 @@ public class NetlistControl : TemplatedControl
 
     private IEnumerable _items = new AvaloniaList<object>();
     
-    private IEnumerable _renderableItems = new AvaloniaList<object>();
+    private AvaloniaList<object> _renderableItems = new();
 
     public IEnumerable Items
     {
@@ -257,6 +257,7 @@ public class NetlistControl : TemplatedControl
     #endregion
 
     public event ElementClickedEventHandler ElementClicked;
+    
     private List<DRect> renderedNodeList = new List<DRect>();
     private List<DRect> renderedLabelList = new List<DRect>();
     private List<DRect> renderedPortList = new List<DRect>();
@@ -287,15 +288,15 @@ public class NetlistControl : TemplatedControl
             return;
         }
 
-        if (!IsInitialized)
-        {
-            return;
-        }
-
         if (change.Property == ItemsProperty && Items != null)
         {
             _itemsInvalidated = true;
             Redraw();
+        }
+
+        if (!IsInitialized)
+        {
+            return;
         }
 
         if (change.Property == IsLoadedProperty)
@@ -398,6 +399,12 @@ public class NetlistControl : TemplatedControl
             return;
         }
 
+        if (_renderableItems.Count != ((AvaloniaList<NetlistElement>)_items).Count)
+        {
+            _renderableItems.Clear();
+            _renderableItems.AddRange((AvaloniaList<NetlistElement>)_items);
+        }
+
         typeface ??= new Typeface(this.FontFamily, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
 
         double x = 0, y = 0, width = 0, height = 0, radius = 0, edgeLength = 0;
@@ -493,7 +500,7 @@ public class NetlistControl : TemplatedControl
 
         if (!_itemsInvalidated)
         {
-            foreach (NetlistElement element in _items)
+            foreach (NetlistElement element in _renderableItems)
             {
                 switch (element.Type)
                 {
@@ -709,6 +716,12 @@ public class NetlistControl : TemplatedControl
                     break;
                 }
             }
+        }
+
+        if (_itemsInvalidated)
+        {
+            _renderableItems.Clear();
+            _renderableItems.AddRange((AvaloniaList<NetlistElement>)_items);
         }
         
         _itemsInvalidated = false;
