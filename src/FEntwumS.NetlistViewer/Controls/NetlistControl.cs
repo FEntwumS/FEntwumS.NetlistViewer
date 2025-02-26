@@ -7,6 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -272,11 +273,15 @@ public class NetlistControl : TemplatedControl
     
     private bool _itemsInvalidated = false;
 
-    static NetlistControl()
+    public NetlistControl()
     {
         AffectsRender<NetlistControl>(ItemsProperty, IsEnabledProperty);
 
         _viewportDimensionService = ServiceManager.GetViewportDimensionService();
+        
+        PointerPressed += NetlistControl_PointerPressed;
+        PointerReleased += NetlistControl_PointerReleased;
+        Tapped += NetlistControl_OnTapped;
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -989,18 +994,20 @@ public class NetlistControl : TemplatedControl
 
     #region EventHandlers
 
-    public void NetlistControl_PointerPressed(object? sender, PointerPressedEventArgs e)
+    public void NetlistControl_PointerPressed(object? sender, RoutedEventArgs e)
     {
         return;
     }
 
-    public void NetlistControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    public void NetlistControl_PointerReleased(object? sender, RoutedEventArgs e)
     {
         return;
     }
 
-    public async Task NetlistControl_OnTappedAsync(object? sender, TappedEventArgs e)
+    public void NetlistControl_OnTapped(object? sender, RoutedEventArgs e)
     {
+        TappedEventArgs args = e as TappedEventArgs;
+        
         NetlistElement hn = null,   // highest node
             he = null,              // highest edge
             hj = null,              // highest junction
@@ -1014,7 +1021,7 @@ public class NetlistControl : TemplatedControl
 
         foreach (var elem in renderedNodeList)
         {
-            if (elem.Hittest(e.GetPosition(this)))
+            if (elem.Hittest(args.GetPosition(this)))
             {
                 hn = elem.element;
             }
@@ -1022,7 +1029,7 @@ public class NetlistControl : TemplatedControl
 
         foreach (var elem in renderedEdgeList)
         {
-            if (elem.Hittest(e.GetPosition(this)))
+            if (elem.Hittest(args.GetPosition(this)))
             {
                 elem.element.IsHighlighted = true;
 
@@ -1039,7 +1046,7 @@ public class NetlistControl : TemplatedControl
 
         foreach (var elem in renderedPortList)
         {
-            if (elem.Hittest(e.GetPosition(this)))
+            if (elem.Hittest(args.GetPosition(this)))
             {
                 hp = elem.element;
             }
@@ -1047,7 +1054,7 @@ public class NetlistControl : TemplatedControl
 
         foreach (var elem in renderedJunctionList)
         {
-            if (elem.Hittest(e.GetPosition(this)))
+            if (elem.Hittest(args.GetPosition(this)))
             {
                 hj = elem.element;
             }
@@ -1055,7 +1062,7 @@ public class NetlistControl : TemplatedControl
 
         foreach (var elem in renderedLabelList)
         {
-            if (elem.Hittest(e.GetPosition(this)))
+            if (elem.Hittest(args.GetPosition(this)))
             {
                 hl = elem.element;
             }
@@ -1106,36 +1113,41 @@ public class NetlistControl : TemplatedControl
                 {
                     string srcloc = CurrentElement.SrcLocation;
 
-                    if (srcloc == "")
-                    {
-                        return;
-                    }
-
-                    int lastpos = srcloc.LastIndexOfAny([':']);
-
-                    if (lastpos == -1)
-                    {
-                        lastpos = srcloc.Length - 1;
-                    }
-                    
-                    string filename = srcloc.Substring(0, lastpos);
-                    string lines = srcloc.Substring(lastpos + 1);
-                    string[] linesSplit = lines.Split('.');
-                    int line = 1;
-                    if (linesSplit.Length > 0)
-                    {
-                        line = int.Parse(linesSplit[0]);
-                    }
-                    
-                    var ds = ServiceManager.GetService<IDockService>();
-                    
-                    var document = await ds.OpenFileAsync(new ExternalFile(filename));
-
-                    (document as IEditor)?.JumpToLine(line);
+                    _ = OpenHDLSourceAsync(srcloc);
 
                 }
             }
         }
+    }
+
+    private async Task OpenHDLSourceAsync(string srcline)
+    {
+        if (srcline == "")
+        {
+            return;
+        }
+
+        int lastpos = srcline.LastIndexOfAny([':']);
+
+        if (lastpos == -1)
+        {
+            lastpos = srcline.Length - 1;
+        }
+                    
+        string filename = srcline.Substring(0, lastpos);
+        string lines = srcline.Substring(lastpos + 1);
+        string[] linesSplit = lines.Split('.');
+        int line = 1;
+        if (linesSplit.Length > 0)
+        {
+            line = int.Parse(linesSplit[0]);
+        }
+                    
+        var ds = ServiceManager.GetService<IDockService>();
+                    
+        var document = await ds.OpenFileAsync(new ExternalFile(filename));
+
+        (document as IEditor)?.JumpToLine(line);
     }
 
     #endregion

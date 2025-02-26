@@ -92,23 +92,6 @@ public partial class FrontendView : UserControl
         NetlistControlElem.PointerY = e.GetPosition(NetlistControlElem).Y;
     }
 
-    private void NetlistControl_OnPointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        // Get click event to NetlistControl
-
-        ((NetlistControl)sender).NetlistControl_PointerPressed(sender, e);
-    }
-
-    private void NetlistControl_OnPointerReleased(object? sender, PointerReleasedEventArgs e)
-    {
-        ((NetlistControl)sender).NetlistControl_PointerReleased(sender, e);
-    }
-
-    private void NetlistControl_OnTapped(object? sender, TappedEventArgs e)
-    {
-        _ = ((NetlistControl)sender).NetlistControl_OnTappedAsync(sender, e);
-    }
-
     private void NetlistControl_OnPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (_vm != null && ((NetlistControl)sender).IsInitialized && ((NetlistControl)sender).FileLoaded &&
