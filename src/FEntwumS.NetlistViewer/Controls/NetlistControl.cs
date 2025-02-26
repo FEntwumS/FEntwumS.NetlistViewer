@@ -272,6 +272,7 @@ public class NetlistControl : TemplatedControl
     private UInt64 _currentNetlistId;
     
     private bool _itemsInvalidated = false;
+    private bool _pointerPressed = false;
 
     public NetlistControl()
     {
@@ -281,7 +282,11 @@ public class NetlistControl : TemplatedControl
         
         PointerPressed += NetlistControl_PointerPressed;
         PointerReleased += NetlistControl_PointerReleased;
+        PointerMoved += NetlistControl_PointerMoved;
+        PointerWheelChanged += NetlistControl_OnPointerWheelChanged;
         Tapped += NetlistControl_OnTapped;
+
+        ElementClicked += NetlistControl_OnElementClicked;
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -994,19 +999,18 @@ public class NetlistControl : TemplatedControl
 
     #region EventHandlers
 
-    public void NetlistControl_PointerPressed(object? sender, RoutedEventArgs e)
+    private void NetlistControl_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        return;
+        _pointerPressed = true;
     }
 
-    public void NetlistControl_PointerReleased(object? sender, RoutedEventArgs e)
+    private void NetlistControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
-        return;
+        _pointerPressed = false;
     }
 
-    public void NetlistControl_OnTapped(object? sender, RoutedEventArgs e)
+    private void NetlistControl_OnTapped(object? sender, TappedEventArgs e)
     {
-        TappedEventArgs args = e as TappedEventArgs;
         
         NetlistElement hn = null,   // highest node
             he = null,              // highest edge
@@ -1021,7 +1025,7 @@ public class NetlistControl : TemplatedControl
 
         foreach (var elem in renderedNodeList)
         {
-            if (elem.Hittest(args.GetPosition(this)))
+            if (elem.Hittest(e.GetPosition(this)))
             {
                 hn = elem.element;
             }
@@ -1029,7 +1033,7 @@ public class NetlistControl : TemplatedControl
 
         foreach (var elem in renderedEdgeList)
         {
-            if (elem.Hittest(args.GetPosition(this)))
+            if (elem.Hittest(e.GetPosition(this)))
             {
                 elem.element.IsHighlighted = true;
 
@@ -1046,7 +1050,7 @@ public class NetlistControl : TemplatedControl
 
         foreach (var elem in renderedPortList)
         {
-            if (elem.Hittest(args.GetPosition(this)))
+            if (elem.Hittest(e.GetPosition(this)))
             {
                 hp = elem.element;
             }
@@ -1054,7 +1058,7 @@ public class NetlistControl : TemplatedControl
 
         foreach (var elem in renderedJunctionList)
         {
-            if (elem.Hittest(args.GetPosition(this)))
+            if (elem.Hittest(e.GetPosition(this)))
             {
                 hj = elem.element;
             }
@@ -1062,7 +1066,7 @@ public class NetlistControl : TemplatedControl
 
         foreach (var elem in renderedLabelList)
         {
-            if (elem.Hittest(args.GetPosition(this)))
+            if (elem.Hittest(e.GetPosition(this)))
             {
                 hl = elem.element;
             }
@@ -1148,6 +1152,41 @@ public class NetlistControl : TemplatedControl
         var document = await ds.OpenFileAsync(new ExternalFile(filename));
 
         (document as IEditor)?.JumpToLine(line);
+    }
+
+    private void NetlistControl_PointerMoved(object? sender, PointerEventArgs e)
+    {
+        var pointerpoints = e.GetIntermediatePoints(this);
+        double dx, dy;
+
+        if (pointerpoints.Count > 1 && pointerpoints.First().Properties.IsLeftButtonPressed)
+        {
+            dx = pointerpoints.Last().Position.X - pointerpoints.First().Position.X;
+            dy = pointerpoints.Last().Position.Y - pointerpoints.First().Position.Y;
+        }
+        else
+        {
+            dx = 0;
+            dy = 0;
+        }
+
+        this.DeltaX += dx;
+        this.DeltaY += dy;
+    }
+
+    private void NetlistControl_OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
+    {
+        var wheel = e.Delta;
+        
+        this.DeltaScale += wheel.Y;
+        
+        this.PointerX = e.GetPosition(this).X;
+        this.PointerY = e.GetPosition(this).Y;
+    }
+    
+    private void NetlistControl_OnElementClicked(object sender, ElementClickedEventArgs e)
+    {
+        ServiceManager.GetCustomLogger().Log($"Toggling entity at {e.NodePath}", false);
     }
 
     #endregion
