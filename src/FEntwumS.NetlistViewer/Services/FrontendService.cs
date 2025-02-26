@@ -8,6 +8,7 @@ using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using FEntwumS.NetlistViewer.ViewModels;
 using OneWare.Essentials.Helpers;
+using OneWare.Essentials.PackageManager;
 using OneWare.ProjectSystem.Models;
 using StreamContent = System.Net.Http.StreamContent;
 
@@ -19,6 +20,7 @@ public class FrontendService
     private readonly IApplicationStateService _applicationStateService;
     private readonly IDockService _dockService;
     private readonly ISettingsService _settingsService;
+    private readonly IPackageService _packageService;
 
     private string _backendAddress = string.Empty;
     private string _backendPort = string.Empty;
@@ -44,6 +46,7 @@ public class FrontendService
         _applicationStateService = ServiceManager.GetService<IApplicationStateService>();
         _dockService = ServiceManager.GetService<IDockService>();
         _settingsService = ServiceManager.GetService<ISettingsService>();
+        _packageService = ServiceManager.GetService<IPackageService>();
     }
 
     public void SubscribeToSettings()
@@ -199,9 +202,104 @@ public class FrontendService
         _settingsService.GetSettingObservable<string>("NetlistViewer_java_args").Subscribe(x => extraJarArgs = x);
     }
 
+    private async Task<(bool success, bool needsRestart)> InstallDependenciesAsync()
+    {
+        bool globalSuccess = true, needsRestart = false;
+
+        // Get packages for external dependencies
+        PackageModel? ghdlPackageModel = _packageService.Packages.GetValueOrDefault("OneWare.GHDLExtension");
+        Package? ghdlPackage = ghdlPackageModel?.Package;
+        
+        PackageModel? ghdlBinaryPackageModel = _packageService.Packages.GetValueOrDefault("ghdl");
+        Package? ghdlBinaryPackage = ghdlBinaryPackageModel?.Package;
+        
+        PackageModel? osscadsuiteBinaryPackageModel = _packageService.Packages.GetValueOrDefault("osscadsuite");
+        Package? osscadsuiteBinaryPackage = osscadsuiteBinaryPackageModel?.Package;
+
+        List<Package?> dependencyList = new();
+        
+        dependencyList.Add(ghdlPackage);
+        dependencyList.Add(ghdlBinaryPackage);
+        dependencyList.Add(osscadsuiteBinaryPackage);
+        dependencyList.Add(FEntwumSNetlistReaderFrontendModule.NetlistPackage);
+        dependencyList.Add(FEntwumSNetlistReaderFrontendModule.JDKPackage);
+
+        foreach (Package? dependency in dependencyList)
+        {
+            if (dependency == null)
+            {
+                _logger.Error("A dependency could not be found in the extension manager. Please file a bug report including the following information:");
+                _logger.Error("Requested and available dependencies:");
+
+                foreach (Package? dep in dependencyList)
+                {
+                    if (dep == null)
+                    {
+                        continue;
+                    }
+                    
+                    _logger.Error($"Name: {dep.Name} - ID: {dep.Id}");
+                }
+                
+                globalSuccess = false;
+                continue;
+            }
+            
+            if (_packageService.Packages!.GetValueOrDefault(dependency!.Id) is
+                {
+                    Status: PackageStatus.Available or PackageStatus.Installing or PackageStatus.UpdateAvailable
+                })
+            {
+                if (_settingsService.GetSettingValue<bool>("Experimental_AutoDownloadBinaries"))
+                {
+                    _logger.Log($"Installing \"{dependency.Name}\"...", true);
+                    
+                    bool localSuccess = await _packageService.InstallAsync(dependency);
+                    
+                    globalSuccess = globalSuccess && localSuccess;
+
+                    if (localSuccess)
+                    {
+                        _logger.Log($"Successfully installed \"{dependency.Name}\".", true);
+                    }
+                    else
+                    {
+                        _logger.Error($"Failed to install \"{dependency.Name}\".");
+                    }
+                }
+                else
+                {
+                    _logger.Error(
+                        $"Extension \"{dependency.Name}\" is not installed. Please enable \"Automatically download Binaries\" under the \"Experimental\" settings or download the extension yourself");
+
+                    globalSuccess = false;
+                }
+
+                if (globalSuccess)
+                {
+                    needsRestart = true;
+                }
+            }
+        }
+
+        if (globalSuccess && needsRestart)
+        {
+            _logger.Log("Dependencies were successfully installed. Please restart OneWare Studio!", true);
+        }
+
+        return (globalSuccess, needsRestart);
+    }
+
     public async Task CreateVhdlNetlist(IProjectFile vhdl)
     {
-        bool success = await StartBackendIfNotStartedAsync();
+        (bool success, bool needsRestart) = await InstallDependenciesAsync();
+
+        if (!success || needsRestart)
+        {
+            return;
+        }
+        
+        success = await StartBackendIfNotStartedAsync();
 
         if (!success)
         {
@@ -257,7 +355,14 @@ public class FrontendService
 
     public async Task CreateVerilogNetlist(IProjectFile verilog)
     {
-        bool success = await StartBackendIfNotStartedAsync();
+        (bool success, bool needsRestart) = await InstallDependenciesAsync();
+
+        if (!success || needsRestart)
+        {
+            return;
+        }
+        
+        success = await StartBackendIfNotStartedAsync();
 
         if (!success)
         {
@@ -292,7 +397,14 @@ public class FrontendService
 
     public async Task CreateSystemVerilogNetlist(IProjectFile sVerilog)
     {
-        bool success = await StartBackendIfNotStartedAsync();
+        (bool success, bool needsRestart) = await InstallDependenciesAsync();
+
+        if (!success || needsRestart)
+        {
+            return;
+        }
+        
+        success = await StartBackendIfNotStartedAsync();
 
         if (!success)
         {
