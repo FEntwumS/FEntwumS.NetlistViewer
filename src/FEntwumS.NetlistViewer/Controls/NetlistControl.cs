@@ -1001,12 +1001,12 @@ public class NetlistControl : TemplatedControl
 
     private void NetlistControl_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        _pointerPressed = true;
+        _pointerPressed = e.GetCurrentPoint(this).Properties.IsLeftButtonPressed;
     }
 
     private void NetlistControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
-        _pointerPressed = false;
+        _pointerPressed = e.GetCurrentPoint(this).Properties.IsLeftButtonPressed;
     }
 
     private void NetlistControl_OnTapped(object? sender, TappedEventArgs e)
@@ -1159,7 +1159,7 @@ public class NetlistControl : TemplatedControl
         var pointerpoints = e.GetIntermediatePoints(this);
         double dx, dy;
 
-        if (pointerpoints.Count > 1 && pointerpoints.First().Properties.IsLeftButtonPressed)
+        if (pointerpoints.Count > 1 && (pointerpoints.First().Properties.IsLeftButtonPressed || _pointerPressed))
         {
             dx = pointerpoints.Last().Position.X - pointerpoints.First().Position.X;
             dy = pointerpoints.Last().Position.Y - pointerpoints.First().Position.Y;
