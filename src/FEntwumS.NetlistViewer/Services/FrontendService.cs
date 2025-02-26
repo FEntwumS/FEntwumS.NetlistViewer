@@ -210,7 +210,7 @@ public class FrontendService
         bool globalSuccess = true, needsRestart = false;
 
         // Get packages for external dependencies
-        PackageModel? ghdlPackageModel = _packageService.Packages.GetValueOrDefault("OneWare.GHDLExtension");
+        PackageModel? ghdlPackageModel = _packageService.Packages.GetValueOrDefault("OneWare.GhdlExtension");
         Package? ghdlPackage = ghdlPackageModel?.Package;
         
         PackageModel? ghdlBinaryPackageModel = _packageService.Packages.GetValueOrDefault("ghdl");
