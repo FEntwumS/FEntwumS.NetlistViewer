@@ -33,6 +33,7 @@ public class FrontendService
     private int _portLabelFontSize = 10;
     private string _javaBinaryFolder = string.Empty;
     private string extraJarArgs = string.Empty;
+    private bool _continueOnBinaryInstallError = false;
 
     private UInt64 currentNetlist = 0;
 
@@ -200,6 +201,8 @@ public class FrontendService
             x => _javaBinaryFolder = x);
         
         _settingsService.GetSettingObservable<string>("NetlistViewer_java_args").Subscribe(x => extraJarArgs = x);
+        
+        _settingsService.GetSettingObservable<bool>("NetlistViewer_ContinueOnBinaryInstallError").Subscribe(x => _continueOnBinaryInstallError = x);
     }
 
     private async Task<(bool success, bool needsRestart)> InstallDependenciesAsync()
@@ -294,7 +297,10 @@ public class FrontendService
     {
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
-        if (!success || needsRestart)
+        if (needsRestart)
+        {
+            return;
+        } else if (!(success || _continueOnBinaryInstallError))
         {
             return;
         }
@@ -357,7 +363,10 @@ public class FrontendService
     {
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
-        if (!success || needsRestart)
+        if (needsRestart)
+        {
+            return;
+        } else if (!(success || _continueOnBinaryInstallError))
         {
             return;
         }
@@ -399,7 +408,10 @@ public class FrontendService
     {
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
-        if (!success || needsRestart)
+        if (needsRestart)
+        {
+            return;
+        } else if (!(success || _continueOnBinaryInstallError))
         {
             return;
         }
