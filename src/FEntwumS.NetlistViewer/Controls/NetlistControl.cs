@@ -273,6 +273,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
     
     private bool _itemsInvalidated = false;
     private bool _pointerPressed = false;
+    private Point _pointerPosition = new Point(0, 0);
 
     public NetlistControl()
     {
@@ -1163,16 +1164,22 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         var pointerpoints = e.GetIntermediatePoints(this);
         double dx, dy;
 
-        if (pointerpoints.Count > 1 && (pointerpoints.First().Properties.IsLeftButtonPressed || _pointerPressed))
+        Point currentPos = e.GetPosition(this);
+        
+        ServiceManager.GetCustomLogger().Log($"Pointer Moved: Old Position = {_pointerPosition.X}, {_pointerPosition.Y} - New Position = {currentPos.X}, {currentPos.Y} - Number of Intermediate Points = {pointerpoints.Count}");
+
+        if (pointerpoints.First().Properties.IsLeftButtonPressed || _pointerPressed)
         {
-            dx = pointerpoints.Last().Position.X - pointerpoints.First().Position.X;
-            dy = pointerpoints.Last().Position.Y - pointerpoints.First().Position.Y;
+            dx = currentPos.X - _pointerPosition.X;
+            dy = currentPos.Y - _pointerPosition.Y;
         }
         else
         {
             dx = 0;
             dy = 0;
         }
+        
+        _pointerPosition = currentPos;
 
         this.DeltaX += dx;
         this.DeltaY += dy;
