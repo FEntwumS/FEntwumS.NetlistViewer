@@ -1145,6 +1145,10 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         {
             return;
         }
+        
+        string[] srclineSplit = srcline.Split('|');
+        
+        srcline = srclineSplit.Last();
 
         int lastpos = srcline.LastIndexOfAny([':']);
 
