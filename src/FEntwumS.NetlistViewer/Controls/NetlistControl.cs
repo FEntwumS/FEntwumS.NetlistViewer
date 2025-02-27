@@ -1008,16 +1008,20 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
     private void NetlistControl_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        _pointerPressed = e.GetCurrentPoint(this).Properties.IsLeftButtonPressed;
-
-        var p = e.GetCurrentPoint(this).Properties;
+        PointerPoint currentPoint = e.GetCurrentPoint(this);
         
-        ServiceManager.GetCustomLogger().Log($"Pointer pressed: Left Button = {p.IsLeftButtonPressed} - Right Button = {p.IsRightButtonPressed} - Middle Button = {p.IsMiddleButtonPressed} - X1 Button = {p.IsXButton1Pressed} - Barrel Button = {p.IsBarrelButtonPressed}");
+        _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
+        
+        _pointerPosition = currentPoint.Position;
     }
 
     private void NetlistControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
-        _pointerPressed = e.GetCurrentPoint(this).Properties.IsLeftButtonPressed;
+        PointerPoint currentPoint = e.GetCurrentPoint(this);
+        
+        _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
+        
+        _pointerPosition = currentPoint.Position;
     }
 
     private void NetlistControl_OnTapped(object? sender, TappedEventArgs e)
