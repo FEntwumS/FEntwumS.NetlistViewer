@@ -209,71 +209,53 @@ public class FrontendService
     {
         bool globalSuccess = true, needsRestart = false;
 
-        // Get packages for external dependencies
-        PackageModel? ghdlPackageModel = _packageService.Packages.GetValueOrDefault("OneWare.GhdlExtension");
-        Package? ghdlPackage = ghdlPackageModel?.Package;
+        string[] dependencyIDs =
+        [
+            "OneWare.GhdlExtension", "osscadsuite", "ghdl", FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id!,
+            FEntwumSNetlistReaderFrontendModule.JDKPackage.Id!
+        ];
         
-        PackageModel? ghdlBinaryPackageModel = _packageService.Packages.GetValueOrDefault("ghdl");
-        Package? ghdlBinaryPackage = ghdlBinaryPackageModel?.Package;
-        
-        PackageModel? osscadsuiteBinaryPackageModel = _packageService.Packages.GetValueOrDefault("osscadsuite");
-        Package? osscadsuiteBinaryPackage = osscadsuiteBinaryPackageModel?.Package;
+        // Install osscadsuite binary between GHDL plugin and ghdl binary to allow for the addition of the ghdl binary to the store
 
-        List<Package?> dependencyList = new();
-        
-        dependencyList.Add(ghdlPackage);
-        dependencyList.Add(ghdlBinaryPackage);
-        dependencyList.Add(osscadsuiteBinaryPackage);
-        dependencyList.Add(FEntwumSNetlistReaderFrontendModule.NetlistPackage);
-        dependencyList.Add(FEntwumSNetlistReaderFrontendModule.JDKPackage);
-
-        foreach (Package? dependency in dependencyList)
+        foreach (string dependencyID in dependencyIDs)
         {
-            if (dependency == null)
+            PackageModel? dependencyModel = _packageService.Packages.GetValueOrDefault(dependencyID);
+            Package? dependencyPackage = dependencyModel?.Package;
+            
+            if (dependencyPackage == null)
             {
-                _logger.Error("A dependency could not be found in the extension manager. Please file a bug report including the following information:");
-                _logger.Error("Requested and available dependencies:");
-
-                foreach (Package? dep in dependencyList)
-                {
-                    if (dep == null)
-                    {
-                        continue;
-                    }
-                    
-                    _logger.Error($"Name: {dep.Name} - ID: {dep.Id}");
-                }
+                _logger.Error($"Dependency with ID {dependencyID} not available in the package manager. Please file a bug report, if this issue persists");
                 
                 globalSuccess = false;
                 continue;
             }
             
-            if (_packageService.Packages!.GetValueOrDefault(dependency!.Id) is
+            if (_packageService.Packages!.GetValueOrDefault(dependencyID) is
                 {
                     Status: PackageStatus.Available or PackageStatus.Installing or PackageStatus.UpdateAvailable
                 })
             {
                 if (_settingsService.GetSettingValue<bool>("Experimental_AutoDownloadBinaries"))
                 {
-                    _logger.Log($"Installing \"{dependency.Name}\"...", true);
+                    _logger.Log($"Installing \"{dependencyPackage.Name}\"...", true);
                     
-                    bool localSuccess = await _packageService.InstallAsync(dependency);
+                    bool localSuccess = await _packageService.InstallAsync(dependencyPackage);
                     
                     globalSuccess = globalSuccess && localSuccess;
 
                     if (localSuccess)
                     {
-                        _logger.Log($"Successfully installed \"{dependency.Name}\".", true);
+                        _logger.Log($"Successfully installed \"{dependencyPackage.Name}\".", true);
                     }
                     else
                     {
-                        _logger.Error($"Failed to install \"{dependency.Name}\".");
+                        _logger.Error($"Failed to install \"{dependencyPackage.Name}\".");
                     }
                 }
                 else
                 {
                     _logger.Error(
-                        $"Extension \"{dependency.Name}\" is not installed. Please enable \"Automatically download Binaries\" under the \"Experimental\" settings or download the extension yourself");
+                        $"Extension \"{dependencyPackage.Name}\" is not installed. Please enable \"Automatically download Binaries\" under the \"Experimental\" settings or download the extension yourself");
 
                     globalSuccess = false;
                 }
