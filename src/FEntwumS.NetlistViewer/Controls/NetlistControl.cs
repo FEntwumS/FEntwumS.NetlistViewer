@@ -1175,8 +1175,6 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         double dx, dy;
 
         Point currentPos = e.GetPosition(this);
-        
-        ServiceManager.GetCustomLogger().Log($"Pointer Moved: Old Position = {_pointerPosition.X}, {_pointerPosition.Y} - New Position = {currentPos.X}, {currentPos.Y} - Number of Intermediate Points = {pointerpoints.Count}");
 
         if (pointerpoints.First().Properties.IsLeftButtonPressed || _pointerPressed)
         {
