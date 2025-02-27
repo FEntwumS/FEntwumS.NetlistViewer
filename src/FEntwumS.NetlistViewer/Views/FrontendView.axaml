@@ -46,7 +46,7 @@
                                      HorizontalAlignment="Stretch" Name="NetlistControl"
                                      CurrentScale="{Binding Scale}" DeltaX="0" DeltaY="0"
                                      DeltaScale="0" PointerX="0" PointerY="0" ClipToBounds="True"
-                                     EdgeLengthScaleClip="2" JunctionScaleClip="3"
+                                     EdgeLengthScaleClip="2" JunctionScaleClip="3" OffsetY="{Binding OffY}"
                                      NodeScaleClip="2" PortScaleClip="3" LabelScaleClip="3" OffsetX="{Binding OffX}"
                                      PropertyChanged="NetlistControl_OnPropertyChanged" FitToZoom="{Binding FitToZoom}"
                                      IsLoaded="{Binding IsLoaded}"
