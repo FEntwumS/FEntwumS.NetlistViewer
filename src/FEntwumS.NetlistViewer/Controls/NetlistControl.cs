@@ -7,8 +7,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Rendering;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using FEntwumS.NetlistViewer.Services;
@@ -19,7 +19,7 @@ using OneWare.Essentials.ViewModels;
 
 namespace FEntwumS.NetlistViewer.Controls;
 
-public class NetlistControl : TemplatedControl
+public class NetlistControl : TemplatedControl, ICustomHitTest
 {
     #region Properties
 
@@ -1190,4 +1190,9 @@ public class NetlistControl : TemplatedControl
     }
 
     #endregion
+
+    public bool HitTest(Point point)
+    {
+        return true;
+    }
 }
