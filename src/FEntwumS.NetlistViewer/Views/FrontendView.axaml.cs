@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 using FEntwumS.NetlistViewer.Controls;
 using FEntwumS.NetlistViewer.Services;
@@ -62,10 +61,6 @@ public partial class FrontendView : UserControl
             ((AvaloniaList<NetlistElement>)((NetlistControl)sender).Items).Count == 0)
         {
             ServiceManager.GetService<IDockService>().CloseDockable(_vm);
-        }
-        else
-        {
-            ((NetlistControl)sender).Redraw();
         }
     }
 

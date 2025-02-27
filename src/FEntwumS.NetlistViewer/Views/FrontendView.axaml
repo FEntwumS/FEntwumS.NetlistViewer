@@ -51,7 +51,7 @@
                                      PropertyChanged="NetlistControl_OnPropertyChanged" FitToZoom="{Binding FitToZoom}"
                                      IsLoaded="{Binding IsLoaded}"
                                      ClickedElementPath="{Binding ClickedElementPath}" NetlistID="{Binding NetlistId}"
-                                     FileLoaded="{Binding FileLoaded}" 
+                                     FileLoaded="{Binding FileLoaded}"
                                      x:Name="NetlistView"
                                      FontFamily="{StaticResource MartianMono}">
             </controls:NetlistControl>
