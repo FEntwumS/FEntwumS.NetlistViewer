@@ -533,7 +533,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IToolExecuterService, ToolExecuterService>();
         containerRegistry.RegisterSingleton<IFpgaBbService, FpgaBbService>();
         containerRegistry.RegisterSingleton<ICcVhdlFileIndexService, CcVhdlFileIndexService>();
-        containerRegistry.RegisterSingleton<FrontendService>();
+        containerRegistry.RegisterSingleton<IFrontendService, FrontendService>();
         containerRegistry.Register<FrontendViewModel>();
     }
 
@@ -564,7 +564,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
         ISettingsService settingsService = ServiceManager.GetService<ISettingsService>();
 
-        var frontendService = containerProvider.Resolve<FrontendService>();
+        var frontendService = containerProvider.Resolve<IFrontendService>();
 
         containerProvider.Resolve<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
 

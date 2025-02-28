@@ -14,26 +14,26 @@ using StreamContent = System.Net.Http.StreamContent;
 
 namespace FEntwumS.NetlistViewer.Services;
 
-public class FrontendService
+public class FrontendService : IFrontendService
 {
-    private readonly ICustomLogger _logger;
-    private readonly IApplicationStateService _applicationStateService;
-    private readonly IDockService _dockService;
-    private readonly ISettingsService _settingsService;
-    private readonly IPackageService _packageService;
+    private static readonly ICustomLogger _logger;
+    private static readonly IApplicationStateService _applicationStateService;
+    private static readonly IDockService _dockService;
+    private static readonly ISettingsService _settingsService;
+    private static readonly IPackageService _packageService;
 
-    private string _backendAddress = string.Empty;
-    private string _backendPort = string.Empty;
-    private bool _useLocalBackend = false;
-    private int _requestTimeout = 600;
-    private string _backendJarFolder = string.Empty;
-    private int _entityLabelFontSize = 25;
-    private int _cellLabelFontSize = 15;
-    private int _edgeLabelFontSize = 10;
-    private int _portLabelFontSize = 10;
-    private string _javaBinaryFolder = string.Empty;
-    private string extraJarArgs = string.Empty;
-    private bool _continueOnBinaryInstallError = false;
+    private static string _backendAddress = string.Empty;
+    private static string _backendPort = string.Empty;
+    private static bool _useLocalBackend = false;
+    private static int _requestTimeout = 600;
+    private static string _backendJarFolder = string.Empty;
+    private static int _entityLabelFontSize = 25;
+    private static int _cellLabelFontSize = 15;
+    private static int _edgeLabelFontSize = 10;
+    private static int _portLabelFontSize = 10;
+    private static string _javaBinaryFolder = string.Empty;
+    private static string extraJarArgs = string.Empty;
+    private static bool _continueOnBinaryInstallError = false;
 
     private UInt64 currentNetlist = 0;
 
@@ -41,7 +41,7 @@ public class FrontendService
     // automatically terminated
     private static IChildProcess? backendProcess;
 
-    public FrontendService()
+    static FrontendService()
     {
         _logger = ServiceManager.GetCustomLogger();
         _applicationStateService = ServiceManager.GetService<IApplicationStateService>();
@@ -649,7 +649,7 @@ public class FrontendService
         }
     }
 
-    private async Task<bool> StartBackendIfNotStartedAsync()
+    public async Task<bool> StartBackendIfNotStartedAsync()
     {
         if (backendProcess != null)
         {
@@ -766,7 +766,7 @@ public class FrontendService
         return true;
     }
 
-    private async Task<bool> ServerStartedAsync()
+    public async Task<bool> ServerStartedAsync()
     {
         HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear();
