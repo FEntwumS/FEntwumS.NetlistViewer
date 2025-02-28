@@ -487,11 +487,13 @@ public class FrontendService
         {
             return;
         }
-
+        
         // create code index for cross-compiled VHDL
-        if (json.Extension is ".v" or ".vhd")
+        string ccFile = Path.Combine(json.Root.FullPath, "build", "netlist", "design.v");
+        
+        if (File.Exists(ccFile))
         {
-            bool success = await ServiceManager.GetService<ICcVhdlFileIndexService>().IndexFileAsync(json.FullPath, combinedHash);
+            bool success = await ServiceManager.GetService<ICcVhdlFileIndexService>().IndexFileAsync(ccFile, combinedHash);
 
             if (success)
             {
