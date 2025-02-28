@@ -1159,7 +1159,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             lastpos = srcline.Length - 1;
         }
 
-        int line = 1;
+        long line = 1;
         string filename = "";
 
         // PMUXes somehow have the actual src attribute set two times; While both contain the correct source file, the
@@ -1173,7 +1173,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
             if (linesSplit.Length > 0)
             {
-                line = int.Parse(linesSplit[0]);
+                line = long.Parse(linesSplit[0]);
             }
 
             if (line == 0)
@@ -1189,11 +1189,20 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             }
         }
 
+        (string vhdlFilename, long vhdlLine, bool success) = await ServiceManager.GetService<ICcVhdlFileIndexService>()
+            .GetActualSourceAsync(line, NetlistID);
+
+        if (success)
+        {
+            filename = vhdlFilename;
+            line = vhdlLine;
+        }
+
         var ds = ServiceManager.GetService<IDockService>();
 
         var document = await ds.OpenFileAsync(new ExternalFile(filename));
 
-        (document as IEditor)?.JumpToLine(line);
+        (document as IEditor)?.JumpToLine((int) line);
     }
 
     private void NetlistControl_PointerMoved(object? sender, PointerEventArgs e)
