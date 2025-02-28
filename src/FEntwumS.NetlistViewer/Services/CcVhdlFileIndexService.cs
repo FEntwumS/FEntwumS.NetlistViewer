@@ -30,6 +30,7 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
         string[] linesToIndex = await File.ReadAllLinesAsync(filePath);
 
         long currentLine = 1, actualSrcLine = -1;
+        string formattedLine = "";
 
         foreach (string line in linesToIndex)
         {
@@ -38,7 +39,7 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
                 actualSrcLine = currentLine;
 
                 // Trim whitespace
-                string formattedLine = line.Trim();
+                formattedLine = line.Trim();
                 // Remove block comment (first and last three cahracters)
                 formattedLine = formattedLine.Substring(3, formattedLine.Length - 6);
 
@@ -55,6 +56,7 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
                 if (actualSrcLine != -1)
                 {
                     fileIndex[currentLine] = actualSrcLine;
+                    fileIndexToSource[currentLine] = formattedLine;
                 }
             }
             
@@ -67,7 +69,7 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
         return true;
     }
 
-    public async Task<(string srcfile, long actualSrcline, bool success)> GetActualSourceAsync(int srcline, ulong netlistId)
+    public async Task<(string srcfile, long actualSrcline, bool success)> GetActualSourceAsync(long srcline, ulong netlistId)
     {
         string srcfile = "";
         long actualSrcline = 0;
