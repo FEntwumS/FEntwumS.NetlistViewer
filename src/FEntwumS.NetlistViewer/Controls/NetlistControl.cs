@@ -287,14 +287,8 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         PointerMoved += NetlistControl_PointerMoved;
         PointerWheelChanged += NetlistControl_OnPointerWheelChanged;
         Tapped += NetlistControl_OnTapped;
-        PropertyChanged += NetlistControl_OnPropertyChanged;
 
         ElementClicked += NetlistControl_OnElementClicked;
-    }
-
-    private void NetlistControl_OnPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        OnPropertyChanged(e);
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
