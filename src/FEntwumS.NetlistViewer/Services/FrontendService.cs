@@ -488,6 +488,21 @@ public class FrontendService
             return;
         }
 
+        // create code index for cross-compiled VHDL
+        if (json.Extension is ".v" or ".vhd")
+        {
+            bool success = await ServiceManager.GetService<ICcVhdlFileIndexService>().IndexFileAsync(json.FullPath, combinedHash);
+
+            if (success)
+            {
+                _logger.Log($"Successfully indexed {top}");
+            }
+            else
+            {
+                _logger.Log($"Failed to index {top}");
+            }
+        }
+
         _dockService.Show(vm, DockShowLocation.Document);
         _dockService.InitializeContent();
         vm.NetlistId = currentNetlist;
