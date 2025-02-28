@@ -532,6 +532,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IYosysService, YosysService>();
         containerRegistry.RegisterSingleton<IToolExecuterService, ToolExecuterService>();
         containerRegistry.RegisterSingleton<IFpgaBbService, FpgaBbService>();
+        containerRegistry.RegisterSingleton<ICcVhdlFileIndexService, CcVhdlFileIndexService>();
         containerRegistry.RegisterSingleton<FrontendService>();
         containerRegistry.Register<FrontendViewModel>();
     }
