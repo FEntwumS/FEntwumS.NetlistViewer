@@ -60,12 +60,41 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
             
             currentLine++;
         }
+        
+        _index[netlistId] = fileIndex;
+        _indexToFile[netlistId] = fileIndexToSource;
 
         return true;
     }
 
-    public async Task<(string srcfile, int srcline, bool success)> GetActualSourceAsync(int srcline, ulong netlistId)
+    public async Task<(string srcfile, long actualSrcline, bool success)> GetActualSourceAsync(int srcline, ulong netlistId)
     {
-        throw new NotImplementedException();
+        string srcfile = "";
+        long actualSrcline = 0;
+        
+        ConcurrentDictionary<long, long> fileIndex = new();
+        ConcurrentDictionary<long, string> fileIndexToSource = new();
+
+        if (!_index.TryGetValue(netlistId, out fileIndex))
+        {
+            return ("", 0, false);
+        }
+
+        if (!_indexToFile.TryGetValue(netlistId, out fileIndexToSource))
+        {
+            return ("", 0, false);
+        }
+
+        if (!fileIndex.TryGetValue(srcline, out actualSrcline))
+        {
+            return ("", 0, false);
+        }
+
+        if (!fileIndexToSource.TryGetValue(srcline, out srcfile))
+        {
+            return ("", 0, false);
+        }
+        
+        return (srcfile, actualSrcline, true);
     }
 }
