@@ -95,6 +95,60 @@
           "target": "all"
         }
       ]
+    },
+    {
+      "version": "0.7.6",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.7.7",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.7.8",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.0",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.1",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.2",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
     }
   ]
 }

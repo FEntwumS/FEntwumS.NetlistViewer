@@ -43,19 +43,15 @@
             </Border>
 
             <controls:NetlistControl Items="{Binding Items}" VerticalAlignment="Stretch"
-                                     HorizontalAlignment="Stretch" PointerMoved="InputElement_OnPointerMoved"
-                                     PointerWheelChanged="InputElement_OnPointerWheelChanged" Name="NetlistControl"
+                                     HorizontalAlignment="Stretch" Name="NetlistControl"
                                      CurrentScale="{Binding Scale}" DeltaX="0" DeltaY="0"
                                      DeltaScale="0" PointerX="0" PointerY="0" ClipToBounds="True"
-                                     EdgeLengthScaleClip="2" JunctionScaleClip="3"
+                                     EdgeLengthScaleClip="2" JunctionScaleClip="3" OffsetY="{Binding OffY}"
                                      NodeScaleClip="2" PortScaleClip="3" LabelScaleClip="3" OffsetX="{Binding OffX}"
-                                     OffsetY="{Binding OffY}" PointerPressed="NetlistControl_OnPointerPressed"
-                                     PointerReleased="NetlistControl_OnPointerReleased"
-                                     Tapped="NetlistControl_OnTapped"
                                      PropertyChanged="NetlistControl_OnPropertyChanged" FitToZoom="{Binding FitToZoom}"
-                                     IsLoaded="{Binding IsLoaded}" ElementClicked="NetlistControl_OnElementClicked"
+                                     IsLoaded="{Binding IsLoaded}"
                                      ClickedElementPath="{Binding ClickedElementPath}" NetlistID="{Binding NetlistId}"
-                                     FileLoaded="{Binding FileLoaded}" 
+                                     FileLoaded="{Binding FileLoaded}"
                                      x:Name="NetlistView"
                                      FontFamily="{StaticResource MartianMono}">
             </controls:NetlistControl>

@@ -242,7 +242,7 @@ public class FrontendViewModel : ExtendedTool
 
                 Items.AddRange(jsonLoader.parseJson(0, 0, this, netlistId).Result);
 
-                UpdateScaleImpl();
+                _ = UpdateScaleImpl();
                 
                 FileLoaded = true;
 

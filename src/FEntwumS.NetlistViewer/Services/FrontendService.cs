@@ -8,29 +8,32 @@ using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using FEntwumS.NetlistViewer.ViewModels;
 using OneWare.Essentials.Helpers;
+using OneWare.Essentials.PackageManager;
 using OneWare.ProjectSystem.Models;
 using StreamContent = System.Net.Http.StreamContent;
 
 namespace FEntwumS.NetlistViewer.Services;
 
-public class FrontendService
+public class FrontendService : IFrontendService
 {
-    private readonly ICustomLogger _logger;
-    private readonly IApplicationStateService _applicationStateService;
-    private readonly IDockService _dockService;
-    private readonly ISettingsService _settingsService;
+    private static readonly ICustomLogger _logger;
+    private static readonly IApplicationStateService _applicationStateService;
+    private static readonly IDockService _dockService;
+    private static readonly ISettingsService _settingsService;
+    private static readonly IPackageService _packageService;
 
-    private string _backendAddress = string.Empty;
-    private string _backendPort = string.Empty;
-    private bool _useLocalBackend = false;
-    private int _requestTimeout = 600;
-    private string _backendJarFolder = string.Empty;
-    private int _entityLabelFontSize = 25;
-    private int _cellLabelFontSize = 15;
-    private int _edgeLabelFontSize = 10;
-    private int _portLabelFontSize = 10;
-    private string _javaBinaryFolder = string.Empty;
-    private string extraJarArgs = string.Empty;
+    private static string _backendAddress = string.Empty;
+    private static string _backendPort = string.Empty;
+    private static bool _useLocalBackend = false;
+    private static int _requestTimeout = 600;
+    private static string _backendJarFolder = string.Empty;
+    private static int _entityLabelFontSize = 25;
+    private static int _cellLabelFontSize = 15;
+    private static int _edgeLabelFontSize = 10;
+    private static int _portLabelFontSize = 10;
+    private static string _javaBinaryFolder = string.Empty;
+    private static string extraJarArgs = string.Empty;
+    private static bool _continueOnBinaryInstallError = false;
 
     private UInt64 currentNetlist = 0;
 
@@ -38,12 +41,13 @@ public class FrontendService
     // automatically terminated
     private static IChildProcess? backendProcess;
 
-    public FrontendService()
+    static FrontendService()
     {
         _logger = ServiceManager.GetCustomLogger();
         _applicationStateService = ServiceManager.GetService<IApplicationStateService>();
         _dockService = ServiceManager.GetService<IDockService>();
         _settingsService = ServiceManager.GetService<ISettingsService>();
+        _packageService = ServiceManager.GetService<IPackageService>();
     }
 
     public void SubscribeToSettings()
@@ -197,11 +201,93 @@ public class FrontendService
             x => _javaBinaryFolder = x);
         
         _settingsService.GetSettingObservable<string>("NetlistViewer_java_args").Subscribe(x => extraJarArgs = x);
+        
+        _settingsService.GetSettingObservable<bool>("NetlistViewer_ContinueOnBinaryInstallError").Subscribe(x => _continueOnBinaryInstallError = x);
+    }
+
+    private async Task<(bool success, bool needsRestart)> InstallDependenciesAsync()
+    {
+        bool globalSuccess = true, needsRestart = false;
+
+        string[] dependencyIDs =
+        [
+            "OneWare.GhdlExtension", "osscadsuite", "ghdl", FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id!,
+            FEntwumSNetlistReaderFrontendModule.JDKPackage.Id!
+        ];
+        
+        // Install osscadsuite binary between GHDL plugin and ghdl binary to allow for the addition of the ghdl binary to the store
+
+        foreach (string dependencyID in dependencyIDs)
+        {
+            PackageModel? dependencyModel = _packageService.Packages.GetValueOrDefault(dependencyID);
+            Package? dependencyPackage = dependencyModel?.Package;
+            
+            if (dependencyPackage == null)
+            {
+                _logger.Error($"Dependency with ID {dependencyID} not available in the package manager. Please file a bug report, if this issue persists");
+                
+                globalSuccess = false;
+                continue;
+            }
+            
+            if (_packageService.Packages!.GetValueOrDefault(dependencyID) is
+                {
+                    Status: PackageStatus.Available or PackageStatus.Installing or PackageStatus.UpdateAvailable
+                })
+            {
+                if (_settingsService.GetSettingValue<bool>("Experimental_AutoDownloadBinaries"))
+                {
+                    _logger.Log($"Installing \"{dependencyPackage.Name}\"...", true);
+                    
+                    bool localSuccess = await _packageService.InstallAsync(dependencyPackage);
+                    
+                    globalSuccess = globalSuccess && localSuccess;
+
+                    if (localSuccess)
+                    {
+                        _logger.Log($"Successfully installed \"{dependencyPackage.Name}\".", true);
+                    }
+                    else
+                    {
+                        _logger.Error($"Failed to install \"{dependencyPackage.Name}\".");
+                    }
+                }
+                else
+                {
+                    _logger.Error(
+                        $"Extension \"{dependencyPackage.Name}\" is not installed. Please enable \"Automatically download Binaries\" under the \"Experimental\" settings or download the extension yourself");
+
+                    globalSuccess = false;
+                }
+
+                if (globalSuccess)
+                {
+                    needsRestart = true;
+                }
+            }
+        }
+
+        if (globalSuccess && needsRestart)
+        {
+            _logger.Log("Dependencies were successfully installed. Please restart OneWare Studio!", true);
+        }
+
+        return (globalSuccess, needsRestart);
     }
 
     public async Task CreateVhdlNetlist(IProjectFile vhdl)
     {
-        bool success = await StartBackendIfNotStartedAsync();
+        (bool success, bool needsRestart) = await InstallDependenciesAsync();
+
+        if (needsRestart)
+        {
+            return;
+        } else if (!(success || _continueOnBinaryInstallError))
+        {
+            return;
+        }
+        
+        success = await StartBackendIfNotStartedAsync();
 
         if (!success)
         {
@@ -257,7 +343,17 @@ public class FrontendService
 
     public async Task CreateVerilogNetlist(IProjectFile verilog)
     {
-        bool success = await StartBackendIfNotStartedAsync();
+        (bool success, bool needsRestart) = await InstallDependenciesAsync();
+
+        if (needsRestart)
+        {
+            return;
+        } else if (!(success || _continueOnBinaryInstallError))
+        {
+            return;
+        }
+        
+        success = await StartBackendIfNotStartedAsync();
 
         if (!success)
         {
@@ -292,7 +388,17 @@ public class FrontendService
 
     public async Task CreateSystemVerilogNetlist(IProjectFile sVerilog)
     {
-        bool success = await StartBackendIfNotStartedAsync();
+        (bool success, bool needsRestart) = await InstallDependenciesAsync();
+
+        if (needsRestart)
+        {
+            return;
+        } else if (!(success || _continueOnBinaryInstallError))
+        {
+            return;
+        }
+        
+        success = await StartBackendIfNotStartedAsync();
 
         if (!success)
         {
@@ -380,6 +486,23 @@ public class FrontendService
         if (!resp.IsSuccessStatusCode)
         {
             return;
+        }
+        
+        // create code index for cross-compiled VHDL
+        string ccFile = Path.Combine(json.Root.FullPath, "build", "netlist", "design.v");
+        
+        if (File.Exists(ccFile))
+        {
+            bool success = await ServiceManager.GetService<ICcVhdlFileIndexService>().IndexFileAsync(ccFile, combinedHash);
+
+            if (success)
+            {
+                _logger.Log($"Successfully indexed {top}");
+            }
+            else
+            {
+                _logger.Log($"Failed to index {top}");
+            }
         }
 
         _dockService.Show(vm, DockShowLocation.Document);
@@ -526,7 +649,7 @@ public class FrontendService
         }
     }
 
-    private async Task<bool> StartBackendIfNotStartedAsync()
+    public async Task<bool> StartBackendIfNotStartedAsync()
     {
         if (backendProcess != null)
         {
@@ -643,7 +766,7 @@ public class FrontendService
         return true;
     }
 
-    private async Task<bool> ServerStartedAsync()
+    public async Task<bool> ServerStartedAsync()
     {
         HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear();

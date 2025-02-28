@@ -8,6 +8,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Rendering;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using FEntwumS.NetlistViewer.Services;
@@ -18,7 +19,7 @@ using OneWare.Essentials.ViewModels;
 
 namespace FEntwumS.NetlistViewer.Controls;
 
-public class NetlistControl : TemplatedControl
+public class NetlistControl : TemplatedControl, ICustomHitTest
 {
     #region Properties
 
@@ -29,8 +30,8 @@ public class NetlistControl : TemplatedControl
             (o, v) => o.Items = v, defaultBindingMode: BindingMode.TwoWay);
 
     private IEnumerable _items = new AvaloniaList<object>();
-    
-    private IEnumerable _renderableItems = new AvaloniaList<object>();
+
+    private AvaloniaList<object> _renderableItems = new();
 
     public IEnumerable Items
     {
@@ -251,12 +252,14 @@ public class NetlistControl : TemplatedControl
         get => GetValue(FileLoadedProperty);
         set => SetValue(FileLoadedProperty, value);
     }
-    
-    public static readonly StyledProperty<bool> FileLoadedProperty = AvaloniaProperty.Register<NetlistControl, bool>(nameof(FileLoaded));
+
+    public static readonly StyledProperty<bool> FileLoadedProperty =
+        AvaloniaProperty.Register<NetlistControl, bool>(nameof(FileLoaded));
 
     #endregion
 
     public event ElementClickedEventHandler ElementClicked;
+
     private List<DRect> renderedNodeList = new List<DRect>();
     private List<DRect> renderedLabelList = new List<DRect>();
     private List<DRect> renderedPortList = new List<DRect>();
@@ -268,14 +271,24 @@ public class NetlistControl : TemplatedControl
     private Typeface? typeface;
 
     private UInt64 _currentNetlistId;
-    
-    private bool _itemsInvalidated = false;
 
-    static NetlistControl()
+    private bool _itemsInvalidated = false;
+    private bool _pointerPressed = false;
+    private Point _pointerPosition = new Point(0, 0);
+
+    public NetlistControl()
     {
         AffectsRender<NetlistControl>(ItemsProperty, IsEnabledProperty);
 
         _viewportDimensionService = ServiceManager.GetViewportDimensionService();
+
+        PointerPressed += NetlistControl_PointerPressed;
+        PointerReleased += NetlistControl_PointerReleased;
+        PointerMoved += NetlistControl_PointerMoved;
+        PointerWheelChanged += NetlistControl_OnPointerWheelChanged;
+        Tapped += NetlistControl_OnTapped;
+
+        ElementClicked += NetlistControl_OnElementClicked;
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -287,15 +300,15 @@ public class NetlistControl : TemplatedControl
             return;
         }
 
-        if (!IsInitialized)
-        {
-            return;
-        }
-
         if (change.Property == ItemsProperty && Items != null)
         {
             _itemsInvalidated = true;
             Redraw();
+        }
+
+        if (!IsInitialized)
+        {
+            return;
         }
 
         if (change.Property == IsLoadedProperty)
@@ -318,7 +331,8 @@ public class NetlistControl : TemplatedControl
         else if (change.Property == BoundsProperty)
         {
             Redraw();
-        } else if (change.Property == FontFamilyProperty)
+        }
+        else if (change.Property == FontFamilyProperty)
         {
             typeface = new Typeface(this.FontFamily, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
         }
@@ -328,7 +342,7 @@ public class NetlistControl : TemplatedControl
             CurrentScale = 0.2;
         }
 
-        //Redraw();
+        Redraw();
         base.OnPropertyChanged(change);
     }
 
@@ -398,6 +412,12 @@ public class NetlistControl : TemplatedControl
             return;
         }
 
+        if (_renderableItems.Count != ((AvaloniaList<NetlistElement>)_items).Count)
+        {
+            _renderableItems.Clear();
+            _renderableItems.AddRange((AvaloniaList<NetlistElement>)_items);
+        }
+
         typeface ??= new Typeface(this.FontFamily, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
 
         double x = 0, y = 0, width = 0, height = 0, radius = 0, edgeLength = 0;
@@ -413,6 +433,7 @@ public class NetlistControl : TemplatedControl
         renderedEdgeList.Clear();
 
         #region Brushes
+
         ThemeVariant theme = Application.Current.ActualThemeVariant;
 
         Brush backgroundBrush =
@@ -447,6 +468,7 @@ public class NetlistControl : TemplatedControl
         Brush textBrush = new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeAccentColor") is Color
             ? (Color)Application.Current!.FindResource(theme, "ThemeAccentColor")
             : Colors.Black);
+
         #endregion
 
         // Draw background
@@ -462,7 +484,7 @@ public class NetlistControl : TemplatedControl
         double deltaX = DeltaX,
             deltaY = DeltaY,
             deltaScale = DeltaScale - currentDeltaScale,
-            step = 0.9d;   // Zoom factor for a single step (rotation by one mouse while notch)
+            step = 0.9d; // Zoom factor for a single step (rotation by one mouse while notch)
 
         // Apply offset from user interaction
         OffsetX += deltaX;
@@ -493,7 +515,7 @@ public class NetlistControl : TemplatedControl
 
         if (!_itemsInvalidated)
         {
-            foreach (NetlistElement element in _items)
+            foreach (NetlistElement element in _renderableItems)
             {
                 switch (element.Type)
                 {
@@ -638,7 +660,8 @@ public class NetlistControl : TemplatedControl
                         if (height >= LabelScaleClip && (intersectsBounds(boundingBox) || containsBounds(boundingBox)))
                         {
                             FormattedText text = new FormattedText(element.LabelText, CultureInfo.InvariantCulture,
-                                FlowDirection.LeftToRight, (Typeface)typeface, element.FontSize * CurrentScale, textBrush);
+                                FlowDirection.LeftToRight, (Typeface)typeface, element.FontSize * CurrentScale,
+                                textBrush);
 
                             context.DrawText(text, new Point(x, y));
 
@@ -703,14 +726,20 @@ public class NetlistControl : TemplatedControl
                 }
 
                 // Check whether the underlying collection has been modified to prevent a crash
-                
+
                 if (_itemsInvalidated)
                 {
                     break;
                 }
             }
         }
-        
+
+        if (_itemsInvalidated)
+        {
+            _renderableItems.Clear();
+            _renderableItems.AddRange((AvaloniaList<NetlistElement>)_items);
+        }
+
         _itemsInvalidated = false;
     }
 
@@ -976,24 +1005,32 @@ public class NetlistControl : TemplatedControl
 
     #region EventHandlers
 
-    public void NetlistControl_PointerPressed(object? sender, PointerPressedEventArgs e)
+    private void NetlistControl_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        return;
+        PointerPoint currentPoint = e.GetCurrentPoint(this);
+
+        _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
+
+        _pointerPosition = currentPoint.Position;
     }
 
-    public void NetlistControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    private void NetlistControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
-        return;
+        PointerPoint currentPoint = e.GetCurrentPoint(this);
+
+        _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
+
+        _pointerPosition = currentPoint.Position;
     }
 
-    public async Task NetlistControl_OnTappedAsync(object? sender, TappedEventArgs e)
+    private void NetlistControl_OnTapped(object? sender, TappedEventArgs e)
     {
-        NetlistElement hn = null,   // highest node
-            he = null,              // highest edge
-            hj = null,              // highest junction
-            hp = null,              // highest port
-            hl = null;              // highest label
-        
+        NetlistElement hn = null, // highest node
+            he = null, // highest edge
+            hj = null, // highest junction
+            hp = null, // highest port
+            hl = null; // highest label
+
         // Due to the underlying structure of the list of netlist elements,
         // the last element in the subset of elements below the cursor
         // has the highest z-index, meaning that it is rendered on top of all
@@ -1074,7 +1111,6 @@ public class NetlistControl : TemplatedControl
 
                 if (CurrentElement.Celltype is "HDL_ENTITY" or "")
                 {
-
                     // kinda bad
                     if (ClickedElementPath == hn.Path)
                     {
@@ -1093,37 +1129,119 @@ public class NetlistControl : TemplatedControl
                 {
                     string srcloc = CurrentElement.SrcLocation;
 
-                    if (srcloc == "")
-                    {
-                        return;
-                    }
-
-                    int lastpos = srcloc.LastIndexOfAny([':']);
-
-                    if (lastpos == -1)
-                    {
-                        lastpos = srcloc.Length - 1;
-                    }
-                    
-                    string filename = srcloc.Substring(0, lastpos);
-                    string lines = srcloc.Substring(lastpos + 1);
-                    string[] linesSplit = lines.Split('.');
-                    int line = 1;
-                    if (linesSplit.Length > 0)
-                    {
-                        line = int.Parse(linesSplit[0]);
-                    }
-                    
-                    var ds = ServiceManager.GetService<IDockService>();
-                    
-                    var document = await ds.OpenFileAsync(new ExternalFile(filename));
-
-                    (document as IEditor)?.JumpToLine(line);
-
+                    _ = OpenHDLSourceAsync(srcloc);
                 }
             }
         }
     }
 
+    private async Task OpenHDLSourceAsync(string srcline)
+    {
+        if (srcline == "")
+        {
+            return;
+        }
+
+        string[] srclineSplit = srcline.Split('|');
+
+        srcline = srclineSplit.First();
+
+        int lastpos = srcline.LastIndexOfAny([':']);
+
+        if (lastpos == -1)
+        {
+            lastpos = srcline.Length - 1;
+        }
+
+        long line = 1;
+        string filename = "";
+
+        // PMUXes somehow have the actual src attribute set two times; While both contain the correct source file, the
+        // first does not contain the line number. Only the second does
+
+        for (int i = 0; i < 2; i++)
+        {
+            filename = srcline.Substring(0, lastpos);
+            string lines = srcline.Substring(lastpos + 1);
+            string[] linesSplit = lines.Split('.');
+
+            if (linesSplit.Length > 0)
+            {
+                line = long.Parse(linesSplit[0]);
+            }
+
+            if (line == 0)
+            {
+                if (srclineSplit.Length > 1)
+                {
+                    srcline = srclineSplit[1];
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        (string vhdlFilename, long vhdlLine, bool success) = await ServiceManager.GetService<ICcVhdlFileIndexService>()
+            .GetActualSourceAsync(line, NetlistID);
+
+        if (success)
+        {
+            filename = vhdlFilename;
+            line = vhdlLine;
+        }
+
+        var ds = ServiceManager.GetService<IDockService>();
+
+        var document = await ds.OpenFileAsync(new ExternalFile(filename));
+
+        (document as IEditor)?.JumpToLine((int) line);
+    }
+
+    private void NetlistControl_PointerMoved(object? sender, PointerEventArgs e)
+    {
+        var pointerpoints = e.GetIntermediatePoints(this);
+        double dx, dy;
+
+        Point currentPos = e.GetPosition(this);
+
+        if (pointerpoints.First().Properties.IsLeftButtonPressed || _pointerPressed)
+        {
+            dx = currentPos.X - _pointerPosition.X;
+            dy = currentPos.Y - _pointerPosition.Y;
+        }
+        else
+        {
+            dx = 0;
+            dy = 0;
+        }
+
+        _pointerPosition = currentPos;
+
+        this.DeltaX += dx;
+        this.DeltaY += dy;
+    }
+
+    private void NetlistControl_OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
+    {
+        var wheel = e.Delta;
+
+        this.DeltaScale += wheel.Y;
+
+        this.PointerX = e.GetPosition(this).X;
+        this.PointerY = e.GetPosition(this).Y;
+    }
+
+    private void NetlistControl_OnElementClicked(object sender, ElementClickedEventArgs e)
+    {
+        ServiceManager.GetCustomLogger().Log($"Toggling entity at {e.NodePath}", false);
+    }
+
     #endregion
+
+    public bool HitTest(Point point)
+    {
+        return true;
+    }
 }

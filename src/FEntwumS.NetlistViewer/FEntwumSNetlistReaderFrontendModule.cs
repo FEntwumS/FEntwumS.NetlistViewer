@@ -532,7 +532,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IYosysService, YosysService>();
         containerRegistry.RegisterSingleton<IToolExecuterService, ToolExecuterService>();
         containerRegistry.RegisterSingleton<IFpgaBbService, FpgaBbService>();
-        containerRegistry.RegisterSingleton<FrontendService>();
+        containerRegistry.RegisterSingleton<ICcVhdlFileIndexService, CcVhdlFileIndexService>();
+        containerRegistry.RegisterSingleton<IFrontendService, FrontendService>();
         containerRegistry.Register<FrontendViewModel>();
     }
 
@@ -563,7 +564,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
         ISettingsService settingsService = ServiceManager.GetService<ISettingsService>();
 
-        var frontendService = containerProvider.Resolve<FrontendService>();
+        var frontendService = containerProvider.Resolve<IFrontendService>();
 
         containerProvider.Resolve<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
 
@@ -643,6 +644,11 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
             new TextBoxSetting("Edge Label Font Size", "10", null));
         settingsService.RegisterSetting("Netlist Viewer", "Font sizes", "NetlistViewer_PortFontSize",
             new TextBoxSetting("Port Font Size", "10", null));
+
+        settingsService.RegisterSettingSubCategory("Netlist Viewer", "Experimental");
+
+        settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_ContinueOnBinaryInstallError",
+            new CheckBoxSetting("Continue if errors occur during dependency installation", false));
 
         // Subscribe the FrontendService _AFTER_ the relevant settings have been registered
         ServiceManager.GetService<FrontendService>().SubscribeToSettings();

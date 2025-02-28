@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 using FEntwumS.NetlistViewer.Controls;
 using FEntwumS.NetlistViewer.Services;
@@ -56,59 +55,6 @@ public partial class FrontendView : UserControl
         }
     }
 
-    // move netlist
-    private void InputElement_OnPointerMoved(object? sender, PointerEventArgs e)
-    {
-        var NetlistControlElem = sender as NetlistControl;
-
-        var pointerpoints = e.GetIntermediatePoints(NetlistControlElem);
-        double dx, dy;
-
-        if (pointerpoints.Count > 1 && pointerpoints.First().Properties.IsLeftButtonPressed)
-        {
-            dx = pointerpoints.Last().Position.X - pointerpoints.First().Position.X;
-            dy = pointerpoints.Last().Position.Y - pointerpoints.First().Position.Y;
-        }
-        else
-        {
-            dx = 0;
-            dy = 0;
-        }
-
-        NetlistControlElem.DeltaX += dx;
-        NetlistControlElem.DeltaY += dy;
-    }
-
-    // change zoom
-    private void InputElement_OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
-    {
-        var wheel = e.Delta;
-        var NetlistControlElem = sender as NetlistControl;
-
-        // only react to vertical scrolling for now
-        NetlistControlElem.DeltaScale += wheel.Y;
-
-        NetlistControlElem.PointerX = e.GetPosition(NetlistControlElem).X;
-        NetlistControlElem.PointerY = e.GetPosition(NetlistControlElem).Y;
-    }
-
-    private void NetlistControl_OnPointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        // Get click event to NetlistControl
-
-        ((NetlistControl)sender).NetlistControl_PointerPressed(sender, e);
-    }
-
-    private void NetlistControl_OnPointerReleased(object? sender, PointerReleasedEventArgs e)
-    {
-        ((NetlistControl)sender).NetlistControl_PointerReleased(sender, e);
-    }
-
-    private void NetlistControl_OnTapped(object? sender, TappedEventArgs e)
-    {
-        _ = ((NetlistControl)sender).NetlistControl_OnTappedAsync(sender, e);
-    }
-
     private void NetlistControl_OnPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (_vm != null && ((NetlistControl)sender).IsInitialized && ((NetlistControl)sender).FileLoaded &&
@@ -116,20 +62,11 @@ public partial class FrontendView : UserControl
         {
             ServiceManager.GetService<IDockService>().CloseDockable(_vm);
         }
-        else
-        {
-            ((NetlistControl)sender).Redraw();
-        }
     }
 
     private void Initialize(FrontendViewModel vm)
     {
         _vm = vm;
-    }
-
-    private void NetlistControl_OnElementClicked(object sender, ElementClickedEventArgs e)
-    {
-        ServiceManager.GetCustomLogger().Log($"Toggling entity at {e.NodePath}", false);
     }
 
     private void Button_OnClick(object? sender, RoutedEventArgs e)
