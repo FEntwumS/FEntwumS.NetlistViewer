@@ -254,9 +254,13 @@ public class FrontendService : IFrontendService
                         {
                             continue;
                         }
+                        
+                        PackageVersion? installedVersion = dependencyModel.InstalledVersion;
 
-                        if (_packageService.Packages![dependencyPackage.Id!].InstalledVersion == packageVersion)
+                        if (installedVersion == packageVersion)
                         {
+                            _logger.Log($"Failed to update {dependencyPackage.Name} from version {installedVersion.Version} to version {dependencyPackage.Versions!.Last()}", true);
+                            
                             updatePerformed = false;
                             localSuccess = true;
                             break;
@@ -273,13 +277,16 @@ public class FrontendService : IFrontendService
 
                     globalSuccess = globalSuccess && localSuccess;
 
-                    if (localSuccess)
+                    if (updatePerformed)
                     {
-                        _logger.Log($"Successfully installed \"{dependencyPackage.Name}\".", true);
-                    }
-                    else
-                    {
-                        _logger.Error($"Failed to install \"{dependencyPackage.Name}\".");
+                        if (localSuccess)
+                        {
+                            _logger.Log($"Successfully installed \"{dependencyPackage.Name}\".", true);
+                        }
+                        else
+                        {
+                            _logger.Error($"Failed to install \"{dependencyPackage.Name}\".");
+                        }
                     }
                 }
                 else
