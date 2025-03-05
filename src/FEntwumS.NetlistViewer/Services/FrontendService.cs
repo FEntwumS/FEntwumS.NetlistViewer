@@ -238,8 +238,27 @@ public class FrontendService : IFrontendService
                 if (_settingsService.GetSettingValue<bool>("Experimental_AutoDownloadBinaries"))
                 {
                     _logger.Log($"Installing \"{dependencyPackage.Name}\"...", true);
-                    
-                    bool localSuccess = await _packageService.InstallAsync(dependencyPackage);
+
+                    bool localSuccess = false;
+
+                    // Try to install the dependency, starting with the latest version
+                    // If the version is not compatible or the download fails, try the previous version
+                    foreach (PackageVersion packageVersion in dependencyPackage.Versions!.Reverse())
+                    {
+                        // Skip incompatible versions
+                        if (!(await dependencyModel!.CheckCompatibilityAsync(packageVersion)).IsCompatible)
+                        {
+                            continue;
+                        }
+                        
+                        localSuccess = await dependencyModel!.DownloadAsync(packageVersion);
+
+                        // Stop trying, if install has been successful
+                        if (localSuccess)
+                        {
+                            break;
+                        }
+                    }
                     
                     globalSuccess = globalSuccess && localSuccess;
 
