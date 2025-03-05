@@ -199,10 +199,11 @@ public class FrontendService : IFrontendService
 
         _settingsService.GetSettingObservable<string>(FEntwumSNetlistReaderFrontendModule.JavaPathSetting).Subscribe(
             x => _javaBinaryFolder = x);
-        
+
         _settingsService.GetSettingObservable<string>("NetlistViewer_java_args").Subscribe(x => extraJarArgs = x);
-        
-        _settingsService.GetSettingObservable<bool>("NetlistViewer_ContinueOnBinaryInstallError").Subscribe(x => _continueOnBinaryInstallError = x);
+
+        _settingsService.GetSettingObservable<bool>("NetlistViewer_ContinueOnBinaryInstallError")
+            .Subscribe(x => _continueOnBinaryInstallError = x);
     }
 
     private async Task<(bool success, bool needsRestart)> InstallDependenciesAsync()
@@ -214,27 +215,30 @@ public class FrontendService : IFrontendService
             "OneWare.GhdlExtension", "osscadsuite", "ghdl", FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id!,
             FEntwumSNetlistReaderFrontendModule.JDKPackage.Id!
         ];
-        
+
         // Install osscadsuite binary between GHDL plugin and ghdl binary to allow for the addition of the ghdl binary to the store
 
         foreach (string dependencyID in dependencyIDs)
         {
             PackageModel? dependencyModel = _packageService.Packages.GetValueOrDefault(dependencyID);
             Package? dependencyPackage = dependencyModel?.Package;
-            
+
             if (dependencyPackage == null)
             {
-                _logger.Error($"Dependency with ID {dependencyID} not available in the package manager. Please file a bug report, if this issue persists");
-                
+                _logger.Error(
+                    $"Dependency with ID {dependencyID} not available in the package manager. Please file a bug report, if this issue persists");
+
                 globalSuccess = false;
                 continue;
             }
-            
+
             if (_packageService.Packages!.GetValueOrDefault(dependencyID) is
                 {
                     Status: PackageStatus.Available or PackageStatus.Installing or PackageStatus.UpdateAvailable
                 })
             {
+                bool updatePerformed = true;
+
                 if (_settingsService.GetSettingValue<bool>("Experimental_AutoDownloadBinaries"))
                 {
                     _logger.Log($"Installing \"{dependencyPackage.Name}\"...", true);
@@ -250,7 +254,14 @@ public class FrontendService : IFrontendService
                         {
                             continue;
                         }
-                        
+
+                        if (_packageService.Packages![dependencyPackage.Id!].InstalledVersion == packageVersion)
+                        {
+                            updatePerformed = false;
+                            localSuccess = true;
+                            break;
+                        }
+
                         localSuccess = await dependencyModel!.DownloadAsync(packageVersion);
 
                         // Stop trying, if install has been successful
@@ -259,7 +270,7 @@ public class FrontendService : IFrontendService
                             break;
                         }
                     }
-                    
+
                     globalSuccess = globalSuccess && localSuccess;
 
                     if (localSuccess)
@@ -279,7 +290,7 @@ public class FrontendService : IFrontendService
                     globalSuccess = false;
                 }
 
-                if (globalSuccess)
+                if (globalSuccess && updatePerformed)
                 {
                     needsRestart = true;
                 }
@@ -301,11 +312,12 @@ public class FrontendService : IFrontendService
         if (needsRestart)
         {
             return;
-        } else if (!(success || _continueOnBinaryInstallError))
+        }
+        else if (!(success || _continueOnBinaryInstallError))
         {
             return;
         }
-        
+
         success = await StartBackendIfNotStartedAsync();
 
         if (!success)
@@ -367,11 +379,12 @@ public class FrontendService : IFrontendService
         if (needsRestart)
         {
             return;
-        } else if (!(success || _continueOnBinaryInstallError))
+        }
+        else if (!(success || _continueOnBinaryInstallError))
         {
             return;
         }
-        
+
         success = await StartBackendIfNotStartedAsync();
 
         if (!success)
@@ -412,11 +425,12 @@ public class FrontendService : IFrontendService
         if (needsRestart)
         {
             return;
-        } else if (!(success || _continueOnBinaryInstallError))
+        }
+        else if (!(success || _continueOnBinaryInstallError))
         {
             return;
         }
-        
+
         success = await StartBackendIfNotStartedAsync();
 
         if (!success)
@@ -506,13 +520,14 @@ public class FrontendService : IFrontendService
         {
             return;
         }
-        
+
         // create code index for cross-compiled VHDL
         string ccFile = Path.Combine(json.Root.FullPath, "build", "netlist", "design.v");
-        
+
         if (File.Exists(ccFile))
         {
-            bool success = await ServiceManager.GetService<ICcVhdlFileIndexService>().IndexFileAsync(ccFile, combinedHash);
+            bool success = await ServiceManager.GetService<ICcVhdlFileIndexService>()
+                .IndexFileAsync(ccFile, combinedHash);
 
             if (success)
             {
@@ -734,40 +749,43 @@ public class FrontendService : IFrontendService
 
             return false;
         }
-        
+
         string prefix = string.Empty;
         string suffix = string.Empty;
 
         if (PlatformHelper.Platform is PlatformId.Unknown or PlatformId.Wasm)
         {
             _logger.Error("Your platform is currently not supported");
-            
+
             return false;
         }
         else
         {
-            var dir = Directory.GetDirectories(_javaBinaryFolder).Where(x => Regex.Match(x, @"jdk-(\d+)\.(\d+)\.(\d+)\+(\d+)-jre").Success);
+            var dir = Directory.GetDirectories(_javaBinaryFolder)
+                .Where(x => Regex.Match(x, @"jdk-(\d+)\.(\d+)\.(\d+)\+(\d+)-jre").Success);
 
             if (dir.Count() == 0)
             {
-                _logger.Error("No directory found. Please make sure that you have installed the \"Eclipse Adoptium OpenJDK\" binary using the extension manager");
-                
+                _logger.Error(
+                    "No directory found. Please make sure that you have installed the \"Eclipse Adoptium OpenJDK\" binary using the extension manager");
+
                 return false;
             }
-            
+
             prefix = dir.First();
         }
 
         if (PlatformHelper.Platform is PlatformId.WinX64 or PlatformId.WinArm64)
         {
             suffix = ".exe";
-        } else if (PlatformHelper.Platform is PlatformId.OsxX64 or PlatformId.OsxArm64)
+        }
+        else if (PlatformHelper.Platform is PlatformId.OsxX64 or PlatformId.OsxArm64)
         {
             prefix += "/Content/Home";
         }
 
         prefix += "/bin";
-        
+
         string javaBinaryFile = Path.Combine(_javaBinaryFolder, $"{prefix}/java{suffix}");
 
         var serverJarFile = enumeratedResults.First();
@@ -776,7 +794,7 @@ public class FrontendService : IFrontendService
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         backendProcess = await ServiceManager.GetService<IToolExecuterService>()
             .ExecuteBackgroundProcessAsync(javaBinaryFile,
-                extraJarArgs.Split(' ').Concat( ["-jar", serverJarFile]).ToArray(),
+                extraJarArgs.Split(' ').Concat(["-jar", serverJarFile]).ToArray(),
                 Path.GetDirectoryName(serverJarFile));
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
