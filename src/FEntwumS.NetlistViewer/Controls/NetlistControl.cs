@@ -31,7 +31,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
     private IEnumerable _items = new AvaloniaList<object>();
 
-    private AvaloniaList<object> _renderableItems = new();
+    private AvaloniaList<object?> _renderableItems = new();
 
     public IEnumerable Items
     {
@@ -235,7 +235,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
     }
 
     public static readonly StyledProperty<string?> ClickedElementPathProperty =
-        AvaloniaProperty.Register<NetlistControl, string>(nameof(ClickedElementPath),
+        AvaloniaProperty.Register<NetlistControl, string?>(nameof(ClickedElementPath),
             defaultBindingMode: BindingMode.TwoWay);
 
     public UInt64 NetlistID
@@ -260,17 +260,14 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
     public event ElementClickedEventHandler ElementClicked;
 
-    private List<DRect> renderedNodeList = new List<DRect>();
-    private List<DRect> renderedLabelList = new List<DRect>();
-    private List<DRect> renderedPortList = new List<DRect>();
-    private List<DCircle> renderedJunctionList = new List<DCircle>();
-    private List<DLine> renderedEdgeList = new List<DLine>();
-    private static readonly FontFamily font = (Application.Current!.FindResource("MartianMono") as FontFamily)!;
-    private static IViewportDimensionService _viewportDimensionService;
+    private readonly List<DRect> _renderedNodeList = new List<DRect>();
+    private readonly List<DRect> _renderedLabelList = new List<DRect>();
+    private readonly List<DRect> _renderedPortList = new List<DRect>();
+    private readonly List<DCircle> _renderedJunctionList = new List<DCircle>();
+    private readonly List<DLine> _renderedEdgeList = new List<DLine>();
+    private static IViewportDimensionService? _viewportDimensionService;
 
-    private Typeface? typeface;
-
-    private UInt64 _currentNetlistId;
+    private Typeface? _typeface;
 
     private bool _itemsInvalidated = false;
     private bool _pointerPressed = false;
@@ -334,7 +331,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         }
         else if (change.Property == FontFamilyProperty)
         {
-            typeface = new Typeface(this.FontFamily, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
+            _typeface = new Typeface(this.FontFamily, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
         }
 
         if (IsInitialized && CurrentScale == 0)
@@ -348,9 +345,9 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
     public void ZoomToFit()
     {
-        var dimensionService = ServiceManager.GetViewportDimensionService();
+        
 
-        DRect? elementBounds = dimensionService.GetZoomElementDimensions(NetlistID);
+        DRect? elementBounds = _viewportDimensionService!.GetZoomElementDimensions(NetlistID);
 
         if (elementBounds != null)
         {
@@ -374,26 +371,26 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                 OffsetY = elementBounds.Y * -CurrentScale;
             }
 
-            dimensionService.SetZoomElementDimensions(NetlistID, null);
+            _viewportDimensionService!.SetZoomElementDimensions(NetlistID, null);
         }
         else
         {
-            double sx = this.Bounds.Width / dimensionService.GetMaxWidth(NetlistID);
-            double sy = this.Bounds.Height / dimensionService.GetMaxHeight(NetlistID);
+            double sx = this.Bounds.Width / _viewportDimensionService!.GetMaxWidth(NetlistID);
+            double sy = this.Bounds.Height / _viewportDimensionService!.GetMaxHeight(NetlistID);
 
             if (sx < sy)
             {
                 CurrentScale = sx;
 
                 OffsetX = 0;
-                OffsetY = ((dimensionService.GetMaxHeight(NetlistID) / 2) * -CurrentScale) +
+                OffsetY = ((_viewportDimensionService!.GetMaxHeight(NetlistID) / 2) * -CurrentScale) +
                           (this.Bounds.Height / 2.0d);
             }
             else
             {
                 CurrentScale = sy;
 
-                OffsetX = ((dimensionService.GetMaxWidth(NetlistID) / 2) * -CurrentScale) + (this.Bounds.Width / 2.0d);
+                OffsetX = ((_viewportDimensionService!.GetMaxWidth(NetlistID) / 2) * -CurrentScale) + (this.Bounds.Width / 2.0d);
                 OffsetY = 0;
             }
         }
@@ -418,7 +415,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             _renderableItems.AddRange((AvaloniaList<NetlistElement>)_items);
         }
 
-        typeface ??= new Typeface(this.FontFamily, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
+        _typeface ??= new Typeface(this.FontFamily, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
 
         double x = 0, y = 0, width = 0, height = 0, radius = 0, edgeLength = 0;
         List<Point> points;
@@ -426,19 +423,19 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         bool previousNodeInView = true;
         int lastVisibleNodeZIndex = 0;
 
-        renderedNodeList.Clear();
-        renderedLabelList.Clear();
-        renderedPortList.Clear();
-        renderedJunctionList.Clear();
-        renderedEdgeList.Clear();
+        _renderedNodeList.Clear();
+        _renderedLabelList.Clear();
+        _renderedPortList.Clear();
+        _renderedJunctionList.Clear();
+        _renderedEdgeList.Clear();
 
         #region Brushes
 
-        ThemeVariant theme = Application.Current.ActualThemeVariant;
+        ThemeVariant theme = Application.Current!.ActualThemeVariant;
 
         Brush backgroundBrush =
             new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeBackgroundColor") is Color
-                ? (Color)Application.Current!.FindResource(theme, "ThemeBackgroundColor")
+                ? (Color)Application.Current!.FindResource(theme, "ThemeBackgroundColor")!
                 : Colors.LightGray);
         Pen highlightPen = new Pen(new SolidColorBrush(Colors.Yellow, 0.5d), 5.5 * CurrentScale, null, PenLineCap.Round,
             PenLineJoin.Miter, 10d);
@@ -450,7 +447,8 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         Pen dropShadowPen =
             new Pen(
                 new SolidColorBrush((Application.Current.FindResource(theme, "ThemeBorderHighColor") is Color
-                    ? (Color)Application.Current.FindResource(theme, "ThemeBorderHighColor")
+                    ? (Color)(Application.Current.FindResource(theme, "ThemeBorderHighColor") ??
+                              new Color(0xFF, 0xA0, 0xA0, 0xA0))
                     : Colors.DarkGray)),
                 2.5 * CurrentScale, null, PenLineCap.Square);
         Pen edgePen = new Pen(
@@ -466,7 +464,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             Application.Current!.FindResource(theme, "ThemeAccentBrush") as SolidColorBrush ??
             new SolidColorBrush(Colors.Black);
         Brush textBrush = new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeAccentColor") is Color
-            ? (Color)Application.Current!.FindResource(theme, "ThemeAccentColor")
+            ? (Color)(Application.Current!.FindResource(theme, "ThemeAccentColor") ?? new Color(0xFF, 0x00, 0x7A, 0xB8))
             : Colors.Black);
 
         #endregion
@@ -515,8 +513,9 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
         if (!_itemsInvalidated)
         {
-            foreach (NetlistElement element in _renderableItems)
+            foreach (NetlistElement? element in _renderableItems)
             {
+                if (element is null) continue;
                 switch (element.Type)
                 {
                     // Node
@@ -545,7 +544,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                         {
                             context.DrawRectangle(rectFillBrush, borderPen, rect);
 
-                            renderedNodeList.Add(new DRect(x, y, width, height, element.ZIndex, element));
+                            _renderedNodeList.Add(new DRect(x, y, width, height, element.ZIndex, element));
 
                             // Dropshadow
 
@@ -628,7 +627,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                                     context.DrawLine(highlightPen, points[i - 1], points[i]);
                                 }
 
-                                renderedEdgeList.Add(new DLine(points[i - 1], points[i], element.ZIndex, element));
+                                _renderedEdgeList.Add(new DLine(points[i - 1], points[i], element.ZIndex, element));
                             }
                         }
 
@@ -657,15 +656,17 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
                         boundingBox = new Rect(x, y, width, height);
 
-                        if (height >= LabelScaleClip && (intersectsBounds(boundingBox) || containsBounds(boundingBox)))
+                        if (height >= LabelScaleClip &&
+                            (intersectsBounds(boundingBox) || containsBounds(boundingBox)) &&
+                            element.LabelText is not null)
                         {
                             FormattedText text = new FormattedText(element.LabelText, CultureInfo.InvariantCulture,
-                                FlowDirection.LeftToRight, (Typeface)typeface, element.FontSize * CurrentScale,
+                                FlowDirection.LeftToRight, (Typeface)_typeface, element.FontSize * CurrentScale,
                                 textBrush);
 
                             context.DrawText(text, new Point(x, y));
 
-                            renderedLabelList.Add(new DRect(x, y, width, height, element.ZIndex, element));
+                            _renderedLabelList.Add(new DRect(x, y, width, height, element.ZIndex, element));
                         }
 
                         break;
@@ -690,7 +691,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                         {
                             context.DrawEllipse(ellipseFillBrush, null, center, radius, radius);
 
-                            renderedJunctionList.Add(new DCircle(x, y, radius, element.ZIndex, element));
+                            _renderedJunctionList.Add(new DCircle(x, y, radius, element.ZIndex, element));
                         }
 
                         break;
@@ -715,7 +716,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                         {
                             context.DrawRectangle(rectFillBrush, borderPen, rect);
 
-                            renderedPortList.Add(new DRect(rect.X, rect.Y, edgeLength, edgeLength, element.ZIndex,
+                            _renderedPortList.Add(new DRect(rect.X, rect.Y, edgeLength, edgeLength, element.ZIndex,
                                 element));
                         }
 
@@ -1025,10 +1026,12 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
     private void NetlistControl_OnTapped(object? sender, TappedEventArgs e)
     {
-        NetlistElement hn = null, // highest node
-            he = null, // highest edge
-            hj = null, // highest junction
-            hp = null, // highest port
+        NetlistElement? hn = null; // highest label
+        NetlistElement? he = null; // highest label
+        NetlistElement? hj = null; // highest label
+        NetlistElement? // highest junction
+            hp = null; // highest label
+        NetlistElement? // highest junction
             hl = null; // highest label
 
         // Due to the underlying structure of the list of netlist elements,
@@ -1036,7 +1039,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         // has the highest z-index, meaning that it is rendered on top of all
         // preceding elements
 
-        foreach (var elem in renderedNodeList)
+        foreach (var elem in _renderedNodeList)
         {
             if (elem.Hittest(e.GetPosition(this)))
             {
@@ -1044,8 +1047,9 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             }
         }
 
-        foreach (var elem in renderedEdgeList)
+        foreach (var elem in _renderedEdgeList)
         {
+            if (elem.element is null) continue;
             if (elem.Hittest(e.GetPosition(this)))
             {
                 elem.element.IsHighlighted = true;
@@ -1061,7 +1065,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             }
         }
 
-        foreach (var elem in renderedPortList)
+        foreach (var elem in _renderedPortList)
         {
             if (elem.Hittest(e.GetPosition(this)))
             {
@@ -1069,7 +1073,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             }
         }
 
-        foreach (var elem in renderedJunctionList)
+        foreach (var elem in _renderedJunctionList)
         {
             if (elem.Hittest(e.GetPosition(this)))
             {
@@ -1077,7 +1081,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             }
         }
 
-        foreach (var elem in renderedLabelList)
+        foreach (var elem in _renderedLabelList)
         {
             if (elem.Hittest(e.GetPosition(this)))
             {
@@ -1121,7 +1125,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                         ClickedElementPath = hn.Path;
                     }
 
-                    _viewportDimensionService.SetClickedElementPath(NetlistID, hn.Path);
+                    _viewportDimensionService!.SetClickedElementPath(NetlistID, hn.Path);
 
                     ElementClicked?.Invoke(this, new ElementClickedEventArgs(hn.Path));
                 }
@@ -1129,28 +1133,28 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                 {
                     string? srcloc = CurrentElement.SrcLocation;
 
-                    _ = OpenHDLSourceAsync(srcloc);
+                    _ = OpenHdlSourceAsync(srcloc);
                 }
             }
         }
     }
 
-    private async Task OpenHDLSourceAsync(string? srcline)
+    private async Task OpenHdlSourceAsync(string? srcLine)
     {
-        if (srcline == "")
+        if (srcLine is null || srcLine == "")
         {
             return;
         }
 
-        string?[] srclineSplit = srcline.Split('|');
+        string?[] srclineSplit = srcLine.Split('|');
 
-        srcline = srclineSplit.First();
+        srcLine = srclineSplit.First();
 
-        int lastpos = srcline.LastIndexOfAny([':']);
+        int lastpos = srcLine!.LastIndexOfAny([':']);
 
         if (lastpos == -1)
         {
-            lastpos = srcline.Length - 1;
+            lastpos = srcLine.Length - 1;
         }
 
         long line = 1;
@@ -1161,8 +1165,8 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
         for (int i = 0; i < 2; i++)
         {
-            filename = srcline.Substring(0, lastpos);
-            string lines = srcline.Substring(lastpos + 1);
+            filename = srcLine!.Substring(0, lastpos);
+            string lines = srcLine.Substring(lastpos + 1);
             string[] linesSplit = lines.Split('.');
 
             if (linesSplit.Length > 0)
@@ -1174,7 +1178,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             {
                 if (srclineSplit.Length > 1)
                 {
-                    srcline = srclineSplit[1];
+                    srcLine = srclineSplit[1];
                 }
             }
             else
@@ -1196,7 +1200,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
         var document = await ds.OpenFileAsync(new ExternalFile(filename));
 
-        (document as IEditor)?.JumpToLine((int) line);
+        (document as IEditor)?.JumpToLine((int)line);
     }
 
     private void NetlistControl_PointerMoved(object? sender, PointerEventArgs e)

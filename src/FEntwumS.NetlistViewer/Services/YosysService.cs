@@ -127,7 +127,7 @@ public class YosysService : IYosysService
         return success;
     }
 
-    public async Task<bool> CreateJsonNetlistAsync()
+    public Task<bool> CreateJsonNetlistAsync()
     {
         throw new NotImplementedException();
     }

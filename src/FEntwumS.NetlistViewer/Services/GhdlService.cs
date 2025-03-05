@@ -15,7 +15,7 @@ public class GhdlService : IGhdlService
     private IToolExecuterService _toolExecuterService;
 
     private string _ghdlPath = string.Empty;
-    private string _vhdlStandard = string.Empty;
+    private string? _vhdlStandard = string.Empty;
 
     public GhdlService()
     {
@@ -33,7 +33,7 @@ public class GhdlService : IGhdlService
 
     public async Task<bool> ElaborateDesignAsync(IProjectFile file)
     {
-        string vhdlStandard;
+        string? vhdlStandard;
         
         _dockService.Show<IOutputService>();
 
@@ -144,10 +144,5 @@ public class GhdlService : IGhdlService
         await File.WriteAllTextAsync(Path.Combine(workingDirectory, "design.v"), stdout);
 
         return success;
-    }
-
-    private async Task<bool> CheckIfGhdlIsInstalledAsync()
-    {
-        return true;
     }
 }

@@ -50,7 +50,7 @@ public class ToolExecuterService : IToolExecuterService
         return (success, stdout, stderr);
     }
 
-    public async Task<IChildProcess> ExecuteBackgroundProcessAsync(string path, IReadOnlyList<string> args, string workingDirectory)
+    public IChildProcess ExecuteBackgroundProcess(string path, IReadOnlyList<string> args, string? workingDirectory)
     {
         ChildProcessStartInfo info = new ChildProcessStartInfo
         {

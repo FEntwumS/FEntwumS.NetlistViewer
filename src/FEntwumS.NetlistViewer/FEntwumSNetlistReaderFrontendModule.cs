@@ -537,7 +537,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerRegistry.Register<FrontendViewModel>();
     }
 
-    public void OnInitialized(IContainerProvider containerProvider)
+    public void OnInitialized(IContainerProvider? containerProvider)
     {
         containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistPackage);
         containerProvider.Resolve<IPackageService>().RegisterPackage(JDKPackage);
@@ -575,7 +575,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                 menuItems.Add(new MenuItemViewModel("NetlistViewer")
                 {
                     Header = $"View netlist {jsonFile.Header}",
-                    Command = new AsyncRelayCommand(() => frontendService.ShowViewer(jsonFile))
+                    Command = new AsyncRelayCommand(() => frontendService.ShowViewerAsync(jsonFile))
                 });
             }
             else if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
@@ -583,7 +583,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                 menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateNetlist")
                 {
                     Header = $"View netlist for {vhdlFile.Header}",
-                    Command = new AsyncRelayCommand(() => frontendService.CreateVhdlNetlist(vhdlFile))
+                    Command = new AsyncRelayCommand(() => frontendService.CreateVhdlNetlistAsync(vhdlFile))
                 });
             }
             else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
@@ -591,7 +591,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                 menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateVerilogNetlist")
                 {
                     Header = $"View netlist for {verilogFile.Header}",
-                    Command = new AsyncRelayCommand(() => frontendService.CreateVerilogNetlist(verilogFile))
+                    Command = new AsyncRelayCommand(() => frontendService.CreateVerilogNetlistAsync(verilogFile))
                 });
             }
             else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
@@ -599,7 +599,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                 menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateSystemVerilogNetlist")
                 {
                     Header = $"View netlist for {systemVerilogFile.Header}",
-                    Command = new AsyncRelayCommand(() => frontendService.CreateSystemVerilogNetlist(systemVerilogFile))
+                    Command = new AsyncRelayCommand(() => frontendService.CreateSystemVerilogNetlistAsync(systemVerilogFile))
                 });
             }
         });

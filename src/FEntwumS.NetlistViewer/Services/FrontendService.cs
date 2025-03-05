@@ -103,7 +103,7 @@ public class FrontendService : IFrontendService
                     _requestTimeout = 600;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.Error("Request timeout not valid. Please enter a positive integer");
 
@@ -126,7 +126,7 @@ public class FrontendService : IFrontendService
                     _entityLabelFontSize = 25;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.Error("Entity label font size not valid. Please enter a positive integer");
 
@@ -147,7 +147,7 @@ public class FrontendService : IFrontendService
                     _cellLabelFontSize = 15;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.Error("Cell label font size not valid. Please enter a positive integer");
 
@@ -168,7 +168,7 @@ public class FrontendService : IFrontendService
                     _edgeLabelFontSize = 10;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.Error("Edge label font size not valid. Please enter a positive integer");
 
@@ -189,7 +189,7 @@ public class FrontendService : IFrontendService
                     _portLabelFontSize = 10;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.Error("Port label font size not valid. Please enter a positive integer");
 
@@ -312,7 +312,7 @@ public class FrontendService : IFrontendService
         return (globalSuccess, needsRestart);
     }
 
-    public async Task CreateVhdlNetlist(IProjectFile vhdl)
+    public async Task CreateVhdlNetlistAsync(IProjectFile vhdl)
     {
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
@@ -376,10 +376,10 @@ public class FrontendService : IFrontendService
             return;
         }
 
-        await ShowViewer(test);
+        await ShowViewerAsync(test);
     }
 
-    public async Task CreateVerilogNetlist(IProjectFile verilog)
+    public async Task CreateVerilogNetlistAsync(IProjectFile verilog)
     {
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
@@ -422,10 +422,10 @@ public class FrontendService : IFrontendService
             return;
         }
 
-        await ShowViewer(test);
+        await ShowViewerAsync(test);
     }
 
-    public async Task CreateSystemVerilogNetlist(IProjectFile sVerilog)
+    public async Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog)
     {
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
@@ -461,10 +461,10 @@ public class FrontendService : IFrontendService
             return;
         }
 
-        await ShowViewer(test);
+        await ShowViewerAsync(test);
     }
 
-    public async Task ShowViewer(IProjectFile json)
+    public async Task ShowViewerAsync(IProjectFile json)
     {
         HttpResponseMessage? resp = null;
         string top = Path.GetFileNameWithoutExtension(json.FullPath);
@@ -492,9 +492,9 @@ public class FrontendService : IFrontendService
         ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash);
         ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash);
 
-        ServiceManager.GetViewportDimensionService().SetClickedElementPath(combinedHash, string.Empty);
-        ServiceManager.GetViewportDimensionService().SetCurrentElementCount(combinedHash, 0);
-        ServiceManager.GetViewportDimensionService().SetZoomElementDimensions(combinedHash, null);
+        ServiceManager.GetViewportDimensionService()!.SetClickedElementPath(combinedHash, string.Empty);
+        ServiceManager.GetViewportDimensionService()!.SetCurrentElementCount(combinedHash, 0);
+        ServiceManager.GetViewportDimensionService()!.SetZoomElementDimensions(combinedHash, null);
 
         FrontendViewModel vm = new FrontendViewModel();
         vm.InitializeContent();
@@ -552,7 +552,7 @@ public class FrontendService : IFrontendService
         await vm.OpenFileImplAsync();
     }
 
-    public async Task ExpandNode(string? nodePath, FrontendViewModel vm)
+    public async Task ExpandNodeAsync(string? nodePath, FrontendViewModel vm)
     {
         _logger.Log("Sending request to ExpandNode", true);
 
@@ -642,7 +642,7 @@ public class FrontendService : IFrontendService
 
             return resp;
         }
-        catch (InvalidOperationException e)
+        catch (InvalidOperationException)
         {
             _logger.Error(
                 $"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
@@ -674,14 +674,14 @@ public class FrontendService : IFrontendService
 
             return null;
         }
-        catch (TaskCanceledException e)
+        catch (TaskCanceledException)
         {
             _logger.Error(
                 "The request has timed out. Please increase the request timeout time in the settings menu and try again",
                 printErrors);
             return null;
         }
-        catch (UriFormatException e)
+        catch (UriFormatException)
         {
             _logger.Error(
                 $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address",
@@ -713,7 +713,7 @@ public class FrontendService : IFrontendService
 
             return true;
         }
-        catch (Exception e)
+        catch (Exception)
         {
             // ignored
         }
@@ -799,8 +799,8 @@ public class FrontendService : IFrontendService
 
         // Start server to run independently
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-        backendProcess = await ServiceManager.GetService<IToolExecuterService>()
-            .ExecuteBackgroundProcessAsync(javaBinaryFile,
+        backendProcess = ServiceManager.GetService<IToolExecuterService>()
+            .ExecuteBackgroundProcess(javaBinaryFile,
                 extraJarArgs.Split(' ').Concat(["-jar", serverJarFile]).ToArray(),
                 Path.GetDirectoryName(serverJarFile));
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
@@ -829,7 +829,7 @@ public class FrontendService : IFrontendService
                 _logger.Log("Server is awaiting requests", true);
                 done = true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 if (_useLocalBackend)
                 {

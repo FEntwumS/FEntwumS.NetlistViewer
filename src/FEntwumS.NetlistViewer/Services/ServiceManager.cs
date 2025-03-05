@@ -5,9 +5,9 @@ namespace FEntwumS.NetlistViewer.Services;
 
 public class ServiceManager
 {
-    private static IContainerProvider _containerProvider;
+    private static IContainerProvider? _containerProvider;
     
-    public ServiceManager(IContainerProvider containerProvider)
+    public ServiceManager(IContainerProvider? containerProvider)
     {
         _containerProvider = containerProvider;
     }
@@ -17,7 +17,7 @@ public class ServiceManager
         return _containerProvider.Resolve<IJsonLoader>();
     }
 
-    public static IViewportDimensionService GetViewportDimensionService()
+    public static IViewportDimensionService? GetViewportDimensionService()
     {
         return _containerProvider.Resolve<IViewportDimensionService>();
     }
