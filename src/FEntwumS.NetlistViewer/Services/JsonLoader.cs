@@ -23,10 +23,10 @@ public class JsonLoader : IJsonLoader
     private long charcnt { get; set; }
     private ICustomLogger logger;
     
-    private string clickedElementPath { get; set; }
+    private string? clickedElementPath { get; set; }
     private string clickedElementParentPath { get; set; }
-    private DRect clickedElementRect { get; set; }
-    private DRect clickedElementParentRect { get; set; }
+    private DRect? clickedElementRect { get; set; }
+    private DRect? clickedElementParentRect { get; set; }
     private IViewportDimensionService viewportDimensionService { get; set; }
 
     public JsonLoader()

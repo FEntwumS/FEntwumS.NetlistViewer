@@ -30,7 +30,7 @@ public class YosysService : IYosysService
             .Subscribe(x => _yosysPath = Path.Combine(x, "bin", "yosys"));
     }
 
-    public async Task<bool> LoadVhdlAsync(IProjectFile file)
+    public Task<bool> LoadVhdlAsync(IProjectFile file)
     {
         throw new NotImplementedException();
     }
@@ -54,7 +54,7 @@ public class YosysService : IYosysService
         }
         else
         {
-            UniversalFpgaProjectRoot root = file.Root as UniversalFpgaProjectRoot;
+            if (file.Root is not UniversalFpgaProjectRoot root) return false;
             IEnumerable<string> verilogFiles = root.Files
                 .Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
                 .Where(x => x.Extension is ".v") // Include only Verilog and SystemVerilog files
@@ -99,9 +99,8 @@ public class YosysService : IYosysService
         }
 
         string top = Path.GetFileNameWithoutExtension(file.FullPath);
-
-
-        UniversalFpgaProjectRoot root = file.Root as UniversalFpgaProjectRoot;
+        
+        if (file.Root is not UniversalFpgaProjectRoot root) return false;
         IEnumerable<string> files = root.Files
             .Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
             .Where(x => x.Extension is ".sv") // Include only SystemVerilog files

@@ -10,20 +10,20 @@ public class NetlistElement : FlexibleWindowViewModelBase
     private int type { get; set; }
     private double width { get; set; }
     private double height { get; set; }
-    private string labelText { get; set; }
-    private List<Point> points { get; set; }
+    private string? labelText { get; set; }
+    private List<Point>? points { get; set; }
     private ushort zIndex { get; set; }
 
     private int signalindex { get; set; }
-    private string signalname { get; set; }
-    private string vector_signals { get; set; }
-    private string cellname { get; set; }
-    private string celltype { get; set; }
-    private string path { get; set; }
-    private string srcLocation { get; set; }
-    private string signalvalue { get; set; }
+    private string? signalname { get; set; }
+    private string? vector_signals { get; set; }
+    private string? cellname { get; set; }
+    private string? celltype { get; set; }
+    private string? path { get; set; }
+    private string? srcLocation { get; set; }
+    private string? signalvalue { get; set; }
     private int indexInSignal { get; set; }
-    private string signaltype { get; set; }
+    private string? signaltype { get; set; }
     private bool isHighlighted { get; set; }
     private double fontSize { get; set; }
 
@@ -77,7 +77,7 @@ public class NetlistElement : FlexibleWindowViewModelBase
         }
     }
 
-    public string LabelText
+    public string? LabelText
     {
         get => this.labelText;
         set
@@ -87,7 +87,7 @@ public class NetlistElement : FlexibleWindowViewModelBase
         }
     }
 
-    public List<Point> Points
+    public List<Point>? Points
     {
         get => this.points;
         set
@@ -117,7 +117,7 @@ public class NetlistElement : FlexibleWindowViewModelBase
         }
     }
 
-    public string Signalname
+    public string? Signalname
     {
         get => this.signalname;
         set
@@ -127,7 +127,7 @@ public class NetlistElement : FlexibleWindowViewModelBase
         }
     }
 
-    public string VectorSignals
+    public string? VectorSignals
     {
         get => this.vector_signals;
         set
@@ -137,7 +137,7 @@ public class NetlistElement : FlexibleWindowViewModelBase
         }
     }
 
-    public string Cellname
+    public string? Cellname
     {
         get => this.cellname;
         set
@@ -147,7 +147,7 @@ public class NetlistElement : FlexibleWindowViewModelBase
         }
     }
 
-    public string Celltype
+    public string? Celltype
     {
         get => this.celltype;
         set
@@ -157,7 +157,7 @@ public class NetlistElement : FlexibleWindowViewModelBase
         }
     }
 
-    public string Path
+    public string? Path
     {
         get => this.path;
         set
@@ -167,7 +167,7 @@ public class NetlistElement : FlexibleWindowViewModelBase
         }
     }
 
-    public string SrcLocation
+    public string? SrcLocation
     {
         get => this.srcLocation;
         set
@@ -177,7 +177,7 @@ public class NetlistElement : FlexibleWindowViewModelBase
         }
     }
 
-    public string Signalvalue
+    public string? Signalvalue
     {
         get => this.signalvalue;
         set
@@ -197,7 +197,7 @@ public class NetlistElement : FlexibleWindowViewModelBase
         }
     }
 
-    public string SignalType
+    public string? SignalType
     {
         get => this.signaltype;
         set

@@ -57,8 +57,9 @@ public partial class FrontendView : UserControl
 
     private void NetlistControl_OnPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
-        if (_vm != null && ((NetlistControl)sender).IsInitialized && ((NetlistControl)sender).FileLoaded &&
-            ((AvaloniaList<NetlistElement>)((NetlistControl)sender).Items).Count == 0)
+        if (sender is not NetlistControl netlistControl) return;
+        if (_vm != null && netlistControl is { IsInitialized: true, FileLoaded: true } &&
+            ((AvaloniaList<NetlistElement>)netlistControl.Items).Count == 0)
         {
             ServiceManager.GetService<IDockService>().CloseDockable(_vm);
         }
@@ -71,11 +72,8 @@ public partial class FrontendView : UserControl
 
     private void Button_OnClick(object? sender, RoutedEventArgs e)
     {
-        NetlistControl netlistControl = this.Find<NetlistControl>("NetlistView");
+        NetlistControl? netlistControl = this.Find<NetlistControl>("NetlistView");
 
-        if (netlistControl != null)
-        {
-            netlistControl.ZoomToFit();
-        }
+        netlistControl?.ZoomToFit();
     }
 }

@@ -527,10 +527,10 @@ public class FrontendService : IFrontendService
         _dockService.Show(vm, DockShowLocation.Document);
         _dockService.InitializeContent();
         vm.NetlistId = currentNetlist;
-        await vm.OpenFileImpl();
+        await vm.OpenFileImplAsync();
     }
 
-    public async Task ExpandNode(string nodePath, FrontendViewModel vm)
+    public async Task ExpandNode(string? nodePath, FrontendViewModel vm)
     {
         _logger.Log("Sending request to ExpandNode", true);
 
@@ -545,7 +545,7 @@ public class FrontendService : IFrontendService
 
         _logger.Log("Answer received", true);
 
-        await vm.OpenFileImpl();
+        await vm.OpenFileImplAsync();
 
         _logger.Log("Done", true);
     }

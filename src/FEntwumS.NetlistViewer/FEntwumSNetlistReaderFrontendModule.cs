@@ -516,7 +516,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         ]
     };
 
-    private ServiceManager _serviceManager;
+    private ServiceManager? _serviceManager;
 
     public const string NetlistPathSetting = "FEntwumS_NetlistReaderBackend";
     public const string JavaPathSetting = "FEntwumS_JDKPath";

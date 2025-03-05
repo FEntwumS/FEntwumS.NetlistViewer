@@ -209,7 +209,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
     public static readonly StyledProperty<bool> FitToZoomProperty =
         AvaloniaProperty.Register<NetlistControl, bool>(nameof(FitToZoom), defaultBindingMode: BindingMode.TwoWay);
 
-    public bool IsLoaded
+    public new bool IsLoaded
     {
         get => GetValue(IsLoadedProperty);
         set => SetValue(IsLoadedProperty, value);
@@ -228,13 +228,13 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         AvaloniaProperty.Register<NetlistControl, NetlistElement>(nameof(CurrentElement),
             defaultBindingMode: BindingMode.TwoWay);
 
-    public string ClickedElementPath
+    public string? ClickedElementPath
     {
         get => GetValue(ClickedElementPathProperty);
         set => SetValue(ClickedElementPathProperty, value);
     }
 
-    public static readonly StyledProperty<string> ClickedElementPathProperty =
+    public static readonly StyledProperty<string?> ClickedElementPathProperty =
         AvaloniaProperty.Register<NetlistControl, string>(nameof(ClickedElementPath),
             defaultBindingMode: BindingMode.TwoWay);
 
@@ -350,7 +350,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
     {
         var dimensionService = ServiceManager.GetViewportDimensionService();
 
-        DRect elementBounds = dimensionService.GetZoomElementDimensions(NetlistID);
+        DRect? elementBounds = dimensionService.GetZoomElementDimensions(NetlistID);
 
         if (elementBounds != null)
         {
@@ -1073,7 +1073,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         {
             if (elem.Hittest(e.GetPosition(this)))
             {
-                hj = elem.element;
+                hj = elem.Element;
             }
         }
 
@@ -1127,7 +1127,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                 }
                 else
                 {
-                    string srcloc = CurrentElement.SrcLocation;
+                    string? srcloc = CurrentElement.SrcLocation;
 
                     _ = OpenHDLSourceAsync(srcloc);
                 }
@@ -1135,14 +1135,14 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         }
     }
 
-    private async Task OpenHDLSourceAsync(string srcline)
+    private async Task OpenHDLSourceAsync(string? srcline)
     {
         if (srcline == "")
         {
             return;
         }
 
-        string[] srclineSplit = srcline.Split('|');
+        string?[] srclineSplit = srcline.Split('|');
 
         srcline = srclineSplit.First();
 
@@ -1183,8 +1183,8 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             }
         }
 
-        (string vhdlFilename, long vhdlLine, bool success) = await ServiceManager.GetService<ICcVhdlFileIndexService>()
-            .GetActualSourceAsync(line, NetlistID);
+        (string vhdlFilename, long vhdlLine, bool success) = ServiceManager.GetService<ICcVhdlFileIndexService>()
+            .GetActualSource(line, NetlistID);
 
         if (success)
         {

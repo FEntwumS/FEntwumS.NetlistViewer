@@ -15,7 +15,7 @@ public interface IFrontendService
 
     public Task ShowViewer(IProjectFile json);
 
-    public Task ExpandNode(string nodePath, FrontendViewModel vm);
+    public Task ExpandNode(string? nodePath, FrontendViewModel vm);
 
     public Task<bool> StartBackendIfNotStartedAsync();
 

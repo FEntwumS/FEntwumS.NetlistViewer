@@ -69,30 +69,24 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
         return true;
     }
 
-    public async Task<(string srcfile, long actualSrcline, bool success)> GetActualSourceAsync(long srcline, ulong netlistId)
+    public (string srcfile, long actualSrcline, bool success) GetActualSource(long srcline, ulong netlistId)
     {
-        string srcfile = "";
-        long actualSrcline = 0;
-        
-        ConcurrentDictionary<long, long> fileIndex = new();
-        ConcurrentDictionary<long, string> fileIndexToSource = new();
-
-        if (!_index.TryGetValue(netlistId, out fileIndex))
+        if (!_index.TryGetValue(netlistId, out ConcurrentDictionary<long, long>? fileIndex))
         {
             return ("", 0, false);
         }
 
-        if (!_indexToFile.TryGetValue(netlistId, out fileIndexToSource))
+        if (!_indexToFile.TryGetValue(netlistId, out ConcurrentDictionary<long, string>? fileIndexToSource))
         {
             return ("", 0, false);
         }
 
-        if (!fileIndex.TryGetValue(srcline, out actualSrcline))
+        if (!fileIndex.TryGetValue(srcline, out long actualSrcline))
         {
             return ("", 0, false);
         }
 
-        if (!fileIndexToSource.TryGetValue(srcline, out srcfile))
+        if (!fileIndexToSource.TryGetValue(srcline, out string? srcfile))
         {
             return ("", 0, false);
         }
