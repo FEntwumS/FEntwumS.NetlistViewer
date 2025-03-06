@@ -234,7 +234,7 @@ public class FrontendService : IFrontendService
 
             if (_packageService.Packages!.GetValueOrDefault(dependencyID) is
                 {
-                    Status: PackageStatus.Available or PackageStatus.Installing or PackageStatus.UpdateAvailable
+                    Status: PackageStatus.Available
                 })
             {
                 bool updatePerformed = true;
