@@ -46,31 +46,44 @@ public class YosysService : IYosysService
 
         string top = Path.GetFileNameWithoutExtension(file.FullPath);
 
-        List<string> files = new List<string>();
+        List<string> verilogFileList = new List<string>();
+        
+        List<string> systemVerilogFileList = new List<string>();
 
         if (File.Exists(Path.Combine(workingDirectory, "design.v")))
         {
-            files.Add(Path.Combine(workingDirectory, "design.v"));
+            verilogFileList.Add(Path.Combine(workingDirectory, "design.v"));
         }
         else
         {
             if (file.Root is not UniversalFpgaProjectRoot root) return false;
             IEnumerable<string> verilogFiles = root.Files
                 .Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
-                .Where(x => x.Extension is ".v") // Include only Verilog and SystemVerilog files
+                .Where(x => x.Extension is ".v") // Include only Verilog files
                 .Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
                 .Select(x => x.FullPath);
-            // TODO
-            // get verilog files
 
-            files.AddRange(verilogFiles);
+            IEnumerable<string> systemVerilogFiles = root.Files
+                .Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
+                .Where(x => x.Extension is ".sv") // Include only SystemVerilog files
+                .Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
+                .Select(x => x.FullPath);
+
+            verilogFileList.AddRange(verilogFiles);
+            systemVerilogFileList.AddRange(systemVerilogFiles);
         }
 
         List<string> yosysArgs =
         [
             "-p",
-            $"read_verilog -nooverwrite \"{string.Join("\" \"", files)}\"; scratchpad -set flatten.separator \";\"; {_fpgaBbService.getBbCommand()} hierarchy -check -top {top}; proc; memory -nomap; flatten -scopename; write_json -compat-int {top}.json"
+            $"read_verilog -nooverwrite \"{string.Join("\" \"", verilogFileList)}\"; {(systemVerilogFileList.Count > 0 ? "read_slang " + "\"" + string.Join("\" \"", systemVerilogFileList) + "\";" : "")} scratchpad -set flatten.separator \";\"; {_fpgaBbService.getBbCommand()} hierarchy -check -top {top}; proc; memory -nomap; flatten -scopename; write_json -compat-int {top}.json"
         ];
+
+        if (systemVerilogFileList.Count > 0)
+        {
+            yosysArgs.Insert(0, "-m");
+            yosysArgs.Insert(1, "slang");
+        }
 
         bool success = false;
         string stdout = string.Empty;
