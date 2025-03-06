@@ -17,16 +17,16 @@ public class ToolExecuterService : IToolExecuterService
     
     public async Task<(bool success, string stdout, string stderr)> ExecuteToolAsync(string toolPath, IReadOnlyList<string> args, string workingDirectory)
     {
-        bool success = false;
+        bool noErrors = true;
         string stdout = string.Empty;
         string stderr = string.Empty;
         
-        (success, _) = await _childProcessService.ExecuteShellAsync(toolPath, args, workingDirectory, "", AppState.Idle, false, x =>
+        (bool success, _) = await _childProcessService.ExecuteShellAsync(toolPath, args, workingDirectory, "", AppState.Idle, false, x =>
         {
             if (x.StartsWith("ghdl:error:"))
             {
                 _logger.Error(x);
-                return false;
+                noErrors = false;
             }
 
             stdout += x + "\n";
@@ -35,19 +35,18 @@ public class ToolExecuterService : IToolExecuterService
             return true;
         }, x =>
         {
-            if (x.StartsWith("ghdl:error:") || x.StartsWith("ERROR:"))
+            if (x.StartsWith("ghdl:error:") || x.StartsWith("ERROR:") || x.Contains("error:"))
             {
-                _logger.Error(x);
-                return false;
+                noErrors = false;
             }
             
             stderr += x + "\n";
                 
-            _logger.Log(x);
+            _logger.Error(x);
             return true;
         });
         
-        return (success, stdout, stderr);
+        return (success && noErrors, stdout, stderr);
     }
 
     public IChildProcess ExecuteBackgroundProcess(string path, IReadOnlyList<string> args, string? workingDirectory)
