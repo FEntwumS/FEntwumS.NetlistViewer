@@ -8,11 +8,11 @@
         <EnableDynamicLoading>true</EnableDynamicLoading>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <SelfContained>false</SelfContained>
-        <RootNamespace>Fentwums.WaveformInteractor</RootNamespace>
+        <RootNamespace>FEntwumS.WaveformInteractor</RootNamespace>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <OutputPath>../../bin/Debug</OutputPath>
+        <OutputPath>../../bin/Debug</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -20,29 +20,30 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Mvvm" Private="false" Version="8.4.0" />
-        <PackageReference Include="OneWare.Essentials" Version="0.11.3" Private="false" ExcludeAssets="runtime;Native" />
-        <PackageReference Include="OneWare.ProjectSystem" Version="0.31.4" Private="false" />
-        <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" Private="false" />
-        <PackageReference Include="OneWare.Vcd.Viewer" Private="false" Version="0.31.4" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Private="false" Version="8.4.0"/>
+        <PackageReference Include="OneWare.Essentials" Version="0.11.3" Private="false" ExcludeAssets="runtime;Native"/>
+        <PackageReference Include="OneWare.ProjectSystem" Version="0.31.4" Private="false"/>
+        <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" Private="false"/>
+        <PackageReference Include="OneWare.Vcd.Viewer" Private="false" Version="0.31.4"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="OneWare.WaveFormViewer">
-        <HintPath>..\..\..\..\OneWare\studio\OneWare.Studio.Desktop\bin\Debug\net9.0\linux-x64\OneWare.WaveFormViewer.dll</HintPath>
-      </Reference>
+        <Reference Include="OneWare.WaveFormViewer">
+            <HintPath>..\..\..\..\OneWare\studio\OneWare.Studio.Desktop\bin\Debug\net9.0\linux-x64\OneWare.WaveFormViewer.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\FEntwumS.Common\FEntwumS.Common.csproj" />
-      <PackageReference Include="OneWare.ProjectSystem" Version="0.31.2" Private="false" />
+        <ProjectReference Include="..\FEntwumS.Common\FEntwumS.Common.csproj"/>
+        <PackageReference Include="OneWare.ProjectSystem" Version="0.31.2" Private="false"/>
+        <ProjectReference Include="..\FEntwumS.NetlistViewer\FEntwumS.NetlistViewer.csproj" />
     </ItemGroup>
 
     <Target Name="GenerateCompatibilityFile" AfterTargets="Build">
         <ItemGroup>
             <FilteredDependencies Include="@(PackageReference)" Condition="'%(Private)' == 'false'"/>
         </ItemGroup>
-        
+
         <WriteLinesToFile
                 File="$(OutDir)compatibility.txt"
                 Lines="@(FilteredDependencies->'%(Identity) : %(Version)')"

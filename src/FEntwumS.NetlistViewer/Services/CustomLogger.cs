@@ -2,7 +2,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Media;
-using FEntwumS.Common;
 using OneWare.Essentials.Services;
 using TextMateSharp.Themes;
 
