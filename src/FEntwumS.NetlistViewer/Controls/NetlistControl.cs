@@ -11,8 +11,10 @@ using Avalonia.Media;
 using Avalonia.Rendering;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using DynamicData;
 using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.Types;
+using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
@@ -1150,8 +1152,16 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
         srcLine = srclineSplit.First();
 
-        int lastpos = srcLine!.LastIndexOfAny([':']);
+        int lastpos = -1;
 
+        if (PlatformHelper.Platform is PlatformId.WinArm64 or PlatformId.WinX64)
+        {
+            lastpos = srcLine!.LastIndexOfAny([':']);
+        } else if (PlatformHelper.Platform is not PlatformId.Unknown or PlatformId.Wasm)
+        {
+            lastpos = srcLine!.IndexOf(':');
+        }
+        
         if (lastpos == -1)
         {
             lastpos = srcLine.Length - 1;
@@ -1167,7 +1177,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         {
             filename = srcLine!.Substring(0, lastpos);
             string lines = srcLine.Substring(lastpos + 1);
-            string[] linesSplit = lines.Split('.');
+            string[] linesSplit = lines.Split((PlatformHelper.Platform is PlatformId.WinArm64 or PlatformId.WinX64) ? '.' : ':');
 
             if (linesSplit.Length > 0)
             {
