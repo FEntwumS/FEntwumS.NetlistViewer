@@ -1,4 +1,4 @@
-namespace Fentwums.WaveformInteractor.Services;
+namespace FEntwumS.WaveformInteractor.Services;
 
 public class SignalBitIndexService
 {

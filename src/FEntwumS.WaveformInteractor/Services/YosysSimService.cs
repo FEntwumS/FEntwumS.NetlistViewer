@@ -1,9 +1,6 @@
-using Avalonia.Logging;
 using FEntwumS.Common.Services;
-using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
-using OneWare.ProjectSystem.Models;
 using OneWare.UniversalFpgaProjectSystem.Models;
 using Prism.Ioc;
 
@@ -11,8 +8,8 @@ namespace FEntwumS.WaveformInteractor.Services;
 
 public class YosysSimService : IYosysService
 {
-    private ISettingsService _settingsService;
-    private IChildProcessService _childProcessService;
+    private readonly IChildProcessService _childProcessService;
+    private readonly ISettingsService _settingsService;
 
     private string _yosysPath = string.Empty;
 
@@ -32,16 +29,13 @@ public class YosysSimService : IYosysService
 
     public async Task<bool> LoadVerilogAsync(IProjectFile file)
     {
-        string workingDirectory = Path.Combine(file.Root!.FullPath, "build", "simulation");
+        var workingDirectory = Path.Combine(file.Root!.FullPath, "build", "simulation");
 
-        if (!Directory.Exists(workingDirectory))
-        {
-            Directory.CreateDirectory(workingDirectory);
-        }
+        if (!Directory.Exists(workingDirectory)) Directory.CreateDirectory(workingDirectory);
 
-        string top = Path.GetFileNameWithoutExtension(file.FullPath);
+        var top = Path.GetFileNameWithoutExtension(file.FullPath);
 
-        List<string> files = new List<string>();
+        List<string> files = new();
 
         if (File.Exists(Path.Combine(workingDirectory, "design.v")))
         {
@@ -49,7 +43,7 @@ public class YosysSimService : IYosysService
         }
         else
         {
-            UniversalFpgaProjectRoot root = file.Root as UniversalFpgaProjectRoot;
+            var root = file.Root as UniversalFpgaProjectRoot;
             IEnumerable<string> verilogFiles = root.Files
                 .Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
                 .Where(x => x.Extension is ".v") // Include only Verilog and SystemVerilog files
@@ -67,9 +61,9 @@ public class YosysSimService : IYosysService
             $"read_verilog -nooverwrite \"{string.Join("\" \"", files)}\"; scratchpad -set flatten.separator \";\"; hierarchy -check -top {top}; proc; memory -nomap; flatten -scopename; write_verilog {file.Header}"
         ];
 
-        bool success = false;
-        string output = string.Empty;
-        
+        var success = false;
+        var output = string.Empty;
+
         // TODO execute yosys cmd
         (success, output) = await ExecuteYosysCommandAsync(yosysArgs, workingDirectory);
         Console.WriteLine($"Output: {output}");
@@ -92,19 +86,19 @@ public class YosysSimService : IYosysService
         throw new NotImplementedException();
     }
 
-    async Task<(bool success, string output)> ExecuteYosysCommandAsync(List<string> yosysArgs, string workingDirectory)
+    private async Task<(bool success, string output)> ExecuteYosysCommandAsync(List<string> yosysArgs,
+        string workingDirectory)
     {
-        bool success = false;
-        string output = string.Empty;
+        var success = false;
+        var output = string.Empty;
 
         try
         {
             var result = await _childProcessService.ExecuteShellAsync(
-                _yosysPath, 
-                yosysArgs, 
-                workingDirectory, 
-                "Executing Yosys command", 
-                AppState.Loading);
+                _yosysPath,
+                yosysArgs,
+                workingDirectory,
+                "Executing Yosys command");
 
             output = result.output;
 
@@ -121,5 +115,4 @@ public class YosysSimService : IYosysService
         (bool success, string output) retVal = (success, output);
         return retVal;
     }
-
 }
