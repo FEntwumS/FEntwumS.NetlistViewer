@@ -31,8 +31,7 @@ public class ToolExecuterService : IToolExecuterService
 
             stdout += x + "\n";
 
-            // TODO: Log asynchronously
-            //_logger.Log(x);
+            _logger.Log(x);
             return true;
         }, x =>
         {
