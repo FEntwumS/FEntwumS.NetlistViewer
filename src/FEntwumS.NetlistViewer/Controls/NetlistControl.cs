@@ -1177,11 +1177,18 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         {
             filename = srcLine!.Substring(0, lastpos);
             string lines = srcLine.Substring(lastpos + 1);
-            string[] linesSplit = lines.Split((PlatformHelper.Platform is PlatformId.WinArm64 or PlatformId.WinX64) ? '.' : ':');
+            string[] linesSplit = lines.Split('.');
 
             if (linesSplit.Length > 0)
             {
-                line = long.Parse(linesSplit[0]);
+                try
+                {
+                    line = long.Parse(linesSplit[0]);
+                }
+                catch (Exception)
+                {
+                    line = 1;
+                }
             }
 
             if (line == 0)
