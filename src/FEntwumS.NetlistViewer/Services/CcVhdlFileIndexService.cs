@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
+using OneWare.Essentials.Helpers;
 
 namespace FEntwumS.NetlistViewer.Services;
 
@@ -40,14 +41,24 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
 
                 // Trim whitespace
                 formattedLine = line.Trim();
-                // Remove block comment (first and last three cahracters)
+                // Remove block comment (first and last three characters)
                 formattedLine = formattedLine.Substring(3, formattedLine.Length - 6);
 
                 string[] formattedLineSplit = formattedLine.Split(':');
 
-                // Extract filename
-                formattedLine = $"{formattedLineSplit[0]}:{formattedLineSplit[1]}";
-                actualSrcLine = long.Parse(formattedLineSplit[2]);
+                if (PlatformHelper.Platform is PlatformId.WinArm64 or PlatformId.WinX64)
+                {
+                    formattedLine = $"{formattedLineSplit[0]}:{formattedLineSplit[1]}";
+                    actualSrcLine = long.Parse(formattedLineSplit[2]);
+                } else if (PlatformHelper.Platform is not PlatformId.Wasm or PlatformId.Unknown)
+                {
+                    formattedLine = formattedLineSplit[0];
+                    actualSrcLine = long.Parse(formattedLineSplit[1]);
+                }
+                else
+                {
+                    return false;
+                }
                 
                 fileIndexToSource[currentLine] = formattedLine;
             }
