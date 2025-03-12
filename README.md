@@ -30,7 +30,7 @@ Manager. To install this plugin, you will need to add a custom package source. P
 1. Open the settings menu
 2. Go to the `Package Manager` tab
 3. Add a new custom package source pointing to
-   `https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/oneware-extension.json`
+   `https://raw.githubusercontent.com/FEntwumS/FEntwumS.NetlistViewer/refs/heads/master/oneware-extension.json`
 4. Click `Save`, then exit the settings menu
 5. Open the package manager
 6. Refresh the package manager
