@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.ViewModels;
 using OneWare.Essentials.Enums;
+using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.PackageManager;
 using OneWare.Essentials.Services;
@@ -539,8 +540,15 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
     public void OnInitialized(IContainerProvider? containerProvider)
     {
+        ILogger logger = containerProvider.Resolve<ILogger>();
+        
+        // Log some debug information
+        logger.Log($"FEntwumS.NetlistViewer: Platform: {PlatformHelper.Platform}");
+        
         containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistPackage);
         containerProvider.Resolve<IPackageService>().RegisterPackage(JDKPackage);
+        
+        logger.Log("FEntwumS.NetlistViewer: Registered Packages");
 
         containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", NetlistPathSetting,
             new FolderPathSetting("Path to folder containing server jar", "fentwums-netlist-reader", "",
@@ -567,6 +575,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         var frontendService = containerProvider.Resolve<IFrontendService>();
 
         containerProvider.Resolve<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
+        
+        logger.Log("FEntwumS.NetlistViewer: Registered FrontendViewModel as Document in dock system");
 
         containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
         {
@@ -603,6 +613,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                 });
             }
         });
+        
+        logger.Log("FEntwumS.NetlistViewer: Registered custom context menu entries");
 
         settingsService.RegisterSettingCategory("Netlist Viewer", 100, "netlistIcon");
         settingsService.RegisterSettingSubCategory("Netlist Viewer", "VHDL");
@@ -649,9 +661,13 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_ContinueOnBinaryInstallError",
             new CheckBoxSetting("Continue if errors occur during dependency installation", false));
+        
+        logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
 
         // Subscribe the FrontendService _AFTER_ the relevant settings have been registered
         ServiceManager.GetService<FrontendService>().SubscribeToSettings();
         ServiceManager.GetService<IFpgaBbService>().SubscribeToSettings();
+        
+        logger.Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
     }
 }
