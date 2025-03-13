@@ -53,7 +53,15 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
                 } else if (PlatformHelper.Platform is not PlatformId.Wasm or PlatformId.Unknown)
                 {
                     formattedLine = formattedLineSplit[0];
-                    actualSrcLine = long.Parse(formattedLineSplit[1]);
+
+                    for (int i = 1; i < formattedLineSplit.Length - 2; i++)
+                    {
+                        formattedLine = $"{formattedLine}:{formattedLineSplit[i]}";
+                    }
+                    
+                    // second to last element is the line number
+                    // last element is column number (currently unused)
+                    actualSrcLine = long.Parse(formattedLineSplit[^2]);
                 }
                 else
                 {
