@@ -16,6 +16,8 @@ public class VerilatorService : IVerilatorService
 
     private string _verilator = string.Empty;
 
+    private ILogger _logger;
+    
     public VerilatorService(IContainerProvider containerProvider)
     {
         _settingsService = containerProvider.Resolve<ISettingsService>();
@@ -24,6 +26,8 @@ public class VerilatorService : IVerilatorService
         _yosysService = containerProvider.Resolve<IYosysService>();
         _settingsService.GetSettingObservable<string>("OssCadSuite_Path")
             .Subscribe(x => _verilator = Path.Combine(x, "bin", "verilator"));
+        
+        _logger = containerProvider.Resolve<ILogger>();
     }
 
     // Verilates Preprocessed file
@@ -187,5 +191,29 @@ public class VerilatorService : IVerilatorService
 
         (bool success, string output) retVal = (success, output);
         return retVal;
+    }
+    
+    // requires verilator testbench, and toplevel entity to be set.
+    public async Task CreateVerilatorBinaryAllStepsAsync()
+    {
+        var projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
+        var path = projectRoot.TopEntity.FullPath;
+        var topFile = projectRoot.Files.FirstOrDefault(file => file.FullPath == path);
+
+        if (topFile != null && Testbench != null)
+        {
+            await _yosysService.LoadVerilogAsync(topFile);
+            await VerilateAsync(topFile);
+            await CompileVerilatedAsync(topFile);
+        }
+        else
+        {
+            if (topFile == null && Testbench != null)
+                _logger.Error("Toplevel Entity must be set!", null, true, true);
+            if (topFile != null && Testbench == null)
+                _logger.Error("Verilator Testbench must be set!", null, true, true);
+            if (topFile == null && Testbench == null)
+                _logger.Error("Toplevel Entity and Verilator Testbench must be set!", null, true, true);
+        }
     }
 }

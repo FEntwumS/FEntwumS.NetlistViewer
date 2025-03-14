@@ -81,7 +81,7 @@ public class FEntwumSWaveformInteractorModule : IModule
             new MenuItemViewModel("Create_Verilator_Binary")
             {
                 Header = "Create Verilator Binary",
-                Command = new AsyncRelayCommand(CreateVerilatorBinaryAllStepsAsync),
+                Command = new AsyncRelayCommand(_verilatorService.CreateVerilatorBinaryAllStepsAsync),
                 IconObservable = Application.Current!.GetResourceObservable("CreateIcon")
             },
             new MenuItemViewModel("Run_Verilator_Binary")
@@ -220,29 +220,5 @@ public class FEntwumSWaveformInteractorModule : IModule
         await _verilatorService.RunExecutableAsync(topFile);
     }
     
-    // TODO: refactor to VerilatorService
-    // requires verilator testbench, and toplevel entity to be set.
-    private async Task CreateVerilatorBinaryAllStepsAsync()
-    {
-        var projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
-        var path = projectRoot.TopEntity.FullPath;
-        var topFile = projectRoot.Files.FirstOrDefault(file => file.FullPath == path);
-        var verilatorServiceTestbench = _verilatorService.Testbench;
-
-        if (topFile != null && verilatorServiceTestbench != null)
-        {
-            await _yosysSimService.LoadVerilogAsync(topFile);
-            await _verilatorService.VerilateAsync(topFile);
-            await _verilatorService.CompileVerilatedAsync(topFile);
-        }
-        else
-        {
-            if (topFile == null && verilatorServiceTestbench != null)
-                _logger.Error("Toplevel Entity must be set!", null, true, true);
-            if (topFile != null && verilatorServiceTestbench == null)
-                _logger.Error("Verilator Testbench must be set!", null, true, true);
-            if (topFile == null && verilatorServiceTestbench == null)
-                _logger.Error("Toplevel Entity and Verilator Testbench must be set!", null, true, true);
-        }
-    }
+    
 }
