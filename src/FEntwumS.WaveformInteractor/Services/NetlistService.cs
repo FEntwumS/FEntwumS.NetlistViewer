@@ -58,7 +58,7 @@ public class NetlistService : INetlistService
             { new StreamContent(jsonFileStream), "file", Path.GetFileName(jsonpath) }
         };
 
-        HttpResponseMessage response = null;
+        HttpResponseMessage response;
 
         // backend healthcheck
         // timeout after 2 seconds. TODO: Adjust timeout values appropriately
@@ -95,7 +95,6 @@ public class NetlistService : INetlistService
         }
     }
      
-         // TODO: get URL and Port from settings. For now only use hardcoded local address and port
     // retrieves information about the netlist from the backend
     // returns empty json if netlist not present locally and on backend.
     public async Task<JObject> GetNetInformationAsync(string netlistPath)

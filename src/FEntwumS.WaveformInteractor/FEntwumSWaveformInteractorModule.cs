@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Text;
 using Avalonia;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
@@ -8,12 +7,10 @@ using FEntwumS.Common.Services;
 using FEntwumS.NetlistViewer.Services;
 using FEntwumS.WaveformInteractor.Services;
 using FEntwumS.WaveformInteractor.ViewModels;
-using Newtonsoft.Json.Linq;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
 using OneWare.UniversalFpgaProjectSystem.Models;
-using OneWare.Vcd.Parser.Data;
 using OneWare.Vcd.Viewer.Models;
 using OneWare.Vcd.Viewer.ViewModels;
 using Prism.Ioc;
@@ -39,11 +36,6 @@ public class FEntwumSWaveformInteractorModule : IModule
     private IWindowService? _windowService;
     private IYosysService? _yosysSimService;
     private NetlistService _netlistService;
-
-    // holds all Signals
-    // private VcdDefinition? rootScope;
-    // private string _backendAddress = "http://127.0.0.1";
-    // private string _backendPort = "8080";
 
     public FEntwumSWaveformInteractorModule(IWaveformInteractorService? waveformInteractorService = null)
     {
@@ -107,7 +99,6 @@ public class FEntwumSWaveformInteractorModule : IModule
                         IconObservable = Application.Current!.GetResourceObservable("VSImageLib.AddTest_16x")
                     });
                 else
-                    // TODO: change icon, if testbench is set.
                     menuItems.Add(new MenuItemViewModel("Unset Verilator testbench")
                     {
                         Header = "Unset Verilator testbench",
@@ -134,6 +125,8 @@ public class FEntwumSWaveformInteractorModule : IModule
                                 _ = HandleIsLoadingChangedAsync(vcdViewModel);
                             break;
                         // Subscribe to PropertyChanged for SelectedSignal in WaveformViewer
+                        // TODO: currently only responds to the list, from which signals can be added to the Waveformviewer
+                        // -> meaning not able to select signal in Waveformviewer directly.
                         case nameof(vcdViewModel.WaveFormViewer.SelectedSignal):
                             var selectedSignal = vcdViewModel.SelectedSignal;
 
@@ -141,7 +134,6 @@ public class FEntwumSWaveformInteractorModule : IModule
                             // currently use signalname as UID to get bit indices
                             // then map bit indices to VCD ID
                             // -> Signalname still have to be used initially, otherwise no way to map from netlist to vcd
-                            
                             var bits = _signalBitIndexService.GetMapping(selectedSignal.Id);
 
                             // jump to selected Signal via bit index
@@ -170,12 +162,12 @@ public class FEntwumSWaveformInteractorModule : IModule
         // TODO: Signaling required, to indicate that settings have been Registered from Frontend. 
         // _settingsService.GetSettingObservable<string>("NetlistViewer_Backend_Address").Subscribe(x =>
         // {
-        //     _backendAddress = x;
+        //      _netlistService.BackendAddress = x;
         // });
         //
         // _settingsService.GetSettingObservable<string>("NetlistViewer_Backend_Port").Subscribe(x =>
         // {
-        //     _backendPort = x;
+        //     _netlistService.BackendPort = x;
         // });
     }
     
@@ -203,6 +195,7 @@ public class FEntwumSWaveformInteractorModule : IModule
                 netInfo = await _netlistService.GetNetInformationAsync(netlistPath);
             }
             _netlistService.ParseNetInformation(netInfo);
+            
         }
         catch (Exception ex)
         {
@@ -218,7 +211,8 @@ public class FEntwumSWaveformInteractorModule : IModule
         var topFile = projectRoot.Files.FirstOrDefault(file => file.FullPath == path);
 
         await _verilatorService.RunExecutableAsync(topFile);
+        
+        // TODO: read .vcd after running simulation and recreate signal names and scopes from net information json, retrieved from backend
+        // only required when using flattened design, since scope and signalnames are intact when not flattening!
     }
-    
-    
 }
