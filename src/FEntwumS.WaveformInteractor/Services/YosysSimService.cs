@@ -12,12 +12,14 @@ public class YosysSimService : IYosysService
     private readonly ISettingsService _settingsService;
 
     private string _yosysPath = string.Empty;
+    private readonly ILogger _logger;
 
     public YosysSimService(IContainerProvider containerProvider)
     {
         _settingsService = containerProvider.Resolve<ISettingsService>();
         _childProcessService = containerProvider.Resolve<IChildProcessService>();
 
+        _logger = containerProvider.Resolve<ILogger>();
         _settingsService.GetSettingObservable<string>("OssCadSuite_Path")
             .Subscribe(x => _yosysPath = Path.Combine(x, "bin", "yosys"));
     }
@@ -65,7 +67,7 @@ public class YosysSimService : IYosysService
         var output = string.Empty;
 
         (success, output) = await ExecuteYosysCommandAsync(yosysArgs, workingDirectory);
-        Console.WriteLine($"Output: {output}");
+        _logger.Log($"{output}", ConsoleColor.White, true);
 
         return success;
     }
@@ -102,13 +104,13 @@ public class YosysSimService : IYosysService
             output = result.output;
 
             if (!string.IsNullOrEmpty(output))
-                Console.WriteLine(output);
+                _logger.Log(output, ConsoleColor.White,true);
 
             success = !string.IsNullOrEmpty(output);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error executing Yosys command: {ex.Message}");
+            _logger.Error($"Error executing Yosys command: {ex.Message}");
         }
 
         (bool success, string output) retVal = (success, output);

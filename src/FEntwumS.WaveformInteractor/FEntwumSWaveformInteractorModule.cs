@@ -34,7 +34,6 @@ public class FEntwumSWaveformInteractorModule : IModule
     private IVerilatorService? _verilatorService;
     private IWaveformInteractorService _waveformInteractorService;
     private IWindowService? _windowService;
-    private IYosysService? _yosysSimService;
     private NetlistService _netlistService;
 
     public FEntwumSWaveformInteractorModule(IWaveformInteractorService? waveformInteractorService = null)
@@ -56,7 +55,6 @@ public class FEntwumSWaveformInteractorModule : IModule
     public void OnInitialized(IContainerProvider containerProvider)
     {
         _containerProvider = containerProvider;
-        _yosysSimService = containerProvider.Resolve<IYosysService>();
         _verilatorService = containerProvider.Resolve<IVerilatorService>();
         _signalBitIndexService = containerProvider.Resolve<SignalBitIndexService>();
         _waveformInteractorService = containerProvider.Resolve<IWaveformInteractorService>();
@@ -199,7 +197,7 @@ public class FEntwumSWaveformInteractorModule : IModule
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error in HandleIsLoadingChangedAsync: {ex}");
+            _logger.Error($"Error in HandleIsLoadingChangedAsync: {ex}");
         }
     }
 

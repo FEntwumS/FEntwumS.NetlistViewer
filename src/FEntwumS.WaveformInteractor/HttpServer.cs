@@ -32,7 +32,6 @@ public class HttpServer
     public async Task StartAsync()
     {
         _listener.Start();
-        Console.WriteLine("Listening... for FEEEENTWUUMS");
 
         // Handle one request at a time for simplicity
         while (true)

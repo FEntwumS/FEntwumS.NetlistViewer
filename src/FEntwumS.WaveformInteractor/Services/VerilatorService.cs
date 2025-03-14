@@ -31,8 +31,15 @@ public class VerilatorService : IVerilatorService
     }
 
     // Verilates Preprocessed file
+    // expects set Testbench
     public async Task<bool> VerilateAsync(IProjectFile file)
     {
+        if (Testbench == null)
+        {
+            _logger.Error($"Register .cpp Testbench to Verilate!");
+            return false;
+        }
+        
         var workingDirectory = Path.Combine(file.Root!.FullPath, "build", "simulation");
 
         if (!Directory.Exists(workingDirectory)) Directory.CreateDirectory(workingDirectory);
@@ -42,7 +49,6 @@ public class VerilatorService : IVerilatorService
         var testbenchFile = Testbench.FullPath;
 
         var top = Path.GetFileNameWithoutExtension(file.FullPath);
-
 
         List<string> yosysArgs =
         [
@@ -59,11 +65,12 @@ public class VerilatorService : IVerilatorService
         var output = string.Empty;
 
         (success, output) = await ExecuteVerilatorCommandAsync(yosysArgs, workingDirectory);
-        Console.WriteLine($"Output: {output}");
-
+        _logger.Log(output, ConsoleColor.White, true);
         return success;
     }
-
+    
+    // compiles verilated project into binary. Uses generated Cmake file.
+    // expects prior verilation with .cpp testbench
     public async Task<bool> CompileVerilatedAsync(IProjectFile topLevelFile)
     {
         var projectRootPath = topLevelFile.Root!.FullPath;
@@ -84,13 +91,13 @@ public class VerilatorService : IVerilatorService
         process.OutputDataReceived += (sender, e) =>
         {
             if (!string.IsNullOrEmpty(e.Data))
-                Console.WriteLine(e.Data);
+                _logger.Log(e.Data, ConsoleColor.White, true);
         };
 
         process.ErrorDataReceived += (sender, e) =>
         {
             if (!string.IsNullOrEmpty(e.Data))
-                Console.WriteLine($"Error: {e.Data}");
+                _logger.Error($"Error: {e.Data}");
         };
 
         process.Start();
@@ -123,13 +130,13 @@ public class VerilatorService : IVerilatorService
         process.OutputDataReceived += (sender, e) =>
         {
             if (!string.IsNullOrEmpty(e.Data))
-                Console.WriteLine(e.Data);
+                _logger.Log(e.Data, ConsoleColor.White, true);
         };
 
         process.ErrorDataReceived += (sender, e) =>
         {
             if (!string.IsNullOrEmpty(e.Data))
-                Console.WriteLine($"Error: {e.Data}");
+                _logger.Error($"Error: {e.Data}");
         };
 
         process.Start();
@@ -146,11 +153,18 @@ public class VerilatorService : IVerilatorService
         if (file is not null && (file.Extension is ".cpp" or ".cxx" or ".cc" or ".C"))
         {
             var project = _projectExplorerService.ActiveProject?.Root as UniversalFpgaProjectRoot;
-            project?.RegisterTestBench(file);
+            // dont add to OneWare Testbenches, if already present
+            if (!project.TestBenches.Any(tb => tb.Name.Equals(file.Name)))
+            {
+                project?.RegisterTestBench(file);
+            }
             if (project != null) _projectExplorerService.SaveProjectAsync(project);
+            Testbench = file;
         }
-
-        Testbench = file;
+        else
+        {
+            _logger.Error($"Testbench has to be a C++ file!");
+        }
     }
 
     public void UnregisterTestbench(IProjectFile file)
@@ -180,13 +194,13 @@ public class VerilatorService : IVerilatorService
             output = result.output;
 
             if (!string.IsNullOrEmpty(output))
-                Console.WriteLine(output);
+                _logger.Log(output, ConsoleColor.White, true);
 
             success = !string.IsNullOrEmpty(output);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error executing Verilator command: {ex.Message}");
+            _logger.Error($"Error executing Verilator command: {ex.Message}", ex);
         }
 
         (bool success, string output) retVal = (success, output);

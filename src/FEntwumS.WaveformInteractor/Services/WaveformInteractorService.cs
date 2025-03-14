@@ -5,11 +5,6 @@ using OneWare.Vcd.Viewer.Models;
 
 public class WaveformInteractorService : IWaveformInteractorService
 {
-    public WaveformInteractorService()
-    {
-        Console.WriteLine($"Instance of {nameof(IWaveformInteractorService)} created at {DateTime.Now}");
-    }
-
     // transmit all signal states to frontend
     public Task<string> TransferSignalStates(ExtendedVcdScopeModel.ExtendedSignal[] signals)
     {
