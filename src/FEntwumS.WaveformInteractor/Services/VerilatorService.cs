@@ -54,7 +54,6 @@ public class VerilatorService : IVerilatorService
         var success = false;
         var output = string.Empty;
 
-        // TODO execute yosys cmd
         (success, output) = await ExecuteVerilatorCommandAsync(yosysArgs, workingDirectory);
         Console.WriteLine($"Output: {output}");
 
@@ -140,7 +139,7 @@ public class VerilatorService : IVerilatorService
 
     public void RegisterTestbench(IProjectFile? file)
     {
-        if (file is not null)
+        if (file is not null && (file.Extension is ".cpp" or ".cxx" or ".cc" or ".C"))
         {
             var project = _projectExplorerService.ActiveProject?.Root as UniversalFpgaProjectRoot;
             project?.RegisterTestBench(file);

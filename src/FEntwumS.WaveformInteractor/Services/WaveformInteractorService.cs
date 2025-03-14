@@ -1,6 +1,4 @@
-using System.Text;
 using FEntwumS.Common;
-using Newtonsoft.Json;
 using OneWare.Vcd.Viewer.Models;
 
 // namespace Fentwums.Common;
@@ -11,7 +9,7 @@ public class WaveformInteractorService : IWaveformInteractorService
     {
         Console.WriteLine($"Instance of {nameof(IWaveformInteractorService)} created at {DateTime.Now}");
     }
-    
+
     // transmit all signal states to frontend
     public Task<string> TransferSignalStates(ExtendedVcdScopeModel.ExtendedSignal[] signals)
     {
@@ -20,6 +18,7 @@ public class WaveformInteractorService : IWaveformInteractorService
 
     public void GoToSignal(int bitIndex)
     {
+        Console.WriteLine("GO TO SIGNAL");
         throw new NotImplementedException();
     }
 

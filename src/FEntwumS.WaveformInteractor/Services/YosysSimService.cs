@@ -64,7 +64,6 @@ public class YosysSimService : IYosysService
         var success = false;
         var output = string.Empty;
 
-        // TODO execute yosys cmd
         (success, output) = await ExecuteYosysCommandAsync(yosysArgs, workingDirectory);
         Console.WriteLine($"Output: {output}");
 
