@@ -1164,7 +1164,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         
         if (lastpos == -1)
         {
-            lastpos = srcLine.Length - 1;
+            lastpos = srcLine!.Length - 1;
         }
 
         long line = 1;

@@ -820,18 +820,20 @@ public class FrontendService : IFrontendService
         client.BaseAddress = new Uri($"http://{_backendAddress}:{_backendPort}");
         client.Timeout = TimeSpan.FromSeconds(_requestTimeout);
         bool done = false;
+        
+        int failures = 0;
 
         while (!done)
         {
             try
             {
                 var res = await client.GetAsync("/server-active");
-                _logger.Log("Server is awaiting requests", true);
+                _logger.Log("Server is awaiting requests");
                 done = true;
             }
             catch (Exception)
             {
-                if (_useLocalBackend)
+                if (!_useLocalBackend)
                 {
                     _logger.Error(
                         "The remote server could not be reached. Make sure the server is started and reachable or switch to the local server");
@@ -839,8 +841,18 @@ public class FrontendService : IFrontendService
                     return false;
                 }
 
-                _logger.Log("No response. Trying again in 10 ms", true);
+                _logger.Log("No response. Trying again in 10 ms");
+                failures++;
                 await Task.Delay(10);
+
+                if (failures % 1000 == 0)
+                {
+                    _logger.Log("The backend could not be reached. Retrying...", true);
+                } else if (failures > 10000)
+                {
+                    _logger.Log("The backend could not be reached. Aborting...", true);
+                    return false;
+                }
             }
         }
 
