@@ -3,7 +3,7 @@ using OneWare.Essentials.ViewModels;
 
 namespace FEntwumS.NetlistViewer.Types;
 
-public class NetlistElement : FlexibleWindowViewModelBase
+public class NetlistElement
 {
     private double x { get; set; }
     private double y { get; set; }
@@ -33,7 +33,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             x = value;
-            OnPropertyChanged();
         }
     }
 
@@ -43,7 +42,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             y = value;
-            OnPropertyChanged();
         }
     }
 
@@ -53,7 +51,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.width = value;
-            OnPropertyChanged();
         }
     }
 
@@ -63,7 +60,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.height = value;
-            OnPropertyChanged();
         }
     }
 
@@ -73,7 +69,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.type = value;
-            OnPropertyChanged();
         }
     }
 
@@ -83,7 +78,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.labelText = value;
-            OnPropertyChanged();
         }
     }
 
@@ -93,7 +87,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.points = value;
-            OnPropertyChanged();
         }
     }
 
@@ -103,7 +96,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.zIndex = value;
-            OnPropertyChanged();
         }
     }
 
@@ -113,7 +105,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.signalindex = value;
-            OnPropertyChanged();
         }
     }
 
@@ -123,7 +114,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.signalname = value;
-            OnPropertyChanged();
         }
     }
 
@@ -133,7 +123,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.vector_signals = value;
-            OnPropertyChanged();
         }
     }
 
@@ -143,7 +132,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.cellname = value;
-            OnPropertyChanged();
         }
     }
 
@@ -153,7 +141,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.celltype = value;
-            OnPropertyChanged();
         }
     }
 
@@ -163,7 +150,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.path = value;
-            OnPropertyChanged();
         }
     }
 
@@ -173,7 +159,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.srcLocation = value;
-            OnPropertyChanged();
         }
     }
 
@@ -183,7 +168,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.signalvalue = value;
-            OnPropertyChanged();
         }
     }
 
@@ -193,7 +177,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.indexInSignal = value;
-            OnPropertyChanged();
         }
     }
 
@@ -203,7 +186,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.signaltype = value;
-            OnPropertyChanged();
         }
     }
 
@@ -213,7 +195,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.isHighlighted = value;
-            OnPropertyChanged();
         }
     }
 
@@ -223,7 +204,6 @@ public class NetlistElement : FlexibleWindowViewModelBase
         set
         {
             this.fontSize = value;
-            OnPropertyChanged();
         }
     }
 }
