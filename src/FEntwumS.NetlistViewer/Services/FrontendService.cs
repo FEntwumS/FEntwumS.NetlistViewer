@@ -32,8 +32,10 @@ public class FrontendService : IFrontendService
     private static int _edgeLabelFontSize = 10;
     private static int _portLabelFontSize = 10;
     private static string _javaBinaryFolder = string.Empty;
-    private static string extraJarArgs = string.Empty;
+    private static string _extraJarArgs = string.Empty;
     private static bool _continueOnBinaryInstallError = false;
+    
+    private static bool _restartRequired = false;
 
     private UInt64 currentNetlist = 0;
 
@@ -200,7 +202,7 @@ public class FrontendService : IFrontendService
         _settingsService.GetSettingObservable<string>(FEntwumSNetlistReaderFrontendModule.JavaPathSetting).Subscribe(
             x => _javaBinaryFolder = x);
 
-        _settingsService.GetSettingObservable<string>("NetlistViewer_java_args").Subscribe(x => extraJarArgs = x);
+        _settingsService.GetSettingObservable<string>("NetlistViewer_java_args").Subscribe(x => _extraJarArgs = x);
 
         _settingsService.GetSettingObservable<bool>("NetlistViewer_ContinueOnBinaryInstallError")
             .Subscribe(x => _continueOnBinaryInstallError = x);
@@ -300,16 +302,17 @@ public class FrontendService : IFrontendService
                 if (globalSuccess && updatePerformed)
                 {
                     needsRestart = true;
+                    _restartRequired = true;
                 }
             }
         }
 
-        if (globalSuccess && needsRestart)
+        if (globalSuccess && (needsRestart || _restartRequired))
         {
             _logger.Log("Dependencies were successfully installed. Please restart OneWare Studio!", true);
         }
 
-        return (globalSuccess, needsRestart);
+        return (globalSuccess, needsRestart || _restartRequired);
     }
 
     public async Task CreateVhdlNetlistAsync(IProjectFile vhdl)
@@ -801,7 +804,7 @@ public class FrontendService : IFrontendService
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         backendProcess = ServiceManager.GetService<IToolExecuterService>()
             .ExecuteBackgroundProcess(javaBinaryFile,
-                extraJarArgs.Split(' ').Concat(["-jar", serverJarFile]).ToArray(),
+                _extraJarArgs.Split(' ').Concat(["-jar", serverJarFile]).ToArray(),
                 Path.GetDirectoryName(serverJarFile));
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
