@@ -558,7 +558,7 @@ public class FrontendService : IFrontendService
 
         var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath, null);
 
-        if (resp == null)
+        if (resp is not { IsSuccessStatusCode: true })
         {
             return;
         }
