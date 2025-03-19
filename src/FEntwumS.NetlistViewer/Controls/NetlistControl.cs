@@ -1115,7 +1115,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             {
                 CurrentElement = hn;
 
-                if (CurrentElement.Celltype is "HDL_ENTITY" or "")
+                if (CurrentElement.Celltype is "HDL_ENTITY" or "" && CurrentElement.ZIndex is not 1)
                 {
                     // kinda bad
                     if (ClickedElementPath == hn.Path)
