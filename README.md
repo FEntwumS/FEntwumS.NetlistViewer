@@ -7,13 +7,18 @@ the software.
 
 ## System requirements
 
-Currently, only Windows is supported, but the plugin should work on all platforms OneWare Studio runs on, except
+Currently, only Windows and Linux are supported, but the plugin should work on all platforms OneWare Studio runs on, except
 browsers.
 
 ## Dependencies
 
 Your installation of OneWare Studio needs to have the `OSS Cad Suite Integration` installed with version 2025-01-22 or
 later, as well as the most recent version of the `GHDL Extension`.
+
+## Limitations
+
+The viewer currently only supports designs written either exclusively in VHDL or exclusively in Verilog. While mixed
+Verilog/SystemVerilog designs can likely be displayed, this is **not** guaranteed.
 
 # About
 
@@ -69,8 +74,7 @@ automatically generate a netlist using yosys and then display it in a new tab. Y
 clicking and dragging with the left mouse button pans the view and left-clicking on an entity will either expand or
 collapse it (depending on whether the entity is collapsed or not).
 
-Left-clicking on a cell will open the corresponding HDL file. Synthesized Verilog code is opened for VHDL designs at the
-moment. Future work will enable the direct opening of the corresponding VHDL file.
+Left-clicking on a cell will open the corresponding HDL file.
 
 ### Viewing a generated netlist
 
