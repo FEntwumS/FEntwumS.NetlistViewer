@@ -125,7 +125,7 @@ public class YosysService : IYosysService
         List<string> yosysArgs =
         [
             "-m", "slang", "-p",
-            $"read_slang \"{string.Join("\" \"", files)}\"; scratchpad -set flatten.separator \";\"; hierarchy -top {top}; proc; memory -nomap; opt -full; flatten -scopename; write_json -compat-int netlist.json"
+            $"read_slang {string.Join(" ", files)}; scratchpad -set flatten.separator \";\"; hierarchy -top {top}; proc; memory -nomap; opt -full; flatten -scopename; write_json -compat-int netlist.json"
         ];
 
         bool success = false;
