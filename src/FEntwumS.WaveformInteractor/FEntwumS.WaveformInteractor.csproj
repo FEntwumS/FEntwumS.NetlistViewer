@@ -9,6 +9,7 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <SelfContained>false</SelfContained>
         <RootNamespace>FEntwumS.WaveformInteractor</RootNamespace>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -22,9 +23,11 @@
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Private="false" Version="8.4.0"/>
         <PackageReference Include="OneWare.Essentials" Version="0.11.3" Private="false" ExcludeAssets="runtime;Native"/>
-        <PackageReference Include="OneWare.ProjectSystem" Version="0.31.4" Private="false"/>
-        <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" Private="false"/>
-        <PackageReference Include="OneWare.Vcd.Viewer" Private="false" Version="0.31.4"/>
+        <PackageReference Include="OneWare.ProjectSystem" Version="0.31.4" Private="false" ExcludeAssets="runtime;Native"/>
+        <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" Private="false" ExcludeAssets="runtime;Native"/>
+        <PackageReference Include="OneWare.Vcd.Viewer" Private="false" Version="0.31.4" ExcludeAssets="runtime;Native"/>
+<!--        <PackageReference Include="System.IO.Hashing" Private="false" Version="9.0.3" CopyLocalLockFileAssemblies="true"/>-->
+    
     </ItemGroup>
 
     <ItemGroup>

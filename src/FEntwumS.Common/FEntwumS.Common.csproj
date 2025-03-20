@@ -24,8 +24,8 @@
 
     <ItemGroup>
       <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" />
-      <PackageReference Include="OneWare.Vcd.Viewer" Version="0.31.2" />
+      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" ExcludeAssets="runtime;Native" />
+      <PackageReference Include="OneWare.Vcd.Viewer" Version="0.31.2" ExcludeAssets="runtime;Native"/>
     </ItemGroup>
 
     <!--    pushing to local nuget repo    -->
