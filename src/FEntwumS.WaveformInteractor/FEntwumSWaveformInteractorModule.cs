@@ -35,6 +35,7 @@ public class FEntwumSWaveformInteractorModule : IModule
     private IWaveformInteractorService _waveformInteractorService;
     private IWindowService? _windowService;
     private NetlistService _netlistService;
+    private VcdService? _vcdService;
 
     public FEntwumSWaveformInteractorModule(IWaveformInteractorService? waveformInteractorService = null)
     {
@@ -47,6 +48,7 @@ public class FEntwumSWaveformInteractorModule : IModule
         containerRegistry.RegisterSingleton<IVerilatorService, VerilatorService>();
         containerRegistry.RegisterSingleton<SignalBitIndexService>();
         containerRegistry.RegisterSingleton<INetlistService, NetlistService>();
+        containerRegistry.RegisterSingleton<IVcdService, VcdService>();
         containerRegistry.Register<IWaveformInteractorService, WaveformInteractorService>();
         containerRegistry.Register<WaveformInteractorViewModel>();
         // containerRegistry.Register<IFrontendService, FrontendService>();
@@ -59,6 +61,8 @@ public class FEntwumSWaveformInteractorModule : IModule
         _signalBitIndexService = containerProvider.Resolve<SignalBitIndexService>();
         _waveformInteractorService = containerProvider.Resolve<IWaveformInteractorService>();
         _netlistService = containerProvider.Resolve<NetlistService>();
+        _vcdService = containerProvider.Resolve<VcdService>();
+        
         // OneWare Services
         var dockService = containerProvider.Resolve<IDockService>();
         _projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
@@ -105,13 +109,23 @@ public class FEntwumSWaveformInteractorModule : IModule
                             Application.Current!.GetResourceObservable("VSImageLib.RemoveSingleDriverTest_16x")
                     });
             }
+
+            if (selected is [IProjectFile { Extension: ".vcd" } vcdFile])
+            {
+                
+                menuItems.Add(new MenuItemViewModel("Recreate Hierarchy from Signalnames")
+                {
+                    Header = "Recreate Hierarchy from Signalnames",
+                    Command = new RelayCommand(() => recreateHirAndWriteVcd(vcdFile)),
+                });
+            }
         });
 
         dockService.PropertyChanged += (o, args) =>
         {
             if (args.PropertyName != nameof(dockService.CurrentDocument)) return;
             var currentDocument = dockService.CurrentDocument;
-
+            
             if (currentDocument is VcdViewModel vcdViewModel)
             {
                 vcdViewModel.PropertyChanged += (o1, innerArgs) =>
@@ -168,11 +182,39 @@ public class FEntwumSWaveformInteractorModule : IModule
         //     _netlistService.BackendPort = x;
         // });
     }
-    
+
+    private void recreateHirAndWriteVcd(IProjectFile vcdFile)
+    {
+        var waveformpath = vcdFile.FullPath;
+        string waveformpathRecreatedHir = Path.Combine(vcdFile.TopFolder.FullPath, Path.GetFileNameWithoutExtension(vcdFile.FullPath) + "_recreated.vcd" );
+        _vcdService.Reset();
+        _vcdService.LoadVcd(waveformpath);
+        _vcdService.RecreateVcdHierarchy();
+        _vcdService.WriteVcd(waveformpathRecreatedHir);    
+    }
+
     private async Task HandleIsLoadingChangedAsync(VcdViewModel vcdViewModel)
     {
         try
-        {
+        {   
+            // first check if the vcd file has been read before, by hashing the body.
+            var lines = File.ReadAllLines(vcdViewModel.FullPath);
+            int bodyStartIndex = _vcdService.GetBodyStartIndex(lines);
+            var hash = _vcdService.HashVcdBody(vcdViewModel.FullPath, bodyStartIndex);
+            
+            // If hash equals to currently loaded body, use the existing BitMapping.
+            // TODO: this seems a bit messy: maybe a vcdService has to be attached to each vcdViewModel. If the hash of the vcd body is the same, it gets attached to the same.
+            // Note that the "original" .vcd would have to be loaded first, so successful BitMapping is assured.
+            if (hash.SequenceEqual(_vcdService.BodyHash))
+            {
+                return;
+            }
+            else
+            {
+                _vcdService.Reset();
+            }
+            
+            //If .vcd has not been loaded before, load it via backend
             // ensure that backend is running
             var frontendService = _containerProvider.Resolve<IFrontendService>();
             _ = frontendService.StartBackendIfNotStartedAsync();
@@ -182,6 +224,7 @@ public class FEntwumSWaveformInteractorModule : IModule
             
             var projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
             var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity.FullPath);
+            // TODO: use OS independent path module
             var netlistPath = _projectExplorerService.ActiveProject.RootFolderPath + $"/build/netlist/{topEntity}.json";
             
             // post netlist to backend

@@ -144,7 +144,6 @@ public class NetlistService : INetlistService
 
     public void ParseNetInformation(JObject netInfo)
     {
-
         // Write to .json file for debugging purposes
         // var jsonString = netInfo.ToString();
         // TODO: use /simulation directory for this
