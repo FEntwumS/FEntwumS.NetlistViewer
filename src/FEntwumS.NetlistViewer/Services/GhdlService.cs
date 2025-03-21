@@ -129,8 +129,8 @@ public class GhdlService : IGhdlService
         // ghdlOptions.Add("-o=design.v");  // TODO rework
         // When a new version of GHDL is available, this parameter will allow us to write the result directly to a file,
         // instead of needing to use File.WriteAllTextAsync
-
-        List<string> ghdlSynthArgs = ["--synth", "--no-formal", "-Pbuild"];
+        
+        List<string> ghdlSynthArgs = ["--synth", "--no-formal", "-Pbuild", "-o=design.v"];
         ghdlSynthArgs.AddRange(ghdlOptions);
         ghdlSynthArgs.Add(top);
 
@@ -140,8 +140,6 @@ public class GhdlService : IGhdlService
 
         (success, stdout, stderr) =
             await _toolExecuterService.ExecuteToolAsync(_ghdlPath, ghdlSynthArgs, workingDirectory);
-
-        await File.WriteAllTextAsync(Path.Combine(workingDirectory, "design.v"), stdout);
 
         return success;
     }
