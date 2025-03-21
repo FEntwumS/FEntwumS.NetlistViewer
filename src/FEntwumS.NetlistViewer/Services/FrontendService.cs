@@ -307,12 +307,20 @@ public class FrontendService : IFrontendService
                     needsRestart = true;
                     _restartRequired = true;
                 }
-            } else if (_packageService.Packages!.GetValueOrDefault(dependencyID) is
-                       {
-                           Status: PackageStatus.UpdateAvailable
-                       })
+            }
+
+            if (dependencyModel!.Status is PackageStatus.Installed or PackageStatus.UpdateAvailable)
             {
-                
+                if (minVersion.CompareTo(Version.Parse(dependencyModel.InstalledVersion!.Version!)) <= 0)
+                {
+                    _logger.Log($"Dependency {dependencyPackage.Id} installed with version {dependencyModel.InstalledVersion.Version} greater than or equal to expected version {minVersion.ToString()}");
+                }
+                else
+                {
+                    _logger.Error($"Installed version {dependencyModel.InstalledVersion.Version} for {dependencyPackage.Name} is below the minimum version {minVersion.ToString()}. Please update {dependencyPackage.Name}!");
+                    
+                    globalSuccess = false;
+                }
             }
         }
 
