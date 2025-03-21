@@ -212,15 +212,18 @@ public class FrontendService : IFrontendService
     {
         bool globalSuccess = true, needsRestart = false;
 
-        string[] dependencyIDs =
-        [
-            "OneWare.GhdlExtension", "osscadsuite", "ghdl", FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id!,
-            FEntwumSNetlistReaderFrontendModule.JDKPackage.Id!
-        ];
+        (string id, Version minversion)[] dependencyIDs = new (string, Version)
+        [ ] {
+            ("OneWare.GhdlExtension", new Version(0, 10, 7)),
+            ("osscadsuite", new Version(2025, 01, 21)),
+            ("ghdl", new Version(5, 0, 1)),
+            (FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id!, new Version(0, 8, 0)),
+            (FEntwumSNetlistReaderFrontendModule.JDKPackage.Id!, new Version(21, 0, 6))
+        };
 
         // Install osscadsuite binary between GHDL plugin and ghdl binary to allow for the addition of the ghdl binary to the store
 
-        foreach (string dependencyID in dependencyIDs)
+        foreach ((string dependencyID, Version minVersion) in dependencyIDs)
         {
             PackageModel? dependencyModel = _packageService.Packages.GetValueOrDefault(dependencyID);
             Package? dependencyPackage = dependencyModel?.Package;
@@ -228,7 +231,7 @@ public class FrontendService : IFrontendService
             if (dependencyPackage == null)
             {
                 _logger.Error(
-                    $"Dependency with ID {dependencyID} not available in the package manager. Please file a bug report, if this issue persists");
+                    $"Dependency with ID {dependencyID} is not available in the package manager. Please file a bug report, if this issue persists");
 
                 globalSuccess = false;
                 continue;
@@ -304,6 +307,12 @@ public class FrontendService : IFrontendService
                     needsRestart = true;
                     _restartRequired = true;
                 }
+            } else if (_packageService.Packages!.GetValueOrDefault(dependencyID) is
+                       {
+                           Status: PackageStatus.UpdateAvailable
+                       })
+            {
+                
             }
         }
 
@@ -474,8 +483,8 @@ public class FrontendService : IFrontendService
 
         if (!File.Exists(json.FullPath))
         {
-            _logger.Error(
-                "No json netlist was generated. Please ensure you are using the yosys from the OSS CAD Suite");
+            _logger.Log(
+                "No json netlist was found. Aborting...");
             return;
         }
 
