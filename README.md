@@ -12,8 +12,14 @@ browsers.
 
 ## Dependencies
 
-Your installation of OneWare Studio needs to have the `OSS Cad Suite Integration` installed with version 2025-01-22 or
-later, as well as the most recent version of the `GHDL Extension`.
+The FEntwumS Netlist Viewer depends on the following OneWare Studio plugins. Please install them before you install the
+Netlist Viewer.
+
+| Category | Dependency | Minimum version |
+| -------- | ---------- | --------------- |
+| Plugins > Simulators | GHDL Extension | 0.10.7 |
+| Binaries | GHDL | 5.0.1 |
+| Binaries | OSS CAD Suite | 2025.01.22 |
 
 ## Limitations
 
@@ -40,8 +46,11 @@ Manager. To install this plugin, you will need to add a custom package source. P
 5. Open the package manager
 6. Refresh the package manager
 7. Done! The plugin should now be available for you to install!
-8. Install both the `FEntwumS.NetlistViewer Extension` plugin as well as the `FEntwumS NetlistViewer Backend`  and the
+8. Install the `FEntwumS.NetlistViewer Extension` plugin
+9. Install both the `FEntwumS NetlistViewer Backend` and the
    `Eclipse Adoptiom OpenJDK` binaries using the package manager
+10. And that's it. You have successfully installed the FEntwumS Netlist Viewer. For usage instructions, see the
+    following sections 
 
 ## Netlist viewer
 
