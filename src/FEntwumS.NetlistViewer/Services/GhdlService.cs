@@ -125,12 +125,9 @@ public class GhdlService : IGhdlService
 
         string top = Path.GetFileNameWithoutExtension(file.FullPath);
 
-        List<string> ghdlOptions = ["--out=verilog"];
-        // ghdlOptions.Add("-o=design.v");  // TODO rework
-        // When a new version of GHDL is available, this parameter will allow us to write the result directly to a file,
-        // instead of needing to use File.WriteAllTextAsync
+        List<string> ghdlOptions = [ "--out=verilog", "-o=design.v" ];
         
-        List<string> ghdlSynthArgs = ["--synth", "--no-formal", "-Pbuild", "-o=design.v"];
+        List<string> ghdlSynthArgs = [ "--synth", "--no-formal", "-Pbuild" ];
         ghdlSynthArgs.AddRange(ghdlOptions);
         ghdlSynthArgs.Add(top);
 
