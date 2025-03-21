@@ -157,3 +157,11 @@ If you are using a remote backend installation, please make sure that you have e
 port and that the provided address is reachable.
 
 If you are using a local backend installation, please file a bug report.
+
+## I get an error telling me to update one of my OneWare Studio plugins, but I am unable to do so because I depend on the specific version that is installed
+
+To ensure that all the OneWare Studio plugins the netlist viewer depends on are installed, a check is run. If this check
+fails for you, for example due to using an older version of a certain plugin, you can tick the `Continue if errors occur
+during dependency installation` checkbox in the experimental section of the Netlist Viewer's settings. By enabling this
+setting, the result of the check is ignored. This means that **you are on your own**! Will it may look as if everything is
+working as intended, this configuration is **not** supported and can stop working without notice.
