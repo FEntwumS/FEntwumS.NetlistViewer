@@ -392,7 +392,7 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
-            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSOn netlist");
+            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
             
             return;
         }
@@ -460,7 +460,7 @@ public class FrontendService : IFrontendService
         
         if (!success)
         {
-            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSOn netlist");
+            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
             
             return;
         }
@@ -528,7 +528,7 @@ public class FrontendService : IFrontendService
         
         if (!success)
         {
-            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSOn netlist");
+            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
             
             return;
         }
