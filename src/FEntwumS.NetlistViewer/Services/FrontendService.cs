@@ -574,7 +574,7 @@ public class FrontendService : IFrontendService
 
     public async Task ExpandNodeAsync(string? nodePath, FrontendViewModel vm)
     {
-        _logger.Log("Sending request to ExpandNode", true);
+        _logger.Log("Sending request to ExpandNode");
 
         var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath, null);
 
@@ -585,11 +585,11 @@ public class FrontendService : IFrontendService
 
         vm.File = await resp.Content.ReadAsStreamAsync();
 
-        _logger.Log("Answer received", true);
+        _logger.Log("Answer received");
 
         await vm.OpenFileImplAsync();
 
-        _logger.Log("Done", true);
+        _logger.Log("Done");
     }
 
     // Source:

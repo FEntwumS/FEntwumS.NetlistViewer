@@ -190,7 +190,7 @@ public class FrontendViewModel : ExtendedTool
         {
             try
             {
-                _logger.Log("Opening file...", true);
+                _logger.Log("Opening file...");
 
                 //var file = fileOpener.OpenFileAsync();
 
@@ -200,7 +200,7 @@ public class FrontendViewModel : ExtendedTool
                     return;
                 }
 
-                _logger.Log("File loaded", true);
+                _logger.Log("File loaded");
 
                 Task t = jsonLoader.OpenJsonAsync(File, netlistId);
                 t.Wait();
@@ -217,7 +217,7 @@ public class FrontendViewModel : ExtendedTool
                 
                 FileLoaded = true;
 
-                _logger.Log("JSON read", true);
+                _logger.Log("JSON read");
             }
             catch (Exception e)
             {
