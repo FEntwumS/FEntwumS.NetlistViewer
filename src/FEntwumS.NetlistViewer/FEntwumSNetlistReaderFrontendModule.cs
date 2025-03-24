@@ -704,7 +704,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                 client.BaseAddress = new Uri("http://localhost:8080");
                 client.Timeout = TimeSpan.FromSeconds(1);
 
-                var res = client.PostAsync("/shutdown-backend", null);
+                var res = client.GetAsync("/shutdown-backend");
             }
             catch (Exception)
             {
