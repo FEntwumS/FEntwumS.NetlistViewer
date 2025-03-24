@@ -843,6 +843,9 @@ public class FrontendService : IFrontendService
         
         int failures = 0;
 
+        const int timeBetweenRetriesMS = 10;
+        const int retriesPerSecond = 1000 / timeBetweenRetriesMS;
+
         while (!done)
         {
             try
@@ -863,12 +866,12 @@ public class FrontendService : IFrontendService
 
                 _logger.Log("No response. Trying again in 10 ms");
                 failures++;
-                await Task.Delay(10);
+                await Task.Delay(timeBetweenRetriesMS);
 
-                if (failures % 1000 == 0)
+                if (failures % retriesPerSecond == 0)
                 {
                     _logger.Log("The backend could not be reached. Retrying...", true);
-                } else if (failures > 10000)
+                } else if (failures > 10 * retriesPerSecond)
                 {
                     _logger.Log("The backend could not be reached. Aborting...", true);
                     return false;
