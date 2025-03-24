@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
@@ -13,6 +14,7 @@ using OneWare.Essentials.ViewModels;
 using OneWare.UniversalFpgaProjectSystem.Models;
 using OneWare.Vcd.Viewer.Models;
 using OneWare.Vcd.Viewer.ViewModels;
+using OneWare.WaveFormViewer.ViewModels;
 using Prism.Ioc;
 using Prism.Modularity;
 using ILogger = OneWare.Essentials.Services.ILogger;
@@ -128,31 +130,14 @@ public class FEntwumSWaveformInteractorModule : IModule
             
             if (currentDocument is VcdViewModel vcdViewModel)
             {
-                vcdViewModel.PropertyChanged += (o1, innerArgs) =>
+                vcdViewModel.PropertyChanged -= VcdViewModel_PropertyChanged;
+                vcdViewModel.PropertyChanged += VcdViewModel_PropertyChanged;
+
+                if (vcdViewModel.WaveFormViewer != null)
                 {
-                    switch (innerArgs.PropertyName)
-                    {
-                        case nameof(vcdViewModel.IsLoading):
-                            if(!vcdViewModel.IsLoading)
-                                _ = HandleIsLoadingChangedAsync(vcdViewModel);
-                            break;
-                        // Subscribe to PropertyChanged for SelectedSignal in WaveformViewer
-                        // TODO: currently only responds to the list, from which signals can be added to the Waveformviewer
-                        // -> meaning not able to select signal in Waveformviewer directly.
-                        case nameof(vcdViewModel.WaveFormViewer.SelectedSignal):
-                            var selectedSignal = vcdViewModel.SelectedSignal;
-
-                            // TODO: How to map from WaveformViewer to Bit Index?
-                            // currently use signalname as UID to get bit indices
-                            // then map bit indices to VCD ID
-                            // -> Signalname still have to be used initially, otherwise no way to map from netlist to vcd
-                            var bits = _signalBitIndexService.GetMapping(selectedSignal.Id);
-
-                            // jump to selected Signal via bit index
-                            _waveformInteractorService.GoToSignal(bits.BitIndexId);
-                            break;
-                    }
-                };
+                    vcdViewModel.WaveFormViewer.PropertyChanged -= WaveFormViewer_PropertyChanged;
+                    vcdViewModel.WaveFormViewer.PropertyChanged += WaveFormViewer_PropertyChanged;
+                }
             }
         };
 
@@ -181,6 +166,33 @@ public class FEntwumSWaveformInteractorModule : IModule
         // {
         //     _netlistService.BackendPort = x;
         // });
+    }
+    
+    void VcdViewModel_PropertyChanged(object sender, PropertyChangedEventArgs args)
+    {
+        var vcdViewModel = sender as VcdViewModel;
+        if (vcdViewModel == null) return;
+
+        if (args.PropertyName == nameof(vcdViewModel.IsLoading) && !vcdViewModel.IsLoading)
+        {
+            _ = HandleIsLoadingChangedAsync(vcdViewModel);
+        }
+    }
+    
+    void WaveFormViewer_PropertyChanged(object sender, PropertyChangedEventArgs args)
+    {
+        var waveformViewModel = sender as WaveFormViewModel;
+        if (waveformViewModel == null) return;
+
+        if (args.PropertyName == nameof(waveformViewModel.SelectedSignal))
+        {
+            var selectedWaveform = waveformViewModel.SelectedSignal;
+            if (selectedWaveform != null)
+            {
+                var bits = _signalBitIndexService.GetMapping(selectedWaveform.Signal.Id);
+                _waveformInteractorService.GoToSignal(bits.BitIndexId);
+            }
+        }
     }
 
     private void recreateHirAndWriteVcd(IProjectFile vcdFile)

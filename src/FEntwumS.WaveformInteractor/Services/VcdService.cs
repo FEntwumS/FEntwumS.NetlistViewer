@@ -200,7 +200,8 @@ public class VcdService : IVcdService
         }
         return 0; // Default if $enddefinitions is not found
     }
-
+    
+    // using System.IO.Hashing
     // public byte[] HashVcdBody(string vcdPath, int bodyStartIndex)
     // {
     //     using var stream = File.OpenRead(vcdPath);
