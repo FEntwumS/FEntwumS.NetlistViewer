@@ -1,4 +1,4 @@
-// using System.IO.Hashing;
+using System.IO.Hashing;
 using System.Text;
 using FEntwumS.NetlistViewer.Services;
 
@@ -7,42 +7,40 @@ namespace FEntwumS.WaveformInteractor.Services;
 public class VcdService : IVcdService
 {
     private VcdScope? _rootScope = new("ROOT", null);
-    private List<string> _bodyLines = new();
-    private List<string> _headerLines = new();
-    private int bodyStartIndex = 0;
-    public string BodyHash;
-
-    public VcdService()
-    {
-        BodyHash = new("");
-    }
+    private int _definitionsStartIndex = -1;
+    private int _bodyStartIndex = -1;
 
     public void Reset()
     {
         _rootScope = new VcdScope("ROOT", null);
-        _bodyLines.Clear();
-        _headerLines.Clear();
-        bodyStartIndex = 0;
-        BodyHash = new("");
+        _definitionsStartIndex = 0;
+        _bodyStartIndex = 0;
     }
     
     // TODO: use FileStreaming to avoid saving the whole .vcd in Memory
     public void LoadVcd(string filePath)
     {
-        var lines = File.ReadAllLines(filePath);
-        _rootScope = ParseVcdHeader(lines);
-        bodyStartIndex = GetBodyStartIndex(lines);
-        _bodyLines = lines.Skip(bodyStartIndex).ToList();
-        BodyHash = HashVcdBody(lines, bodyStartIndex);
+        using var reader = new StreamReader(filePath);
+        _rootScope = ParseVcdDefinitions(reader);
+        _bodyStartIndex = GetBodyStartIndex(reader);
     }
 
-    public void WriteVcd(string filePath)
+    public void WriteVcd(string inputFilePath, string outputFilePath)
     {
-        using var writer = new StreamWriter(filePath);
-        // Write header lines
-        foreach (var line in _headerLines)
+        using var reader = new StreamReader(inputFilePath);
+        using var writer = new StreamWriter(outputFilePath);
+        
+        // Write header lines up to _definitionsStartIndex
+        for (int i = 0; i < _definitionsStartIndex; i++)
         {
-            writer.WriteLine(line);
+            if (reader.ReadLine() is string line)
+            {
+                writer.WriteLine(line);
+            }
+            else
+            {
+                break;
+            }
         }
 
         // Write VCD hierarchy from data structure
@@ -56,8 +54,14 @@ public class VcdService : IVcdService
         // Write enddefinitions block
         writer.WriteLine("$enddefinitions $end");
             
+        // Skip lines up to bodyStartIndex
+        for (int i = 0; i < _bodyStartIndex - _definitionsStartIndex; i++)
+        {
+            if (reader.ReadLine() == null) return; // Stop if end of file is reached
+        }
+        
         // Write body lines
-        foreach (var line in _bodyLines)
+        while (reader.ReadLine() is string line)
         {
             writer.WriteLine(line);
         }
@@ -130,30 +134,35 @@ public class VcdService : IVcdService
         }
         return currentRootScope;
     }
-    
+
+
     // parses .vcd header and definitions section
     // returns root VcdScope, which holds all subscopes and signals
-    private VcdScope? ParseVcdHeader(string[] lines)
+    private VcdScope? ParseVcdDefinitions(StreamReader reader)
     {
         VcdScope? currentScope = _rootScope;
         bool headerParsed = false;
-        
-        for (int i = 0; i < lines.Length; i++)
+        string? line;
+
+        while((line = reader.ReadLine()) !=null)
         {
-            var line = lines[i].Trim();
+            line = line.Trim();
             var parts = line.Split(' ');
-            // add header lines, which are added later without alteration later on
-            if (!headerParsed && (line.StartsWith("$scope") || line.StartsWith("$var")))
+
+            if (!headerParsed)
             {
-                headerParsed = true;
+                if ((line.StartsWith("$scope") || line.StartsWith("$var")))
+                {
+                    headerParsed = true;
+                }
+                else
+                {
+                    _definitionsStartIndex++;
+                }
             }
-            else if(!headerParsed)
-            {
-                _headerLines.Add(line);
-            }
-            // parse definitions and save in datastructure
             if (headerParsed)
             {
+                // parse definitions and save in datastructure
                 if (line.StartsWith("$scope"))
                 {
                     VcdScope? newScope = new VcdScope(parts[2], currentScope); // pass name and parent
@@ -183,57 +192,65 @@ public class VcdService : IVcdService
         return currentScope;
     }
     
-    public int GetBodyStartIndex(string[] lines)
+    public int GetBodyStartIndex(StreamReader reader)
     {
-        for (int i = 0; i < lines.Length; i++)
+        int index = 0;
+        while (reader.ReadLine() is string line)
         {
-            var line = lines[i].Trim();
-            if (line.StartsWith("$enddefinitions"))
-            {
-                return i + 1;
-            }
+            if (line.StartsWith("$enddefinitions")) return index + 1;
+            index++;
         }
-        return 0; // Default if $enddefinitions is not found
+        return -1;
     }
     
     // using System.IO.Hashing
-    // public byte[] HashVcdBody(string vcdPath, int bodyStartIndex)
+    public string HashVcdBody(StreamReader reader, int bodyStartIndex)
+    {
+        // Skip lines up to bodyStartIndex
+        for (int i = 0; i < bodyStartIndex; i++)
+        {
+            if (reader.ReadLine() == null) return ""; // Stop if end of file is reached
+        }
+        
+        var xxHash = new XxHash32();     
+        char[] buffer = new char[8192];
+        int charsRead;
+        
+        while ((charsRead = reader.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            ReadOnlySpan<byte> byteSpan = Encoding.UTF8.GetBytes(buffer, 0, charsRead);
+            xxHash.Append(byteSpan);
+        }
+
+        return xxHash.GetCurrentHash().ToString();
+    }
+
+    // public string HashVcdBody(StreamReader reader, int bodystartIndex)
     // {
-    //     using var stream = File.OpenRead(vcdPath);
-    //     using var reader = new StreamReader(stream);
-    //
-    //     // Skip lines up to bodyStartIndex
     //     for (int i = 0; i < bodyStartIndex; i++)
     //     {
-    //         if (reader.ReadLine() == null) return []; // Stop if end of file is reached
-    //     }
-    //     
-    //     var xxHash = new XxHash32();     
-    //     byte[] buffer = new byte[8192];
-    //     int bytesRead;
-    //     while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
-    //     {
-    //         xxHash.Append(buffer.AsSpan(0, bytesRead));
+    //         reader.ReadLine();
     //     }
     //
-    //     return xxHash.GetCurrentHash();
+    //     char[] buffer = new char[8192];
+    //
+    //     
+    //     IHashService hashService = ServiceManager.GetHashService();
+    //     // ReadOnlySpan<byte> bodyByteSpan = new ReadOnlySpan<Byte>(Encoding.UTF8.GetBytes(content));
+    //     // uint bodyhash = hashService.ComputeHash(bodyByteSpan);
+    //
+    //     // return bodyhash.ToString("X8");
+    //     return "x";
     // }
-
-    public string HashVcdBody(string[] lines, int bodystartIndex)
-    {
-        string content = string.Join("\n", lines.Skip(bodystartIndex));        
-        IHashService hashService = ServiceManager.GetHashService();
-        ReadOnlySpan<byte> bodyByteSpan = new ReadOnlySpan<Byte>(Encoding.UTF8.GetBytes(content));
-        uint bodyhash = hashService.ComputeHash(bodyByteSpan);
-
-        return bodyhash.ToString("X8");
-    }
 
     public string LoadVcdAndHashBody(string vcdPath)
     {
-        var lines = File.ReadAllLines(vcdPath);
-        int bodyStartIndex = GetBodyStartIndex(lines);
-        var hash = HashVcdBody(lines, bodyStartIndex);
+        using var stream = File.OpenRead(vcdPath);
+        using var reader = new StreamReader(stream);
+        
+        int bodyStartIndex = GetBodyStartIndex(reader);
+
+        var hash = HashVcdBody(reader, bodyStartIndex);
         return hash;
     }
 }

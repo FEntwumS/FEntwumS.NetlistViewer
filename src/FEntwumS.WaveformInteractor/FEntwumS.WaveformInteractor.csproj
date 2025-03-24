@@ -26,13 +26,16 @@
         <PackageReference Include="OneWare.ProjectSystem" Version="0.31.4" Private="false" ExcludeAssets="runtime;Native"/>
         <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" Private="false" ExcludeAssets="runtime;Native"/>
         <PackageReference Include="OneWare.Vcd.Viewer" Private="false" Version="0.31.4" ExcludeAssets="runtime;Native"/>
-<!--        <PackageReference Include="System.IO.Hashing" Private="false" Version="9.0.3" CopyLocalLockFileAssemblies="true"/>-->
+        <PackageReference Include="System.IO.Hashing" Private="true" Version="9.0.3" CopyLocalLockFileAssemblies="true"/>
     
     </ItemGroup>
 
     <ItemGroup>
         <Reference Include="OneWare.WaveFormViewer">
             <HintPath>..\..\..\..\OneWare\studio\OneWare.Studio.Desktop\bin\Debug\net9.0\linux-x64\OneWare.WaveFormViewer.dll</HintPath>
+        </Reference>
+        <Reference Include="System.IO.Hashing">
+          <HintPath>..\..\..\..\..\..\..\tmp\OneWare\Sessions\OneWareStudioSession\Plugins\net9.0\System.IO.Hashing.dll</HintPath>
         </Reference>
     </ItemGroup>
 

@@ -204,7 +204,7 @@ public class FEntwumSWaveformInteractorModule : IModule
         _vcdService.Reset();
         _vcdService.LoadVcd(waveformpath);
         _vcdService.RecreateVcdHierarchy();
-        _vcdService.WriteVcd(waveformpathRecreatedHir);    
+        _vcdService.WriteVcd(waveformpath, waveformpathRecreatedHir);    
     }
 
     private async Task HandleIsLoadingChangedAsync(VcdViewModel vcdViewModel)
