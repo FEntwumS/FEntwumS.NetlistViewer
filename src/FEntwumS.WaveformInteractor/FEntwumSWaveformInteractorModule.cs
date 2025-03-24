@@ -114,11 +114,10 @@ public class FEntwumSWaveformInteractorModule : IModule
 
             if (selected is [IProjectFile { Extension: ".vcd" } vcdFile])
             {
-                
                 menuItems.Add(new MenuItemViewModel("Recreate Hierarchy from Signalnames")
                 {
                     Header = "Recreate Hierarchy from Signalnames",
-                    Command = new RelayCommand(() => recreateHirAndWriteVcd(vcdFile)),
+                    Command = new RelayCommand(() => recreateHirAndWriteVcd(vcdFile))
                 });
             }
         });
@@ -133,12 +132,8 @@ public class FEntwumSWaveformInteractorModule : IModule
                 vcdViewModel.PropertyChanged -= VcdViewModel_PropertyChanged;
                 vcdViewModel.PropertyChanged += VcdViewModel_PropertyChanged;
 
-                if (vcdViewModel.WaveFormViewer != null)
-                {
-                    vcdViewModel.WaveFormViewer.PropertyChanged -= WaveFormViewer_PropertyChanged;
-                    vcdViewModel.WaveFormViewer.PropertyChanged += WaveFormViewer_PropertyChanged;
-                }
-            }
+                // vcdViewModel.WaveFormViewer.PropertyChanged -= WaveFormViewer_PropertyChanged;
+                vcdViewModel.WaveFormViewer.PropertyChanged += (sender, args) => WaveFormViewer_PropertyChanged(sender, args, vcdViewModel);            }
         };
 
         // wait until project launches and active project may be fetched
@@ -179,17 +174,19 @@ public class FEntwumSWaveformInteractorModule : IModule
         }
     }
     
-    void WaveFormViewer_PropertyChanged(object sender, PropertyChangedEventArgs args)
+    void WaveFormViewer_PropertyChanged(object? sender, PropertyChangedEventArgs args, VcdViewModel vcdViewModel)    
     {
         var waveformViewModel = sender as WaveFormViewModel;
         if (waveformViewModel == null) return;
 
         if (args.PropertyName == nameof(waveformViewModel.SelectedSignal))
         {
+            var hash = _vcdService.LoadVcdAndHashBody(vcdViewModel.FullPath);
+            
             var selectedWaveform = waveformViewModel.SelectedSignal;
             if (selectedWaveform != null)
             {
-                var bits = _signalBitIndexService.GetMapping(selectedWaveform.Signal.Id);
+                var bits = _signalBitIndexService.GetMapping(hash, selectedWaveform.Signal.Id);
                 _waveformInteractorService.GoToSignal(bits.BitIndexId);
             }
         }
@@ -209,22 +206,21 @@ public class FEntwumSWaveformInteractorModule : IModule
     {
         try
         {   
+            // first read in bitMapping.json
+            var projectPath = _projectExplorerService.ActiveProject?.FullPath;
+            var jsonPath = Path.Combine(projectPath, "build", "simulation", "bitmapping.json");
+            _signalBitIndexService.LoadFromJsonFile(jsonPath);
+                
             // first check if the vcd file has been read before, by hashing the body.
-            var lines = File.ReadAllLines(vcdViewModel.FullPath);
-            int bodyStartIndex = _vcdService.GetBodyStartIndex(lines);
-            var hash = _vcdService.HashVcdBody(vcdViewModel.FullPath, bodyStartIndex);
+            var vcdBodyHash = _vcdService.LoadVcdAndHashBody(vcdViewModel.FullPath);
             
-            // If hash equals to currently loaded body, use the existing BitMapping.
-            // TODO: this seems a bit messy: maybe a vcdService has to be attached to each vcdViewModel. If the hash of the vcd body is the same, it gets attached to the same.
-            // Note that the "original" .vcd would have to be loaded first, so successful BitMapping is assured.
-            if (hash.SequenceEqual(_vcdService.BodyHash))
+            // check if mapping was already done before
+            if (_signalBitIndexService.GetMapping(vcdBodyHash) != null)
             {
                 return;
             }
-            else
-            {
-                _vcdService.Reset();
-            }
+
+            _vcdService.Reset();
             
             //If .vcd has not been loaded before, load it via backend
             // ensure that backend is running
@@ -236,8 +232,7 @@ public class FEntwumSWaveformInteractorModule : IModule
             
             var projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
             var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity.FullPath);
-            // TODO: use OS independent path module
-            var netlistPath = _projectExplorerService.ActiveProject.RootFolderPath + $"/build/netlist/{topEntity}.json";
+            var netlistPath = Path.Combine(_projectExplorerService.ActiveProject.RootFolderPath, "build", "netlist", $"{topEntity}.json");
             
             // post netlist to backend
             // dont post if netlist already present in backend?
@@ -247,8 +242,8 @@ public class FEntwumSWaveformInteractorModule : IModule
                 await _netlistService.PostNetlistToBackendAsync(netlistPath);
                 netInfo = await _netlistService.GetNetInformationAsync(netlistPath);
             }
-            _netlistService.ParseNetInformation(netInfo);
             
+            _netlistService.ParseNetInfoToBitMapping(netInfo, vcdBodyHash);
         }
         catch (Exception ex)
         {
@@ -264,8 +259,5 @@ public class FEntwumSWaveformInteractorModule : IModule
         var topFile = projectRoot.Files.FirstOrDefault(file => file.FullPath == path);
 
         await _verilatorService.RunExecutableAsync(topFile);
-        
-        // TODO: read .vcd after running simulation and recreate signal names and scopes from net information json, retrieved from backend
-        // only required when using flattened design, since scope and signalnames are intact when not flattening!
     }
 }

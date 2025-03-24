@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Text;
 using FEntwumS.NetlistViewer.Services;
 using Newtonsoft.Json.Linq;
+using OneWare.Essentials.Services;
 using OneWare.Vcd.Viewer.Models;
 using Prism.Ioc;
 using ILogger = OneWare.Essentials.Services.ILogger;
@@ -20,12 +21,15 @@ public class NetlistService : INetlistService
 
     
     private SignalBitIndexService? _signalBitIndexService;
+    private IProjectExplorerService _projectExplorerService;
 
     public NetlistService(IContainerProvider containerProvider)
     {
         _httpClient = new HttpClient();
         _logger = containerProvider.Resolve<ILogger>();
         _signalBitIndexService = containerProvider.Resolve<SignalBitIndexService>();
+        _projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
+        
     }
     
      public async Task PostNetlistToBackendAsync(string jsonpath)
@@ -141,10 +145,10 @@ public class NetlistService : INetlistService
         }
         return new JObject();
     }
-
-    public void ParseNetInformation(JObject netInfo)
+    
+    public void ParseNetInfoToBitMapping(JObject netInfo, string vcdBodyHash)
     {
-        // Write to .json file for debugging purposes
+        // Write to .json file for debugging purposes or later usage?
         // var jsonString = netInfo.ToString();
         // TODO: use /simulation directory for this
         // File.WriteAllText("/home/jonas/tin/fentwums/uart-verilog/yosys_verilog/netinfo.json", jsonString);
@@ -155,14 +159,19 @@ public class NetlistService : INetlistService
             _logger.Error("The provided netInfo does not contain valid 'signals' data.");
             return;
         }
-        PopulateSignalBitMappingRecursive(signalsObject, OneWareScopes.OfType<VcdScopeModel>());
+        PopulateSignalBitMappingRecursive(signalsObject, OneWareScopes.OfType<VcdScopeModel>(), vcdBodyHash);
+        
+        var projectPath = _projectExplorerService.ActiveProject?.FullPath;
+        var jsonPath = Path.Combine(projectPath, "build", "simulation", "bitmapping.json");
+        _signalBitIndexService.SaveToJsonFile(jsonPath);
+        // _signalBitIndexService.SaveToJsonFile("/home/jonas/tin/fentwums/bitmapping.json");
     }
     
-    public void PopulateSignalBitMappingRecursive(JObject signalsObject, IEnumerable<VcdScopeModel> scopeModels)
+    public void PopulateSignalBitMappingRecursive(JObject signalsObject, IEnumerable<VcdScopeModel> scopeModels, string vcdBodyHash)
     {
         foreach (var scope in scopeModels)
         {
-            PopulateSignalBitMappingRecursive(signalsObject, scope.Scopes);
+            PopulateSignalBitMappingRecursive(signalsObject, scope.Scopes, vcdBodyHash);
             foreach (var signal in scope.Signals)
                 if (signalsObject.TryGetValue(signal.Name, out var signalToken) &&
                     signalToken is JObject signalDetails)
@@ -175,7 +184,7 @@ public class NetlistService : INetlistService
                         var bits = bitsArray.Select(bit => bit.ToObject<int>()).ToList();
                         var vcdId = signal.Id;
 
-                        _signalBitIndexService?.AddMapping(vcdId, bits);
+                        _signalBitIndexService?.AddMapping(vcdBodyHash, vcdId, bits);
                     }
                     else
                     {

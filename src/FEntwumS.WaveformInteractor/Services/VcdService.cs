@@ -10,11 +10,11 @@ public class VcdService : IVcdService
     private List<string> _bodyLines = new();
     private List<string> _headerLines = new();
     private int bodyStartIndex = 0;
-    public byte[] BodyHash;
+    public string BodyHash;
 
     public VcdService()
     {
-        BodyHash = [];
+        BodyHash = new("");
     }
 
     public void Reset()
@@ -23,16 +23,17 @@ public class VcdService : IVcdService
         _bodyLines.Clear();
         _headerLines.Clear();
         bodyStartIndex = 0;
-        BodyHash = [];
+        BodyHash = new("");
     }
-
+    
+    // TODO: use FileStreaming to avoid saving the whole .vcd in Memory
     public void LoadVcd(string filePath)
     {
         var lines = File.ReadAllLines(filePath);
         _rootScope = ParseVcdHeader(lines);
         bodyStartIndex = GetBodyStartIndex(lines);
         _bodyLines = lines.Skip(bodyStartIndex).ToList();
-        BodyHash = HashVcdBody(filePath, bodyStartIndex);
+        BodyHash = HashVcdBody(lines, bodyStartIndex);
     }
 
     public void WriteVcd(string filePath)
@@ -224,15 +225,22 @@ public class VcdService : IVcdService
     //     return xxHash.GetCurrentHash();
     // }
 
-    public byte[] HashVcdBody(string vcdPath, int bodystartIndex)
+    public string HashVcdBody(string[] lines, int bodystartIndex)
     {
-        string content = string.Join("\n", File.ReadLines(vcdPath).Skip(bodystartIndex));
-        
+        string content = string.Join("\n", lines.Skip(bodystartIndex));        
         IHashService hashService = ServiceManager.GetHashService();
         ReadOnlySpan<byte> bodyByteSpan = new ReadOnlySpan<Byte>(Encoding.UTF8.GetBytes(content));
         uint bodyhash = hashService.ComputeHash(bodyByteSpan);
 
-        return BitConverter.GetBytes(bodyhash);
+        return bodyhash.ToString("X8");
+    }
+
+    public string LoadVcdAndHashBody(string vcdPath)
+    {
+        var lines = File.ReadAllLines(vcdPath);
+        int bodyStartIndex = GetBodyStartIndex(lines);
+        var hash = HashVcdBody(lines, bodyStartIndex);
+        return hash;
     }
 }
 
