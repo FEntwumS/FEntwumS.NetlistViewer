@@ -147,6 +147,11 @@ public class FEntwumSWaveformInteractorModule : IModule
                 // set first testbench from OneWare Project as _verilatorTestbench
                 var project = _projectExplorerService.ActiveProject?.Root as UniversalFpgaProjectRoot;
                 _verilatorService.RegisterTestbench(project?.TestBenches.FirstOrDefault());
+                
+                // read in build/simulation/bitmapping.json
+                var projectPath = _projectExplorerService.ActiveProject?.FullPath;
+                var jsonPath = Path.Combine(projectPath, "build", "simulation", "bitmapping.json");
+                _signalBitIndexService.LoadFromJsonFile(jsonPath);
             }
         };
         
@@ -206,11 +211,6 @@ public class FEntwumSWaveformInteractorModule : IModule
     {
         try
         {   
-            // first read in bitMapping.json
-            var projectPath = _projectExplorerService.ActiveProject?.FullPath;
-            var jsonPath = Path.Combine(projectPath, "build", "simulation", "bitmapping.json");
-            _signalBitIndexService.LoadFromJsonFile(jsonPath);
-                
             // first check if the vcd file has been read before, by hashing the body.
             var vcdBodyHash = _vcdService.LoadVcdAndHashBody(vcdViewModel.FullPath);
             
@@ -251,7 +251,7 @@ public class FEntwumSWaveformInteractorModule : IModule
         }
     }
 
-    // executes compiled verilator binary  
+    // executes compiled verilator binary
     private async Task RunVerilatorExecutableFromToplevelAsync()
     {
         var projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;

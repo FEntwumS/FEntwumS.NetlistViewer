@@ -148,11 +148,6 @@ public class NetlistService : INetlistService
     
     public void ParseNetInfoToBitMapping(JObject netInfo, string vcdBodyHash)
     {
-        // Write to .json file for debugging purposes or later usage?
-        // var jsonString = netInfo.ToString();
-        // TODO: use /simulation directory for this
-        // File.WriteAllText("/home/jonas/tin/fentwums/uart-verilog/yosys_verilog/netinfo.json", jsonString);
-
         // Check if the "signals" key exists
         if (!netInfo.TryGetValue("signals", out var signalsToken) || signalsToken is not JObject signalsObject)
         {
@@ -164,7 +159,6 @@ public class NetlistService : INetlistService
         var projectPath = _projectExplorerService.ActiveProject?.FullPath;
         var jsonPath = Path.Combine(projectPath, "build", "simulation", "bitmapping.json");
         _signalBitIndexService.SaveToJsonFile(jsonPath);
-        // _signalBitIndexService.SaveToJsonFile("/home/jonas/tin/fentwums/bitmapping.json");
     }
     
     public void PopulateSignalBitMappingRecursive(JObject signalsObject, IEnumerable<VcdScopeModel> scopeModels, string vcdBodyHash)

@@ -124,11 +124,6 @@ public class VcdService : IVcdService
                 }
                 // add new signal to the correct scope
                 // omit scopenames in signalname by using last only part of original signalname (e.g. "txInst;clk" -> "clk")
-                // TODO: This creates problem:
-                // when the new .vcd file is created, assigning bit-indices to .vcd Identifier via signalname is done. This obviously does not work anymore, since the signalname in the .vcd is now different than the netlist signalnames.
-                // possible solution:
-                // use original .vcd signalnames to assign bit-indices to vcd identifier
-                // when this is done, use the existing SignalBitIndexService data for the recreated .vcd
                 targetScope.Signals.Add(new Signal(signal.Type, signal.BitWidth, signal.Id, signalName));
                 currentRootScope.Signals.Remove(signal);
             }
@@ -181,7 +176,6 @@ public class VcdService : IVcdService
                 }
                 else if (line.StartsWith("$enddefinitions"))
                 {
-                    // bodyStartIndex = i + 1;
                     break;
                 }
             }
