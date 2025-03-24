@@ -925,6 +925,8 @@ public class FrontendService : IFrontendService
 
     public async Task<bool> ServerStartedAsync()
     {
+        ApplicationProcess liveProc = _applicationStateService.AddState("Connecting to backend", AppState.Loading);
+        
         HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.Add(
@@ -954,6 +956,9 @@ public class FrontendService : IFrontendService
                     _logger.Error(
                         "The remote server could not be reached. Make sure the server is started and reachable or switch to the local server");
 
+                    
+                    _applicationStateService.RemoveState(liveProc, "Error: The backend could not be reached");
+                    
                     return false;
                 }
 
@@ -967,10 +972,15 @@ public class FrontendService : IFrontendService
                 } else if (failures > 10 * retriesPerSecond)
                 {
                     _logger.Log("The backend could not be reached. Aborting...", true);
+                    
+                    _applicationStateService.RemoveState(liveProc, "Error: The backend could not be reached");
+                    
                     return false;
                 }
             }
         }
+        
+        _applicationStateService.RemoveState(liveProc);
 
         return true;
     }
