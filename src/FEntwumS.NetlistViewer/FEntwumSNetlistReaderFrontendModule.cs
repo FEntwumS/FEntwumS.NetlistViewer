@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using Avalonia;
 using Avalonia.Markup.Xaml.Styling;
 using CommunityToolkit.Mvvm.Input;
@@ -690,5 +691,25 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         ServiceManager.GetService<IFpgaBbService>().SubscribeToSettings();
         
         logger.Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
+        
+        ServiceManager.GetService<IApplicationStateService>().RegisterShutdownAction(() =>
+        {
+            try
+            {
+                HttpClient client = new();
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(
+                    new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
+                client.DefaultRequestHeaders.Add("User-Agent", "FEntwumS.NetlistViewer");
+                client.BaseAddress = new Uri("http://localhost:8080");
+                client.Timeout = TimeSpan.FromSeconds(1);
+
+                var res = client.PostAsync("/shutdown-backend", null);
+            }
+            catch (Exception)
+            {
+                
+            }
+        });
     }
 }
