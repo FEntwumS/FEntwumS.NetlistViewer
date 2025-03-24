@@ -6,6 +6,8 @@ using CommunityToolkit.Mvvm.Input;
 using FEntwumS.NetlistViewer.Controls;
 using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.Types;
+using OneWare.Essentials.Enums;
+using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
 
@@ -141,6 +143,7 @@ public class FrontendViewModel : ExtendedTool
 
 
     private ICustomLogger _logger { get; set; }
+    private readonly IApplicationStateService _applicationStateService;
 
     private FrontendService _frontendService { get; set; }
 
@@ -152,6 +155,7 @@ public class FrontendViewModel : ExtendedTool
         FitToZoom = false;
 
         _logger = ServiceManager.GetCustomLogger();
+        _applicationStateService = ServiceManager.GetService<IApplicationStateService>();
 
         // OneWare uses the Community MVVM Toolkit. If ReactiveUI is used in an extension, any access to a bound property
         // inside a ReactiveCommand leads to an exception
@@ -190,6 +194,8 @@ public class FrontendViewModel : ExtendedTool
         {
             try
             {
+                ApplicationProcess readProc = _applicationStateService.AddState("Reading response", AppState.Loading);
+                
                 _logger.Log("Opening file...");
 
                 //var file = fileOpener.OpenFileAsync();
@@ -201,9 +207,15 @@ public class FrontendViewModel : ExtendedTool
                 }
 
                 _logger.Log("File loaded");
-
+                
+                _applicationStateService.RemoveState(readProc);
+                
+                ApplicationProcess loadProc = _applicationStateService.AddState("Loading JSON", AppState.Loading);
+                
                 Task t = jsonLoader.OpenJsonAsync(File, netlistId);
                 t.Wait();
+                
+                _applicationStateService.RemoveState(loadProc);
 
                 File.Close();
                 

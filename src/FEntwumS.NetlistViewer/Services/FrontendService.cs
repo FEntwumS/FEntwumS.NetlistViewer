@@ -210,6 +210,8 @@ public class FrontendService : IFrontendService
 
     private async Task<(bool success, bool needsRestart)> InstallDependenciesAsync()
     {
+        ApplicationProcess checkProc = _applicationStateService.AddState("Checking dependencies", AppState.Loading);
+        
         bool globalSuccess = true, needsRestart = false;
 
         (string id, Version minversion)[] dependencyIDs = new (string, Version)
@@ -328,20 +330,28 @@ public class FrontendService : IFrontendService
         {
             _logger.Log("Dependencies were successfully installed. Please restart OneWare Studio!", true);
         }
+        
+        _applicationStateService.RemoveState(checkProc);
 
         return (globalSuccess, needsRestart || _restartRequired);
     }
 
     public async Task CreateVhdlNetlistAsync(IProjectFile vhdl)
     {
+        ApplicationProcess proc = _applicationStateService.AddState("Visualizing VHDL netlist", AppState.Loading);
+        
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
         if (needsRestart)
         {
+            _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
+            
             return;
         }
         else if (!(success || _continueOnBinaryInstallError))
         {
+            _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
+            
             return;
         }
 
@@ -349,6 +359,8 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: The backend could not be started");
+            
             return;
         }
 
@@ -361,6 +373,8 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: GHDL could not elaborate the design");
+            
             return;
         }
 
@@ -369,6 +383,8 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: GHDL could not synthesize the design into Verilog");
+            
             return;
         }
 
@@ -376,6 +392,8 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSOn netlist");
+            
             return;
         }
 
@@ -384,6 +402,9 @@ public class FrontendService : IFrontendService
         if (!File.Exists(netlistPath))
         {
             _logger.Error($"Netlist file not found: {netlistPath}");
+            
+            _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
+            
             return;
         }
 
@@ -393,22 +414,32 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
+            
             return;
         }
 
         await ShowViewerAsync(test);
+        
+        _applicationStateService.RemoveState(proc);
     }
 
     public async Task CreateVerilogNetlistAsync(IProjectFile verilog)
     {
+        ApplicationProcess proc = _applicationStateService.AddState("Visualizing Verilog netlist", AppState.Loading);
+        
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
         if (needsRestart)
         {
+            _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
+            
             return;
         }
         else if (!(success || _continueOnBinaryInstallError))
         {
+            _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
+            
             return;
         }
 
@@ -416,6 +447,8 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: The backend could not be started");
+            
             return;
         }
 
@@ -423,13 +456,23 @@ public class FrontendService : IFrontendService
 
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
 
-        await yosysService.LoadVerilogAsync(verilog);
+        success = await yosysService.LoadVerilogAsync(verilog);
+        
+        if (!success)
+        {
+            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSOn netlist");
+            
+            return;
+        }
 
         string netlistPath = Path.Combine(verilog.Root!.FullPath, "build", "netlist", $"{top}.json");
 
         if (!File.Exists(netlistPath))
         {
             _logger.Error($"Netlist file not found: {netlistPath}");
+            
+            _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
+            
             return;
         }
 
@@ -439,22 +482,32 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
+            
             return;
         }
 
         await ShowViewerAsync(test);
+        
+        _applicationStateService.RemoveState(proc);
     }
 
     public async Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog)
     {
+        ApplicationProcess proc = _applicationStateService.AddState("Visualizing SystemVerilog netlist", AppState.Loading);
+        
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
         if (needsRestart)
         {
+            _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
+            
             return;
         }
         else if (!(success || _continueOnBinaryInstallError))
         {
+            _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
+            
             return;
         }
 
@@ -462,6 +515,8 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: Backend could not be started");
+            
             return;
         }
 
@@ -469,23 +524,46 @@ public class FrontendService : IFrontendService
 
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
 
-        await yosysService.LoadSystemVerilogAsync(sVerilog);
+        success = await yosysService.LoadSystemVerilogAsync(sVerilog);
+        
+        if (!success)
+        {
+            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSOn netlist");
+            
+            return;
+        }
+        
+        string netlistPath = Path.Combine(sVerilog.Root!.FullPath, "build", "netlist", $"{top}.json");
 
-        IProjectFile test = new ProjectFile(Path.Combine(sVerilog.Root!.FullPath, "build", "netlist", $"{top}.json"),
-            sVerilog.TopFolder!);
+        if (!File.Exists(netlistPath))
+        {
+            _logger.Error($"Netlist file not found: {netlistPath}");
+            
+            _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
+            
+            return;
+        }
+
+        IProjectFile test = new ProjectFile(netlistPath, sVerilog.TopFolder!);
 
         success = await ServerStartedAsync();
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
+            
             return;
         }
 
         await ShowViewerAsync(test);
+        
+        _applicationStateService.RemoveState(proc);
     }
 
     public async Task ShowViewerAsync(IProjectFile json)
     {
+        ApplicationProcess proc = _applicationStateService.AddState("Starting viewer", AppState.Loading);
+        
         HttpResponseMessage? resp = null;
         string top = Path.GetFileNameWithoutExtension(json.FullPath);
 
@@ -528,11 +606,16 @@ public class FrontendService : IFrontendService
             { new StreamContent(jsonFileStream), "file", json.Name }
         };
 
+        ApplicationProcess waitForBackendProc =
+            _applicationStateService.AddState("Layouting in progress", AppState.Loading);
+        
         resp = await PostAsync(
             "/graphRemoteFile" + $"?hash={combinedHash}" + $"&entityLabelFontSize={_entityLabelFontSize}" +
             $"&cellLabelFontSize={_cellLabelFontSize}" + $"&edgeLabelFontSize={_edgeLabelFontSize}" +
             $"&portLabelFontSize={_portLabelFontSize}",
             formDataContent);
+        
+        _applicationStateService.RemoveState(waitForBackendProc);
 
         jsonFileStream.Close();
 
@@ -548,6 +631,8 @@ public class FrontendService : IFrontendService
             return;
         }
 
+        ApplicationProcess indexProc = _applicationStateService.AddState("Indexing", AppState.Loading);
+        
         // create code index for cross-compiled VHDL
         string ccFile = Path.Combine(json.Root.FullPath, "build", "netlist", "design.v");
 
@@ -565,15 +650,21 @@ public class FrontendService : IFrontendService
                 _logger.Log($"Failed to index {top}");
             }
         }
+        
+        _applicationStateService.RemoveState(indexProc);
 
         _dockService.Show(vm, DockShowLocation.Document);
         _dockService.InitializeContent();
         vm.NetlistId = currentNetlist;
         await vm.OpenFileImplAsync();
+        
+        _applicationStateService.RemoveState(proc);
     }
 
     public async Task ExpandNodeAsync(string? nodePath, FrontendViewModel vm)
     {
+        ApplicationProcess expandProc = _applicationStateService.AddState("Layouting in progress", AppState.Loading);
+        
         _logger.Log("Sending request to ExpandNode");
 
         var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath, null);
@@ -590,6 +681,8 @@ public class FrontendService : IFrontendService
         await vm.OpenFileImplAsync();
 
         _logger.Log("Done");
+        
+        _applicationStateService.RemoveState(expandProc);
     }
 
     // Source:

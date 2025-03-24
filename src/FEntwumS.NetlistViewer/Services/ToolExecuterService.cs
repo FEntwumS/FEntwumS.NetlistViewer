@@ -21,7 +21,7 @@ public class ToolExecuterService : IToolExecuterService
         string stdout = string.Empty;
         string stderr = string.Empty;
         
-        (bool success, _) = await _childProcessService.ExecuteShellAsync(toolPath, args, workingDirectory, "", AppState.Idle, false, x =>
+        (bool success, _) = await _childProcessService.ExecuteShellAsync(toolPath, args, workingDirectory, $"Executing {Path.GetFileNameWithoutExtension(toolPath)}", AppState.Loading, false, x =>
         {
             if (x.StartsWith("ghdl:error:"))
             {
