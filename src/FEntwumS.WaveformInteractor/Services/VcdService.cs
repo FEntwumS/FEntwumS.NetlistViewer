@@ -17,7 +17,6 @@ public class VcdService : IVcdService
         _bodyStartIndex = 0;
     }
     
-    // TODO: use FileStreaming to avoid saving the whole .vcd in Memory
     public void LoadVcd(string filePath)
     {
         using var reader = new StreamReader(filePath);
@@ -222,7 +221,7 @@ public class VcdService : IVcdService
             xxHash.Append(byteSpan);
         }
 
-        return xxHash.GetCurrentHash().ToString();
+        return BitConverter.ToString(xxHash.GetCurrentHash()).Replace("-", "").ToLower();
     }
 
     // public string HashVcdBody(StreamReader reader, int bodystartIndex)
