@@ -41,6 +41,7 @@ public class SignalBitIndexService
     
     public void SaveToJsonFile(string filename)
     {
+        Directory.CreateDirectory(Path.GetDirectoryName(filename)!);
         File.WriteAllText(filename, JsonSerializer.Serialize(_signalBitIndexMapping, new JsonSerializerOptions { WriteIndented = true }));
     }
 

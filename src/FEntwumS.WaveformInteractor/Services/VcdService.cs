@@ -27,7 +27,7 @@ public class VcdService : IVcdService
     public void WriteVcd(string inputFilePath, string outputFilePath)
     {
         using var reader = new StreamReader(inputFilePath);
-        using var writer = new StreamWriter(outputFilePath);
+        using var writer = new StreamWriter(outputFilePath){ NewLine = "\n" };
         
         // Write header lines up to _definitionsStartIndex
         for (int i = 0; i < _definitionsStartIndex; i++)

@@ -162,6 +162,7 @@ public class NetlistService : INetlistService
         var projectPath = _projectExplorerService.ActiveProject?.FullPath;
         var jsonPath = Path.Combine(projectPath, "build", "simulation", "bitmapping.json");
         _signalBitIndexService.SaveToJsonFile(jsonPath);
+        _logger.Log("Successfully mapped bit indices to vcd identifiers.", ConsoleColor.White);
     }
     public void PopulateSignalBitMappingRecursive(JObject signalsObject, List <VcdScope>? scopes, string vcdBodyHash)
     {

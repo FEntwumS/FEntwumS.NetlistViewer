@@ -241,6 +241,7 @@ public class FEntwumSWaveformInteractorModule : IModule
             var vcdBodyHash = _vcdService.LoadVcdAndHashBody(vcdViewModel.FullPath);
             if (_signalBitIndexService.GetMapping(vcdBodyHash) != null)
             {
+                _logger.Log("Using bitmapping of previously loaded VCD. ", ConsoleColor.White);
                 return;
             }
 
