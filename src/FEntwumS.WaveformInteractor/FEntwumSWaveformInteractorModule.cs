@@ -53,11 +53,13 @@ public class FEntwumSWaveformInteractorModule : IModule
         containerRegistry.RegisterSingleton<IVcdService, VcdService>();
         containerRegistry.Register<IWaveformInteractorService, WaveformInteractorService>();
         containerRegistry.Register<WaveformInteractorViewModel>();
-        // containerRegistry.Register<IFrontendService, FrontendService>();
     }
 
     public void OnInitialized(IContainerProvider containerProvider)
     {
+        // TODO: Include Plugin in NetlistViewer Plugin 
+        // TODO: Cross platform on Windows working?
+        
         _containerProvider = containerProvider;
         _verilatorService = containerProvider.Resolve<IVerilatorService>();
         _signalBitIndexService = containerProvider.Resolve<SignalBitIndexService>();
@@ -78,13 +80,11 @@ public class FEntwumSWaveformInteractorModule : IModule
             {
                 Header = "Create Verilator Binary",
                 Command = new AsyncRelayCommand(_verilatorService.CreateVerilatorBinaryAllStepsAsync),
-                IconObservable = Application.Current!.GetResourceObservable("CreateIcon")
             },
             new MenuItemViewModel("Run_Verilator_Binary")
             {
                 Header = "Run Verilator Binary",
                 Command = new AsyncRelayCommand(RunVerilatorExecutableFromToplevelAsync),
-                IconObservable = Application.Current!.GetResourceObservable("CreateIcon")
             });
 
         _projectExplorerService.RegisterConstructContextMenu((selected, menuItems) =>
@@ -197,24 +197,27 @@ public class FEntwumSWaveformInteractorModule : IModule
         }
     }
 
-    private void recreateHirAndWriteVcd(IProjectFile vcdFile)
+    private async Task recreateHirAndWriteVcd(IProjectFile vcdFile)
     {
+        // TODO: check if original vcd bitindexmapping was done before. Otherwise do it now
+        // this curently requires that the vcd is loaded once via OneWare, becase OneWares signal datastructures are used.
+        // this plugins vcdService would have to be used for mapping purposes. This can be done very performant, since only the definitions section of the vcd would have to be parsed.
+        // first check if the vcd file has been read before, by checking if vcd with bodyHash has been read mapped before.
+        
         var waveformpath = vcdFile.FullPath;
         string waveformpathRecreatedHir = Path.Combine(vcdFile.TopFolder.FullPath, Path.GetFileNameWithoutExtension(vcdFile.FullPath) + "_recreated.vcd" );
         _vcdService.Reset();
         _vcdService.LoadVcd(waveformpath);
         _vcdService.RecreateVcdHierarchy();
-        _vcdService.WriteVcd(waveformpath, waveformpathRecreatedHir);    
+        _vcdService.WriteVcd(waveformpath, waveformpathRecreatedHir);
     }
 
     private async Task HandleIsLoadingChangedAsync(VcdViewModel vcdViewModel)
     {
         try
         {   
-            // first check if the vcd file has been read before, by hashing the body.
+            // first check if the vcd file has been read before, by checking if vcd with bodyHash has been read mapped before.
             var vcdBodyHash = _vcdService.LoadVcdAndHashBody(vcdViewModel.FullPath);
-            
-            // check if mapping was already done before
             if (_signalBitIndexService.GetMapping(vcdBodyHash) != null)
             {
                 return;

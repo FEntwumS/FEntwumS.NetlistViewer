@@ -50,10 +50,10 @@ public class VerilatorService : IVerilatorService
 
         var top = Path.GetFileNameWithoutExtension(file.FullPath);
 
-        List<string> yosysArgs =
+        List<string> verilatorArgs =
         [
             "--timescale-override", "10ns/10ns", // TODO: add option to configure simulation timescale 
-            "-top-module", top,
+            "-top-module", top, // takes top module from OneWare project
             "-Wall",
             "--trace",
             "--exe", // TODO: look into direct executable building. Probably it makes sense to add additional cc compile step
@@ -64,7 +64,7 @@ public class VerilatorService : IVerilatorService
         var success = false;
         var output = string.Empty;
 
-        (success, output) = await ExecuteVerilatorCommandAsync(yosysArgs, workingDirectory);
+        (success, output) = await ExecuteVerilatorCommandAsync(verilatorArgs, workingDirectory);
         _logger.Log(output, ConsoleColor.White, true);
         return success;
     }

@@ -7,8 +7,8 @@ namespace FEntwumS.WaveformInteractor.Services;
 public class VcdService : IVcdService
 {
     private VcdScope? _rootScope = new("ROOT", null);
-    private int _definitionsStartIndex = -1;
-    private int _bodyStartIndex = -1;
+    private int _definitionsStartIndex = 0;
+    private int _bodyStartIndex = 0;
 
     public void Reset()
     {
@@ -21,7 +21,6 @@ public class VcdService : IVcdService
     {
         using var reader = new StreamReader(filePath);
         _rootScope = ParseVcdDefinitions(reader);
-        _bodyStartIndex = GetBodyStartIndex(reader);
     }
 
     public void WriteVcd(string inputFilePath, string outputFilePath)
@@ -52,7 +51,7 @@ public class VcdService : IVcdService
 
         // Write enddefinitions block
         writer.WriteLine("$enddefinitions $end");
-            
+        
         // Skip lines up to bodyStartIndex
         for (int i = 0; i < _bodyStartIndex - _definitionsStartIndex; i++)
         {
@@ -137,6 +136,7 @@ public class VcdService : IVcdService
 
     // parses .vcd header and definitions section
     // returns root VcdScope, which holds all subscopes and signals
+    // increments definitionsStartIndex and bodyStartIndex for later usage
     private VcdScope? ParseVcdDefinitions(StreamReader reader)
     {
         VcdScope? currentScope = _rootScope;
@@ -147,7 +147,9 @@ public class VcdService : IVcdService
         {
             line = line.Trim();
             var parts = line.Split(' ');
-
+            
+            _bodyStartIndex++;
+            
             if (!headerParsed)
             {
                 if ((line.StartsWith("$scope") || line.StartsWith("$var")))
@@ -203,14 +205,8 @@ public class VcdService : IVcdService
     }
     
     // using System.IO.Hashing
-    public string HashVcdBody(StreamReader reader, int bodyStartIndex)
+    public string HashVcd(StreamReader reader)
     {
-        // Skip lines up to bodyStartIndex
-        for (int i = 0; i < bodyStartIndex; i++)
-        {
-            if (reader.ReadLine() == null) return ""; // Stop if end of file is reached
-        }
-        
         var xxHash = new XxHash32();     
         char[] buffer = new char[8192];
         int charsRead;
@@ -247,9 +243,10 @@ public class VcdService : IVcdService
         using var stream = File.OpenRead(vcdPath);
         using var reader = new StreamReader(stream);
         
+        // advance streamreader to vcd body
         int bodyStartIndex = GetBodyStartIndex(reader);
 
-        var hash = HashVcdBody(reader, bodyStartIndex);
+        var hash = HashVcd(reader);
         return hash;
     }
 }
