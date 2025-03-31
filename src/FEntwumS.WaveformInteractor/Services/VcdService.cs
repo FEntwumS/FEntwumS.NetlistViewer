@@ -6,21 +6,22 @@ namespace FEntwumS.WaveformInteractor.Services;
 
 public class VcdService : IVcdService
 {
-    private VcdScope? _rootScope = new("ROOT", null);
+    public VcdScope? RootScope { get; private set; } = new("ROOT", null);
     private int _definitionsStartIndex = 0;
     private int _bodyStartIndex = 0;
 
     public void Reset()
     {
-        _rootScope = new VcdScope("ROOT", null);
+        RootScope = new VcdScope("ROOT", null);
         _definitionsStartIndex = 0;
         _bodyStartIndex = 0;
     }
-    
+
+
     public void LoadVcd(string filePath)
     {
         using var reader = new StreamReader(filePath);
-        _rootScope = ParseVcdDefinitions(reader);
+        RootScope = ParseVcdDefinitions(reader);
     }
 
     public void WriteVcd(string inputFilePath, string outputFilePath)
@@ -43,7 +44,7 @@ public class VcdService : IVcdService
 
         // Write VCD hierarchy from data structure
         // Omit the "ROOT" scope, which just holds all scopes.
-        List<VcdScope?> scopes = _rootScope.SubScopes;
+        List<VcdScope?> scopes = RootScope.SubScopes;
         foreach (var scope in scopes)
         {
             WriteScopeRecursive(writer, scope);
@@ -86,8 +87,8 @@ public class VcdService : IVcdService
     {
         // the scope of the signal can be derived from signalname: scope;signal where ';' is the delimiter.
         // dual nested signals (in 2 scopes) are saved as: scope1;scope2;signal
-        VcdScope? rootScope = IterateThroughSignalsofScopeRecursive(_rootScope);
-        _rootScope = rootScope;
+        VcdScope? rootScope = IterateThroughSignalsofScopeRecursive(RootScope);
+        RootScope = rootScope;
     }
 
     public VcdScope? IterateThroughSignalsofScopeRecursive(VcdScope? currentRootScope)
@@ -99,6 +100,7 @@ public class VcdService : IVcdService
         
         foreach (var signal in currentRootScope.Signals.ToList())
         {
+            // TODO: set delimiter through OneWare Settings? synchronize with NetlistViewer
             var parts = signal.Name.Split(';');
             if (parts.Length > 1)
             {
@@ -139,7 +141,7 @@ public class VcdService : IVcdService
     // increments definitionsStartIndex and bodyStartIndex for later usage
     private VcdScope? ParseVcdDefinitions(StreamReader reader)
     {
-        VcdScope? currentScope = _rootScope;
+        VcdScope? currentScope = RootScope;
         bool headerParsed = false;
         string? line;
 
@@ -240,12 +242,11 @@ public class VcdService : IVcdService
 
     public string LoadVcdAndHashBody(string vcdPath)
     {
+        Reset();
+
         using var stream = File.OpenRead(vcdPath);
         using var reader = new StreamReader(stream);
-        
-        // advance streamreader to vcd body
-        int bodyStartIndex = GetBodyStartIndex(reader);
-
+        RootScope = ParseVcdDefinitions(reader);
         var hash = HashVcd(reader);
         return hash;
     }

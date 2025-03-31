@@ -17,11 +17,10 @@ public class NetlistService : INetlistService
     
     public string BackendAddress { get; set; } = "http://localhost";
     public string BackendPort { get; set; } = ":8080";
-    public ObservableCollection<VcdScopeModel> OneWareScopes{ get; set; }
 
-    
     private SignalBitIndexService? _signalBitIndexService;
     private IProjectExplorerService _projectExplorerService;
+    private IVcdService _vcdService;
 
     public NetlistService(IContainerProvider containerProvider)
     {
@@ -29,7 +28,7 @@ public class NetlistService : INetlistService
         _logger = containerProvider.Resolve<ILogger>();
         _signalBitIndexService = containerProvider.Resolve<SignalBitIndexService>();
         _projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
-        
+        _vcdService = containerProvider.Resolve<IVcdService>();
     }
     
      public async Task PostNetlistToBackendAsync(string jsonpath)
@@ -123,7 +122,7 @@ public class NetlistService : INetlistService
 
         var netHash = ((ulong)hashPath << 32) | hashContent;
 
-        _logger.Log("Get netlist information form backend to populate Signals with bit-indices and hdlname/scope", ConsoleColor.White, true);
+        _logger.Log("Get netlist information from backend to populate Signals with bit-indices and hdlname/scope", ConsoleColor.White, true);
         var url = $"{BackendAddress}{BackendPort}/get-net-information";
         try
         {
@@ -154,18 +153,21 @@ public class NetlistService : INetlistService
             _logger.Error("The provided netInfo does not contain valid 'signals' data.");
             return;
         }
-        PopulateSignalBitMappingRecursive(signalsObject, OneWareScopes.OfType<VcdScopeModel>(), vcdBodyHash);
+        
+        var scopes = new List<VcdScope>();
+        scopes.Add(_vcdService.RootScope);
+        PopulateSignalBitMappingRecursive(signalsObject, scopes, vcdBodyHash);
+        // PopulateSignalBitMappingRecursive(signalsObject, OneWareScopes.OfType<VcdScopeModel>(), vcdBodyHash);
         
         var projectPath = _projectExplorerService.ActiveProject?.FullPath;
         var jsonPath = Path.Combine(projectPath, "build", "simulation", "bitmapping.json");
         _signalBitIndexService.SaveToJsonFile(jsonPath);
     }
-    
-    public void PopulateSignalBitMappingRecursive(JObject signalsObject, IEnumerable<VcdScopeModel> scopeModels, string vcdBodyHash)
+    public void PopulateSignalBitMappingRecursive(JObject signalsObject, List <VcdScope>? scopes, string vcdBodyHash)
     {
-        foreach (var scope in scopeModels)
+        foreach (var scope in scopes)
         {
-            PopulateSignalBitMappingRecursive(signalsObject, scope.Scopes, vcdBodyHash);
+            PopulateSignalBitMappingRecursive(signalsObject, scope.SubScopes, vcdBodyHash);
             foreach (var signal in scope.Signals)
                 if (signalsObject.TryGetValue(signal.Name, out var signalToken) &&
                     signalToken is JObject signalDetails)

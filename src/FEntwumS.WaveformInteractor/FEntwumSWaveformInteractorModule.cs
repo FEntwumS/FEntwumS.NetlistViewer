@@ -36,8 +36,8 @@ public class FEntwumSWaveformInteractorModule : IModule
     private IVerilatorService? _verilatorService;
     private IWaveformInteractorService _waveformInteractorService;
     private IWindowService? _windowService;
-    private NetlistService _netlistService;
-    private VcdService? _vcdService;
+    private INetlistService _netlistService;
+    private IVcdService? _vcdService;
 
     public FEntwumSWaveformInteractorModule(IWaveformInteractorService? waveformInteractorService = null)
     {
@@ -65,7 +65,7 @@ public class FEntwumSWaveformInteractorModule : IModule
         _signalBitIndexService = containerProvider.Resolve<SignalBitIndexService>();
         _waveformInteractorService = containerProvider.Resolve<IWaveformInteractorService>();
         _netlistService = containerProvider.Resolve<NetlistService>();
-        _vcdService = containerProvider.Resolve<VcdService>();
+        _vcdService = containerProvider.Resolve<IVcdService>();
         
         // OneWare Services
         var dockService = containerProvider.Resolve<IDockService>();
@@ -184,6 +184,7 @@ public class FEntwumSWaveformInteractorModule : IModule
         var waveformViewModel = sender as WaveFormViewModel;
         if (waveformViewModel == null) return;
 
+        // Get bitmapping if Selected Waveform changes
         if (args.PropertyName == nameof(waveformViewModel.SelectedSignal))
         {
             var hash = _vcdService.LoadVcdAndHashBody(vcdViewModel.FullPath);
@@ -203,11 +204,32 @@ public class FEntwumSWaveformInteractorModule : IModule
         // this curently requires that the vcd is loaded once via OneWare, becase OneWares signal datastructures are used.
         // this plugins vcdService would have to be used for mapping purposes. This can be done very performant, since only the definitions section of the vcd would have to be parsed.
         // first check if the vcd file has been read before, by checking if vcd with bodyHash has been read mapped before.
+        var vcdBodyHash = _vcdService.LoadVcdAndHashBody(vcdFile.FullPath);
+        if (_signalBitIndexService.GetMapping(vcdBodyHash) == null)
+        {
+            //If .vcd has not been loaded before, load it via backend
+            // ensure that backend is running
+            var frontendService = _containerProvider.Resolve<IFrontendService>();
+            _ = frontendService.StartBackendIfNotStartedAsync();
+
+            var projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
+            var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity.FullPath);
+            var netlistPath = Path.Combine(_projectExplorerService.ActiveProject.RootFolderPath, "build", "netlist", $"{topEntity}.json");
+            
+            // post netlist to backend
+            // dont post if netlist already present in backend
+            var netInfo = await _netlistService.GetNetInformationAsync(netlistPath);
+            if (!netInfo.HasValues)
+            {
+                await _netlistService.PostNetlistToBackendAsync(netlistPath);
+                netInfo = await _netlistService.GetNetInformationAsync(netlistPath);
+            }
+            
+            _netlistService.ParseNetInfoToBitMapping(netInfo, vcdBodyHash);
+        }
         
         var waveformpath = vcdFile.FullPath;
         string waveformpathRecreatedHir = Path.Combine(vcdFile.TopFolder.FullPath, Path.GetFileNameWithoutExtension(vcdFile.FullPath) + "_recreated.vcd" );
-        _vcdService.Reset();
-        _vcdService.LoadVcd(waveformpath);
         _vcdService.RecreateVcdHierarchy();
         _vcdService.WriteVcd(waveformpath, waveformpathRecreatedHir);
     }
@@ -216,29 +238,23 @@ public class FEntwumSWaveformInteractorModule : IModule
     {
         try
         {   
-            // first check if the vcd file has been read before, by checking if vcd with bodyHash has been read mapped before.
             var vcdBodyHash = _vcdService.LoadVcdAndHashBody(vcdViewModel.FullPath);
             if (_signalBitIndexService.GetMapping(vcdBodyHash) != null)
             {
                 return;
             }
 
-            _vcdService.Reset();
-            
-            //If .vcd has not been loaded before, load it via backend
+            // If .vcd has not been loaded before, load it via backend
             // ensure that backend is running
             var frontendService = _containerProvider.Resolve<IFrontendService>();
             _ = frontendService.StartBackendIfNotStartedAsync();
 
-            // Get current scopes
-            _netlistService.OneWareScopes = vcdViewModel.Scopes;
-            
             var projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
             var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity.FullPath);
             var netlistPath = Path.Combine(_projectExplorerService.ActiveProject.RootFolderPath, "build", "netlist", $"{topEntity}.json");
             
             // post netlist to backend
-            // dont post if netlist already present in backend?
+            // dont post if netlist already present in backend
             var netInfo = await _netlistService.GetNetInformationAsync(netlistPath);
             if (!netInfo.HasValues)
             {
