@@ -149,6 +149,141 @@
           "target": "all"
         }
       ]
+    },
+    {
+      "version": "0.8.3",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.4",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.5",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.6",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.7",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.8",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.9",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.10",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.11",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.12",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.13",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.14",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.15",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.16",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
+    },
+    {
+      "version": "0.8.17",
+      "minStudioVersion": "0.21.1.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
     }
   ]
 }

@@ -2,12 +2,12 @@
 
 namespace FEntwumS.NetlistViewer.Types;
 
-public class DLine(Point start, Point end, ushort zIndex, NetlistElement element)
+public class DLine(Point start, Point end, ushort zIndex, NetlistElement? element)
 {
     public Point Start { get; set; } = start;
     public Point End { get; set; } = end;
     public ushort ZIndex { get; set; } = zIndex;
-    public NetlistElement element { get; set; } = element;
+    public NetlistElement? element { get; set; } = element;
 
     private const double lenience = 2.25d;
 

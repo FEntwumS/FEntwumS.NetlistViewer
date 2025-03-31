@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
+using OneWare.Essentials.Helpers;
 
 namespace FEntwumS.NetlistViewer.Services;
 
@@ -40,14 +41,32 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
 
                 // Trim whitespace
                 formattedLine = line.Trim();
-                // Remove block comment (first and last three cahracters)
+                // Remove block comment (first and last three characters)
                 formattedLine = formattedLine.Substring(3, formattedLine.Length - 6);
 
                 string[] formattedLineSplit = formattedLine.Split(':');
 
-                // Extract filename
-                formattedLine = $"{formattedLineSplit[0]}:{formattedLineSplit[1]}";
-                actualSrcLine = long.Parse(formattedLineSplit[2]);
+                if (PlatformHelper.Platform is PlatformId.WinArm64 or PlatformId.WinX64)
+                {
+                    formattedLine = $"{formattedLineSplit[0]}:{formattedLineSplit[1]}";
+                    actualSrcLine = long.Parse(formattedLineSplit[2]);
+                } else if (PlatformHelper.Platform is not PlatformId.Wasm or PlatformId.Unknown)
+                {
+                    formattedLine = formattedLineSplit[0];
+
+                    for (int i = 1; i < formattedLineSplit.Length - 2; i++)
+                    {
+                        formattedLine = $"{formattedLine}:{formattedLineSplit[i]}";
+                    }
+                    
+                    // second to last element is the line number
+                    // last element is column number (currently unused)
+                    actualSrcLine = long.Parse(formattedLineSplit[^2]);
+                }
+                else
+                {
+                    return false;
+                }
                 
                 fileIndexToSource[currentLine] = formattedLine;
             }
@@ -69,30 +88,24 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
         return true;
     }
 
-    public async Task<(string srcfile, long actualSrcline, bool success)> GetActualSourceAsync(long srcline, ulong netlistId)
+    public (string srcfile, long actualSrcline, bool success) GetActualSource(long srcline, ulong netlistId)
     {
-        string srcfile = "";
-        long actualSrcline = 0;
-        
-        ConcurrentDictionary<long, long> fileIndex = new();
-        ConcurrentDictionary<long, string> fileIndexToSource = new();
-
-        if (!_index.TryGetValue(netlistId, out fileIndex))
+        if (!_index.TryGetValue(netlistId, out ConcurrentDictionary<long, long>? fileIndex))
         {
             return ("", 0, false);
         }
 
-        if (!_indexToFile.TryGetValue(netlistId, out fileIndexToSource))
+        if (!_indexToFile.TryGetValue(netlistId, out ConcurrentDictionary<long, string>? fileIndexToSource))
         {
             return ("", 0, false);
         }
 
-        if (!fileIndex.TryGetValue(srcline, out actualSrcline))
+        if (!fileIndex.TryGetValue(srcline, out long actualSrcline))
         {
             return ("", 0, false);
         }
 
-        if (!fileIndexToSource.TryGetValue(srcline, out srcfile))
+        if (!fileIndexToSource.TryGetValue(srcline, out string? srcfile))
         {
             return ("", 0, false);
         }

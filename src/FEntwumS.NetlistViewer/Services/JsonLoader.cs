@@ -7,137 +7,139 @@ namespace FEntwumS.NetlistViewer.Services;
 
 public class JsonLoader : IJsonLoader
 {
-    private JsonNode rootnode { get; set; }
-    private bool isLoading { get; set; }
+    private JsonNode? RootNode { get; set; }
+    private bool IsLoading { get; set; }
 
-    public double maxWidth { get; set; }
-    public double maxHeight { get; set; }
-    private double scale { get; set; }
+    public double MaxWidth { get; set; }
+    public double MaxHeight { get; set; }
+    private double Scale { get; set; }
 
-    private long nodecnt { get; set; }
-    private long edgecnt { get; set; }
-    private long junctioncnt { get; set; }
-    private long labelcnt { get; set; }
-    private long portcnt { get; set; }
-    private long bendcnt { get; set; }
-    private long charcnt { get; set; }
-    private ICustomLogger logger;
+    private long NodeCnt { get; set; }
+    private long EdgeCnt { get; set; }
+    private long JunctionCnt { get; set; }
+    private long LabelCnt { get; set; }
+    private long PortCnt { get; set; }
+    private long BendCnt { get; set; }
+    private long CharCnt { get; set; }
+    private readonly ICustomLogger _logger;
     
-    private string clickedElementPath { get; set; }
-    private string clickedElementParentPath { get; set; }
-    private DRect clickedElementRect { get; set; }
-    private DRect clickedElementParentRect { get; set; }
-    private IViewportDimensionService viewportDimensionService { get; set; }
+    private string? ClickedElementPath { get; set; }
+    private string? ClickedElementParentPath { get; set; }
+    private DRect? ClickedElementRect { get; set; }
+    private DRect? ClickedElementParentRect { get; set; }
+    private readonly IViewportDimensionService? _viewportDimensionService;
 
     public JsonLoader()
     {
-        viewportDimensionService = ServiceManager.GetViewportDimensionService();
+        _viewportDimensionService = ServiceManager.GetViewportDimensionService();
+        _logger = ServiceManager.GetCustomLogger();
     }
 
-    public async Task OpenJson(Stream netlist, UInt64 netlistId)
+    public async Task OpenJsonAsync(Stream netlist, UInt64 netlistId)
     {
-        logger = ServiceManager.GetCustomLogger();
-        isLoading = true;
-        rootnode = await JsonNode.ParseAsync(netlist);
-        isLoading = false;
-        scale = 1.0d;
+        IsLoading = true;
+        RootNode = await JsonNode.ParseAsync(netlist);
+        IsLoading = false;
+        Scale = 1.0d;
     }
 
-    private async Task loadingDone()
+    private async Task LoadingDoneAsync()
     {
-        while (isLoading)
+        while (IsLoading)
         {
             await Task.Delay(1);
         }
     }
 
-    public async Task<List<NetlistElement>> parseJson(double xRef, double yRef,
+    public async Task<List<NetlistElement>> ParseJsonAsync(double xRef, double yRef,
         FrontendViewModel mw, UInt64 netlistId)
     {
-        await loadingDone();
+        await LoadingDoneAsync();
 
-        clickedElementPath = viewportDimensionService.GetClickedElementPath(netlistId);
+        ClickedElementPath = _viewportDimensionService!.GetClickedElementPath(netlistId);
 
-        if (clickedElementPath == null)
+        if (ClickedElementPath == null)
         {
-            clickedElementPath = string.Empty;
+            ClickedElementPath = string.Empty;
         }
         
-        var clickedElementPathSplit = clickedElementPath.Split(' ');
+        var clickedElementPathSplit = ClickedElementPath.Split(' ');
 
         if (clickedElementPathSplit.Length < 2)
         {
-            clickedElementParentPath = string.Empty;
+            ClickedElementParentPath = string.Empty;
         }
         else
         {
-            clickedElementParentPath = string.Join(" ", clickedElementPathSplit, 0, clickedElementPathSplit.Length - 1);
+            ClickedElementParentPath = string.Join(" ", clickedElementPathSplit, 0, clickedElementPathSplit.Length - 1);
         }
         
-        logger.Log("Start loading elements");
-        logger.Log("====");
+        _logger.Log("Start loading elements");
+        _logger.Log("====");
         
-        nodecnt = 0;
-        labelcnt = 0;
-        portcnt = 0;
-        bendcnt = 0;
-        edgecnt = 0;
-        junctioncnt = 0;
-        charcnt = 0;
+        NodeCnt = 0;
+        LabelCnt = 0;
+        PortCnt = 0;
+        BendCnt = 0;
+        EdgeCnt = 0;
+        JunctionCnt = 0;
+        CharCnt = 0;
 
-        maxWidth = 0;
-        maxHeight = 0;
+        MaxWidth = 0;
+        MaxHeight = 0;
 
         List<NetlistElement> items = new List<NetlistElement>();
 
-        createNode(rootnode, items, xRef, yRef, 0);
+        if (RootNode is null) return items;
+        
+        CreateNode(RootNode, items, xRef, yRef, 0);
         
         // check for clicked elements
         // TODO was anything clicked????
-        if (viewportDimensionService.getCurrentElementCount(netlistId) == 0)
+        if (_viewportDimensionService.getCurrentElementCount(netlistId) == 0)
         {
-            viewportDimensionService.SetZoomElementDimensions(netlistId, new DRect(0, 0, maxWidth, maxHeight, 0, null));
+            _viewportDimensionService.SetZoomElementDimensions(netlistId, new DRect(0, 0, MaxWidth, MaxHeight, 0, null));
         }
-        else if (items.Count > viewportDimensionService.getCurrentElementCount(netlistId))
+        else if (items.Count > _viewportDimensionService.getCurrentElementCount(netlistId))
         {
             // expansion
             
-            viewportDimensionService.SetZoomElementDimensions(netlistId, clickedElementRect);
+            _viewportDimensionService.SetZoomElementDimensions(netlistId, ClickedElementRect);
         }
         else
         {
             // collapse
             
-            viewportDimensionService.SetZoomElementDimensions(netlistId, clickedElementParentRect);
+            _viewportDimensionService.SetZoomElementDimensions(netlistId, ClickedElementParentRect);
         }
         
-        viewportDimensionService.SetCurrentElementCount(netlistId, items.Count);
+        _viewportDimensionService.SetCurrentElementCount(netlistId, items.Count);
         
-        viewportDimensionService.SetMaxHeight(netlistId, maxHeight);
-        viewportDimensionService.SetMaxWidth(netlistId, maxWidth);
+        _viewportDimensionService.SetMaxHeight(netlistId, MaxHeight);
+        _viewportDimensionService.SetMaxWidth(netlistId, MaxWidth);
         
         
-        logger.Log("====");
-        logger.Log("All elements loaded");
-        logger.Log("Statistics:");
+        _logger.Log("====");
+        _logger.Log("All elements loaded");
+        _logger.Log("Statistics:");
 
         // Dispose of the JSON document, as we dont need to keep it around
-        rootnode = new JsonObject();
+        RootNode = new JsonObject();
 
         // Call the garbage collector to free dozens of MB of RAM
         // If the GC isn't called explicitly, the dead objects of the JSON file will just stay in the Gen 2 Heap
         GC.Collect();
 
-        logger.Log("Number of Objects: " + items.Count);
-        logger.Log("Number of nodes: " + nodecnt);
-        logger.Log("Number of ports: " + portcnt);
-        logger.Log("Number of edges: " + edgecnt);
-        logger.Log("Average number of bendpoints per edge: " + ((float)bendcnt / (float)edgecnt));
-        logger.Log("Number of junctions: " + junctioncnt);
-        logger.Log("Number of labels: " + labelcnt);
-        logger.Log("Average number of characters per label: " + ((float)charcnt / (float)labelcnt));
-        logger.Log("Max width: " + maxWidth);
-        logger.Log("Max height: " + maxHeight);
+        _logger.Log("Number of Objects: " + items.Count);
+        _logger.Log("Number of nodes: " + NodeCnt);
+        _logger.Log("Number of ports: " + PortCnt);
+        _logger.Log("Number of edges: " + EdgeCnt);
+        _logger.Log("Average number of bendpoints per edge: " + ((float)BendCnt / (float)EdgeCnt));
+        _logger.Log("Number of junctions: " + JunctionCnt);
+        _logger.Log("Number of labels: " + LabelCnt);
+        _logger.Log("Average number of characters per label: " + ((float)CharCnt / (float)LabelCnt));
+        _logger.Log("Max width: " + MaxWidth);
+        _logger.Log("Max height: " + MaxHeight);
         
         
 
@@ -146,15 +148,10 @@ public class JsonLoader : IJsonLoader
         return items;
     }
 
-    public void createNode(JsonNode node, List<NetlistElement> items, double xRef, double yRef,
+    public void CreateNode(JsonNode node, List<NetlistElement> items, double xRef, double yRef,
         ushort depth)
     {
-        if (node.AsObject().ContainsKey("node"))
-        {
-            logger.Log(node["id"].ToString());
-        }
-
-        JsonArray children = node["children"] as JsonArray;
+        JsonArray? children = node["children"] as JsonArray;
         double x = 0;
         double y = 0;
         double nWidth = 0;
@@ -165,81 +162,84 @@ public class JsonLoader : IJsonLoader
         string path = "";
         string src = "";
 
-        JsonNode layoutOptions = node["layoutOptions"] as JsonNode;
+        JsonNode? layoutOptions = node["layoutOptions"] as JsonNode;
 
         if (node.AsObject().ContainsKey("x"))
         {
-            x = node["x"].GetValue<double>();
+            x = node["x"]!.GetValue<double>();
         }
 
         if (node.AsObject().ContainsKey("y"))
         {
-            y = node["y"].GetValue<double>();
+            y = node["y"]!.GetValue<double>();
         }
 
         if (node.AsObject().ContainsKey("width"))
         {
-            nWidth = node["width"].GetValue<double>();
+            nWidth = node["width"]!.GetValue<double>();
         }
 
         if (node.AsObject().ContainsKey("height"))
         {
-            nHeight = node["height"].GetValue<double>();
+            nHeight = node["height"]!.GetValue<double>();
         }
 
-        if (layoutOptions.AsObject().ContainsKey("celltype"))
+        if (layoutOptions is not null)
         {
-            celltype = layoutOptions["celltype"].GetValue<string>();
-        }
+            if (layoutOptions.AsObject().ContainsKey("celltype"))
+            {
+                celltype = layoutOptions["celltype"]!.GetValue<string>();
+            }
 
-        if (layoutOptions.AsObject().ContainsKey("cellname"))
-        {
-            cellname = layoutOptions["cellname"].GetValue<string>();
-        }
+            if (layoutOptions.AsObject().ContainsKey("cellname"))
+            {
+                cellname = layoutOptions["cellname"]!.GetValue<string>();
+            }
 
-        if (layoutOptions.AsObject().ContainsKey("location-path"))
-        {
-            path = layoutOptions["location-path"].GetValue<string>();
-        }
+            if (layoutOptions.AsObject().ContainsKey("location-path"))
+            {
+                path = layoutOptions["location-path"]!.GetValue<string>();
+            }
 
-        if (layoutOptions.AsObject().ContainsKey("src-location"))
-        {
-            src = layoutOptions["src-location"].GetValue<string>();
+            if (layoutOptions.AsObject().ContainsKey("src-location"))
+            {
+                src = layoutOptions["src-location"]!.GetValue<string>();
+            }
         }
 
         if (path != string.Empty)
         {
-            if (path == clickedElementPath)
+            if (path == ClickedElementPath)
             {
-                clickedElementRect = new DRect(xRef + x, yRef + y, nWidth, nHeight, depth, null);
+                ClickedElementRect = new DRect(xRef + x, yRef + y, nWidth, nHeight, depth, null);
             }
-            else if (path == clickedElementParentPath)
+            else if (path == ClickedElementParentPath)
             {
-                clickedElementParentRect = new DRect(xRef + x, yRef + y, nWidth, nHeight, depth, null);
+                ClickedElementParentRect = new DRect(xRef + x, yRef + y, nWidth, nHeight, depth, null);
             }
-        } else if (clickedElementPath.Length > 0 && clickedElementParentPath == string.Empty && depth == 1)
+        } else if (ClickedElementPath is not null && ClickedElementPath.Length > 0 && ClickedElementParentPath == string.Empty && depth == 1)
         {
-            clickedElementParentRect = new DRect(0, 0, maxWidth, maxHeight, depth, null);
+            ClickedElementParentRect = new DRect(0, 0, MaxWidth, MaxHeight, depth, null);
         }
 
-        if (xRef + x + nWidth > maxWidth)
+        if (xRef + x + nWidth > MaxWidth)
         {
-            maxWidth = xRef + (x + nWidth) * scale;
+            MaxWidth = xRef + (x + nWidth) * Scale;
         }
 
-        if (yRef + y + nHeight > maxHeight)
+        if (yRef + y + nHeight > MaxHeight)
         {
-            maxHeight = yRef + (y + nHeight) * scale;
+            MaxHeight = yRef + (y + nHeight) * Scale;
         }
 
-        if (!(string.Equals((string)node["id"], "root", StringComparison.Ordinal)))
+        if (!(string.Equals((string)node["id"]!, "root", StringComparison.Ordinal)))
         {
             items.Add(new NetlistElement()
             {
-                Height = nHeight * scale,
-                Width = nWidth * scale,
-                xPos = xRef + x * scale,
-                yPos = yRef + y * scale,
+                Height = nHeight * Scale,
+                Width = nWidth * Scale,
+                xPos = xRef + x * Scale,
+                yPos = yRef + y * Scale,
                 Type = 1,
                 ZIndex = depth,
                 Celltype = celltype,
@@ -248,40 +248,41 @@ public class JsonLoader : IJsonLoader
                 Path = path
             });
 
-            nodecnt++;
+            NodeCnt++;
         }
 
-        JsonArray labels = node["labels"] as JsonArray;
+        JsonArray? labels = node["labels"] as JsonArray;
 
         if (labels != null)
         {
-            createLabels(labels, items, xRef + x * scale, yRef + y * scale, (ushort)(depth + 1));
+            CreateLabels(labels, items, xRef + x * Scale, yRef + y * Scale, (ushort)(depth + 1));
         }
 
-        JsonArray ports = node["ports"] as JsonArray;
+        JsonArray? ports = node["ports"] as JsonArray;
 
         if (ports != null)
         {
-            createPorts(ports, items, xRef + x * scale, yRef + y * scale, (ushort)(depth + 1));
+            CreatePorts(ports, items, xRef + x * Scale, yRef + y * Scale, (ushort)(depth + 1));
         }
 
-        JsonArray edges = node["edges"] as JsonArray;
+        JsonArray? edges = node["edges"] as JsonArray;
 
         if (edges != null)
         {
-            createEdges(edges, items, xRef + x * scale, yRef + y * scale, (ushort)(depth + 1));
+            CreateEdges(edges, items, xRef + x * Scale, yRef + y * Scale, (ushort)(depth + 1));
         }
 
-        if (children != null)
+        if (children == null) return;
+        foreach (JsonNode? child in children)
         {
-            foreach (JsonNode child in children)
+            if (child is not null)
             {
-                createNode(child, items, xRef + x * scale, yRef + y * scale, (ushort)(depth + 1));
+                CreateNode(child, items, xRef + x * Scale, yRef + y * Scale, (ushort)(depth + 1));
             }
         }
     }
 
-    public void createLabels(JsonArray labels, List<NetlistElement> items, double xRef,
+    public void CreateLabels(JsonArray labels, List<NetlistElement> items, double xRef,
         double yRef, ushort depth)
     {
         double x = 0;
@@ -290,9 +291,11 @@ public class JsonLoader : IJsonLoader
         double h = 0;
         string text = "";
         double fontSize = 10.0d;
-        JsonNode layoutOptions;
-        foreach (JsonNode label in labels)
+        JsonNode? layoutOptions;
+        foreach (JsonNode? label in labels)
         {
+            if (label is null) continue;
+            
             x = 0;
             y = 0;
             w = 0;
@@ -302,41 +305,41 @@ public class JsonLoader : IJsonLoader
 
             if (label.AsObject().ContainsKey("x"))
             {
-                x = label["x"].GetValue<double>();
+                x = label["x"]!.GetValue<double>();
             }
 
             if (label.AsObject().ContainsKey("y"))
             {
-                y = label["y"].GetValue<double>();
+                y = label["y"]!.GetValue<double>();
             }
 
             if (label.AsObject().ContainsKey("width"))
             {
-                w = label["width"].GetValue<double>();
+                w = label["width"]!.GetValue<double>();
             }
 
             if (label.AsObject().ContainsKey("height"))
             {
-                h = label["height"].GetValue<double>();
+                h = label["height"]!.GetValue<double>();
             }
 
             if (label.AsObject().ContainsKey("text"))
             {
-                text = label["text"].GetValue<string>();
+                text = label["text"]!.GetValue<string>();
 
-                charcnt += text.Length;
+                CharCnt += text.Length;
             }
 
             if (layoutOptions != null && layoutOptions.AsObject().ContainsKey("font-size"))
             {
-                fontSize = double.Parse(layoutOptions["font-size"].GetValue<string>(), System.Globalization.CultureInfo.InvariantCulture);
+                fontSize = double.Parse(layoutOptions["font-size"]!.GetValue<string>(), System.Globalization.CultureInfo.InvariantCulture);
             }
 
             items.Add(new NetlistElement()
             {
                 LabelText = text,
-                xPos = xRef + x * scale + 1, // Add small offset to separate label from border
-                yPos = yRef + y * scale,
+                xPos = xRef + x * Scale + 1, // Add small offset to separate label from border
+                yPos = yRef + y * Scale,
                 Type = 3,
                 Width = w,
                 Height = h,
@@ -344,68 +347,72 @@ public class JsonLoader : IJsonLoader
                 FontSize = fontSize
             });
 
-            labelcnt++;
+            LabelCnt++;
         }
     }
 
-    public void createPorts(JsonArray ports, List<NetlistElement> items, double xRef,
+    public void CreatePorts(JsonArray ports, List<NetlistElement> items, double xRef,
         double yRef, ushort depth)
     {
         double x = 0;
         double y = 0;
-        foreach (JsonNode port in ports)
+        foreach (JsonNode? port in ports)
         {
+            if (port is null) continue;
+            
             x = 0;
             y = 0;
-            JsonArray labels = port["labels"] as JsonArray;
+            JsonArray? labels = port["labels"] as JsonArray;
 
             if (port.AsObject().ContainsKey("x"))
             {
-                x = port["x"].GetValue<double>();
+                x = port["x"]!.GetValue<double>();
             }
 
             if (port.AsObject().ContainsKey("y"))
             {
-                y = port["y"].GetValue<double>();
+                y = port["y"]!.GetValue<double>();
             }
 
-            if (labels != null)
+            if (labels is not null)
             {
-                createLabels(labels, items, xRef + x * scale, yRef + y * scale, (ushort)(depth + 1));
+                CreateLabels(labels, items, xRef + x * Scale, yRef + y * Scale, (ushort)(depth + 1));
             }
 
             items.Add(new NetlistElement()
             {
-                xPos = xRef + x * scale,
-                yPos = yRef + y * scale,
+                xPos = xRef + x * Scale,
+                yPos = yRef + y * Scale,
                 Type = 5,
                 ZIndex = depth
             });
 
-            portcnt++;
+            PortCnt++;
         }
     }
 
-    public void createEdges(JsonArray edges, List<NetlistElement> items, double xRef,
+    public void CreateEdges(JsonArray edges, List<NetlistElement> items, double xRef,
         double yRef, ushort depth)
     {
         double x = 0;
         double y = 0;
-        JsonArray sections;
-        JsonNode start;
-        JsonNode end;
-        JsonArray bendpoints;
+        JsonArray? sections;
+        JsonNode? start;
+        JsonNode? end;
+        JsonArray? bendpoints;
         Point cPoint = new Point();
         Point ePoint = new Point();
-        JsonNode layoutOptions;
+        JsonNode? layoutOptions;
         string locationpath;
         string src;
         string signalname;
         int indexInSignal;
         string signaltype;
 
-        foreach (JsonNode edge in edges)
+        foreach (JsonNode? edge in edges)
         {
+            if (edge is null) continue;
+            
             locationpath = "";
             src = "";
             signalname = "";
@@ -419,8 +426,10 @@ public class JsonLoader : IJsonLoader
                 continue;
             }
 
-            foreach (JsonNode section in sections)
+            foreach (JsonNode? section in sections)
             {
+                if (section is null) continue;
+                
                 start = section["startPoint"];
                 end = section["endPoint"];
                 bendpoints = section["bendPoints"] as JsonArray;
@@ -432,15 +441,15 @@ public class JsonLoader : IJsonLoader
                 {
                     if (start.AsObject().ContainsKey("x"))
                     {
-                        x = start["x"].GetValue<double>();
+                        x = start["x"]!.GetValue<double>();
                     }
 
                     if (start.AsObject().ContainsKey("y"))
                     {
-                        y = start["y"].GetValue<double>();
+                        y = start["y"]!.GetValue<double>();
                     }
 
-                    cPoint = new Point(x * scale, y * scale);
+                    cPoint = new Point(x * Scale, y * Scale);
 
                     pointList.Add(cPoint);
                 }
@@ -448,26 +457,28 @@ public class JsonLoader : IJsonLoader
                 // Add bends
                 if (bendpoints != null)
                 {
-                    foreach (JsonNode bend in bendpoints)
+                    foreach (JsonNode? bend in bendpoints)
                     {
+                        if (bend is null) continue;
+                        
                         x = 0;
                         y = 0;
 
                         if (bend.AsObject().ContainsKey("x"))
                         {
-                            x = bend["x"].GetValue<double>();
+                            x = bend["x"]!.GetValue<double>();
                         }
 
                         if (bend.AsObject().ContainsKey("y"))
                         {
-                            y = bend["y"].GetValue<double>();
+                            y = bend["y"]!.GetValue<double>();
                         }
 
-                        cPoint = new Point(x * scale, y * scale);
+                        cPoint = new Point(x * Scale, y * Scale);
 
                         pointList.Add(cPoint);
 
-                        bendcnt++;
+                        BendCnt++;
                     }
                 }
 
@@ -479,15 +490,15 @@ public class JsonLoader : IJsonLoader
 
                     if (end.AsObject().ContainsKey("x"))
                     {
-                        x = end["x"].GetValue<double>();
+                        x = end["x"]!.GetValue<double>();
                     }
 
                     if (end.AsObject().ContainsKey("y"))
                     {
-                        y = end["y"].GetValue<double>();
+                        y = end["y"]!.GetValue<double>();
                     }
 
-                    ePoint = new Point(x * scale, y * scale);
+                    ePoint = new Point(x * Scale, y * Scale);
 
                     pointList.Add(ePoint);
                 }
@@ -501,8 +512,8 @@ public class JsonLoader : IJsonLoader
                 xDir /= mag;
                 yDir /= mag;
 
-                xDir *= 7 * scale;
-                yDir *= 7 * scale;
+                xDir *= 7 * Scale;
+                yDir *= 7 * Scale;
 
                 // Angle of 30 degrees
                 double xUp = 0.86 * xDir - (0.5) * yDir;
@@ -517,35 +528,35 @@ public class JsonLoader : IJsonLoader
                 pointList.Add(ePoint);
                 pointList.Add(downPoint);
 
-                bendcnt += 3;
+                BendCnt += 3;
 
-                if (layoutOptions != null)
+                if (layoutOptions is not null)
                 {
                     if (layoutOptions.AsObject().ContainsKey("src-location"))
                     {
-                        src = layoutOptions["src-location"].GetValue<string>();
+                        src = layoutOptions["src-location"]!.GetValue<string>();
                     }
 
                     if (layoutOptions.AsObject().ContainsKey("location-path"))
                     {
-                        locationpath = layoutOptions["location-path"].GetValue<string>();
+                        locationpath = layoutOptions["location-path"]!.GetValue<string>();
                     }
 
                     if (layoutOptions.AsObject().ContainsKey("signalname"))
                     {
-                        signalname = layoutOptions["signalname"].GetValue<string>();
+                        signalname = layoutOptions["signalname"]!.GetValue<string>();
                     }
 
                     if (layoutOptions.AsObject().ContainsKey("index-in-signal"))
                     {
                         // GetValue<int>() somehow does not (always?) work with negative integers
                         // Therefore this construct is used
-                        indexInSignal = Convert.ToInt32(layoutOptions["index-in-signal"].GetValue<string>());
+                        indexInSignal = Convert.ToInt32(layoutOptions["index-in-signal"]!.GetValue<string>());
                     }
 
                     if (layoutOptions.AsObject().ContainsKey("signaltype"))
                     {
-                        signaltype = layoutOptions["signaltype"].GetValue<string>();
+                        signaltype = layoutOptions["signaltype"]!.GetValue<string>();
                     }
                 }
 
@@ -563,12 +574,10 @@ public class JsonLoader : IJsonLoader
                     SignalType = signaltype
                 });
 
-                edgecnt++;
+                EdgeCnt++;
             }
 
-            JsonArray labels = edge["labels"] as JsonArray;
-
-            if (labels != null)
+            if (edge["labels"] is JsonArray labels)
             {
                 // foreach (JsonNode label in labels)
                 // {
@@ -601,36 +610,38 @@ public class JsonLoader : IJsonLoader
                 //     }
                 // }
 
-                createLabels(labels, items, xRef, yRef, (ushort)(depth + 1));
+                CreateLabels(labels, items, xRef, yRef, (ushort)(depth + 1));
             }
 
-            JsonArray junctionPoints = edge["junctionPoints"] as JsonArray;
+            JsonArray? junctionPoints = edge["junctionPoints"] as JsonArray;
 
-            if (junctionPoints != null)
+            if (junctionPoints is not null)
             {
-                createJunctionPoints(junctionPoints, items, xRef, yRef, (ushort)(depth + 1));
+                CreateJunctionPoints(junctionPoints, items, xRef, yRef, (ushort)(depth + 1));
             }
         }
     }
 
-    public void createJunctionPoints(JsonArray junctionPoints, List<NetlistElement> items,
+    public void CreateJunctionPoints(JsonArray junctionPoints, List<NetlistElement> items,
         double xRef, double yRef, ushort depth)
     {
         double x = 0;
         double y = 0;
-        foreach (JsonNode junctionPoint in junctionPoints)
+        foreach (JsonNode? junctionPoint in junctionPoints)
         {
+            if (junctionPoint is null) continue;
+            
             x = 0;
             y = 0;
 
             if (junctionPoint.AsObject().ContainsKey("x"))
             {
-                x = junctionPoint["x"].GetValue<double>();
+                x = junctionPoint["x"]!.GetValue<double>();
             }
 
             if (junctionPoint.AsObject().ContainsKey("y"))
             {
-                y = junctionPoint["y"].GetValue<double>();
+                y = junctionPoint["y"]!.GetValue<double>();
             }
 
             // Add offset to move junction point to line center
@@ -640,25 +651,25 @@ public class JsonLoader : IJsonLoader
 
             items.Add(new NetlistElement()
             {
-                xPos = xRef + x * scale,
-                yPos = yRef + y * scale,
+                xPos = xRef + x * Scale,
+                yPos = yRef + y * Scale,
                 Type = 4,
                 ZIndex = depth
             });
 
-            junctioncnt++;
+            JunctionCnt++;
         }
     }
 
     public double GetMaxWidth()
     {
-        logger.Log("Maxwidth: " + maxWidth);
-        return maxWidth;
+        _logger.Log("Maxwidth: " + MaxWidth);
+        return MaxWidth;
     }
 
     public double GetMaxHeight()
     {
-        logger.Log("Maxheight: " + maxHeight);
-        return maxHeight;
+        _logger.Log("Maxheight: " + MaxHeight);
+        return MaxHeight;
     }
 }

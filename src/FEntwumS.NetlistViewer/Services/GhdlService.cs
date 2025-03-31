@@ -15,7 +15,7 @@ public class GhdlService : IGhdlService
     private IToolExecuterService _toolExecuterService;
 
     private string _ghdlPath = string.Empty;
-    private string _vhdlStandard = string.Empty;
+    private string? _vhdlStandard = string.Empty;
 
     public GhdlService()
     {
@@ -33,7 +33,7 @@ public class GhdlService : IGhdlService
 
     public async Task<bool> ElaborateDesignAsync(IProjectFile file)
     {
-        string vhdlStandard;
+        string? vhdlStandard;
         
         _dockService.Show<IOutputService>();
 
@@ -125,12 +125,9 @@ public class GhdlService : IGhdlService
 
         string top = Path.GetFileNameWithoutExtension(file.FullPath);
 
-        List<string> ghdlOptions = ["--out=verilog"];
-        // ghdlOptions.Add("-o=design.v");  // TODO rework
-        // When a new version of GHDL is available, this parameter will allow us to write the result directly to a file,
-        // instead of needing to use File.WriteAllTextAsync
-
-        List<string> ghdlSynthArgs = ["--synth", "--no-formal", "-Pbuild"];
+        List<string> ghdlOptions = [ "--out=verilog", "-o=design.v" ];
+        
+        List<string> ghdlSynthArgs = [ "--synth", "--no-formal", "-Pbuild" ];
         ghdlSynthArgs.AddRange(ghdlOptions);
         ghdlSynthArgs.Add(top);
 
@@ -141,13 +138,6 @@ public class GhdlService : IGhdlService
         (success, stdout, stderr) =
             await _toolExecuterService.ExecuteToolAsync(_ghdlPath, ghdlSynthArgs, workingDirectory);
 
-        await File.WriteAllTextAsync(Path.Combine(workingDirectory, "design.v"), stdout);
-
         return success;
-    }
-
-    private async Task<bool> CheckIfGhdlIsInstalledAsync()
-    {
-        return true;
     }
 }

@@ -32,8 +32,10 @@ public class FrontendService : IFrontendService
     private static int _edgeLabelFontSize = 10;
     private static int _portLabelFontSize = 10;
     private static string _javaBinaryFolder = string.Empty;
-    private static string extraJarArgs = string.Empty;
+    private static string _extraJarArgs = string.Empty;
     private static bool _continueOnBinaryInstallError = false;
+    
+    private static bool _restartRequired = false;
 
     private UInt64 currentNetlist = 0;
 
@@ -103,7 +105,7 @@ public class FrontendService : IFrontendService
                     _requestTimeout = 600;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.Error("Request timeout not valid. Please enter a positive integer");
 
@@ -126,7 +128,7 @@ public class FrontendService : IFrontendService
                     _entityLabelFontSize = 25;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.Error("Entity label font size not valid. Please enter a positive integer");
 
@@ -147,7 +149,7 @@ public class FrontendService : IFrontendService
                     _cellLabelFontSize = 15;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.Error("Cell label font size not valid. Please enter a positive integer");
 
@@ -168,7 +170,7 @@ public class FrontendService : IFrontendService
                     _edgeLabelFontSize = 10;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.Error("Edge label font size not valid. Please enter a positive integer");
 
@@ -189,7 +191,7 @@ public class FrontendService : IFrontendService
                     _portLabelFontSize = 10;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.Error("Port label font size not valid. Please enter a positive integer");
 
@@ -199,57 +201,99 @@ public class FrontendService : IFrontendService
 
         _settingsService.GetSettingObservable<string>(FEntwumSNetlistReaderFrontendModule.JavaPathSetting).Subscribe(
             x => _javaBinaryFolder = x);
-        
-        _settingsService.GetSettingObservable<string>("NetlistViewer_java_args").Subscribe(x => extraJarArgs = x);
-        
-        _settingsService.GetSettingObservable<bool>("NetlistViewer_ContinueOnBinaryInstallError").Subscribe(x => _continueOnBinaryInstallError = x);
+
+        _settingsService.GetSettingObservable<string>("NetlistViewer_java_args").Subscribe(x => _extraJarArgs = x);
+
+        _settingsService.GetSettingObservable<bool>("NetlistViewer_ContinueOnBinaryInstallError")
+            .Subscribe(x => _continueOnBinaryInstallError = x);
     }
 
     private async Task<(bool success, bool needsRestart)> InstallDependenciesAsync()
     {
+        ApplicationProcess checkProc = _applicationStateService.AddState("Checking dependencies", AppState.Loading);
+        
         bool globalSuccess = true, needsRestart = false;
 
-        string[] dependencyIDs =
-        [
-            "OneWare.GhdlExtension", "osscadsuite", "ghdl", FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id!,
-            FEntwumSNetlistReaderFrontendModule.JDKPackage.Id!
-        ];
-        
+        (string id, Version minversion)[] dependencyIDs = new (string, Version)
+        [ ] {
+            ("OneWare.GhdlExtension", new Version(0, 10, 7)),
+            ("osscadsuite", new Version(2025, 01, 21)),
+            ("ghdl", new Version(5, 0, 1)),
+            (FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id!, new Version(0, 8, 0)),
+            (FEntwumSNetlistReaderFrontendModule.JDKPackage.Id!, new Version(21, 0, 6))
+        };
+
         // Install osscadsuite binary between GHDL plugin and ghdl binary to allow for the addition of the ghdl binary to the store
 
-        foreach (string dependencyID in dependencyIDs)
+        foreach ((string dependencyID, Version minVersion) in dependencyIDs)
         {
             PackageModel? dependencyModel = _packageService.Packages.GetValueOrDefault(dependencyID);
             Package? dependencyPackage = dependencyModel?.Package;
-            
+
             if (dependencyPackage == null)
             {
-                _logger.Error($"Dependency with ID {dependencyID} not available in the package manager. Please file a bug report, if this issue persists");
-                
+                _logger.Error(
+                    $"Dependency with ID {dependencyID} is not available in the package manager. Please file a bug report, if this issue persists");
+
                 globalSuccess = false;
                 continue;
             }
-            
+
             if (_packageService.Packages!.GetValueOrDefault(dependencyID) is
                 {
-                    Status: PackageStatus.Available or PackageStatus.Installing or PackageStatus.UpdateAvailable
+                    Status: PackageStatus.Available
                 })
             {
+                bool updatePerformed = true;
+
                 if (_settingsService.GetSettingValue<bool>("Experimental_AutoDownloadBinaries"))
                 {
                     _logger.Log($"Installing \"{dependencyPackage.Name}\"...", true);
-                    
-                    bool localSuccess = await _packageService.InstallAsync(dependencyPackage);
-                    
+
+                    bool localSuccess = false;
+
+                    // Try to install the dependency, starting with the latest version
+                    // If the version is not compatible or the download fails, try the previous version
+                    foreach (PackageVersion packageVersion in dependencyPackage.Versions!.Reverse())
+                    {
+                        // Skip incompatible versions
+                        if (!(await dependencyModel!.CheckCompatibilityAsync(packageVersion)).IsCompatible)
+                        {
+                            continue;
+                        }
+                        
+                        PackageVersion? installedVersion = dependencyModel.InstalledVersion;
+
+                        if (installedVersion == packageVersion)
+                        {
+                            _logger.Log($"Failed to update {dependencyPackage.Name} from version {installedVersion.Version} to version {dependencyPackage.Versions!.Last()}", true);
+                            
+                            updatePerformed = false;
+                            localSuccess = true;
+                            break;
+                        }
+
+                        localSuccess = await dependencyModel!.DownloadAsync(packageVersion);
+
+                        // Stop trying, if install has been successful
+                        if (localSuccess)
+                        {
+                            break;
+                        }
+                    }
+
                     globalSuccess = globalSuccess && localSuccess;
 
-                    if (localSuccess)
+                    if (updatePerformed)
                     {
-                        _logger.Log($"Successfully installed \"{dependencyPackage.Name}\".", true);
-                    }
-                    else
-                    {
-                        _logger.Error($"Failed to install \"{dependencyPackage.Name}\".");
+                        if (localSuccess)
+                        {
+                            _logger.Log($"Successfully installed \"{dependencyPackage.Name}\".", true);
+                        }
+                        else
+                        {
+                            _logger.Error($"Failed to install \"{dependencyPackage.Name}\".");
+                        }
                     }
                 }
                 else
@@ -260,37 +304,63 @@ public class FrontendService : IFrontendService
                     globalSuccess = false;
                 }
 
-                if (globalSuccess)
+                if (globalSuccess && updatePerformed)
                 {
                     needsRestart = true;
+                    _restartRequired = true;
+                }
+            }
+
+            if (dependencyModel!.Status is PackageStatus.Installed or PackageStatus.UpdateAvailable)
+            {
+                if (minVersion.CompareTo(Version.Parse(dependencyModel.InstalledVersion!.Version!)) <= 0)
+                {
+                    _logger.Log($"Dependency {dependencyPackage.Id} installed with version {dependencyModel.InstalledVersion.Version} greater than or equal to expected version {minVersion.ToString()}");
+                }
+                else
+                {
+                    _logger.Error($"Installed version {dependencyModel.InstalledVersion.Version} for {dependencyPackage.Name} is below the minimum version {minVersion.ToString()}. Please update {dependencyPackage.Name}!");
+                    
+                    globalSuccess = false;
                 }
             }
         }
 
-        if (globalSuccess && needsRestart)
+        if (globalSuccess && (needsRestart || _restartRequired))
         {
             _logger.Log("Dependencies were successfully installed. Please restart OneWare Studio!", true);
         }
+        
+        _applicationStateService.RemoveState(checkProc);
 
-        return (globalSuccess, needsRestart);
+        return (globalSuccess, needsRestart || _restartRequired);
     }
 
-    public async Task CreateVhdlNetlist(IProjectFile vhdl)
+    public async Task CreateVhdlNetlistAsync(IProjectFile vhdl)
     {
+        ApplicationProcess proc = _applicationStateService.AddState("Visualizing VHDL netlist", AppState.Loading);
+        
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
         if (needsRestart)
         {
-            return;
-        } else if (!(success || _continueOnBinaryInstallError))
-        {
+            _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
+            
             return;
         }
-        
+        else if (!(success || _continueOnBinaryInstallError))
+        {
+            _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
+            
+            return;
+        }
+
         success = await StartBackendIfNotStartedAsync();
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: The backend could not be started");
+            
             return;
         }
 
@@ -303,6 +373,8 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: GHDL could not elaborate the design");
+            
             return;
         }
 
@@ -311,6 +383,8 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: GHDL could not synthesize the design into Verilog");
+            
             return;
         }
 
@@ -318,6 +392,8 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
+            
             return;
         }
 
@@ -326,6 +402,9 @@ public class FrontendService : IFrontendService
         if (!File.Exists(netlistPath))
         {
             _logger.Error($"Netlist file not found: {netlistPath}");
+            
+            _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
+            
             return;
         }
 
@@ -335,28 +414,41 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
+            
             return;
         }
 
-        await ShowViewer(test);
+        await ShowViewerAsync(test);
+        
+        _applicationStateService.RemoveState(proc);
     }
 
-    public async Task CreateVerilogNetlist(IProjectFile verilog)
+    public async Task CreateVerilogNetlistAsync(IProjectFile verilog)
     {
+        ApplicationProcess proc = _applicationStateService.AddState("Visualizing Verilog netlist", AppState.Loading);
+        
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
         if (needsRestart)
         {
-            return;
-        } else if (!(success || _continueOnBinaryInstallError))
-        {
+            _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
+            
             return;
         }
-        
+        else if (!(success || _continueOnBinaryInstallError))
+        {
+            _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
+            
+            return;
+        }
+
         success = await StartBackendIfNotStartedAsync();
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: The backend could not be started");
+            
             return;
         }
 
@@ -364,13 +456,23 @@ public class FrontendService : IFrontendService
 
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
 
-        await yosysService.LoadVerilogAsync(verilog);
+        success = await yosysService.LoadVerilogAsync(verilog);
+        
+        if (!success)
+        {
+            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
+            
+            return;
+        }
 
         string netlistPath = Path.Combine(verilog.Root!.FullPath, "build", "netlist", $"{top}.json");
 
         if (!File.Exists(netlistPath))
         {
             _logger.Error($"Netlist file not found: {netlistPath}");
+            
+            _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
+            
             return;
         }
 
@@ -380,28 +482,41 @@ public class FrontendService : IFrontendService
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
+            
             return;
         }
 
-        await ShowViewer(test);
+        await ShowViewerAsync(test);
+        
+        _applicationStateService.RemoveState(proc);
     }
 
-    public async Task CreateSystemVerilogNetlist(IProjectFile sVerilog)
+    public async Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog)
     {
+        ApplicationProcess proc = _applicationStateService.AddState("Visualizing SystemVerilog netlist", AppState.Loading);
+        
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
         if (needsRestart)
         {
-            return;
-        } else if (!(success || _continueOnBinaryInstallError))
-        {
+            _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
+            
             return;
         }
-        
+        else if (!(success || _continueOnBinaryInstallError))
+        {
+            _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
+            
+            return;
+        }
+
         success = await StartBackendIfNotStartedAsync();
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: Backend could not be started");
+            
             return;
         }
 
@@ -409,30 +524,53 @@ public class FrontendService : IFrontendService
 
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
 
-        await yosysService.LoadSystemVerilogAsync(sVerilog);
+        success = await yosysService.LoadSystemVerilogAsync(sVerilog);
+        
+        if (!success)
+        {
+            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
+            
+            return;
+        }
+        
+        string netlistPath = Path.Combine(sVerilog.Root!.FullPath, "build", "netlist", $"{top}.json");
 
-        IProjectFile test = new ProjectFile(Path.Combine(sVerilog.Root!.FullPath, "build", "netlist", $"{top}.json"),
-            sVerilog.TopFolder!);
+        if (!File.Exists(netlistPath))
+        {
+            _logger.Error($"Netlist file not found: {netlistPath}");
+            
+            _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
+            
+            return;
+        }
+
+        IProjectFile test = new ProjectFile(netlistPath, sVerilog.TopFolder!);
 
         success = await ServerStartedAsync();
 
         if (!success)
         {
+            _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
+            
             return;
         }
 
-        await ShowViewer(test);
+        await ShowViewerAsync(test);
+        
+        _applicationStateService.RemoveState(proc);
     }
 
-    public async Task ShowViewer(IProjectFile json)
+    public async Task ShowViewerAsync(IProjectFile json)
     {
+        ApplicationProcess proc = _applicationStateService.AddState("Starting viewer", AppState.Loading);
+        
         HttpResponseMessage? resp = null;
         string top = Path.GetFileNameWithoutExtension(json.FullPath);
 
         if (!File.Exists(json.FullPath))
         {
-            _logger.Error(
-                "No json netlist was generated. Please ensure you are using the yosys from the OSS CAD Suite");
+            _logger.Log(
+                "No json netlist was found. Aborting...");
             return;
         }
 
@@ -452,9 +590,9 @@ public class FrontendService : IFrontendService
         ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash);
         ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash);
 
-        ServiceManager.GetViewportDimensionService().SetClickedElementPath(combinedHash, string.Empty);
-        ServiceManager.GetViewportDimensionService().SetCurrentElementCount(combinedHash, 0);
-        ServiceManager.GetViewportDimensionService().SetZoomElementDimensions(combinedHash, null);
+        ServiceManager.GetViewportDimensionService()!.SetClickedElementPath(combinedHash, string.Empty);
+        ServiceManager.GetViewportDimensionService()!.SetCurrentElementCount(combinedHash, 0);
+        ServiceManager.GetViewportDimensionService()!.SetZoomElementDimensions(combinedHash, null);
 
         FrontendViewModel vm = new FrontendViewModel();
         vm.InitializeContent();
@@ -468,11 +606,16 @@ public class FrontendService : IFrontendService
             { new StreamContent(jsonFileStream), "file", json.Name }
         };
 
+        ApplicationProcess waitForBackendProc =
+            _applicationStateService.AddState("Layouting in progress", AppState.Loading);
+        
         resp = await PostAsync(
             "/graphRemoteFile" + $"?hash={combinedHash}" + $"&entityLabelFontSize={_entityLabelFontSize}" +
             $"&cellLabelFontSize={_cellLabelFontSize}" + $"&edgeLabelFontSize={_edgeLabelFontSize}" +
             $"&portLabelFontSize={_portLabelFontSize}",
             formDataContent);
+        
+        _applicationStateService.RemoveState(waitForBackendProc);
 
         jsonFileStream.Close();
 
@@ -487,13 +630,16 @@ public class FrontendService : IFrontendService
         {
             return;
         }
+
+        ApplicationProcess indexProc = _applicationStateService.AddState("Indexing", AppState.Loading);
         
         // create code index for cross-compiled VHDL
         string ccFile = Path.Combine(json.Root.FullPath, "build", "netlist", "design.v");
-        
+
         if (File.Exists(ccFile))
         {
-            bool success = await ServiceManager.GetService<ICcVhdlFileIndexService>().IndexFileAsync(ccFile, combinedHash);
+            bool success = await ServiceManager.GetService<ICcVhdlFileIndexService>()
+                .IndexFileAsync(ccFile, combinedHash);
 
             if (success)
             {
@@ -504,31 +650,39 @@ public class FrontendService : IFrontendService
                 _logger.Log($"Failed to index {top}");
             }
         }
+        
+        _applicationStateService.RemoveState(indexProc);
 
         _dockService.Show(vm, DockShowLocation.Document);
         _dockService.InitializeContent();
         vm.NetlistId = currentNetlist;
-        await vm.OpenFileImpl();
+        await vm.OpenFileImplAsync();
+        
+        _applicationStateService.RemoveState(proc);
     }
 
-    public async Task ExpandNode(string nodePath, FrontendViewModel vm)
+    public async Task ExpandNodeAsync(string? nodePath, FrontendViewModel vm)
     {
-        _logger.Log("Sending request to ExpandNode", true);
+        ApplicationProcess expandProc = _applicationStateService.AddState("Layouting in progress", AppState.Loading);
+        
+        _logger.Log("Sending request to ExpandNode");
 
         var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath, null);
 
-        if (resp == null)
+        if (resp is not { IsSuccessStatusCode: true })
         {
             return;
         }
 
         vm.File = await resp.Content.ReadAsStreamAsync();
 
-        _logger.Log("Answer received", true);
+        _logger.Log("Answer received");
 
-        await vm.OpenFileImpl();
+        await vm.OpenFileImplAsync();
 
-        _logger.Log("Done", true);
+        _logger.Log("Done");
+        
+        _applicationStateService.RemoveState(expandProc);
     }
 
     // Source:
@@ -601,7 +755,7 @@ public class FrontendService : IFrontendService
 
             return resp;
         }
-        catch (InvalidOperationException e)
+        catch (InvalidOperationException)
         {
             _logger.Error(
                 $"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
@@ -633,14 +787,14 @@ public class FrontendService : IFrontendService
 
             return null;
         }
-        catch (TaskCanceledException e)
+        catch (TaskCanceledException)
         {
             _logger.Error(
                 "The request has timed out. Please increase the request timeout time in the settings menu and try again",
                 printErrors);
             return null;
         }
-        catch (UriFormatException e)
+        catch (UriFormatException)
         {
             _logger.Error(
                 $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address",
@@ -672,7 +826,7 @@ public class FrontendService : IFrontendService
 
             return true;
         }
-        catch (Exception e)
+        catch (Exception)
         {
             // ignored
         }
@@ -715,49 +869,52 @@ public class FrontendService : IFrontendService
 
             return false;
         }
-        
+
         string prefix = string.Empty;
         string suffix = string.Empty;
 
         if (PlatformHelper.Platform is PlatformId.Unknown or PlatformId.Wasm)
         {
             _logger.Error("Your platform is currently not supported");
-            
+
             return false;
         }
         else
         {
-            var dir = Directory.GetDirectories(_javaBinaryFolder).Where(x => Regex.Match(x, @"jdk-(\d+)\.(\d+)\.(\d+)\+(\d+)-jre").Success);
+            var dir = Directory.GetDirectories(_javaBinaryFolder)
+                .Where(x => Regex.Match(x, @"jdk-(\d+)\.(\d+)\.(\d+)\+(\d+)-jre").Success);
 
             if (dir.Count() == 0)
             {
-                _logger.Error("No directory found. Please make sure that you have installed the \"Eclipse Adoptium OpenJDK\" binary using the extension manager");
-                
+                _logger.Error(
+                    "No directory found. Please make sure that you have installed the \"Eclipse Adoptium OpenJDK\" binary using the extension manager");
+
                 return false;
             }
-            
+
             prefix = dir.First();
         }
 
         if (PlatformHelper.Platform is PlatformId.WinX64 or PlatformId.WinArm64)
         {
             suffix = ".exe";
-        } else if (PlatformHelper.Platform is PlatformId.OsxX64 or PlatformId.OsxArm64)
+        }
+        else if (PlatformHelper.Platform is PlatformId.OsxX64 or PlatformId.OsxArm64)
         {
             prefix += "/Content/Home";
         }
 
         prefix += "/bin";
-        
+
         string javaBinaryFile = Path.Combine(_javaBinaryFolder, $"{prefix}/java{suffix}");
 
         var serverJarFile = enumeratedResults.First();
 
         // Start server to run independently
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-        backendProcess = await ServiceManager.GetService<IToolExecuterService>()
-            .ExecuteBackgroundProcessAsync(javaBinaryFile,
-                extraJarArgs.Split(' ').Concat( ["-jar", serverJarFile]).ToArray(),
+        backendProcess = ServiceManager.GetService<IToolExecuterService>()
+            .ExecuteBackgroundProcess(javaBinaryFile,
+                _extraJarArgs.Split(' ').Concat(["-jar", serverJarFile]).ToArray(),
                 Path.GetDirectoryName(serverJarFile));
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
@@ -768,6 +925,8 @@ public class FrontendService : IFrontendService
 
     public async Task<bool> ServerStartedAsync()
     {
+        ApplicationProcess liveProc = _applicationStateService.AddState("Connecting to backend", AppState.Loading);
+        
         HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.Add(
@@ -776,29 +935,52 @@ public class FrontendService : IFrontendService
         client.BaseAddress = new Uri($"http://{_backendAddress}:{_backendPort}");
         client.Timeout = TimeSpan.FromSeconds(_requestTimeout);
         bool done = false;
+        
+        int failures = 0;
+
+        const int timeBetweenRetriesMS = 10;
+        const int retriesPerSecond = 1000 / timeBetweenRetriesMS;
 
         while (!done)
         {
             try
             {
                 var res = await client.GetAsync("/server-active");
-                _logger.Log("Server is awaiting requests", true);
+                _logger.Log("Server is awaiting requests");
                 done = true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                if (_useLocalBackend)
+                if (!_useLocalBackend)
                 {
                     _logger.Error(
                         "The remote server could not be reached. Make sure the server is started and reachable or switch to the local server");
 
+                    
+                    _applicationStateService.RemoveState(liveProc, "Error: The backend could not be reached");
+                    
                     return false;
                 }
 
-                _logger.Log("No response. Trying again in 10 ms", true);
-                await Task.Delay(10);
+                _logger.Log("No response. Trying again in 10 ms");
+                failures++;
+                await Task.Delay(timeBetweenRetriesMS);
+
+                if (failures % retriesPerSecond == 0)
+                {
+                    _logger.Log("The backend could not be reached. Retrying...", true);
+                } else if (failures > 10 * retriesPerSecond)
+                {
+                    _logger.Log("The backend could not be reached. Aborting...", true);
+                    
+                    _applicationStateService.RemoveState(liveProc, "Error: The backend could not be reached");
+                    
+                    return false;
+                }
             }
         }
+        
+        _applicationStateService.RemoveState(liveProc);
 
         return true;
     }

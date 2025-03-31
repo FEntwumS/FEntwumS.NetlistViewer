@@ -1,9 +1,11 @@
+using System.Net.Http.Headers;
 using Avalonia;
 using Avalonia.Markup.Xaml.Styling;
 using CommunityToolkit.Mvvm.Input;
 using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.ViewModels;
 using OneWare.Essentials.Enums;
+using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.PackageManager;
 using OneWare.Essentials.Services;
@@ -392,6 +394,27 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                         ]
                     }
                 ]
+            },
+            new PackageVersion()
+            {
+                Version = "0.8.0",
+                Targets =
+                [
+                    new PackageTarget()
+                    {
+                        Target = "all",
+                        Url =
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.8.0/fentwums-netlist-reader-server-v0.8.0.tar.gz",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-netlist-reader",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
+                    }
+                ]
             }
         ]
     };
@@ -516,7 +539,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         ]
     };
 
-    private ServiceManager _serviceManager;
+    private ServiceManager? _serviceManager;
 
     public const string NetlistPathSetting = "FEntwumS_NetlistReaderBackend";
     public const string JavaPathSetting = "FEntwumS_JDKPath";
@@ -537,10 +560,17 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerRegistry.Register<FrontendViewModel>();
     }
 
-    public void OnInitialized(IContainerProvider containerProvider)
+    public void OnInitialized(IContainerProvider? containerProvider)
     {
+        ILogger logger = containerProvider.Resolve<ILogger>();
+        
+        // Log some debug information
+        logger.Log($"FEntwumS.NetlistViewer: Platform: {PlatformHelper.Platform}");
+        
         containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistPackage);
         containerProvider.Resolve<IPackageService>().RegisterPackage(JDKPackage);
+        
+        logger.Log("FEntwumS.NetlistViewer: Registered Packages");
 
         containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", NetlistPathSetting,
             new FolderPathSetting("Path to folder containing server jar", "fentwums-netlist-reader", "",
@@ -567,6 +597,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         var frontendService = containerProvider.Resolve<IFrontendService>();
 
         containerProvider.Resolve<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
+        
+        logger.Log("FEntwumS.NetlistViewer: Registered FrontendViewModel as Document in dock system");
 
         containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
         {
@@ -575,7 +607,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                 menuItems.Add(new MenuItemViewModel("NetlistViewer")
                 {
                     Header = $"View netlist {jsonFile.Header}",
-                    Command = new AsyncRelayCommand(() => frontendService.ShowViewer(jsonFile))
+                    Command = new AsyncRelayCommand(() => frontendService.ShowViewerAsync(jsonFile))
                 });
             }
             else if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
@@ -583,7 +615,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                 menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateNetlist")
                 {
                     Header = $"View netlist for {vhdlFile.Header}",
-                    Command = new AsyncRelayCommand(() => frontendService.CreateVhdlNetlist(vhdlFile))
+                    Command = new AsyncRelayCommand(() => frontendService.CreateVhdlNetlistAsync(vhdlFile))
                 });
             }
             else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
@@ -591,7 +623,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                 menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateVerilogNetlist")
                 {
                     Header = $"View netlist for {verilogFile.Header}",
-                    Command = new AsyncRelayCommand(() => frontendService.CreateVerilogNetlist(verilogFile))
+                    Command = new AsyncRelayCommand(() => frontendService.CreateVerilogNetlistAsync(verilogFile))
                 });
             }
             else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
@@ -599,10 +631,12 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                 menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateSystemVerilogNetlist")
                 {
                     Header = $"View netlist for {systemVerilogFile.Header}",
-                    Command = new AsyncRelayCommand(() => frontendService.CreateSystemVerilogNetlist(systemVerilogFile))
+                    Command = new AsyncRelayCommand(() => frontendService.CreateSystemVerilogNetlistAsync(systemVerilogFile))
                 });
             }
         });
+        
+        logger.Log("FEntwumS.NetlistViewer: Registered custom context menu entries");
 
         settingsService.RegisterSettingCategory("Netlist Viewer", 100, "netlistIcon");
         settingsService.RegisterSettingSubCategory("Netlist Viewer", "VHDL");
@@ -649,9 +683,33 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_ContinueOnBinaryInstallError",
             new CheckBoxSetting("Continue if errors occur during dependency installation", false));
+        
+        logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
 
         // Subscribe the FrontendService _AFTER_ the relevant settings have been registered
         ServiceManager.GetService<FrontendService>().SubscribeToSettings();
         ServiceManager.GetService<IFpgaBbService>().SubscribeToSettings();
+        
+        logger.Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
+        
+        ServiceManager.GetService<IApplicationStateService>().RegisterShutdownAction(() =>
+        {
+            try
+            {
+                HttpClient client = new();
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(
+                    new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
+                client.DefaultRequestHeaders.Add("User-Agent", "FEntwumS.NetlistViewer");
+                client.BaseAddress = new Uri("http://localhost:8080");
+                client.Timeout = TimeSpan.FromSeconds(1);
+
+                var res = client.GetAsync("/shutdown-backend");
+            }
+            catch (Exception)
+            {
+                
+            }
+        });
     }
 }

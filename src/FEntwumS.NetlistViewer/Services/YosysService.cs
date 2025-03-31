@@ -30,7 +30,7 @@ public class YosysService : IYosysService
             .Subscribe(x => _yosysPath = Path.Combine(x, "bin", "yosys"));
     }
 
-    public async Task<bool> LoadVhdlAsync(IProjectFile file)
+    public Task<bool> LoadVhdlAsync(IProjectFile file)
     {
         throw new NotImplementedException();
     }
@@ -46,31 +46,44 @@ public class YosysService : IYosysService
 
         string top = Path.GetFileNameWithoutExtension(file.FullPath);
 
-        List<string> files = new List<string>();
+        List<string> verilogFileList = new List<string>();
+        
+        List<string> systemVerilogFileList = new List<string>();
 
         if (File.Exists(Path.Combine(workingDirectory, "design.v")))
         {
-            files.Add(Path.Combine(workingDirectory, "design.v"));
+            verilogFileList.Add(Path.Combine(workingDirectory, "design.v"));
         }
         else
         {
-            UniversalFpgaProjectRoot root = file.Root as UniversalFpgaProjectRoot;
+            if (file.Root is not UniversalFpgaProjectRoot root) return false;
             IEnumerable<string> verilogFiles = root.Files
                 .Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
-                .Where(x => x.Extension is ".v") // Include only Verilog and SystemVerilog files
+                .Where(x => x.Extension is ".v") // Include only Verilog files
                 .Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
                 .Select(x => x.FullPath);
-            // TODO
-            // get verilog files
 
-            files.AddRange(verilogFiles);
+            IEnumerable<string> systemVerilogFiles = root.Files
+                .Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
+                .Where(x => x.Extension is ".sv") // Include only SystemVerilog files
+                .Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
+                .Select(x => x.FullPath);
+
+            verilogFileList.AddRange(verilogFiles);
+            systemVerilogFileList.AddRange(systemVerilogFiles);
         }
 
         List<string> yosysArgs =
         [
             "-p",
-            $"read_verilog -nooverwrite \"{string.Join("\" \"", files)}\"; scratchpad -set flatten.separator \";\"; {_fpgaBbService.getBbCommand()} hierarchy -check -top {top}; proc; memory -nomap; flatten -scopename; write_json -compat-int {top}.json"
+            $"read_verilog -sv -nooverwrite \"{string.Join("\" \"", verilogFileList)}\" {(systemVerilogFileList.Count > 0 ? "\"" + string.Join("\" \"", systemVerilogFileList) + "\"" : "")}; scratchpad -set flatten.separator \";\"; {_fpgaBbService.getBbCommand()} hierarchy -check -top {top}; proc; memory -nomap; flatten -scopename; write_json -compat-int {top}.json"
         ];
+
+        if (systemVerilogFileList.Count > 0)
+        {
+            yosysArgs.Insert(0, "-m");
+            yosysArgs.Insert(1, "slang");
+        }
 
         bool success = false;
         string stdout = string.Empty;
@@ -99,9 +112,8 @@ public class YosysService : IYosysService
         }
 
         string top = Path.GetFileNameWithoutExtension(file.FullPath);
-
-
-        UniversalFpgaProjectRoot root = file.Root as UniversalFpgaProjectRoot;
+        
+        if (file.Root is not UniversalFpgaProjectRoot root) return false;
         IEnumerable<string> files = root.Files
             .Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
             .Where(x => x.Extension is ".sv") // Include only SystemVerilog files
@@ -113,7 +125,7 @@ public class YosysService : IYosysService
         List<string> yosysArgs =
         [
             "-m", "slang", "-p",
-            $"read_slang \"{string.Join("\" \"", files)}\"; scratchpad -set flatten.separator \";\"; hierarchy -top {top}; proc; memory -nomap; opt -full; flatten -scopename; write_json -compat-int netlist.json"
+            $"read_slang {string.Join(" ", files)}; scratchpad -set flatten.separator \";\"; hierarchy -top {top}; proc; memory -nomap; opt -full; flatten -scopename; write_json -compat-int netlist.json"
         ];
 
         bool success = false;
@@ -123,12 +135,10 @@ public class YosysService : IYosysService
         (success, stdout, stderr) =
             await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
 
-        _logger.Log(stdout);
-
         return success;
     }
 
-    public async Task<bool> CreateJsonNetlistAsync()
+    public Task<bool> CreateJsonNetlistAsync()
     {
         throw new NotImplementedException();
     }

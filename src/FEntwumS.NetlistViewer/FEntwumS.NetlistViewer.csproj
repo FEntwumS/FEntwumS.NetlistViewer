@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <Version>0.8.2</Version>
+        <Version>0.8.17</Version>
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -24,22 +24,16 @@
     </ItemGroup>
     
     <ItemGroup>
-        <None Include="../../License.md" Pack="true" PackagePath="" />
+        <None Include="../../License.md" Pack="true" PackagePath=""/>
     </ItemGroup>
     
     <ItemGroup>
       <PackageReference Include="OneWare.Essentials" Version="0.11.3" Private="false" ExcludeAssets="runtime;Native">
               <PrivateAssets>all</PrivateAssets>
       </PackageReference>
-      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" Private="false" ExcludeAssets="runtime;Native" >
+      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" Private="false" ExcludeAssets="runtime;Native">
           <PrivateAssets>all</PrivateAssets>
       </PackageReference>
-    </ItemGroup>
-    
-    <ItemGroup><!--      <ProjectReference Include="..\FEntwumS.Common\FEntwumS.Common.csproj" />-->
-<!--      <ProjectReference Include="..\FEntwumS.WaveformInteractor\FEntwumS.WaveformInteractor.csproj" />-->
-    
-<!--      <ProjectReference Include="..\FEntwumS.WaveformInteractor\FEntwumS.WaveformInteractor.csproj" />-->
     </ItemGroup>
 
     <Target Name="GenerateCompatibilityFile" AfterTargets="Build">
@@ -47,7 +41,10 @@
             <FilteredDependencies Include="@(PackageReference)" Condition="'%(Private)' == 'false'" />
         </ItemGroup>
 
-        <WriteLinesToFile File="$(OutDir)compatibility.txt" Lines="@(FilteredDependencies->'%(Identity) : %(Version)')" Overwrite="true" />
+        <WriteLinesToFile
+                File="$(OutDir)compatibility.txt"
+                Lines="@(FilteredDependencies->'%(Identity) : %(Version)')"
+                Overwrite="true" />
     </Target>
     
 </Project>

@@ -29,12 +29,12 @@ public class ViewportDimensionService : IViewportDimensionService
         return width;
     }
 
-    public DRect GetZoomElementDimensions(UInt64 netlistId)
+    public DRect? GetZoomElementDimensions(UInt64 netlistId)
     {
         return specificData[netlistId].ClickedElementBounds;
     }
 
-    public void SetZoomElementDimensions(UInt64 netlistId, DRect ZoomElementDimensions)
+    public void SetZoomElementDimensions(UInt64 netlistId, DRect? ZoomElementDimensions)
     {
         if (specificData.ContainsKey(netlistId))
         {
@@ -46,12 +46,12 @@ public class ViewportDimensionService : IViewportDimensionService
         }
     }
 
-    public string GetClickedElementPath(UInt64 netlistId)
+    public string? GetClickedElementPath(UInt64 netlistId)
     {
         return specificData[netlistId].ClickedElementPath;
     }
 
-    public void SetClickedElementPath(UInt64 netlistId, string ClickedElementName)
+    public void SetClickedElementPath(UInt64 netlistId, string? ClickedElementName)
     {
         if (specificData.ContainsKey(netlistId))
         {

@@ -7,15 +7,15 @@ public interface IFrontendService
 {
     public void SubscribeToSettings();
 
-    public Task CreateVhdlNetlist(IProjectFile vhdl);
+    public Task CreateVhdlNetlistAsync(IProjectFile vhdl);
 
-    public Task CreateVerilogNetlist(IProjectFile verilog);
+    public Task CreateVerilogNetlistAsync(IProjectFile verilog);
 
-    public Task CreateSystemVerilogNetlist(IProjectFile sVerilog);
+    public Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog);
 
-    public Task ShowViewer(IProjectFile json);
+    public Task ShowViewerAsync(IProjectFile json);
 
-    public Task ExpandNode(string nodePath, FrontendViewModel vm);
+    public Task ExpandNodeAsync(string? nodePath, FrontendViewModel vm);
 
     public Task<bool> StartBackendIfNotStartedAsync();
 

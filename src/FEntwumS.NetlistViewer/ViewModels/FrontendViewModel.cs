@@ -6,6 +6,8 @@ using CommunityToolkit.Mvvm.Input;
 using FEntwumS.NetlistViewer.Controls;
 using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.Types;
+using OneWare.Essentials.Enums;
+using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
 
@@ -13,34 +15,7 @@ namespace FEntwumS.NetlistViewer.ViewModels;
 
 public class FrontendViewModel : ExtendedTool
 {
-    public ICommand LoadJSONCommand { get; }
-
-    public string? StatusText
-    {
-        get { return statusText; }
-        set
-        {
-            statusText = value;
-            OnPropertyChanged();
-        }
-    }
-
-    private string? testString;
-
-    public string TestString
-    {
-        get { return testString; }
-        set
-        {
-            testString = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public ICommand TestAsyncCommand { get; }
-    public ICommand UpdateScaleCommand { get; }
-
-    private string? statusText;
+    public ICommand LoadJsonCommand { get; }
     private double scale { get; set; }
 
     private AvaloniaList<NetlistElement> items { get; set; }
@@ -114,11 +89,9 @@ public class FrontendViewModel : ExtendedTool
         }
     }
 
-    public ICommand OnInitializedCommand { get; }
+    private Stream? file { get; set; }
 
-    private Stream file { get; set; }
-
-    public Stream File
+    public Stream? File
     {
         get => file;
         set
@@ -128,16 +101,16 @@ public class FrontendViewModel : ExtendedTool
         }
     }
 
-    private string clickedElementPath { get; set; }
+    private string? clickedElementPath { get; set; }
 
-    public string ClickedElementPath
+    public string? ClickedElementPath
     {
         get => clickedElementPath;
         set
         {
             this.clickedElementPath = value;
             OnPropertyChanged();
-            ClickedElementPathChanged();
+            _ = ClickedElementPathChangedAsync();
         }
     }
 
@@ -170,6 +143,7 @@ public class FrontendViewModel : ExtendedTool
 
 
     private ICustomLogger _logger { get; set; }
+    private readonly IApplicationStateService _applicationStateService;
 
     private FrontendService _frontendService { get; set; }
 
@@ -181,10 +155,11 @@ public class FrontendViewModel : ExtendedTool
         FitToZoom = false;
 
         _logger = ServiceManager.GetCustomLogger();
+        _applicationStateService = ServiceManager.GetService<IApplicationStateService>();
 
         // OneWare uses the Community MVVM Toolkit. If ReactiveUI is used in an extension, any access to a bound property
         // inside a ReactiveCommand leads to an exception
-        LoadJSONCommand = new RelayCommand(() => OpenFileImpl());
+        LoadJsonCommand = new RelayCommand(() => _ = OpenFileImplAsync());
 
         FitToZoomCommand = new RelayCommand(() => { FitToZoom = !FitToZoom; });
 
@@ -193,25 +168,25 @@ public class FrontendViewModel : ExtendedTool
         FileLoaded = false;
     }
 
-    public async Task ClickedElementPathChanged()
+    public async Task ClickedElementPathChangedAsync()
     {
-        await _frontendService.ExpandNode(clickedElementPath, this);
+        await _frontendService.ExpandNodeAsync(clickedElementPath, this);
     }
 
     public override bool OnClose()
     {
-        ServiceManager.GetService<FrontendService>().CloseNetlistOnServerAsync(netlistId);
+        _ = ServiceManager.GetService<FrontendService>().CloseNetlistOnServerAsync(netlistId);
 
         return base.OnClose();
     }
 
-    public async Task UpdateScaleImpl()
+    private void UpdateScaleImpl()
     {
         IsLoaded = !IsLoaded;
         FitToZoom = !FitToZoom;
     }
 
-    public async Task OpenFileImpl()
+    public async Task OpenFileImplAsync()
     {
         var jsonLoader = ServiceManager.GetJsonLoader();
 
@@ -219,20 +194,28 @@ public class FrontendViewModel : ExtendedTool
         {
             try
             {
-                _logger.Log("Opening file...", true);
+                ApplicationProcess readProc = _applicationStateService.AddState("Reading response", AppState.Loading);
+                
+                _logger.Log("Opening file...");
 
                 //var file = fileOpener.OpenFileAsync();
 
-                if (file is null)
+                if (File is null)
                 {
                     _logger.Error("File is empty.");
                     return;
                 }
 
-                _logger.Log("File loaded", true);
-
-                Task t = jsonLoader.OpenJson(file, netlistId);
+                _logger.Log("File loaded");
+                
+                _applicationStateService.RemoveState(readProc);
+                
+                ApplicationProcess loadProc = _applicationStateService.AddState("Loading JSON", AppState.Loading);
+                
+                Task t = jsonLoader.OpenJsonAsync(File, netlistId);
                 t.Wait();
+                
+                _applicationStateService.RemoveState(loadProc);
 
                 File.Close();
                 
@@ -240,13 +223,13 @@ public class FrontendViewModel : ExtendedTool
 
                 Items.Clear();
 
-                Items.AddRange(jsonLoader.parseJson(0, 0, this, netlistId).Result);
+                Items.AddRange(jsonLoader.ParseJsonAsync(0, 0, this, netlistId).Result);
 
-                _ = UpdateScaleImpl();
+                UpdateScaleImpl();
                 
                 FileLoaded = true;
 
-                _logger.Log("JSON read", true);
+                _logger.Log("JSON read");
             }
             catch (Exception e)
             {

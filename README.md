@@ -7,13 +7,24 @@ the software.
 
 ## System requirements
 
-Currently, only Windows is supported, but the plugin should work on all platforms OneWare Studio runs on, except
+Currently, only Windows and Linux are supported, but the plugin should work on all platforms OneWare Studio runs on, except
 browsers.
 
 ## Dependencies
 
-Your installation of OneWare Studio needs to have the `OSS Cad Suite Integration` installed with version 2025-01-22 or
-later, as well as the most recent version of the `GHDL Extension`.
+The FEntwumS Netlist Viewer depends on the following OneWare Studio plugins. Please install them before you install the
+Netlist Viewer.
+
+| Category | Dependency | Minimum version |
+| -------- | ---------- | --------------- |
+| Plugins > Simulators | GHDL Extension | 0.10.7 |
+| Binaries | GHDL | 5.0.1 |
+| Binaries | OSS CAD Suite | 2025.01.22 |
+
+## Limitations
+
+The viewer currently only supports designs written either exclusively in VHDL or exclusively in Verilog. While mixed
+Verilog/SystemVerilog designs can likely be displayed, this is **not** guaranteed.
 
 # About
 
@@ -30,13 +41,16 @@ Manager. To install this plugin, you will need to add a custom package source. P
 1. Open the settings menu
 2. Go to the `Package Manager` tab
 3. Add a new custom package source pointing to
-   `https://raw.githubusercontent.com/FEntwumS/Oneware.NetlistReaderFrontend/refs/heads/master/oneware-extension.json`
+   `https://raw.githubusercontent.com/FEntwumS/FEntwumS.NetlistViewer/refs/heads/master/oneware-extension.json`
 4. Click `Save`, then exit the settings menu
 5. Open the package manager
 6. Refresh the package manager
 7. Done! The plugin should now be available for you to install!
-8. Install both the `FEntwumS.NetlistViewer Extension` plugin as well as the `FEntwumS NetlistViewer Backend`  and the
+8. Install the `FEntwumS.NetlistViewer Extension` plugin
+9. Install both the `FEntwumS NetlistViewer Backend` and the
    `Eclipse Adoptiom OpenJDK` binaries using the package manager
+10. And that's it. You have successfully installed the FEntwumS Netlist Viewer. For usage instructions, see the
+    following sections 
 
 ## Netlist viewer
 
@@ -69,8 +83,7 @@ automatically generate a netlist using yosys and then display it in a new tab. Y
 clicking and dragging with the left mouse button pans the view and left-clicking on an entity will either expand or
 collapse it (depending on whether the entity is collapsed or not).
 
-Left-clicking on a cell will open the corresponding HDL file. Synthesized Verilog code is opened for VHDL designs at the
-moment. Future work will enable the direct opening of the corresponding VHDL file.
+Left-clicking on a cell will open the corresponding HDL file.
 
 ### Viewing a generated netlist
 
@@ -153,3 +166,11 @@ If you are using a remote backend installation, please make sure that you have e
 port and that the provided address is reachable.
 
 If you are using a local backend installation, please file a bug report.
+
+## I get an error telling me to update one of my OneWare Studio plugins, but I am unable to do so because I depend on the specific version that is installed
+
+To ensure that all the OneWare Studio plugins the netlist viewer depends on are installed, a check is run. If this check
+fails for you, for example due to using an older version of a certain plugin, you can tick the `Continue if errors occur
+during dependency installation` checkbox in the experimental section of the Netlist Viewer's settings. By enabling this
+setting, the result of the check is ignored. This means that **you are on your own**! Will it may look as if everything is
+working as intended, this configuration is **not** supported and can stop working without notice.
