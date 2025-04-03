@@ -1,8 +1,7 @@
-﻿using System.Text;
-using OneWare.Essentials.Enums;
-using OneWare.Essentials.Models;
-using OneWare.Essentials.Services;
+﻿using OneWare.Essentials.Models;
 using OneWare.UniversalFpgaProjectSystem.Models;
+using FEntwumS.Common.Services;
+using OneWare.Essentials.Services;
 
 namespace FEntwumS.NetlistViewer.Services;
 

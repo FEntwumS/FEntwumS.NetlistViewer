@@ -4,8 +4,8 @@ using Avalonia.Collections;
 using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.Input;
 using FEntwumS.NetlistViewer.Controls;
-using FEntwumS.NetlistViewer.Services;
-using FEntwumS.NetlistViewer.Types;
+using FEntwumS.Common.Services;
+using FEntwumS.Common.Types;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
@@ -145,7 +145,7 @@ public class FrontendViewModel : ExtendedTool
     private ICustomLogger _logger { get; set; }
     private readonly IApplicationStateService _applicationStateService;
 
-    private FrontendService _frontendService { get; set; }
+    private IFrontendService _frontendService { get; set; }
 
     public FrontendViewModel() : base("Frontend")
     {
@@ -163,7 +163,7 @@ public class FrontendViewModel : ExtendedTool
 
         FitToZoomCommand = new RelayCommand(() => { FitToZoom = !FitToZoom; });
 
-        _frontendService = ServiceManager.GetService<FrontendService>();
+        _frontendService = ServiceManager.GetService<IFrontendService>();
         
         FileLoaded = false;
     }
@@ -175,7 +175,7 @@ public class FrontendViewModel : ExtendedTool
 
     public override bool OnClose()
     {
-        _ = ServiceManager.GetService<FrontendService>().CloseNetlistOnServerAsync(netlistId);
+        _ = ServiceManager.GetService<IFrontendService>().CloseNetlistOnServerAsync(netlistId);
 
         return base.OnClose();
     }

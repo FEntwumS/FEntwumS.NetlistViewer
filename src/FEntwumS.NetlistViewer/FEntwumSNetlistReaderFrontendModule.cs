@@ -12,6 +12,8 @@ using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
 using Prism.Ioc;
 using Prism.Modularity;
+using FEntwumS.Common.Services;
+using FEntwumS.Common.Types;
 
 namespace FEntwumS.NetlistViewer;
 

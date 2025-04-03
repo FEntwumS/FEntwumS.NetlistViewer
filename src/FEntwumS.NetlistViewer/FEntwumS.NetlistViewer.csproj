@@ -35,6 +35,10 @@
           <PrivateAssets>all</PrivateAssets>
       </PackageReference>
     </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\FEntwumS.Common\FEntwumS.Common.csproj" />
+    </ItemGroup>
 
     <Target Name="GenerateCompatibilityFile" AfterTargets="Build">
         <ItemGroup>

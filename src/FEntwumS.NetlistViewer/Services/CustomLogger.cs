@@ -1,9 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Media;
 using OneWare.Essentials.Services;
-using TextMateSharp.Themes;
+using FEntwumS.Common.Services;
 
 namespace FEntwumS.NetlistViewer.Services;
 

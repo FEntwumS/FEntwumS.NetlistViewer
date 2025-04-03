@@ -1,7 +1,9 @@
 ﻿using System.Text.Json.Nodes;
 using Avalonia;
-using FEntwumS.NetlistViewer.Types;
+using FEntwumS.Common.Services;
+using FEntwumS.Common.Types;
 using FEntwumS.NetlistViewer.ViewModels;
+using OneWare.Essentials.ViewModels;
 
 namespace FEntwumS.NetlistViewer.Services;
 
@@ -52,7 +54,7 @@ public class JsonLoader : IJsonLoader
     }
 
     public async Task<List<NetlistElement>> ParseJsonAsync(double xRef, double yRef,
-        FrontendViewModel mw, UInt64 netlistId)
+        ExtendedTool mw, UInt64 netlistId)
     {
         await LoadingDoneAsync();
 

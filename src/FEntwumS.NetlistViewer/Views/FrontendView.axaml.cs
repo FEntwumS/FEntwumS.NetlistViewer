@@ -3,8 +3,8 @@ using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using FEntwumS.NetlistViewer.Controls;
-using FEntwumS.NetlistViewer.Services;
-using FEntwumS.NetlistViewer.Types;
+using FEntwumS.Common.Services;
+using FEntwumS.Common.Types;
 using FEntwumS.NetlistViewer.ViewModels;
 using OneWare.Essentials.Services;
 
