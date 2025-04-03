@@ -1,9 +1,7 @@
-using System.Collections.ObjectModel;
 using System.Text;
-using FEntwumS.NetlistViewer.Services;
+using FEntwumS.Common.Services;
 using Newtonsoft.Json.Linq;
 using OneWare.Essentials.Services;
-using OneWare.Vcd.Viewer.Models;
 using Prism.Ioc;
 using ILogger = OneWare.Essentials.Services.ILogger;
 

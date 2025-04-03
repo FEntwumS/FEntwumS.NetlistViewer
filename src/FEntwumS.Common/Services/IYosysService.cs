@@ -1,4 +1,5 @@
-﻿using OneWare.Essentials.Models;
+﻿
+using OneWare.Essentials.Models;
 
 namespace FEntwumS.Common.Services;
 
