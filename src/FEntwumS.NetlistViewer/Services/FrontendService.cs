@@ -925,6 +925,9 @@ public class FrontendService : IFrontendService
 
     public async Task<bool> ServerStartedAsync()
     {
+        const int timeBetweenRetriesMS = 100;
+        const int retriesPerSecond = 1000 / timeBetweenRetriesMS;
+        
         ApplicationProcess liveProc = _applicationStateService.AddState("Connecting to backend", AppState.Loading);
         
         HttpClient client = new();
@@ -933,13 +936,10 @@ public class FrontendService : IFrontendService
             new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
         client.DefaultRequestHeaders.Add("User-Agent", "FEntwumS.NetlistViewer");
         client.BaseAddress = new Uri($"http://{_backendAddress}:{_backendPort}");
-        client.Timeout = TimeSpan.FromSeconds(_requestTimeout);
+        client.Timeout = TimeSpan.FromMilliseconds(timeBetweenRetriesMS);
         bool done = false;
         
         int failures = 0;
-
-        const int timeBetweenRetriesMS = 10;
-        const int retriesPerSecond = 1000 / timeBetweenRetriesMS;
 
         while (!done)
         {
@@ -962,7 +962,7 @@ public class FrontendService : IFrontendService
                     return false;
                 }
 
-                _logger.Log("No response. Trying again in 10 ms");
+                _logger.Log($"No response. Trying again in {timeBetweenRetriesMS} ms");
                 failures++;
                 await Task.Delay(timeBetweenRetriesMS);
 
