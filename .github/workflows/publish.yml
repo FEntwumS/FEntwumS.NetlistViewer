@@ -27,14 +27,14 @@ jobs:
         run: dotnet build src/FEntwumS.NetlistViewer/FEntwumS.NetlistViewer.csproj -c Release -o publish
       - name: Generate licensing information for viewer
         id: license
-        run: nuget-license -i ./src/FEntwumS.NetlistViewer/FEntwumS.NetlistViewer.csproj -override ./src/FEntwumS.NetlistViewer/override-third-party.json -t -o Table -d ./publish/THIRD-PARTY-LICENSES -fo ./publish/THIRD-PARTY-NOTICE.txt
+        run: nuget-license -i ./src/FEntwumS.NetlistViewer/FEntwumS.NetlistViewer.csproj -override ./override-third-party.json -t -o Table -d ./publish/THIRD-PARTY-LICENSES -fo ./publish/THIRD-PARTY-NOTICE.txt
       - name: Copy font license for viewer
         id: font-license
         run: cp ./src/FEntwumS.NetlistViewer/Assets/Fonts/MartianMono-LICENSE.txt ./publish/THIRD-PARTY-LICENSES/Martian-Mono-License.txt
       - name: Build interactor
         run: dotnet build src/FEntwumS.WaveformInteractor/FEntwumS.WaveformInteractor.csproj -c Release -o publish/FEntwumS.WaveformInteractor
       - name: Generate licensing information for interactor
-        run: nuget-license -i ./src/FEntwumS.WaveformInteractor/FEntwumS.WaveformInteractor.csproj -override ./src/FEntwumS.WaveformInteractor/override-third-party.json -t -ot Table -d ./publish/FEntwumS.WaveformInteractor/THIRD-PARTY-LICENSES -fo ./publish/FEntwumS.WaveformInteractor/THIRD-PARTY-NOTICE.txt
+        run: nuget-license -i ./src/FEntwumS.WaveformInteractor/FEntwumS.WaveformInteractor.csproj -override .override-third-party.json -t -o Table -d ./publish/FEntwumS.WaveformInteractor/THIRD-PARTY-LICENSES -fo ./publish/FEntwumS.WaveformInteractor/THIRD-PARTY-NOTICE.txt
       - name: Compress
         if: steps.license.outcome == 'success'
         uses: thedoctor0/zip-release@0.7.1
