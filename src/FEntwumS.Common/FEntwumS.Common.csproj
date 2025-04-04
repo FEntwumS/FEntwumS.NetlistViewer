@@ -21,7 +21,7 @@
     <PropertyGroup>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-        <OutputPath>../../bin/$(Configuration)/$(MSBuildProjectName)/</OutputPath>
+        <OutputPath>../../bin/$(Configuration)/ecosystem/$(MSBuildProjectName)/</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
