@@ -5,7 +5,6 @@ using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
 using FEntwumS.Common;
 using FEntwumS.Common.Services;
-using FEntwumS.NetlistViewer.Services;
 using FEntwumS.WaveformInteractor.Services;
 using FEntwumS.WaveformInteractor.ViewModels;
 using OneWare.Essentials.Models;

@@ -42,7 +42,6 @@
     <ItemGroup>
         <ProjectReference Include="..\FEntwumS.Common\FEntwumS.Common.csproj"/>
         <PackageReference Include="OneWare.ProjectSystem" Version="0.31.2" Private="false"/>
-        <ProjectReference Include="..\FEntwumS.NetlistViewer\FEntwumS.NetlistViewer.csproj" />
     </ItemGroup>
 
     <Target Name="GenerateCompatibilityFile" AfterTargets="Build">
