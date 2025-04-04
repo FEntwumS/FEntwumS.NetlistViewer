@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using OneWare.Essentials.ViewModels;
 
-namespace FEntwumS.NetlistViewer.Types;
+namespace FEntwumS.Common.Types;
 
 public class NetlistElement
 {

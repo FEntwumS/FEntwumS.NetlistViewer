@@ -1,4 +1,6 @@
-﻿namespace FEntwumS.NetlistViewer.Services;
+﻿using FEntwumS.Common.Services;
+
+namespace FEntwumS.NetlistViewer.Services;
 
 public class OAATHashService : IHashService
 {

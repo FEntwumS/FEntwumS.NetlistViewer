@@ -1,4 +1,4 @@
-﻿namespace FEntwumS.NetlistViewer.Types;
+﻿namespace FEntwumS.Common.Types;
 
 public record ViewportInformation
 {

@@ -1,7 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 
-namespace FEntwumS.NetlistViewer.Services;
+namespace FEntwumS.Common.Services;
 
 public interface IFileOpener
 {

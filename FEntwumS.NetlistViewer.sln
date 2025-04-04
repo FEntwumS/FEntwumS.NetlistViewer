@@ -20,6 +20,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actions", "Actions", "{1239
 		.github\workflows\test.yml = .github\workflows\test.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FEntwumS.Common", "src\FEntwumS.Common\FEntwumS.Common.csproj", "{3384C3FF-3690-4DBF-8D85-8A4202AA320F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FEntwumS.WaveformInteractor", "src\FEntwumS.WaveformInteractor\FEntwumS.WaveformInteractor.csproj", "{B772FDF2-20BF-477B-B2EC-A1C11DA6C4D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +38,14 @@ Global
 		{393BAF19-4387-413C-AC2E-2D22577783FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{393BAF19-4387-413C-AC2E-2D22577783FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{393BAF19-4387-413C-AC2E-2D22577783FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3384C3FF-3690-4DBF-8D85-8A4202AA320F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3384C3FF-3690-4DBF-8D85-8A4202AA320F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3384C3FF-3690-4DBF-8D85-8A4202AA320F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3384C3FF-3690-4DBF-8D85-8A4202AA320F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B772FDF2-20BF-477B-B2EC-A1C11DA6C4D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B772FDF2-20BF-477B-B2EC-A1C11DA6C4D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B772FDF2-20BF-477B-B2EC-A1C11DA6C4D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B772FDF2-20BF-477B-B2EC-A1C11DA6C4D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

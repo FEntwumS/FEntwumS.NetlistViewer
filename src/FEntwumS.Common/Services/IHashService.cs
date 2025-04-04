@@ -1,4 +1,4 @@
-﻿namespace FEntwumS.NetlistViewer.Services;
+﻿namespace FEntwumS.Common.Services;
 
 public interface IHashService
 {

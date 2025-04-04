@@ -5,6 +5,6 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 .idea
-src/FEntwumS.NetlistViewer/publish
-FEntwumS.NetlistReaderFrontend.sln.DotSettings.user
-FEntwumS.NetlistViewer.sln.DotSettings.user
+src/FEntwumS.NetlistReaderFrontend/publish
+*.DotSettings.user
+publish/

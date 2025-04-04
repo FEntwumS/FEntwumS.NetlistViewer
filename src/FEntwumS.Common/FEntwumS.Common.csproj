@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <PackageId>FEntwumS.Common</PackageId> <!-- Package ID (name of your package) -->
+        <Version>0.0.3</Version> <!-- Version of the package -->
+        <Authors>Jonas Lux - TH Köln</Authors>
+        <Description>Shared interfaces for FEntwumS project</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression> <!-- License (optional) -->
+<!--        <PackageProjectUrl>https://github.com/YourRepo</PackageProjectUrl> &lt;!&ndash; URL to the project (optional) &ndash;&gt;-->
+<!--        <RepositoryUrl>https://github.com/YourRepo</RepositoryUrl> &lt;!&ndash; URL to the source repository &ndash;&gt;-->
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <RootNamespace>FEntwumS.Common</RootNamespace>
+
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+        <OutputPath>../../bin/$(Configuration)/ecosystem/$(MSBuildProjectName)/</OutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" ExcludeAssets="runtime;Native" />
+      <PackageReference Include="OneWare.Vcd.Viewer" Version="0.31.2" ExcludeAssets="runtime;Native"/>
+    </ItemGroup>
+
+    <!--    pushing to local nuget repo    -->
+    <Target Name="PushNuGetPackage" AfterTargets="Pack">
+<!--        <Exec Command="dotnet nuget push bin/Debug/FEntwumS.Common.$(Version).nupkg &#45;&#45;source '$(SolutionDir)local-nuget'" />    -->
+    </Target>
+
+</Project>

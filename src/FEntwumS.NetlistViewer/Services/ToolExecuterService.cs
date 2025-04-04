@@ -1,6 +1,7 @@
 ﻿using Asmichi.ProcessManagement;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Services;
+using FEntwumS.Common.Services;
 
 namespace FEntwumS.NetlistViewer.Services;
 

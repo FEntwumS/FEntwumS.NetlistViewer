@@ -1,7 +1,7 @@
 ﻿using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 
-namespace FEntwumS.NetlistViewer.Services;
+namespace FEntwumS.Common.Services;
 
 public interface IGhdlService
 {

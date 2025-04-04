@@ -1,6 +1,6 @@
 ﻿using Avalonia;
 
-namespace FEntwumS.NetlistViewer.Types;
+namespace FEntwumS.Common.Types;
 
 public class DRect(double x, double y, double width, double height, ushort zIndex, NetlistElement? element)
 {

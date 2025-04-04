@@ -11,6 +11,8 @@ using OneWare.Essentials.Helpers;
 using OneWare.Essentials.PackageManager;
 using OneWare.ProjectSystem.Models;
 using StreamContent = System.Net.Http.StreamContent;
+using FEntwumS.Common.Services;
+using OneWare.Essentials.ViewModels;
 
 namespace FEntwumS.NetlistViewer.Services;
 
@@ -661,24 +663,29 @@ public class FrontendService : IFrontendService
         _applicationStateService.RemoveState(proc);
     }
 
-    public async Task ExpandNodeAsync(string? nodePath, FrontendViewModel vm)
+    public async Task ExpandNodeAsync(string? nodePath, ExtendedTool vm)
     {
+        if (vm is not FrontendViewModel viewmodel)
+        {
+            return;
+        }
+        
         ApplicationProcess expandProc = _applicationStateService.AddState("Layouting in progress", AppState.Loading);
         
         _logger.Log("Sending request to ExpandNode");
 
-        var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath, null);
+        var resp = await PostAsync("/expandNode?hash=" + viewmodel.NetlistId + "&nodePath=" + nodePath, null);
 
         if (resp is not { IsSuccessStatusCode: true })
         {
             return;
         }
 
-        vm.File = await resp.Content.ReadAsStreamAsync();
+        viewmodel.File = await resp.Content.ReadAsStreamAsync();
 
         _logger.Log("Answer received");
 
-        await vm.OpenFileImplAsync();
+        await viewmodel.OpenFileImplAsync();
 
         _logger.Log("Done");
         

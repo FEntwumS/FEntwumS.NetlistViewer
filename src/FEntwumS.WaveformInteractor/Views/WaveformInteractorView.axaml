@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Width="400" Height="30"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:FEntwumS.WaveformInteractor.ViewModels"
+        x:Class="FEntwumS.WaveformInteractor.Views.WaveformInteractorView"
+        x:DataType="viewModels:WaveformInteractorViewModel"
+        x:CompileBindings="True"
+        >
+        <StackPanel Orientation="Horizontal">
+                <!-- TextBox bound to Text property of ViewModel -->
+                <TextBox Text="{Binding Text}" Width="200" />
+
+                <!-- Three buttons, each handling Click event to change the text -->
+                <Button Content="Button 1" Click="Button1_Click" Width="100"/>
+                <Button Content="Button 2" Click="Button2_Click" Width="100"/>
+                <Button Content="Button 3" Click="Button3_Click" Width="100"/>
+                <Separator Margin="0" Width="1" Background="{DynamicResource ThemeBorderLowBrush}" Height="24" />
+                <!-- <Button ToolTip.Tip="Programs FPGA" Command="{Binding DownloadAsync}" -->
+                        <!-- IsEnabled="{Binding Project.Loader, FallbackValue={x:Null}, Converter={x:Static ObjectConverters.IsNotNull}}"> -->
+                        <!-- <StackPanel Margin="2 0 0 0" Orientation="Horizontal" Spacing="5"> -->
+                        <!--         <Grid VerticalAlignment="Center"> -->
+                        <!--                 <Image -->
+                        <!--                         IsVisible="{Binding !LongTermProgramming}" -->
+                        <!--                         Source="{DynamicResource VsImageLib.Download16X}" -->
+                        <!--                         Height="14" Width="14" VerticalAlignment="Center" /> -->
+                        <!--                 <Image -->
+                        <!--                         IsVisible="{Binding LongTermProgramming}" -->
+                        <!--                         Source="{DynamicResource VsImageLib.DownloadAlternative16X}" -->
+                        <!--                         Height="14" Width="14" VerticalAlignment="Center" /> -->
+                        <!--         </Grid> -->
+                        <!--         <TextBlock Text="Download" VerticalAlignment="Center" /> -->
+                        <!-- </StackPanel> -->
+                <!-- </Button> -->
+        </StackPanel>
+</UserControl>
+
+

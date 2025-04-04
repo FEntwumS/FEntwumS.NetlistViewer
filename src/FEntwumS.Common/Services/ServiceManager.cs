@@ -1,7 +1,8 @@
 ﻿using OneWare.Essentials.Services;
 using Prism.Ioc;
+using FEntwumS.Common.Services;
 
-namespace FEntwumS.NetlistViewer.Services;
+namespace FEntwumS.Common.Services;
 
 public class ServiceManager
 {
