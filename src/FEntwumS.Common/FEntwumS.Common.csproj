@@ -18,8 +18,10 @@
 
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <OutputPath>../../bin/Debug/net9.0/</OutputPath>
+    <PropertyGroup>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+        <OutputPath>../../bin/$(Configuration)/$(MSBuildProjectName)/</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
