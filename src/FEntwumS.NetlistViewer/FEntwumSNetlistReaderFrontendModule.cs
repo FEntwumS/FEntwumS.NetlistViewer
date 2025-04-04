@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Reflection;
 using Avalonia;
 using Avalonia.Markup.Xaml.Styling;
 using CommunityToolkit.Mvvm.Input;
@@ -569,8 +570,30 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         // Log some debug information
         logger.Log($"FEntwumS.NetlistViewer: Platform: {PlatformHelper.Platform}");
         
+        // Add binary packages to store
         containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistPackage);
         containerProvider.Resolve<IPackageService>().RegisterPackage(JDKPackage);
+        
+        // Add WaveformInteractor plugin to store
+        string applicationDir = "";
+        
+        // Get compilation directory as fallback
+        string developmentDir = (Assembly.GetExecutingAssembly().CustomAttributes.FirstOrDefault(attr => (attr.AttributeType.FullName is "System.Reflection.AssemblyMetadataAttribute" && attr.ConstructorArguments[0].Value as string is "BuildDir"))!.ConstructorArguments[1].Value as string)!;
+        string productionDir =
+            Path.Combine(containerProvider.Resolve<IPaths>().PluginsDirectory, "FEntwumS.NetlistViewer/");
+
+        if (Assembly.GetExecutingAssembly().CustomAttributes.FirstOrDefault(attr =>
+                attr.AttributeType.FullName is "System.Reflection.AssemblyConfigurationAttribute" &&
+                attr.ConstructorArguments[0].Value as string is "Debug") != null)
+        {
+            applicationDir = developmentDir;
+        }
+        else
+        {
+            applicationDir = productionDir;
+        }
+        
+        containerProvider.Resolve<IPluginService>().AddPlugin(Path.Combine(applicationDir, "FEntwumS.WaveformInteractor"));
         
         logger.Log("FEntwumS.NetlistViewer: Registered Packages");
 

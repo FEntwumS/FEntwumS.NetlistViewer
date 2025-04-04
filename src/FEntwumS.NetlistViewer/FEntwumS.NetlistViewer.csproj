@@ -18,6 +18,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <!-- Include must be the fully qualified .NET type name of the Attribute to create. -->
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <!-- _Parameter1, _Parameter2, etc. correspond to the
+                matching parameter of a constructor of that .NET attribute type -->
+            <_Parameter1>BuildDir</_Parameter1>
+            <_Parameter2>$(MSBuildProjectDirectory)/$(OutDir)</_Parameter2>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+
+    <ItemGroup>
         <AvaloniaResource Include="Assets\**\*.*" />
     </ItemGroup>
     
