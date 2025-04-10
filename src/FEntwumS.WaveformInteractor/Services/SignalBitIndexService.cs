@@ -1,4 +1,5 @@
 using System.Text.Json;
+using FEntwumS.Common.Types;
 
 namespace FEntwumS.WaveformInteractor.Services;
 
@@ -61,10 +62,4 @@ public class SignalBitIndexService
             }
         }
     }
-}
-
-public class BitIndexEntry
-{
-    public int BitIndexId { get; set; }
-    public List<int> BitIndices { get; set; } = new();
 }

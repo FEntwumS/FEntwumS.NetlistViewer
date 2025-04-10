@@ -3,10 +3,8 @@ using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
-using FEntwumS.Common;
 using FEntwumS.Common.Services;
 using FEntwumS.WaveformInteractor.Services;
-using FEntwumS.WaveformInteractor.ViewModels;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
@@ -48,7 +46,6 @@ public class FEntwumSWaveformInteractorModule : IModule
         containerRegistry.RegisterSingleton<INetlistService, NetlistService>();
         containerRegistry.RegisterSingleton<IVcdService, VcdService>();
         containerRegistry.Register<IWaveformInteractorService, WaveformInteractorService>();
-        containerRegistry.Register<WaveformInteractorViewModel>();
     }
 
     public void OnInitialized(IContainerProvider containerProvider)

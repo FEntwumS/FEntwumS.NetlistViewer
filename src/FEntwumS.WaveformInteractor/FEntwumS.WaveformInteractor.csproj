@@ -44,6 +44,11 @@
         <ProjectReference Include="..\FEntwumS.Common\FEntwumS.Common.csproj" ExcludeAssets="runtime;Native"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="ViewModels\" />
+      <Folder Include="Views\" />
+    </ItemGroup>
+
     <Target Name="GenerateCompatibilityFile" AfterTargets="Build">
         <ItemGroup>
             <FilteredDependencies Include="@(PackageReference)" Condition="'%(Private)' == 'false'"/>
