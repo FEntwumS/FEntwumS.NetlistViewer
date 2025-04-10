@@ -1,4 +1,6 @@
-namespace FEntwumS.WaveformInteractor.Services;
+
+using FEntwumS.Common.Types;
+namespace FEntwumS.Common.Services;
 
 public interface IVcdService
 {

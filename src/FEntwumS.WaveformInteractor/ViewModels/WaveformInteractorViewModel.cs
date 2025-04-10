@@ -24,13 +24,6 @@ public class WaveformInteractorViewModel : ExtendedTool
         }
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged(string propertyName)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
     public void Button1Clicked() => Text = "Button 1 clicked";
     public void Button2Clicked() => Text = "Button 2 clicked";
     public void Button3Clicked() => Text = "Button 3 clicked";

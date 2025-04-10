@@ -6,7 +6,7 @@ using OneWare.Vcd.Viewer.Models;
 public class WaveformInteractorService : IWaveformInteractorService
 {
     // transmit all signal states to frontend
-    public Task<string> TransferSignalStates(ExtendedVcdScopeModel.ExtendedSignal[] signals)
+    public Task<string> TransferSignalStatesAsync(ExtendedVcdScopeModel.ExtendedSignal[] signals)
     {
         throw new NotImplementedException();
     }

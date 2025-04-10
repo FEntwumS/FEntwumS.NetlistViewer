@@ -26,19 +26,16 @@ public class FEntwumSWaveformInteractorModule : IModule
     private ObservableCollection<ExtendedVcdScopeModel>? _fentwumsScopes;
     private HttpClient? _httpClient;
     private ILogger? _logger;
-    private ISettingsService? _settingsService;
-    
-    private IContainerProvider _containerProvider; 
 
     private IProjectExplorerService? _projectExplorerService;
     private SignalBitIndexService? _signalBitIndexService;
     private IVerilatorService? _verilatorService;
-    private IWaveformInteractorService _waveformInteractorService;
+    private IWaveformInteractorService? _waveformInteractorService;
     private IWindowService? _windowService;
-    private INetlistService _netlistService;
+    private INetlistService? _netlistService;
     private IVcdService? _vcdService;
 
-    public FEntwumSWaveformInteractorModule(IWaveformInteractorService? waveformInteractorService = null)
+    public FEntwumSWaveformInteractorModule(IWaveformInteractorService waveformInteractorService)
     {
         _waveformInteractorService = waveformInteractorService;
     }
@@ -59,7 +56,7 @@ public class FEntwumSWaveformInteractorModule : IModule
         // TODO: Include Plugin in NetlistViewer Plugin 
         // TODO: Cross platform on Windows working?
         
-        _containerProvider = containerProvider;
+        IContainerProvider _containerProvider = containerProvider;
         _verilatorService = containerProvider.Resolve<IVerilatorService>();
         _signalBitIndexService = containerProvider.Resolve<SignalBitIndexService>();
         _waveformInteractorService = containerProvider.Resolve<IWaveformInteractorService>();
@@ -71,7 +68,7 @@ public class FEntwumSWaveformInteractorModule : IModule
         _projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
         _windowService = containerProvider.Resolve<IWindowService>();
         _logger = containerProvider.Resolve<ILogger>();
-        _settingsService = containerProvider.Resolve<ISettingsService>();
+        ISettingsService _settingsService = containerProvider.Resolve<ISettingsService>();
 
         // for now register Menu which handles functionality
         _windowService.RegisterMenuItem("MainWindow_MainMenu/Verilator",
@@ -208,7 +205,7 @@ public class FEntwumSWaveformInteractorModule : IModule
         {
             //If .vcd has not been loaded before, load it via backend
             // ensure that backend is running
-            var frontendService = _containerProvider.Resolve<IFrontendService>();
+            var frontendService = ServiceManager.GetService<IFrontendService>();
             _ = frontendService.StartBackendIfNotStartedAsync();
 
             var projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
@@ -246,7 +243,7 @@ public class FEntwumSWaveformInteractorModule : IModule
 
             // If .vcd has not been loaded before, load it via backend
             // ensure that backend is running
-            var frontendService = _containerProvider.Resolve<IFrontendService>();
+            var frontendService = ServiceManager.GetService<IFrontendService>();
             _ = frontendService.StartBackendIfNotStartedAsync();
 
             var projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;

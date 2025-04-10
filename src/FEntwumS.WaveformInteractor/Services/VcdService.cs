@@ -1,5 +1,7 @@
 using System.IO.Hashing;
 using System.Text;
+using FEntwumS.Common.Services;
+using FEntwumS.Common.Types;
 
 namespace FEntwumS.WaveformInteractor.Services;
 
@@ -39,6 +41,11 @@ public class VcdService : IVcdService
             {
                 break;
             }
+        }
+
+        if (RootScope == null)
+        {
+            
         }
 
         // Write VCD hierarchy from data structure
@@ -248,37 +255,5 @@ public class VcdService : IVcdService
         RootScope = ParseVcdDefinitions(reader);
         var hash = HashVcd(reader);
         return hash;
-    }
-}
-
-// data structures for VCD parsing
-public class VcdScope
-{
-    public string Name { get; set; }
-    public List<VcdScope?> SubScopes { get; } = new();
-    public List<Signal> Signals { get; } = new();
-    public VcdScope? parent;
-
-    public VcdScope(string name, VcdScope? parent)
-    {
-        Name = name;
-        this.parent = parent;
-    }
-}
-
-public class Signal
-{
-    public string Type { get; }
-    public int BitWidth { get; }
-    public string Id { get; }
-    public string Name { get; }
-    public string Value { get; private set; } = "0";
-
-    public Signal(string type, int bitWidth, string id, string name)
-    {
-        Type = type;
-        BitWidth = bitWidth;
-        Id = id;
-        Name = name;
     }
 }

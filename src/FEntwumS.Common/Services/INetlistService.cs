@@ -1,7 +1,7 @@
+using FEntwumS.Common.Types;
 using Newtonsoft.Json.Linq;
-using OneWare.Vcd.Viewer.Models;
 
-namespace FEntwumS.WaveformInteractor.Services;
+namespace FEntwumS.Common.Services;
 
 public interface INetlistService
 {

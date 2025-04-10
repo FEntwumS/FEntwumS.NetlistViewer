@@ -7,10 +7,10 @@ public class HttpServer
 {
     private readonly HttpListener _listener;
 
-    private string[] signalNames;
-
     public HttpServer(string[] prefixes)
     {
+        _listener = new HttpListener();
+        
         if (!HttpListener.IsSupported)
         {
             throw new NotSupportedException("HttpListener is not supported.");
@@ -20,8 +20,6 @@ public class HttpServer
         {
             throw new ArgumentException("At least one prefix must be specified.", nameof(prefixes));
         }
-
-        _listener = new HttpListener();
 
         foreach (string prefix in prefixes)
         {
@@ -88,10 +86,5 @@ public class HttpServer
     {
         _listener.Stop();
         Console.WriteLine("Server stopped.");
-    }
-
-    public void SetSignalNames(string[] signalNames)
-    {
-        this.signalNames = signalNames;
     }
 }

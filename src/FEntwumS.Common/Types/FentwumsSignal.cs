@@ -1,11 +1,12 @@
 using DynamicData;
 using OneWare.Vcd.Parser.Data;
 
+// ReSharper disable once CheckNamespace
 namespace OneWare.Vcd.Viewer.Models
 {
     public class ExtendedVcdScopeModel : VcdScopeModel
     {
-        public ExtendedVcdScopeModel(VcdScope? scope)
+        public ExtendedVcdScopeModel(VcdScope scope)
             : base(scope)
         {
             // Initialize extended signals with BitIndices
@@ -20,12 +21,13 @@ namespace OneWare.Vcd.Viewer.Models
             public ExtendedSignal(IVcdSignal signal)
             {
                 OriginalSignal = signal;
+                
             }
 
             public IVcdSignal OriginalSignal { get; }
 
-            public List<int> BitIndices { get; set; }
-            public int BitIndexId { get; set; }
+            // public List<int> BitIndices { get; set; }
+            // public int BitIndexId { get; set; }
         }
     }
 }
