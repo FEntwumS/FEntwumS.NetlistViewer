@@ -577,8 +577,6 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         // Add WaveformInteractor plugin to store
         string applicationDir = "";
         
-        var t = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        
         // Get compilation directory as fallback
         string developmentDir = (Assembly.GetExecutingAssembly().CustomAttributes.FirstOrDefault(attr => (attr.AttributeType.FullName is "System.Reflection.AssemblyMetadataAttribute" && attr.ConstructorArguments[0].Value as string is "BuildDir"))!.ConstructorArguments[1].Value as string)!;
         string productionDir =
@@ -594,8 +592,6 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         {
             applicationDir = productionDir;
         }
-
-        applicationDir = t;
         
         containerProvider.Resolve<IPluginService>().AddPlugin(Path.Combine(applicationDir, "ecosystem/FEntwumS.WaveformInteractor"));
         

@@ -9,7 +9,7 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <SelfContained>false</SelfContained>
         <RootNamespace>FEntwumS.WaveformInteractor</RootNamespace>
-        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -41,8 +41,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\FEntwumS.Common\FEntwumS.Common.csproj"/>
-        <PackageReference Include="OneWare.ProjectSystem" Version="0.31.2" Private="false"/>
+        <ProjectReference Include="..\FEntwumS.Common\FEntwumS.Common.csproj" ExcludeAssets="runtime;Native"/>
     </ItemGroup>
 
     <Target Name="GenerateCompatibilityFile" AfterTargets="Build">
