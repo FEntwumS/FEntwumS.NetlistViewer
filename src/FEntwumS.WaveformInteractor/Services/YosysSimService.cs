@@ -45,12 +45,18 @@ public class YosysSimService : IYosysService
         }
         else
         {
-            var root = file.Root as UniversalFpgaProjectRoot;
-            IEnumerable<string> verilogFiles = root.Files
-                .Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
-                .Where(x => x.Extension is ".v") // Include only Verilog and SystemVerilog files
-                .Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
-                .Select(x => x.FullPath);
+            IEnumerable<string> verilogFiles = new List<string>();
+            
+            if (file.Root is UniversalFpgaProjectRoot root)
+            {
+                verilogFiles = root.Files
+                    .Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
+                    .Where(x => x.Extension is ".v") // Include only Verilog and SystemVerilog files
+                    .Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
+                    .Select(x => x.FullPath);
+            }
+
+            
             // TODO
             // get verilog files
 
