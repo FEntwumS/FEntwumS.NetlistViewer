@@ -1,5 +1,6 @@
 using System.Text;
 using FEntwumS.Common.Services;
+using FEntwumS.Common.Types;
 using Newtonsoft.Json.Linq;
 using OneWare.Essentials.Services;
 using Prism.Ioc;
@@ -162,6 +163,7 @@ public class NetlistService : INetlistService
         _signalBitIndexService.SaveToJsonFile(jsonPath);
         _logger.Log("Successfully mapped bit indices to vcd identifiers.", ConsoleColor.White);
     }
+
     public void PopulateSignalBitMappingRecursive(JObject signalsObject, List <VcdScope>? scopes, string vcdBodyHash)
     {
         foreach (var scope in scopes)
