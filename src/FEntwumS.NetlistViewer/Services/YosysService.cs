@@ -143,7 +143,7 @@ public class YosysService : IYosysService
         throw new NotImplementedException();
     }
     
-    public async Task<bool> CreateVerilogAsync()
+    public Task<bool> CreateVerilogAsync()
     {
         
         throw new NotImplementedException();
