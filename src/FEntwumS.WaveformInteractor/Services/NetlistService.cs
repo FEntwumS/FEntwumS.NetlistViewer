@@ -4,7 +4,6 @@ using FEntwumS.Common.Types;
 using Newtonsoft.Json.Linq;
 using OneWare.Essentials.Services;
 using Prism.Ioc;
-using ILogger = OneWare.Essentials.Services.ILogger;
 
 
 namespace FEntwumS.WaveformInteractor.Services;

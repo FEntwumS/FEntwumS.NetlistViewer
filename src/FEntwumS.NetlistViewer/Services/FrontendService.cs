@@ -724,7 +724,7 @@ public class FrontendService : IFrontendService
         }
         catch (IOException e)
         {
-            _logger.Error(e.Message, false);
+            _logger.Error(e.Message, e, false);
 
             return false;
         }
@@ -749,23 +749,23 @@ public class FrontendService : IFrontendService
                 if (resp.StatusCode == HttpStatusCode.NotFound)
                 {
                     _logger.Error(
-                        "The requested resource could not be found on the server. This could be due to a server restart. Please Re-Open your netlist.",
+                        "The requested resource could not be found on the server. This could be due to a server restart. Please Re-Open your netlist.", null,
                         printErrors);
                 }
                 else
                 {
                     _logger.Error(
-                        "An internal server error occured. Please file a bug report if this problem persists.",
+                        "An internal server error occured. Please file a bug report if this problem persists.", null,
                         printErrors);
                 }
             }
 
             return resp;
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException e)
         {
             _logger.Error(
-                $"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
+                $"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address", e,
                 printErrors);
             return null;
         }
@@ -775,36 +775,36 @@ public class FrontendService : IFrontendService
             {
                 case HttpRequestError.NameResolutionError:
                     _logger.Error(
-                        $"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address",
+                        $"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address", e,
                         printErrors);
                     break;
 
                 case HttpRequestError.ConnectionError:
                     _logger.Error(
-                        $"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
+                        $"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address", e,
                         printErrors);
                     break;
 
                 default:
                     _logger.Error(
-                        "Due to an internal error, the server could not complete the request. Please file a bug report",
+                        "Due to an internal error, the server could not complete the request. Please file a bug report", e,
                         printErrors);
                     break;
             }
 
             return null;
         }
-        catch (TaskCanceledException)
+        catch (TaskCanceledException e)
         {
             _logger.Error(
-                "The request has timed out. Please increase the request timeout time in the settings menu and try again",
+                "The request has timed out. Please increase the request timeout time in the settings menu and try again", e,
                 printErrors);
             return null;
         }
-        catch (UriFormatException)
+        catch (UriFormatException e)
         {
             _logger.Error(
-                $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address",
+                $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address", e,
                 printErrors);
             return null;
         }

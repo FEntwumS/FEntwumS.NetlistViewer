@@ -1,7 +1,7 @@
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Platform;
 using CommunityToolkit.Mvvm.Input;
 using FEntwumS.Common.Services;
 using FEntwumS.WaveformInteractor.Services;
@@ -10,7 +10,6 @@ using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
 using OneWare.UniversalFpgaProjectSystem.Models;
-using OneWare.Vcd.Viewer.Models;
 using OneWare.Vcd.Viewer.ViewModels;
 using OneWare.WaveFormViewer.ViewModels;
 using Prism.Ioc;
@@ -45,13 +44,13 @@ public class FEntwumSWaveformInteractorModule : IModule
     public void OnInitialized(IContainerProvider containerProvider)
     {
         // TODO: Cross platform on Windows working?
-        
+
         _verilatorService = containerProvider.Resolve<IVerilatorService>();
         _signalBitIndexService = containerProvider.Resolve<SignalBitIndexService>();
         _waveformInteractorService = containerProvider.Resolve<IWaveformInteractorService>();
         _netlistService = containerProvider.Resolve<NetlistService>();
         _vcdService = containerProvider.Resolve<IVcdService>();
-        
+
         // OneWare Services
         var dockService = containerProvider.Resolve<IDockService>();
         _projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
@@ -111,14 +110,16 @@ public class FEntwumSWaveformInteractorModule : IModule
         {
             if (args.PropertyName != nameof(dockService.CurrentDocument)) return;
             var currentDocument = dockService.CurrentDocument;
-            
+
             if (currentDocument is VcdViewModel vcdViewModel)
             {
                 vcdViewModel.PropertyChanged -= VcdViewModel_PropertyChanged;
                 vcdViewModel.PropertyChanged += VcdViewModel_PropertyChanged;
 
                 // vcdViewModel.WaveFormViewer.PropertyChanged -= WaveFormViewer_PropertyChanged;
-                vcdViewModel.WaveFormViewer.PropertyChanged += (sender, args) => WaveFormViewer_PropertyChanged(sender, args, vcdViewModel);            }
+                vcdViewModel.WaveFormViewer.PropertyChanged += (sender, args) =>
+                    WaveFormViewer_PropertyChanged(sender, args, vcdViewModel);
+            }
         };
 
         // wait until project launches and active project may be fetched
@@ -132,14 +133,16 @@ public class FEntwumSWaveformInteractorModule : IModule
                 // set first testbench from OneWare Project as _verilatorTestbench
                 var project = _projectExplorerService.ActiveProject?.Root as UniversalFpgaProjectRoot;
                 _verilatorService.RegisterTestbench(project?.TestBenches.FirstOrDefault());
-                
+
                 // read in build/simulation/bitmapping.json
                 var projectPath = _projectExplorerService.ActiveProject?.FullPath;
                 var jsonPath = Path.Combine(projectPath!, "build", "simulation", "bitmapping.json");
                 _signalBitIndexService.LoadFromJsonFile(jsonPath);
             }
         };
-        
+
+        _ = InsertVerilatorBashScriptAsync();
+
         // Subscribe to Settings from Frontend. Expects valid address and port
         // TODO: Signaling required, to indicate that settings have been Registered from Frontend. 
         // _settingsService.GetSettingObservable<string>("NetlistViewer_Backend_Address").Subscribe(x =>
@@ -152,7 +155,7 @@ public class FEntwumSWaveformInteractorModule : IModule
         //     _netlistService.BackendPort = x;
         // });
     }
-    
+
     void VcdViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
         var vcdViewModel = sender as VcdViewModel;
@@ -163,8 +166,8 @@ public class FEntwumSWaveformInteractorModule : IModule
             _ = HandleIsLoadingChangedAsync(vcdViewModel);
         }
     }
-    
-    void WaveFormViewer_PropertyChanged(object? sender, PropertyChangedEventArgs args, VcdViewModel vcdViewModel)    
+
+    void WaveFormViewer_PropertyChanged(object? sender, PropertyChangedEventArgs args, VcdViewModel vcdViewModel)
     {
         var waveformViewModel = sender as WaveFormViewModel;
         if (waveformViewModel == null) return;
@@ -173,7 +176,7 @@ public class FEntwumSWaveformInteractorModule : IModule
         if (args.PropertyName == nameof(waveformViewModel.SelectedSignal))
         {
             var hash = _vcdService!.LoadVcdAndHashBody(vcdViewModel.FullPath);
-            
+
             var selectedWaveform = waveformViewModel.SelectedSignal;
             if (selectedWaveform != null)
             {
@@ -183,6 +186,7 @@ public class FEntwumSWaveformInteractorModule : IModule
                 {
                     return;
                 }
+
                 _waveformInteractorService!.GoToSignal(bits.BitIndexId);
             }
         }
@@ -208,7 +212,7 @@ public class FEntwumSWaveformInteractorModule : IModule
                 {
                     return;
                 }
-                
+
                 var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity.FullPath);
                 var netlistPath = Path.Combine(_projectExplorerService.ActiveProject.RootFolderPath, "build", "netlist",
                     $"{topEntity}.json");
@@ -225,9 +229,10 @@ public class FEntwumSWaveformInteractorModule : IModule
                 _netlistService.ParseNetInfoToBitMapping(netInfo, vcdBodyHash);
             }
         }
-        
+
         var waveformpath = vcdFile.FullPath;
-        string waveformpathRecreatedHir = Path.Combine(vcdFile.TopFolder!.FullPath, Path.GetFileNameWithoutExtension(vcdFile.FullPath) + "_recreated.vcd" );
+        string waveformpathRecreatedHir = Path.Combine(vcdFile.TopFolder!.FullPath,
+            Path.GetFileNameWithoutExtension(vcdFile.FullPath) + "_recreated.vcd");
         _vcdService.RecreateVcdHierarchy();
         _vcdService.WriteVcd(waveformpath, waveformpathRecreatedHir);
     }
@@ -235,7 +240,7 @@ public class FEntwumSWaveformInteractorModule : IModule
     private async Task HandleIsLoadingChangedAsync(VcdViewModel vcdViewModel)
     {
         try
-        {   
+        {
             var vcdBodyHash = _vcdService!.LoadVcdAndHashBody(vcdViewModel.FullPath);
             if (_signalBitIndexService!.GetMapping(vcdBodyHash) != null)
             {
@@ -252,10 +257,11 @@ public class FEntwumSWaveformInteractorModule : IModule
             {
                 return;
             }
-            
+
             var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity!.FullPath);
-            var netlistPath = Path.Combine(_projectExplorerService.ActiveProject.RootFolderPath, "build", "netlist", $"{topEntity}.json");
-            
+            var netlistPath = Path.Combine(_projectExplorerService.ActiveProject.RootFolderPath, "build", "netlist",
+                $"{topEntity}.json");
+
             // post netlist to backend
             // dont post if netlist already present in backend
             var netInfo = await _netlistService!.GetNetInformationAsync(netlistPath);
@@ -264,7 +270,7 @@ public class FEntwumSWaveformInteractorModule : IModule
                 await _netlistService.PostNetlistToBackendAsync(netlistPath);
                 netInfo = await _netlistService.GetNetInformationAsync(netlistPath);
             }
-            
+
             _netlistService.ParseNetInfoToBitMapping(netInfo, vcdBodyHash);
         }
         catch (Exception ex)
@@ -282,7 +288,7 @@ public class FEntwumSWaveformInteractorModule : IModule
             {
                 return;
             }
-            
+
             var path = projectRoot.TopEntity.FullPath;
             var topFile = projectRoot.Files.FirstOrDefault(file => file.FullPath == path);
 
@@ -296,8 +302,20 @@ public class FEntwumSWaveformInteractorModule : IModule
         {
             return true;
         }
-        
-        
+
+        string filepath =
+            Path.Combine(ServiceManager.GetService<ISettingsService>().GetSettingValue<string>("OssCadSuite_Path"),
+                "bin", "verilator.bat");
+
+        if (!File.Exists(filepath))
+        {
+            var resourceInputStream =
+                AssetLoader.Open(new Uri("avares://FEntwumS.WaveformInteractor/Assets/verilator.bat"));
+
+            FileStream batchFileStream = File.OpenWrite(filepath);
+            await resourceInputStream.CopyToAsync(batchFileStream);
+            batchFileStream.Close();
+        }
 
         return true;
     }

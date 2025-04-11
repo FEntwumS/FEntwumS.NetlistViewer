@@ -20,6 +20,7 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**\*.*"/>
+        <AvaloniaResource Include="Assets\verilator.bat"/>
     </ItemGroup>
 
     <ItemGroup>

@@ -2,7 +2,6 @@ using FEntwumS.Common.Services;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.UniversalFpgaProjectSystem.Models;
-using Prism.Ioc;
 
 namespace FEntwumS.WaveformInteractor.Services;
 
@@ -12,14 +11,14 @@ public class YosysSimService : IYosysService
     private readonly ISettingsService _settingsService;
 
     private string _yosysPath = string.Empty;
-    private readonly ILogger _logger;
+    private readonly ICustomLogger _logger;
 
-    public YosysSimService(IContainerProvider containerProvider)
+    public YosysSimService()
     {
-        _settingsService = containerProvider.Resolve<ISettingsService>();
-        _childProcessService = containerProvider.Resolve<IChildProcessService>();
+        _settingsService = ServiceManager.GetService<ISettingsService>();
+        _childProcessService = ServiceManager.GetService<IChildProcessService>();
 
-        _logger = containerProvider.Resolve<ILogger>();
+        _logger = ServiceManager.GetService<ICustomLogger>();
         _settingsService.GetSettingObservable<string>("OssCadSuite_Path")
             .Subscribe(x => _yosysPath = Path.Combine(x, "bin", "yosys"));
     }
@@ -73,7 +72,7 @@ public class YosysSimService : IYosysService
         var output = string.Empty;
 
         (success, output) = await ExecuteYosysCommandAsync(yosysArgs, workingDirectory);
-        _logger.Log($"{output}", ConsoleColor.White, true);
+        _logger.Log($"{output}", true);
 
         return success;
     }
@@ -110,7 +109,7 @@ public class YosysSimService : IYosysService
             output = result.output;
 
             if (!string.IsNullOrEmpty(output))
-                _logger.Log(output, ConsoleColor.White,true);
+                _logger.Log(output, true);
 
             success = !string.IsNullOrEmpty(output);
         }

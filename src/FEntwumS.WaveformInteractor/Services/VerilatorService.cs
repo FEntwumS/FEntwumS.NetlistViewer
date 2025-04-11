@@ -16,7 +16,7 @@ public class VerilatorService : IVerilatorService
 
     private string _verilator = string.Empty;
 
-    private ILogger _logger;
+    private ICustomLogger _logger;
 
     public VerilatorService(IContainerProvider containerProvider)
     {
@@ -27,7 +27,7 @@ public class VerilatorService : IVerilatorService
         _settingsService.GetSettingObservable<string>("OssCadSuite_Path")
             .Subscribe(x => _verilator = Path.Combine(x, "bin", "verilator"));
 
-        _logger = containerProvider.Resolve<ILogger>();
+        _logger = containerProvider.Resolve<ICustomLogger>();
     }
 
     // Verilates Preprocessed file
@@ -65,7 +65,7 @@ public class VerilatorService : IVerilatorService
         var output = string.Empty;
 
         (success, output) = await ExecuteVerilatorCommandAsync(verilatorArgs, workingDirectory);
-        _logger.Log(output, ConsoleColor.White, true);
+        _logger.Log(output, true);
         return success;
     }
 
@@ -91,7 +91,7 @@ public class VerilatorService : IVerilatorService
         process.OutputDataReceived += (sender, e) =>
         {
             if (!string.IsNullOrEmpty(e.Data))
-                _logger.Log(e.Data, ConsoleColor.White, true);
+                _logger.Log(e.Data, true);
         };
 
         process.ErrorDataReceived += (sender, e) =>
@@ -130,7 +130,7 @@ public class VerilatorService : IVerilatorService
         process.OutputDataReceived += (sender, e) =>
         {
             if (!string.IsNullOrEmpty(e.Data))
-                _logger.Log(e.Data, ConsoleColor.White, true);
+                _logger.Log(e.Data, true);
         };
 
         process.ErrorDataReceived += (sender, e) =>
@@ -202,7 +202,7 @@ public class VerilatorService : IVerilatorService
             output = result.output;
 
             if (!string.IsNullOrEmpty(output))
-                _logger.Log(output, ConsoleColor.White, true);
+                _logger.Log(output, true);
 
             success = !string.IsNullOrEmpty(output);
         }
@@ -235,11 +235,11 @@ public class VerilatorService : IVerilatorService
         else
         {
             if (topFile == null && Testbench != null)
-                _logger.Error("Toplevel Entity must be set!", null, true, true);
+                _logger.Error("Toplevel Entity must be set!");
             if (topFile != null && Testbench == null)
-                _logger.Error("Verilator Testbench must be set!", null, true, true);
+                _logger.Error("Verilator Testbench must be set!");
             if (topFile == null && Testbench == null)
-                _logger.Error("Toplevel Entity and Verilator Testbench must be set!", null, true, true);
+                _logger.Error("Toplevel Entity and Verilator Testbench must be set!");
         }
     }
 }

@@ -13,7 +13,6 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using FEntwumS.Common.Services;
 using FEntwumS.Common.Types;
-using FEntwumS.NetlistViewer.Services;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
@@ -347,8 +346,6 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
     public void ZoomToFit()
     {
-        
-
         DRect? elementBounds = _viewportDimensionService!.GetZoomElementDimensions(NetlistID);
 
         if (elementBounds != null)
