@@ -25,10 +25,10 @@ public class CustomLogger : ICustomLogger
         _logger.Log("["+ assemblyName + "]: " + message, LogMessageConsoleColor, showOutput, LogMessageBrush);
     }
 
-    public void Error(string message, bool showOutput = true)
+    public void Error(string message, Exception? ex = null, bool showOutput = true)
     {
         string assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name!;
         
-        _logger.Error("["+ assemblyName + "]: " + message, null, showOutput);
+        _logger.Error("["+ assemblyName + "]: " + message, ex, showOutput);
     }
 }
