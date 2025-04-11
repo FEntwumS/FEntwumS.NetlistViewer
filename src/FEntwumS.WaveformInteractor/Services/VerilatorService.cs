@@ -17,7 +17,7 @@ public class VerilatorService : IVerilatorService
     private string _verilator = string.Empty;
 
     private ILogger _logger;
-    
+
     public VerilatorService(IContainerProvider containerProvider)
     {
         _settingsService = containerProvider.Resolve<ISettingsService>();
@@ -26,7 +26,7 @@ public class VerilatorService : IVerilatorService
         _yosysService = containerProvider.Resolve<IYosysService>();
         _settingsService.GetSettingObservable<string>("OssCadSuite_Path")
             .Subscribe(x => _verilator = Path.Combine(x, "bin", "verilator"));
-        
+
         _logger = containerProvider.Resolve<ILogger>();
     }
 
@@ -39,7 +39,7 @@ public class VerilatorService : IVerilatorService
             _logger.Error($"Register .cpp Testbench to Verilate!");
             return false;
         }
-        
+
         var workingDirectory = Path.Combine(file.Root!.FullPath, "build", "simulation");
 
         if (!Directory.Exists(workingDirectory)) Directory.CreateDirectory(workingDirectory);
@@ -68,7 +68,7 @@ public class VerilatorService : IVerilatorService
         _logger.Log(output, ConsoleColor.White, true);
         return success;
     }
-    
+
     // compiles verilated project into binary. Uses generated Cmake file.
     // expects prior verilation with .cpp testbench
     public async Task<bool> CompileVerilatedAsync(IProjectFile topLevelFile)
@@ -150,15 +150,20 @@ public class VerilatorService : IVerilatorService
 
     public void RegisterTestbench(IProjectFile? file)
     {
-        if (file is not null && (file.Extension is ".cpp" or ".cxx" or ".cc" or ".C"))
+        if (file is not null && (file.Extension is ".cpp" or ".cxx" or ".cc" or ".C") &&
+            _projectExplorerService.ActiveProject?.Root is UniversalFpgaProjectRoot project)
         {
-            var project = _projectExplorerService.ActiveProject?.Root as UniversalFpgaProjectRoot;
             // dont add to OneWare Testbenches, if already present
             if (!project.TestBenches.Any(tb => tb.Name.Equals(file.Name)))
             {
                 project?.RegisterTestBench(file);
             }
-            if (project != null) _projectExplorerService.SaveProjectAsync(project);
+
+            if (project != null)
+            {
+                _ = _projectExplorerService.SaveProjectAsync(project);
+            }
+
             Testbench = file;
         }
         else
@@ -171,7 +176,10 @@ public class VerilatorService : IVerilatorService
     {
         var project = _projectExplorerService.ActiveProject?.Root as UniversalFpgaProjectRoot;
         project?.UnregisterTestBench(file);
-        if (project != null) _projectExplorerService.SaveProjectAsync(project);
+        if (project != null)
+        {
+            _ = _projectExplorerService.SaveProjectAsync(project);
+        }
         Testbench = null;
     }
 
@@ -206,12 +214,16 @@ public class VerilatorService : IVerilatorService
         (bool success, string output) retVal = (success, output);
         return retVal;
     }
-    
+
     // requires verilator testbench, and toplevel entity to be set.
     public async Task CreateVerilatorBinaryAllStepsAsync()
     {
-        var projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
-        var path = projectRoot.TopEntity.FullPath;
+        if (_projectExplorerService.ActiveProject!.Root is not UniversalFpgaProjectRoot projectRoot)
+        {
+            return;
+        }
+        
+        var path = projectRoot.TopEntity!.FullPath;
         var topFile = projectRoot.Files.FirstOrDefault(file => file.FullPath == path);
 
         if (topFile != null && Testbench != null)

@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
 using FEntwumS.Common.Services;
 using FEntwumS.WaveformInteractor.Services;
+using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
@@ -21,8 +22,6 @@ namespace FEntwumS.WaveformInteractor;
 
 public class FEntwumSWaveformInteractorModule : IModule
 {
-    private ObservableCollection<ExtendedVcdScopeModel>? _fentwumsScopes;
-    private HttpClient? _httpClient;
     private ILogger? _logger;
 
     private IProjectExplorerService? _projectExplorerService;
@@ -32,11 +31,6 @@ public class FEntwumSWaveformInteractorModule : IModule
     private IWindowService? _windowService;
     private INetlistService? _netlistService;
     private IVcdService? _vcdService;
-
-    public FEntwumSWaveformInteractorModule(IWaveformInteractorService waveformInteractorService)
-    {
-        _waveformInteractorService = waveformInteractorService;
-    }
 
     public void RegisterTypes(IContainerRegistry containerRegistry)
     {
@@ -50,10 +44,8 @@ public class FEntwumSWaveformInteractorModule : IModule
 
     public void OnInitialized(IContainerProvider containerProvider)
     {
-        // TODO: Include Plugin in NetlistViewer Plugin 
         // TODO: Cross platform on Windows working?
         
-        IContainerProvider _containerProvider = containerProvider;
         _verilatorService = containerProvider.Resolve<IVerilatorService>();
         _signalBitIndexService = containerProvider.Resolve<SignalBitIndexService>();
         _waveformInteractorService = containerProvider.Resolve<IWaveformInteractorService>();
@@ -110,7 +102,7 @@ public class FEntwumSWaveformInteractorModule : IModule
                 menuItems.Add(new MenuItemViewModel("Recreate Hierarchy from Signalnames")
                 {
                     Header = "Recreate Hierarchy from Signalnames",
-                    Command = new RelayCommand(() => recreateHirAndWriteVcd(vcdFile))
+                    Command = new RelayCommand(() => _ = recreateHirAndWriteVcdAsync(vcdFile))
                 });
             }
         });
@@ -143,7 +135,7 @@ public class FEntwumSWaveformInteractorModule : IModule
                 
                 // read in build/simulation/bitmapping.json
                 var projectPath = _projectExplorerService.ActiveProject?.FullPath;
-                var jsonPath = Path.Combine(projectPath, "build", "simulation", "bitmapping.json");
+                var jsonPath = Path.Combine(projectPath!, "build", "simulation", "bitmapping.json");
                 _signalBitIndexService.LoadFromJsonFile(jsonPath);
             }
         };
@@ -161,7 +153,7 @@ public class FEntwumSWaveformInteractorModule : IModule
         // });
     }
     
-    void VcdViewModel_PropertyChanged(object sender, PropertyChangedEventArgs args)
+    void VcdViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
         var vcdViewModel = sender as VcdViewModel;
         if (vcdViewModel == null) return;
@@ -180,49 +172,62 @@ public class FEntwumSWaveformInteractorModule : IModule
         // Get bitmapping if Selected Waveform changes
         if (args.PropertyName == nameof(waveformViewModel.SelectedSignal))
         {
-            var hash = _vcdService.LoadVcdAndHashBody(vcdViewModel.FullPath);
+            var hash = _vcdService!.LoadVcdAndHashBody(vcdViewModel.FullPath);
             
             var selectedWaveform = waveformViewModel.SelectedSignal;
             if (selectedWaveform != null)
             {
-                var bits = _signalBitIndexService.GetMapping(hash, selectedWaveform.Signal.Id);
-                _waveformInteractorService.GoToSignal(bits.BitIndexId);
+                var bits = _signalBitIndexService!.GetMapping(hash, selectedWaveform.Signal.Id);
+
+                if (bits is null)
+                {
+                    return;
+                }
+                _waveformInteractorService!.GoToSignal(bits.BitIndexId);
             }
         }
     }
 
-    private async Task recreateHirAndWriteVcd(IProjectFile vcdFile)
+    private async Task recreateHirAndWriteVcdAsync(IProjectFile vcdFile)
     {
         // TODO: check if original vcd bitindexmapping was done before. Otherwise do it now
         // this curently requires that the vcd is loaded once via OneWare, becase OneWares signal datastructures are used.
         // this plugins vcdService would have to be used for mapping purposes. This can be done very performant, since only the definitions section of the vcd would have to be parsed.
         // first check if the vcd file has been read before, by checking if vcd with bodyHash has been read mapped before.
-        var vcdBodyHash = _vcdService.LoadVcdAndHashBody(vcdFile.FullPath);
-        if (_signalBitIndexService.GetMapping(vcdBodyHash) == null)
+        var vcdBodyHash = _vcdService!.LoadVcdAndHashBody(vcdFile.FullPath);
+        if (_signalBitIndexService!.GetMapping(vcdBodyHash) == null)
         {
             //If .vcd has not been loaded before, load it via backend
             // ensure that backend is running
             var frontendService = ServiceManager.GetService<IFrontendService>();
             _ = frontendService.StartBackendIfNotStartedAsync();
 
-            var projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
-            var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity.FullPath);
-            var netlistPath = Path.Combine(_projectExplorerService.ActiveProject.RootFolderPath, "build", "netlist", $"{topEntity}.json");
-            
-            // post netlist to backend
-            // dont post if netlist already present in backend
-            var netInfo = await _netlistService.GetNetInformationAsync(netlistPath);
-            if (!netInfo.HasValues)
+            if (_projectExplorerService!.ActiveProject!.Root is UniversalFpgaProjectRoot projectRoot)
             {
-                await _netlistService.PostNetlistToBackendAsync(netlistPath);
-                netInfo = await _netlistService.GetNetInformationAsync(netlistPath);
+                if (projectRoot.TopEntity is null)
+                {
+                    return;
+                }
+                
+                var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity.FullPath);
+                var netlistPath = Path.Combine(_projectExplorerService.ActiveProject.RootFolderPath, "build", "netlist",
+                    $"{topEntity}.json");
+
+                // post netlist to backend
+                // dont post if netlist already present in backend
+                var netInfo = await _netlistService!.GetNetInformationAsync(netlistPath);
+                if (!netInfo.HasValues)
+                {
+                    await _netlistService.PostNetlistToBackendAsync(netlistPath);
+                    netInfo = await _netlistService.GetNetInformationAsync(netlistPath);
+                }
+
+                _netlistService.ParseNetInfoToBitMapping(netInfo, vcdBodyHash);
             }
-            
-            _netlistService.ParseNetInfoToBitMapping(netInfo, vcdBodyHash);
         }
         
         var waveformpath = vcdFile.FullPath;
-        string waveformpathRecreatedHir = Path.Combine(vcdFile.TopFolder.FullPath, Path.GetFileNameWithoutExtension(vcdFile.FullPath) + "_recreated.vcd" );
+        string waveformpathRecreatedHir = Path.Combine(vcdFile.TopFolder!.FullPath, Path.GetFileNameWithoutExtension(vcdFile.FullPath) + "_recreated.vcd" );
         _vcdService.RecreateVcdHierarchy();
         _vcdService.WriteVcd(waveformpath, waveformpathRecreatedHir);
     }
@@ -231,10 +236,10 @@ public class FEntwumSWaveformInteractorModule : IModule
     {
         try
         {   
-            var vcdBodyHash = _vcdService.LoadVcdAndHashBody(vcdViewModel.FullPath);
-            if (_signalBitIndexService.GetMapping(vcdBodyHash) != null)
+            var vcdBodyHash = _vcdService!.LoadVcdAndHashBody(vcdViewModel.FullPath);
+            if (_signalBitIndexService!.GetMapping(vcdBodyHash) != null)
             {
-                _logger.Log("Using bitmapping of previously loaded VCD. ", ConsoleColor.White);
+                _logger!.Log("Using bitmapping of previously loaded VCD. ", ConsoleColor.White);
                 return;
             }
 
@@ -243,13 +248,17 @@ public class FEntwumSWaveformInteractorModule : IModule
             var frontendService = ServiceManager.GetService<IFrontendService>();
             _ = frontendService.StartBackendIfNotStartedAsync();
 
-            var projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
-            var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity.FullPath);
+            if (_projectExplorerService!.ActiveProject!.Root is not UniversalFpgaProjectRoot projectRoot)
+            {
+                return;
+            }
+            
+            var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity!.FullPath);
             var netlistPath = Path.Combine(_projectExplorerService.ActiveProject.RootFolderPath, "build", "netlist", $"{topEntity}.json");
             
             // post netlist to backend
             // dont post if netlist already present in backend
-            var netInfo = await _netlistService.GetNetInformationAsync(netlistPath);
+            var netInfo = await _netlistService!.GetNetInformationAsync(netlistPath);
             if (!netInfo.HasValues)
             {
                 await _netlistService.PostNetlistToBackendAsync(netlistPath);
@@ -260,17 +269,36 @@ public class FEntwumSWaveformInteractorModule : IModule
         }
         catch (Exception ex)
         {
-            _logger.Error($"Error in HandleIsLoadingChangedAsync: {ex}");
+            _logger!.Error($"Error in HandleIsLoadingChangedAsync: {ex}");
         }
     }
 
     // executes compiled verilator binary
     private async Task RunVerilatorExecutableFromToplevelAsync()
     {
-        var projectRoot = _projectExplorerService.ActiveProject.Root as UniversalFpgaProjectRoot;
-        var path = projectRoot.TopEntity.FullPath;
-        var topFile = projectRoot.Files.FirstOrDefault(file => file.FullPath == path);
+        if (_projectExplorerService!.ActiveProject?.Root is UniversalFpgaProjectRoot projectRoot)
+        {
+            if (projectRoot.TopEntity is null)
+            {
+                return;
+            }
+            
+            var path = projectRoot.TopEntity.FullPath;
+            var topFile = projectRoot.Files.FirstOrDefault(file => file.FullPath == path);
 
-        await _verilatorService.RunExecutableAsync(topFile);
+            await _verilatorService!.RunExecutableAsync(topFile!);
+        }
+    }
+
+    private async Task<bool> InsertVerilatorBashScriptAsync()
+    {
+        if (PlatformHelper.Platform is not (PlatformId.WinArm64 or PlatformId.WinX64))
+        {
+            return true;
+        }
+        
+        
+
+        return true;
     }
 }
