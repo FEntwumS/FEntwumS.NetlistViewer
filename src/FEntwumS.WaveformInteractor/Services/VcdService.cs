@@ -5,6 +5,8 @@ using FEntwumS.Common.Types;
 
 namespace FEntwumS.WaveformInteractor.Services;
 
+
+// TODO add better return values to indicate success/failure etc
 public class VcdService : IVcdService
 {
     public VcdScope? RootScope { get; private set; } = new("ROOT", null);
@@ -45,7 +47,7 @@ public class VcdService : IVcdService
 
         if (RootScope == null)
         {
-            
+            return;
         }
 
         // Write VCD hierarchy from data structure
@@ -74,6 +76,11 @@ public class VcdService : IVcdService
 
     private void WriteScopeRecursive(StreamWriter writer, VcdScope? scope)
     {
+        if (scope is null)
+        {
+            return;
+        }
+        
         writer.WriteLine($"$scope module {scope.Name} $end");
 
         foreach (var signal in scope.Signals)
@@ -99,6 +106,11 @@ public class VcdService : IVcdService
 
     public VcdScope? IterateThroughSignalsofScopeRecursive(VcdScope? currentRootScope)
     {
+        if (currentRootScope is null)
+        {
+            return null;
+        }
+        
         for (int i = 0; i < currentRootScope.SubScopes.Count; i++)
         {
             currentRootScope.SubScopes[i] = IterateThroughSignalsofScopeRecursive(currentRootScope.SubScopes[i]);
@@ -119,7 +131,7 @@ public class VcdService : IVcdService
                 foreach (var scopeName in scopePath)
                 {
                     // search if scope already exists
-                    var existingScope = targetScope.SubScopes.FirstOrDefault(s => s.Name == scopeName);
+                    var existingScope = targetScope.SubScopes.FirstOrDefault(s => s!.Name == scopeName);
                     // if not add new scope
                     if (existingScope == null)
                     {
@@ -175,7 +187,7 @@ public class VcdService : IVcdService
                 if (line.StartsWith("$scope"))
                 {
                     VcdScope? newScope = new VcdScope(parts[2], currentScope); // pass name and parent
-                    currentScope.SubScopes.Add(newScope);
+                    currentScope!.SubScopes.Add(newScope);
                     currentScope = newScope; // traverse into new scope
                 }
                 else if (line.StartsWith("$var"))
@@ -186,11 +198,11 @@ public class VcdService : IVcdService
                         parts[3],  // IdentifierCode (e.g., "4")
                         parts[4]   // Name (e.g., "generatorInst;tx_counter")
                     ); 
-                    currentScope.Signals.Add(newSignal);
+                    currentScope!.Signals.Add(newSignal);
                 }
                 else if (line.StartsWith("$upscope"))
                 {
-                    currentScope = currentScope.parent;
+                    currentScope = currentScope!.parent;
                 }
                 else if (line.StartsWith("$enddefinitions"))
                 {

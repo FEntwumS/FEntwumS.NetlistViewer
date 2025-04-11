@@ -12,7 +12,7 @@ namespace FEntwumS.WaveformInteractor.Services;
 public class NetlistService : INetlistService
 {
     private readonly HttpClient _httpClient;
-    private readonly ILogger? _logger;
+    private readonly ICustomLogger _logger;
     
     public string BackendAddress { get; set; } = "http://localhost";
     public string BackendPort { get; set; } = ":8080";
@@ -24,10 +24,10 @@ public class NetlistService : INetlistService
     public NetlistService(IContainerProvider containerProvider)
     {
         _httpClient = new HttpClient();
-        _logger = containerProvider.Resolve<ILogger>();
-        _signalBitIndexService = containerProvider.Resolve<SignalBitIndexService>();
-        _projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
-        _vcdService = containerProvider.Resolve<IVcdService>();
+        _logger = ServiceManager.GetCustomLogger();
+        _signalBitIndexService = ServiceManager.GetService<SignalBitIndexService>();
+        _projectExplorerService = ServiceManager.GetService<IProjectExplorerService>();
+        _vcdService = ServiceManager.GetService<IVcdService>();
     }
     
      public async Task PostNetlistToBackendAsync(string jsonpath)
@@ -71,18 +71,18 @@ public class NetlistService : INetlistService
                 response = await _httpClient.GetAsync($"{BackendAddress}{BackendPort}/actuator/health");
                 if (response.IsSuccessStatusCode)
                 {
-                    _logger?.Log("Server is healthy and ready.", ConsoleColor.White, true);
+                    _logger?.Log("Server is healthy and ready.", true);
                     break; // Exit loop if server is healthy
                 }
                 else 
                 {
-                    _logger?.Log($"Received non-success status code: {response.StatusCode}. Retrying...", ConsoleColor.White);
+                    _logger?.Log($"Received non-success status code: {response.StatusCode}. Retrying...");
                 }       
             }
             catch (Exception ex)
             {
                 await Task.Delay(200);
-                _logger?.Log($"Failed {i+1} time to reach server. Retrying... Exception: {ex.Message}", ConsoleColor.White);
+                _logger?.Log($"Failed {i+1} time to reach server. Retrying... Exception: {ex.Message}");
                 if(i == 9) return;
             }
         }
@@ -93,7 +93,7 @@ public class NetlistService : INetlistService
         
         if (!response.IsSuccessStatusCode)
         {
-            _logger.Log($"Request failed: {response.StatusCode} {await response.Content.ReadAsStringAsync()}", showOutput:true);
+            _logger?.Log($"Request failed: {response.StatusCode} {await response.Content.ReadAsStringAsync()}", true);
         }
     }
      
@@ -121,7 +121,7 @@ public class NetlistService : INetlistService
 
         var netHash = ((ulong)hashPath << 32) | hashContent;
 
-        _logger.Log("Get netlist information from backend to populate Signals with bit-indices and hdlname/scope", ConsoleColor.White, true);
+        _logger.Log("Get netlist information from backend to populate Signals with bit-indices and hdlname/scope", true);
         var url = $"{BackendAddress}{BackendPort}/get-net-information";
         try
         {
@@ -153,21 +153,27 @@ public class NetlistService : INetlistService
             return;
         }
         
-        var scopes = new List<VcdScope>();
-        scopes.Add(_vcdService.RootScope);
+        var scopes = new List<VcdScope?> { _vcdService.RootScope };
+
         PopulateSignalBitMappingRecursive(signalsObject, scopes, vcdBodyHash);
         // PopulateSignalBitMappingRecursive(signalsObject, OneWareScopes.OfType<VcdScopeModel>(), vcdBodyHash);
         
         var projectPath = _projectExplorerService.ActiveProject?.FullPath;
-        var jsonPath = Path.Combine(projectPath, "build", "simulation", "bitmapping.json");
-        _signalBitIndexService.SaveToJsonFile(jsonPath);
-        _logger.Log("Successfully mapped bit indices to vcd identifiers.", ConsoleColor.White);
+        var jsonPath = Path.Combine(projectPath!, "build", "simulation", "bitmapping.json");
+        _signalBitIndexService!.SaveToJsonFile(jsonPath);
+        _logger.Log("Successfully mapped bit indices to vcd identifiers.");
     }
 
-    public void PopulateSignalBitMappingRecursive(JObject signalsObject, List <VcdScope>? scopes, string vcdBodyHash)
+    public void PopulateSignalBitMappingRecursive(JObject signalsObject, List<VcdScope?> scopes, string vcdBodyHash)
     {
+        
         foreach (var scope in scopes)
         {
+            if (scope is null)
+            {
+                continue;
+            }
+            
             PopulateSignalBitMappingRecursive(signalsObject, scope.SubScopes, vcdBodyHash);
             foreach (var signal in scope.Signals)
                 if (signalsObject.TryGetValue(signal.Name, out var signalToken) &&
