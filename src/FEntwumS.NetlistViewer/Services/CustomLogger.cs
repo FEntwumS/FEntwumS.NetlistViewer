@@ -20,14 +20,14 @@ public class CustomLogger : ICustomLogger
 
     public void Log(string message, bool showOutput = false)
     {
-        string assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name!;
+        string assemblyName = System.Reflection.Assembly.GetCallingAssembly().GetName().Name!;
         
         _logger.Log("["+ assemblyName + "]: " + message, LogMessageConsoleColor, showOutput, LogMessageBrush);
     }
 
     public void Error(string message, Exception? ex = null, bool showOutput = true)
     {
-        string assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name!;
+        string assemblyName = System.Reflection.Assembly.GetCallingAssembly().GetName().Name!;
         
         _logger.Error("["+ assemblyName + "]: " + message, ex, showOutput);
     }
