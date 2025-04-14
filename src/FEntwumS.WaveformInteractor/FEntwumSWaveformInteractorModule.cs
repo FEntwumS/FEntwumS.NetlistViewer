@@ -33,7 +33,7 @@ public class FEntwumSWaveformInteractorModule : IModule
 
     public void RegisterTypes(IContainerRegistry containerRegistry)
     {
-        containerRegistry.RegisterSingleton<IYosysService, YosysSimService>();
+        // containerRegistry.RegisterSingleton<IYosysService, YosysSimService>();
         containerRegistry.RegisterSingleton<IVerilatorService, VerilatorService>();
         containerRegistry.RegisterSingleton<SignalBitIndexService>();
         containerRegistry.RegisterSingleton<INetlistService, NetlistService>();
@@ -305,16 +305,18 @@ public class FEntwumSWaveformInteractorModule : IModule
 
         string filepath =
             Path.Combine(ServiceManager.GetService<ISettingsService>().GetSettingValue<string>("OssCadSuite_Path"),
-                "bin", "verilator.bat");
+                "bin");
 
-        if (!File.Exists(filepath))
+        if (Directory.Exists(filepath))
         {
             var resourceInputStream =
                 AssetLoader.Open(new Uri("avares://FEntwumS.WaveformInteractor/Assets/verilator.bat"));
 
-            FileStream batchFileStream = File.OpenWrite(filepath);
+            FileStream batchFileStream = File.OpenWrite(Path.Combine(filepath, "verilator.bat"));
             await resourceInputStream.CopyToAsync(batchFileStream);
             batchFileStream.Close();
+
+            File.CreateSymbolicLink($"{filepath}/verilator.exe", $"{filepath}/verilator");
         }
 
         return true;
