@@ -45,8 +45,8 @@ public class VerilatorService : IVerilatorService
         if (!Directory.Exists(workingDirectory)) Directory.CreateDirectory(workingDirectory);
 
         // string verilogFile = Path.Combine(workingDirectory, Path.GetFileNameWithoutExtension(file.FullPath) + "_preprocessed.v" );
-        var verilogFile = Path.Combine(workingDirectory, file.Header);
-        var testbenchFile = Testbench.FullPath;
+        var verilogFile = Path.GetFileName(Path.Combine(workingDirectory, file.Header));
+        var testbenchFile = Path.GetFileName(Testbench.FullPath);
 
         var top = Path.GetFileNameWithoutExtension(file.FullPath);
 
@@ -57,6 +57,7 @@ public class VerilatorService : IVerilatorService
             "-Wall",
             "--trace",
             "--exe", // TODO: look into direct executable building. Probably it makes sense to add additional cc compile step
+            $"-I{file.Root!.FullPath}",
             "--build",
             "-cc", testbenchFile, verilogFile
         ];
@@ -191,18 +192,30 @@ public class VerilatorService : IVerilatorService
         var success = false;
         var output = string.Empty;
 
+        List<string> cArgs = new();
+        cArgs.Add("-Command");
+        cArgs.Add(_verilator);
+        cArgs.AddRange(args);
+        
+        IEnvironmentService environmentService = ServiceManager.GetService<IEnvironmentService>();
+        
+        environmentService.SetEnvironmentVariable("VERILATOR_ROOT", Path.Combine(_settingsService.GetSettingValue<string>("OssCadSuite_Path"), "share", "verilator"));
+        
         try
         {
-            var result = await _childProcessService.ExecuteShellAsync(
-                _verilator,
+            var result = await ServiceManager.GetService<IToolExecuterService>()
+                .ExecuteToolAsync($"{_verilator}_bin", args, workingDirectory);
+            
+            /*var result = await _childProcessService.ExecuteShellAsync(
+                $"{_verilator}_bin",
                 args,
                 workingDirectory,
-                "Executing Verilator command");
+                "Executing Verilator command");*/
 
-            output = result.output;
+            /*output = result.output;
 
             if (!string.IsNullOrEmpty(output))
-                _logger.Log(output, true);
+                _logger.Log(output, true);*/
 
             success = !string.IsNullOrEmpty(output);
         }
@@ -228,7 +241,7 @@ public class VerilatorService : IVerilatorService
 
         if (topFile != null && Testbench != null)
         {
-            await _yosysService.LoadVerilogAsync(topFile);
+            // await _yosysService.LoadVerilogAsync(topFile);
             await VerilateAsync(topFile);
             await CompileVerilatedAsync(topFile);
         }
