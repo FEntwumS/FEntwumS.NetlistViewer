@@ -21,6 +21,9 @@ Netlist Viewer.
 | Binaries | GHDL | 5.0.1 |
 | Binaries | OSS CAD Suite | 2025.01.22 |
 
+Alternatively, you can enable `Automatically download binaries` from the `Experimental` Settings Category in OneWare
+Studio. If this setting is enabled, the netlist viewer will automatically download all dependencies.
+
 ## Limitations
 
 The viewer currently only supports designs written either exclusively in VHDL or exclusively in Verilog. While mixed
