@@ -56,11 +56,12 @@ public class GhdlService : IGhdlService
             _logger.Error("GHDL path does not point to ghdl executable");
         }
         
-        vhdlStandard = root.GetProjectProperty("VHDL_Standard");
+        vhdlStandard = root.GetProjectProperty("FEntwumS_VHDL_Standard");
 
         if (vhdlStandard == null)
         {
             vhdlStandard = _vhdlStandard;
+            root.SetProjectProperty("FEntwumS_VHDL_Standard", vhdlStandard);
             _logger.Error("ERROR: VHDL standard is not set. Using global VHDL standard from settings");
         }
         

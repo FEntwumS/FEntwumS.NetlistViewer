@@ -10,6 +10,7 @@ using OneWare.Essentials.Models;
 using OneWare.Essentials.PackageManager;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
+using OneWare.UniversalFpgaProjectSystem.Models;
 using Prism.Ioc;
 using Prism.Modularity;
 
@@ -685,6 +686,10 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
             new CheckBoxSetting("Continue if errors occur during dependency installation", false));
         
         logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
+        
+        IProjectSettingsService projectSettingsService = ServiceManager.GetService<IProjectSettingsService>();
+        projectSettingsService.AddProjectSetting("FEntwumS_VHDL_Standard", new ComboBoxSetting("VHDL Standard", "93c", ["87", "93", "93c", "00", "02", "08", "19"]), (
+            file => Path.GetExtension((file as UniversalFpgaProjectRoot).TopEntity.FullPath) is ".vhd"));
 
         // Subscribe the FrontendService _AFTER_ the relevant settings have been registered
         ServiceManager.GetService<FrontendService>().SubscribeToSettings();
