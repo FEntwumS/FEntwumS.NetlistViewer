@@ -7,7 +7,8 @@ the software.
 
 ## System requirements
 
-Currently, only Windows and Linux are supported, but the plugin should work on all platforms OneWare Studio runs on, except
+Currently, only Windows and Linux are supported, but the plugin should work on all platforms OneWare Studio runs on,
+except
 browsers.
 
 ## Dependencies
@@ -15,11 +16,11 @@ browsers.
 The FEntwumS Netlist Viewer depends on the following OneWare Studio plugins. Please install them before you install the
 Netlist Viewer.
 
-| Category | Dependency | Minimum version |
-| -------- | ---------- | --------------- |
-| Plugins > Simulators | GHDL Extension | 0.10.7 |
-| Binaries | GHDL | 5.0.1 |
-| Binaries | OSS CAD Suite | 2025.01.22 |
+| Category             | Dependency     | Minimum version |
+|----------------------|----------------|-----------------|
+| Plugins > Simulators | GHDL Extension | 0.10.7          |
+| Binaries             | GHDL           | 5.0.1           |
+| Binaries             | OSS CAD Suite  | 2025.01.22      |
 
 Alternatively, you can enable `Automatically download binaries` from the `Experimental` Settings Category in OneWare
 Studio. If this setting is enabled, the netlist viewer will automatically download all dependencies.
@@ -53,7 +54,7 @@ Manager. To install this plugin, you will need to add a custom package source. P
 9. Install both the `FEntwumS NetlistViewer Backend` and the
    `Eclipse Adoptiom OpenJDK` binaries using the package manager
 10. And that's it. You have successfully installed the FEntwumS Netlist Viewer. For usage instructions, see the
-    following sections 
+    following sections
 
 ## Netlist viewer
 
@@ -115,6 +116,38 @@ Since OneWare Studio does not show json files in the Project Explorer, you will 
 manually. To do this, please right click on the project containing the netlist, choose the `Edit` option and add an
 entry `*.json` to the list `Files to Include`.
 
+### Available settings
+
+The FEntwumS Netlist Viewer adds several global and project-specific settings to OneWare Studio.
+
+#### Global settings
+
+| Category     | Name                                                    | Description                                                  | Intended Use                                                             |
+|--------------|---------------------------------------------------------|--------------------------------------------------------------|--------------------------------------------------------------------------|
+| Backend      | Path to folder containing server jar                    | Points the plugin to the location of the backend executable  | Plugin development                                                       |
+| Backend      | Path to folder containing java binary                   | Points the plugin to the location of the java executable     | Plugin development                                                       |
+| Backend      | Extra arguments for the Java Virtual Machine            | Settings that will be passed to the JVM during its creation  | Plugin development, memory size adjustment                               |
+| Backend      | Server address                                          | The address under which the backend is reachable             | Specifying the location of a remote backend                              |
+| Backend      | Port                                                    | The port on which the backend listens                        | Specifies the port of a remote backend                                   |
+| Backend      | Request timeout                                         | Time in seconds after which requests to the backend time out | Large designs can take quite a while to be read, this sets a hard cutoff |
+| Backend      | Use local backend server                                | Whether to use the local backend                             | Untick if you want to use a remote backend                               |
+| VHDL         | VHDL Standard                                           | Global VHDL Standard                                         | Default value, can be overridden in the settings of each project         |
+| FPGA         | FPGA manufacturer                                       | Global FPGA manufacturer                                     | Default value, can be overridden in the settings of each project         |
+| FPGA         | Device Family                                           | Global device family                                         | Default value, can be overridden in the settings of each project         |
+| Font sizes   | Entity Label Font Size                                  | Font size to be used in the netlist view for entities        | Self explanatory                                                         |
+| Font sizes   | Cell Label Font Size                                    | Font size to be used in the netlist view for cells           | Self explanatory                                                         |
+| Font sizes   | Edge Label Font Size                                    | Font size to be used in the netlist view for connections     | Self explanatory                                                         |
+| Font sizes   | Port Font Size                                          | Font size to be used in the netlist view for ports           | Self explanatory                                                         |
+| Experimental | Continue if errors occur during dependency installation | Disables the dependency version checker                      | Plugin development                                                       |
+
+#### Project-specific settings
+
+| Name              | Description                                     | Availability                       |
+|-------------------|-------------------------------------------------|------------------------------------|
+| VHDL Standard     | Overrides the global VHDL standard              | All projects containing VHDL files |
+| FPGA Manufacturer | Overrides the global FPGA manufacturer setting  | All projects                       |
+| Device family     | Overrides the global FPGA device family setting | All projects                       |
+
 # Troubleshooting
 
 ## I cannot find a suitable OSS Cad Suite Integration plugin version
@@ -133,7 +166,7 @@ Please edit your project settings to include the used VHDL-Standard.
 
 ## `ERROR: Module ... is not part of the design`
 
-Please make sure that you have specified the correct device manufacturer and device family in the settings.
+Please make sure that you have specified the correct device manufacturer and device family in the project settings.
 The available options are listed on the synth_<...> pages in
 the [Yosys documentation](https://yosyshq.readthedocs.io/projects/yosys/en/latest/cmd_ref.html).
 
@@ -175,5 +208,6 @@ If you are using a local backend installation, please file a bug report.
 To ensure that all the OneWare Studio plugins the netlist viewer depends on are installed, a check is run. If this check
 fails for you, for example due to using an older version of a certain plugin, you can tick the `Continue if errors occur
 during dependency installation` checkbox in the experimental section of the Netlist Viewer's settings. By enabling this
-setting, the result of the check is ignored. This means that **you are on your own**! Will it may look as if everything is
+setting, the result of the check is ignored. This means that **you are on your own**! Will it may look as if everything
+is
 working as intended, this configuration is **not** supported and can stop working without notice.
