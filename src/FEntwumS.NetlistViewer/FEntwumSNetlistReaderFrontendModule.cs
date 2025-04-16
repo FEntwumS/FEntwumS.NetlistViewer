@@ -564,13 +564,13 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
     public void OnInitialized(IContainerProvider? containerProvider)
     {
         ILogger logger = containerProvider.Resolve<ILogger>();
-        
+
         // Log some debug information
         logger.Log($"FEntwumS.NetlistViewer: Platform: {PlatformHelper.Platform}");
-        
+
         containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistPackage);
         containerProvider.Resolve<IPackageService>().RegisterPackage(JDKPackage);
-        
+
         logger.Log("FEntwumS.NetlistViewer: Registered Packages");
 
         containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", NetlistPathSetting,
@@ -598,7 +598,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         var frontendService = containerProvider.Resolve<IFrontendService>();
 
         containerProvider.Resolve<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
-        
+
         logger.Log("FEntwumS.NetlistViewer: Registered FrontendViewModel as Document in dock system");
 
         containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
@@ -632,11 +632,12 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                 menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateSystemVerilogNetlist")
                 {
                     Header = $"View netlist for {systemVerilogFile.Header}",
-                    Command = new AsyncRelayCommand(() => frontendService.CreateSystemVerilogNetlistAsync(systemVerilogFile))
+                    Command = new AsyncRelayCommand(() =>
+                        frontendService.CreateSystemVerilogNetlistAsync(systemVerilogFile))
                 });
             }
         });
-        
+
         logger.Log("FEntwumS.NetlistViewer: Registered custom context menu entries");
 
         settingsService.RegisterSettingCategory("Netlist Viewer", 100, "netlistIcon");
@@ -684,30 +685,46 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_ContinueOnBinaryInstallError",
             new CheckBoxSetting("Continue if errors occur during dependency installation", false));
-        
+
         logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
-        
+
         IProjectSettingsService projectSettingsService = ServiceManager.GetService<IProjectSettingsService>();
-        projectSettingsService.AddProjectSetting("FEntwumS_VHDL_Standard", new ComboBoxSetting("VHDL Standard", "93c", ["87", "93", "93c", "00", "02", "08", "19"]), (
-            file => Path.GetExtension((file as UniversalFpgaProjectRoot).TopEntity.FullPath) is ".vhd"));
-        
-        projectSettingsService.AddProjectSetting("FEntwumS_FPGA_Manufacturer", new ComboBoxSetting("FPGA Manufacturer", "gatemate",
-        [
-            "achronix", "anlogic", "coolrunner2", "ecp5", "efinix", "fabulous", "gatemate", "gowin", "greenpak4",
-            "ice40", "intel", "intel_alm", "lattice", "microchip", "nanoxplore", "nexus", "quicklogic", "sf2",
-            "xilinx"
-        ]), _ => true);
-        
-        projectSettingsService.AddProjectSetting("FEntwumS_FPGA_DeviceFamily", new TextBoxSetting("Device family", "", null), _ => true);
-        
+        projectSettingsService.AddProjectSetting("FEntwumS_VHDL_Standard",
+            new ComboBoxSetting("VHDL Standard", "93c", ["87", "93", "93c", "00", "02", "08", "19"]),
+            file =>
+            {
+                if (file is UniversalFpgaProjectRoot root)
+                {
+                    if (root.TopEntity is not null)
+                    {
+                        return Path.GetExtension(root.TopEntity.FullPath) is ".vhd";
+                    }
+
+                    return root.Files.Exists(projectFile => Path.GetExtension(projectFile.FullPath) is ".vhd");
+                }
+
+                return false;
+            });
+
+        projectSettingsService.AddProjectSetting("FEntwumS_FPGA_Manufacturer", new ComboBoxSetting("FPGA Manufacturer",
+            "gatemate",
+            [
+                "achronix", "anlogic", "coolrunner2", "ecp5", "efinix", "fabulous", "gatemate", "gowin", "greenpak4",
+                "ice40", "intel", "intel_alm", "lattice", "microchip", "nanoxplore", "nexus", "quicklogic", "sf2",
+                "xilinx"
+            ]), _ => true);
+
+        projectSettingsService.AddProjectSetting("FEntwumS_FPGA_DeviceFamily",
+            new TextBoxSetting("Device family", "", null), _ => true);
+
         logger.Log("Added project-specific settings");
 
         // Subscribe the FrontendService _AFTER_ the relevant settings have been registered
         ServiceManager.GetService<FrontendService>().SubscribeToSettings();
         ServiceManager.GetService<IFpgaBbService>().SubscribeToSettings();
-        
+
         logger.Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
-        
+
         ServiceManager.GetService<IApplicationStateService>().RegisterShutdownAction(() =>
         {
             try
@@ -724,7 +741,6 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
             }
             catch (Exception)
             {
-                
             }
         });
     }

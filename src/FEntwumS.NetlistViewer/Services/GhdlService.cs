@@ -61,7 +61,7 @@ public class GhdlService : IGhdlService
         if (vhdlStandard == null)
         {
             vhdlStandard = _vhdlStandard;
-            root.SetProjectProperty("FEntwumS_VHDL_Standard", vhdlStandard);
+            root.SetProjectProperty("FEntwumS_VHDL_Standard", vhdlStandard ?? "93c");
             _logger.Error("ERROR: VHDL standard is not set. Using global VHDL standard from settings");
         }
         
