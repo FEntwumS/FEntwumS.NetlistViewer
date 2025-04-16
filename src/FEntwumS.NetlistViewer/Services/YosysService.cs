@@ -1,8 +1,8 @@
-﻿using OneWare.Essentials.Enums;
-using OneWare.Essentials.Models;
+﻿using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
-using OneWare.ProjectSystem.Models;
 using OneWare.UniversalFpgaProjectSystem.Models;
+using FEntwumS.Common.Services;
+using FEntwumS.Common.Types;
 
 namespace FEntwumS.NetlistViewer.Services;
 
@@ -140,6 +140,12 @@ public class YosysService : IYosysService
 
     public Task<bool> CreateJsonNetlistAsync()
     {
+        throw new NotImplementedException();
+    }
+    
+    public Task<bool> CreateVerilogAsync()
+    {
+        
         throw new NotImplementedException();
     }
 }

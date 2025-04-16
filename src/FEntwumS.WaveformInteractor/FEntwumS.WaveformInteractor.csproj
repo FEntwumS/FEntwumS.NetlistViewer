@@ -1,0 +1,64 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Version>0.1</Version>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <EnableDynamicLoading>true</EnableDynamicLoading>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <SelfContained>false</SelfContained>
+        <RootNamespace>FEntwumS.WaveformInteractor</RootNamespace>
+        <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+        <OutputPath>../../bin/$(Configuration)/ecosystem/$(MSBuildProjectName)/</OutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**\*.*"/>
+        <AvaloniaResource Include="Assets\verilator.bat"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="OneWare.Essentials" Version="0.11.3" Private="false" ExcludeAssets="runtime;Native"/>
+        <PackageReference Include="OneWare.ProjectSystem" Version="0.31.4" Private="false" ExcludeAssets="runtime;Native"/>
+        <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" Private="false" ExcludeAssets="runtime;Native"/>
+        <PackageReference Include="OneWare.Vcd.Viewer" Private="false" Version="0.31.4" ExcludeAssets="runtime;Native"/>
+        <PackageReference Include="System.IO.Hashing" Private="true" Version="9.0.3" CopyLocalLockFileAssemblies="true"/>
+    
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="OneWare.WaveFormViewer">
+            <HintPath>..\..\..\..\OneWare\studio\OneWare.Studio.Desktop\bin\Debug\net9.0\linux-x64\OneWare.WaveFormViewer.dll</HintPath>
+        </Reference>
+        <Reference Include="System.IO.Hashing">
+          <HintPath>..\..\..\..\..\..\..\tmp\OneWare\Sessions\OneWareStudioSession\Plugins\net9.0\System.IO.Hashing.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\FEntwumS.Common\FEntwumS.Common.csproj" ExcludeAssets="runtime;Native"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="ViewModels\" />
+      <Folder Include="Views\" />
+    </ItemGroup>
+
+    <Target Name="GenerateCompatibilityFile" AfterTargets="Build">
+        <ItemGroup>
+            <FilteredDependencies Include="@(PackageReference)" Condition="'%(Private)' == 'false'"/>
+        </ItemGroup>
+
+        <WriteLinesToFile
+                File="$(OutDir)compatibility.txt"
+                Lines="@(FilteredDependencies->'%(Identity) : %(Version)')"
+                Overwrite="true"/>
+    </Target>
+
+</Project>

@@ -1,9 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Media;
 using OneWare.Essentials.Services;
-using TextMateSharp.Themes;
+using FEntwumS.Common.Services;
 
 namespace FEntwumS.NetlistViewer.Services;
 
@@ -14,8 +13,6 @@ public class CustomLogger : ICustomLogger
     private const ConsoleColor LogMessageConsoleColor = ConsoleColor.Cyan;
     private static readonly IBrush LogMessageBrush = (Application.Current!.GetResourceObservable("ThemeAccentBrush") as IBrush)!;
 
-    private readonly string _assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name!;
-
     public CustomLogger()
     {
         _logger = ServiceManager.GetLogger();
@@ -23,11 +20,15 @@ public class CustomLogger : ICustomLogger
 
     public void Log(string message, bool showOutput = false)
     {
-        _logger.Log("["+ _assemblyName + "]: " + message, LogMessageConsoleColor, showOutput, LogMessageBrush);
+        string assemblyName = System.Reflection.Assembly.GetCallingAssembly().GetName().Name!;
+        
+        _logger.Log("["+ assemblyName + "]: " + message, LogMessageConsoleColor, showOutput, LogMessageBrush);
     }
 
-    public void Error(string message, bool showOutput = true)
+    public void Error(string message, Exception? ex = null, bool showOutput = true)
     {
-        _logger.Error("["+ _assemblyName + "]: " + message, null, showOutput);
+        string assemblyName = System.Reflection.Assembly.GetCallingAssembly().GetName().Name!;
+        
+        _logger.Error("["+ assemblyName + "]: " + message, ex, showOutput);
     }
 }

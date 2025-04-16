@@ -1,6 +1,6 @@
 ﻿using Asmichi.ProcessManagement;
 
-namespace FEntwumS.NetlistViewer.Services;
+namespace FEntwumS.Common.Services;
 
 public interface IToolExecuterService
 {

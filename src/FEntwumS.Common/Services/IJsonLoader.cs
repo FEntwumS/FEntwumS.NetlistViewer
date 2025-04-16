@@ -1,17 +1,15 @@
 ﻿using System.Text.Json.Nodes;
-using Avalonia.Collections;
-using Avalonia.Platform.Storage;
-using FEntwumS.NetlistViewer.Types;
-using FEntwumS.NetlistViewer.ViewModels;
+using FEntwumS.Common.Types;
+using OneWare.Essentials.ViewModels;
 
-namespace FEntwumS.NetlistViewer.Services;
+namespace FEntwumS.Common.Services;
 
 public interface IJsonLoader
 {
     public Task OpenJsonAsync(Stream netlist, UInt64 netlistId);
 
     public Task<List<NetlistElement>> ParseJsonAsync(double xRef, double yRef,
-        FrontendViewModel mw, UInt64 netlistId);
+        ExtendedTool mw, UInt64 netlistId);
 
     public void CreateNode(JsonNode node, List<NetlistElement> items, double xRef, double
         yRef, ushort depth);

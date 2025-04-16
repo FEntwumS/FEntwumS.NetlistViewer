@@ -11,6 +11,8 @@ using OneWare.Essentials.Helpers;
 using OneWare.Essentials.PackageManager;
 using OneWare.ProjectSystem.Models;
 using StreamContent = System.Net.Http.StreamContent;
+using FEntwumS.Common.Services;
+using OneWare.Essentials.ViewModels;
 
 namespace FEntwumS.NetlistViewer.Services;
 
@@ -661,24 +663,29 @@ public class FrontendService : IFrontendService
         _applicationStateService.RemoveState(proc);
     }
 
-    public async Task ExpandNodeAsync(string? nodePath, FrontendViewModel vm)
+    public async Task ExpandNodeAsync(string? nodePath, ExtendedTool vm)
     {
+        if (vm is not FrontendViewModel viewmodel)
+        {
+            return;
+        }
+        
         ApplicationProcess expandProc = _applicationStateService.AddState("Layouting in progress", AppState.Loading);
         
         _logger.Log("Sending request to ExpandNode");
 
-        var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath, null);
+        var resp = await PostAsync("/expandNode?hash=" + viewmodel.NetlistId + "&nodePath=" + nodePath, null);
 
         if (resp is not { IsSuccessStatusCode: true })
         {
             return;
         }
 
-        vm.File = await resp.Content.ReadAsStreamAsync();
+        viewmodel.File = await resp.Content.ReadAsStreamAsync();
 
         _logger.Log("Answer received");
 
-        await vm.OpenFileImplAsync();
+        await viewmodel.OpenFileImplAsync();
 
         _logger.Log("Done");
         
@@ -717,7 +724,7 @@ public class FrontendService : IFrontendService
         }
         catch (IOException e)
         {
-            _logger.Error(e.Message, false);
+            _logger.Error(e.Message, e, false);
 
             return false;
         }
@@ -742,23 +749,23 @@ public class FrontendService : IFrontendService
                 if (resp.StatusCode == HttpStatusCode.NotFound)
                 {
                     _logger.Error(
-                        "The requested resource could not be found on the server. This could be due to a server restart. Please Re-Open your netlist.",
+                        "The requested resource could not be found on the server. This could be due to a server restart. Please Re-Open your netlist.", null,
                         printErrors);
                 }
                 else
                 {
                     _logger.Error(
-                        "An internal server error occured. Please file a bug report if this problem persists.",
+                        "An internal server error occured. Please file a bug report if this problem persists.", null,
                         printErrors);
                 }
             }
 
             return resp;
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException e)
         {
             _logger.Error(
-                $"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
+                $"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address", e,
                 printErrors);
             return null;
         }
@@ -768,36 +775,36 @@ public class FrontendService : IFrontendService
             {
                 case HttpRequestError.NameResolutionError:
                     _logger.Error(
-                        $"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address",
+                        $"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address", e,
                         printErrors);
                     break;
 
                 case HttpRequestError.ConnectionError:
                     _logger.Error(
-                        $"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
+                        $"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address", e,
                         printErrors);
                     break;
 
                 default:
                     _logger.Error(
-                        "Due to an internal error, the server could not complete the request. Please file a bug report",
+                        "Due to an internal error, the server could not complete the request. Please file a bug report", e,
                         printErrors);
                     break;
             }
 
             return null;
         }
-        catch (TaskCanceledException)
+        catch (TaskCanceledException e)
         {
             _logger.Error(
-                "The request has timed out. Please increase the request timeout time in the settings menu and try again",
+                "The request has timed out. Please increase the request timeout time in the settings menu and try again", e,
                 printErrors);
             return null;
         }
-        catch (UriFormatException)
+        catch (UriFormatException e)
         {
             _logger.Error(
-                $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address",
+                $"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address", e,
                 printErrors);
             return null;
         }

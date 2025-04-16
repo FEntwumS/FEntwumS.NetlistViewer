@@ -1,7 +1,7 @@
-﻿using FEntwumS.NetlistViewer.ViewModels;
-using OneWare.Essentials.Models;
+﻿using OneWare.Essentials.Models;
+using OneWare.Essentials.ViewModels;
 
-namespace FEntwumS.NetlistViewer.Services;
+namespace FEntwumS.Common.Services;
 
 public interface IFrontendService
 {
@@ -15,7 +15,7 @@ public interface IFrontendService
 
     public Task ShowViewerAsync(IProjectFile json);
 
-    public Task ExpandNodeAsync(string? nodePath, FrontendViewModel vm);
+    public Task ExpandNodeAsync(string? nodePath, ExtendedTool vm);
 
     public Task<bool> StartBackendIfNotStartedAsync();
 

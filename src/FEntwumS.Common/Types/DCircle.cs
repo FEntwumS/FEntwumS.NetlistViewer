@@ -1,6 +1,6 @@
 ﻿using Avalonia;
 
-namespace FEntwumS.NetlistViewer.Types;
+namespace FEntwumS.Common.Types;
 
 public class DCircle (double x, double y, double radius, ushort zIndex, NetlistElement? element)
 {

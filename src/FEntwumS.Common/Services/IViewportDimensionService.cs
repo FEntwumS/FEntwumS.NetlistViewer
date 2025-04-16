@@ -1,6 +1,6 @@
-﻿using FEntwumS.NetlistViewer.Types;
+﻿using FEntwumS.Common.Types;
 
-namespace FEntwumS.NetlistViewer.Services;
+namespace FEntwumS.Common.Services;
 
 public interface IViewportDimensionService
 {

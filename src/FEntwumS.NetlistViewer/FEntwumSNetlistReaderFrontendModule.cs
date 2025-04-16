@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Reflection;
 using Avalonia;
 using Avalonia.Markup.Xaml.Styling;
 using CommunityToolkit.Mvvm.Input;
@@ -12,6 +13,8 @@ using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
 using Prism.Ioc;
 using Prism.Modularity;
+using FEntwumS.Common.Services;
+using FEntwumS.Common.Types;
 
 namespace FEntwumS.NetlistViewer;
 
@@ -562,25 +565,49 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
     public void OnInitialized(IContainerProvider? containerProvider)
     {
-        ILogger logger = containerProvider.Resolve<ILogger>();
+        _serviceManager = new ServiceManager(containerProvider);
+        
+        ICustomLogger logger = ServiceManager.GetService<ICustomLogger>();
         
         // Log some debug information
-        logger.Log($"FEntwumS.NetlistViewer: Platform: {PlatformHelper.Platform}");
+        logger.Log($" Platform: {PlatformHelper.Platform}");
         
-        containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistPackage);
-        containerProvider.Resolve<IPackageService>().RegisterPackage(JDKPackage);
+        // Add binary packages to store
+        ServiceManager.GetService<IPackageService>().RegisterPackage(NetlistPackage);
+        ServiceManager.GetService<IPackageService>().RegisterPackage(JDKPackage);
         
-        logger.Log("FEntwumS.NetlistViewer: Registered Packages");
+        // Add WaveformInteractor plugin to store
+        string applicationDir = "";
+        
+        // Get compilation directory as fallback
+        string developmentDir = (Assembly.GetExecutingAssembly().CustomAttributes.FirstOrDefault(attr => (attr.AttributeType.FullName is "System.Reflection.AssemblyMetadataAttribute" && attr.ConstructorArguments[0].Value as string is "BuildDir"))!.ConstructorArguments[1].Value as string)!;
+        string productionDir =
+            Path.Combine(ServiceManager.GetService<IPaths>().PluginsDirectory, "FEntwumS.NetlistViewer/");
 
-        containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", NetlistPathSetting,
+        if (Assembly.GetExecutingAssembly().CustomAttributes.FirstOrDefault(attr =>
+                attr.AttributeType.FullName is "System.Reflection.AssemblyConfigurationAttribute" &&
+                attr.ConstructorArguments[0].Value as string is "Debug") != null)
+        {
+            applicationDir = developmentDir;
+        }
+        else
+        {
+            applicationDir = productionDir;
+        }
+        
+        ServiceManager.GetService<IPluginService>().AddPlugin(Path.Combine(applicationDir, "ecosystem/FEntwumS.WaveformInteractor"));
+        
+        logger.Log("Registered Packages");
+
+        ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", NetlistPathSetting,
             new FolderPathSetting("Path to folder containing server jar", "fentwums-netlist-reader", "",
                 NetlistPathSetting, Path.Exists));
 
-        containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", JavaPathSetting,
+        ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", JavaPathSetting,
             new FolderPathSetting("Path to folder containing java binary", "", "", JavaPathSetting,
                 Path.Exists));
 
-        containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
+        ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
             "NetlistViewer_java_args",
             new TextBoxSetting("Extra arguments for the Java Virtual Machine", "-Xmx16G -XX:+UseZGC -XX:+ZGenerational",
                 "null"));
@@ -590,17 +617,15 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
         Application.Current?.Resources.MergedDictionaries.Add(resourceInclude);
 
-        _serviceManager = new ServiceManager(containerProvider);
-
         ISettingsService settingsService = ServiceManager.GetService<ISettingsService>();
 
-        var frontendService = containerProvider.Resolve<IFrontendService>();
+        var frontendService = ServiceManager.GetService<IFrontendService>();
 
-        containerProvider.Resolve<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
+        ServiceManager.GetService<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
         
-        logger.Log("FEntwumS.NetlistViewer: Registered FrontendViewModel as Document in dock system");
+        logger.Log("Registered FrontendViewModel as Document in dock system");
 
-        containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
+        ServiceManager.GetService<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
         {
             if (selected is [IProjectFile { Extension: ".json" } jsonFile])
             {
@@ -636,7 +661,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
             }
         });
         
-        logger.Log("FEntwumS.NetlistViewer: Registered custom context menu entries");
+        logger.Log("Registered custom context menu entries");
 
         settingsService.RegisterSettingCategory("Netlist Viewer", 100, "netlistIcon");
         settingsService.RegisterSettingSubCategory("Netlist Viewer", "VHDL");
@@ -684,13 +709,13 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_ContinueOnBinaryInstallError",
             new CheckBoxSetting("Continue if errors occur during dependency installation", false));
         
-        logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
+        logger.Log("Registered custom settings");
 
         // Subscribe the FrontendService _AFTER_ the relevant settings have been registered
         ServiceManager.GetService<FrontendService>().SubscribeToSettings();
         ServiceManager.GetService<IFpgaBbService>().SubscribeToSettings();
         
-        logger.Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
+        logger.Log("Subscribed relevant services to the settings relevant to them");
         
         ServiceManager.GetService<IApplicationStateService>().RegisterShutdownAction(() =>
         {

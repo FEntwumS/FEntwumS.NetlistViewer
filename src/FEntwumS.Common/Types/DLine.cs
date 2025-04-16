@@ -1,6 +1,6 @@
 ﻿using Avalonia;
 
-namespace FEntwumS.NetlistViewer.Types;
+namespace FEntwumS.Common.Types;
 
 public class DLine(Point start, Point end, ushort zIndex, NetlistElement? element)
 {

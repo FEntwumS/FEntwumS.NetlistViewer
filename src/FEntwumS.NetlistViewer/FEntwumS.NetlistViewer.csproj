@@ -11,6 +11,23 @@
         <PackageLicenseFile>License.md</PackageLicenseFile>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+        <OutputPath>../../bin/$(Configuration)/</OutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Include must be the fully qualified .NET type name of the Attribute to create. -->
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <!-- _Parameter1, _Parameter2, etc. correspond to the
+                matching parameter of a constructor of that .NET attribute type -->
+            <_Parameter1>BuildDir</_Parameter1>
+            <_Parameter2>$(MSBuildProjectDirectory)/$(OutDir)</_Parameter2>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+
     <ItemGroup>
         <AvaloniaResource Include="Assets\**\*.*" />
     </ItemGroup>
@@ -32,6 +49,10 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>compile; build; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\FEntwumS.Common\FEntwumS.Common.csproj" />
     </ItemGroup>
 
     <Target Name="GenerateCompatibilityFile" AfterTargets="Build">

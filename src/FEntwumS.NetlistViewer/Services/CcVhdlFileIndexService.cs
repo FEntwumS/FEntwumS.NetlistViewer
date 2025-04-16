@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
+using FEntwumS.Common.Services;
 using OneWare.Essentials.Helpers;
 
 namespace FEntwumS.NetlistViewer.Services;
