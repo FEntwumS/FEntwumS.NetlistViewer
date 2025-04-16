@@ -48,8 +48,8 @@ public class FpgaBbService : IFpgaBbService
 
     public string getBbCommand(IProjectFile? file = null)
     {
-        string manufacturer = _currentManufacturer;
-        string deviceFamily = _currentDeviceFamily;
+        string? manufacturer = _currentManufacturer;
+        string? deviceFamily = _currentDeviceFamily;
         
         if (file is null || file.Root is not UniversalFpgaProjectRoot root)
         {
@@ -58,8 +58,21 @@ public class FpgaBbService : IFpgaBbService
         else
         {
 
-            manufacturer = root.GetProjectProperty("FEntwumS_FPGA_Manufacturer") ?? _currentManufacturer;
-            deviceFamily = root.GetProjectProperty("FEntwumS_FPGA_DeviceFamily") ?? _currentDeviceFamily;
+            manufacturer = root.GetProjectProperty("FEntwumS_FPGA_Manufacturer");
+
+            if (manufacturer is null)
+            {
+                manufacturer = _currentManufacturer;
+                root.SetProjectProperty("FEntwumS_FPGA_Manufacturer", manufacturer);
+            }
+            
+            deviceFamily = root.GetProjectProperty("FEntwumS_FPGA_DeviceFamily");
+
+            if (deviceFamily is null)
+            {
+                deviceFamily = _currentDeviceFamily;
+                root.SetProjectProperty("FEntwumS_FPGA_DeviceFamily", deviceFamily);
+            }
         }
 
         switch (manufacturer)
