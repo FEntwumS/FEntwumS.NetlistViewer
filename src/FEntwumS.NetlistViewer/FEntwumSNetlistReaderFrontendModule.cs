@@ -690,6 +690,17 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         IProjectSettingsService projectSettingsService = ServiceManager.GetService<IProjectSettingsService>();
         projectSettingsService.AddProjectSetting("FEntwumS_VHDL_Standard", new ComboBoxSetting("VHDL Standard", "93c", ["87", "93", "93c", "00", "02", "08", "19"]), (
             file => Path.GetExtension((file as UniversalFpgaProjectRoot).TopEntity.FullPath) is ".vhd"));
+        
+        projectSettingsService.AddProjectSetting("FEntwumS_FPGA_Manufacturer", new ComboBoxSetting("FPGA Manufacturer", "gatemate",
+        [
+            "achronix", "anlogic", "coolrunner2", "ecp5", "efinix", "fabulous", "gatemate", "gowin", "greenpak4",
+            "ice40", "intel", "intel_alm", "lattice", "microchip", "nanoxplore", "nexus", "quicklogic", "sf2",
+            "xilinx"
+        ]), _ => true);
+        
+        projectSettingsService.AddProjectSetting("FEntwumS_FPGA_DeviceFamily", new TextBoxSetting("Device family", "", null), _ => true);
+        
+        logger.Log("Added project-specific settings");
 
         // Subscribe the FrontendService _AFTER_ the relevant settings have been registered
         ServiceManager.GetService<FrontendService>().SubscribeToSettings();

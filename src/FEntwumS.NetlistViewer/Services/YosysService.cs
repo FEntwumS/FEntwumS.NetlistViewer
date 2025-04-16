@@ -76,7 +76,7 @@ public class YosysService : IYosysService
         List<string> yosysArgs =
         [
             "-p",
-            $"read_verilog -sv -nooverwrite \"{string.Join("\" \"", verilogFileList)}\" {(systemVerilogFileList.Count > 0 ? "\"" + string.Join("\" \"", systemVerilogFileList) + "\"" : "")}; scratchpad -set flatten.separator \";\"; {_fpgaBbService.getBbCommand()} hierarchy -check -purge_lib -top {top}; proc; memory -nomap; flatten -scopename; select *; write_json -compat-int {top}.json"
+            $"read_verilog -sv -nooverwrite \"{string.Join("\" \"", verilogFileList)}\" {(systemVerilogFileList.Count > 0 ? "\"" + string.Join("\" \"", systemVerilogFileList) + "\"" : "")}; scratchpad -set flatten.separator \";\"; {_fpgaBbService.getBbCommand(file)} hierarchy -check -purge_lib -top {top}; proc; memory -nomap; flatten -scopename; select *; write_json -compat-int {top}.json"
         ];
 
         if (systemVerilogFileList.Count > 0)
