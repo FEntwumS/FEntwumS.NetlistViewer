@@ -416,6 +416,27 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                         ]
                     }
                 ]
+            },
+            new PackageVersion()
+            {
+                Version = "0.8.1",
+                Targets =
+                [
+                    new PackageTarget()
+                    {
+                        Target = "all",
+                        Url =
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.8.1/fentwums-netlist-reader-server-v0.8.1.tar.gz",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-netlist-reader",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
+                    }
+                ]
             }
         ]
     };
@@ -729,15 +750,19 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         {
             try
             {
-                HttpClient client = new();
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(
-                    new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
-                client.DefaultRequestHeaders.Add("User-Agent", "FEntwumS.NetlistViewer");
-                client.BaseAddress = new Uri("http://localhost:8080");
-                client.Timeout = TimeSpan.FromSeconds(1);
+                if (ServiceManager.GetService<ISettingsService>()
+                    .GetSettingValue<bool>("NetlistViewer_Backend_UseLocal"))
+                {
+                    HttpClient client = new();
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("application/vnd.spring-boot.actuator.v3+json"));
+                    client.DefaultRequestHeaders.Add("User-Agent", "FEntwumS.NetlistViewer");
+                    client.BaseAddress = new Uri("http://localhost:8080");
+                    client.Timeout = TimeSpan.FromSeconds(1);
 
-                var res = client.GetAsync("/shutdown-backend");
+                    var res = client.GetAsync("/shutdown-backend");
+                }
             }
             catch (Exception)
             {
