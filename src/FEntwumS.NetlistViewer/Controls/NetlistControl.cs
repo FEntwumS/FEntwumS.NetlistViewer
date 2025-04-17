@@ -441,6 +441,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                 : Colors.LightGray);
         Pen highlightPen = new Pen(new SolidColorBrush(Colors.Yellow, 0.5d), 5.5 * CurrentScale, null, PenLineCap.Round,
             PenLineJoin.Miter, 10d);
+        Pen notConnectedPen = new Pen(new SolidColorBrush(Colors.Red), 2 * CurrentScale, null, PenLineCap.Round);
 
         Pen borderPen = new Pen(
             Application.Current!.FindResource(theme, "ThemeBorderMidBrush") as IBrush ??
@@ -712,11 +713,22 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                         x += OffsetX;
                         y += OffsetY;
 
+                        double lx = x - edgeLength / 2;
+                        double ty = y - edgeLength / 2;
+                        double rx = lx + edgeLength;
+                        double by = ty + edgeLength;
+
                         rect = new Rect(x - edgeLength / 2, y - edgeLength / 2, edgeLength, edgeLength);
 
                         if (edgeLength >= PortScaleClip && (intersectsBounds(rect) || containsBounds(rect)))
                         {
                             context.DrawRectangle(rectFillBrush, borderPen, rect);
+
+                            if (element.NotConnected)
+                            {
+                                context.DrawLine(notConnectedPen, new Point(lx, ty), new Point(rx, by));
+                                context.DrawLine(notConnectedPen, new Point(rx, ty), new Point(lx, by));
+                            }
 
                             _renderedPortList.Add(new DRect(rect.X, rect.Y, edgeLength, edgeLength, element.ZIndex,
                                 element));

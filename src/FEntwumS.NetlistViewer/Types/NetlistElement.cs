@@ -26,6 +26,8 @@ public class NetlistElement
     private string? signaltype { get; set; }
     private bool isHighlighted { get; set; }
     private double fontSize { get; set; }
+    
+    private bool notConnected { get; set; }
 
     public double xPos
     {
@@ -204,6 +206,15 @@ public class NetlistElement
         set
         {
             this.fontSize = value;
+        }
+    }
+
+    public bool NotConnected
+    {
+        get => this.notConnected;
+        set
+        {
+            this.notConnected = value;
         }
     }
 }

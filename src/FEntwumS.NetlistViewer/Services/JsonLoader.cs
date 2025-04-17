@@ -356,13 +356,17 @@ public class JsonLoader : IJsonLoader
     {
         double x = 0;
         double y = 0;
+        bool notConnected = false;
+        
         foreach (JsonNode? port in ports)
         {
             if (port is null) continue;
             
             x = 0;
             y = 0;
+            notConnected = false;
             JsonArray? labels = port["labels"] as JsonArray;
+            JsonNode? layoutOptions = port["layoutOptions"] as JsonNode;
 
             if (port.AsObject().ContainsKey("x"))
             {
@@ -379,12 +383,18 @@ public class JsonLoader : IJsonLoader
                 CreateLabels(labels, items, xRef + x * Scale, yRef + y * Scale, (ushort)(depth + 1));
             }
 
+            if (layoutOptions is not null && layoutOptions.AsObject().ContainsKey("not-connected"))
+            {
+                notConnected = layoutOptions["not-connected"]!.GetValue<string>() == "true";
+            }
+
             items.Add(new NetlistElement()
             {
                 xPos = xRef + x * Scale,
                 yPos = yRef + y * Scale,
                 Type = 5,
-                ZIndex = depth
+                ZIndex = depth,
+                NotConnected = notConnected
             });
 
             PortCnt++;
