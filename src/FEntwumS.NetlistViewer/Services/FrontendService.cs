@@ -219,7 +219,7 @@ public class FrontendService : IFrontendService
             ("OneWare.GhdlExtension", new Version(0, 10, 7)),
             ("osscadsuite", new Version(2025, 01, 21)),
             ("ghdl", new Version(5, 0, 1)),
-            (FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id!, new Version(0, 8, 0)),
+            (FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id!, new Version(0, 8, 1)),
             (FEntwumSNetlistReaderFrontendModule.JDKPackage.Id!, new Version(21, 0, 6))
         };
 
