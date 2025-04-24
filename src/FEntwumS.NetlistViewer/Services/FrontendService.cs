@@ -569,6 +569,8 @@ public class FrontendService : IFrontendService
 
         if (!File.Exists(json.FullPath))
         {
+            _applicationStateService.RemoveState(proc, "Error: No JSON netlist was found");
+            
             _logger.Log(
                 "No json netlist was found. Aborting...");
             return;
@@ -621,6 +623,8 @@ public class FrontendService : IFrontendService
 
         if (resp == null)
         {
+            _applicationStateService.RemoveState(proc, "Error: No response from backend");
+            
             return;
         }
 
@@ -628,6 +632,8 @@ public class FrontendService : IFrontendService
 
         if (!resp.IsSuccessStatusCode)
         {
+            _applicationStateService.RemoveState(proc, "Error: The backend returned an error");
+            
             return;
         }
 
