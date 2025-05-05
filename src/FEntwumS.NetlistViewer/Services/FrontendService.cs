@@ -677,6 +677,8 @@ public class FrontendService : IFrontendService
 
         if (resp is not { IsSuccessStatusCode: true })
         {
+            _applicationStateService.RemoveState(expandProc);
+            
             return;
         }
 
