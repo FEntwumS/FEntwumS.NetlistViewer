@@ -2,7 +2,7 @@
 
 namespace FEntwumS.NetlistViewer.Services;
 
-public interface IFpgaBbService
+public interface IFpgaBbService : SettingsSubscriber
 {
     public void SubscribeToSettings();
     

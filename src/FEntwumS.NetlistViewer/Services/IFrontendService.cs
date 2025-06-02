@@ -3,7 +3,7 @@ using OneWare.Essentials.Models;
 
 namespace FEntwumS.NetlistViewer.Services;
 
-public interface IFrontendService
+public interface IFrontendService : SettingsSubscriber
 {
     public void SubscribeToSettings();
 

@@ -414,6 +414,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         // Subscribe the FrontendService _AFTER_ the relevant settings have been registered
         ServiceManager.GetService<FrontendService>().SubscribeToSettings();
         ServiceManager.GetService<IFpgaBbService>().SubscribeToSettings();
+        ServiceManager.GetService<IYosysService>().SubscribeToSettings();
 
         logger.Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
 

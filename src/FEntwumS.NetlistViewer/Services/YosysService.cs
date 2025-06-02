@@ -47,7 +47,7 @@ public class YosysService : IYosysService
         string top = Path.GetFileNameWithoutExtension(file.FullPath);
 
         List<string> verilogFileList = new List<string>();
-        
+
         List<string> systemVerilogFileList = new List<string>();
 
         if (File.Exists(Path.Combine(workingDirectory, "design.v")))
@@ -112,7 +112,7 @@ public class YosysService : IYosysService
         }
 
         string top = Path.GetFileNameWithoutExtension(file.FullPath);
-        
+
         if (file.Root is not UniversalFpgaProjectRoot root) return false;
         IEnumerable<string> files = root.Files
             .Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
