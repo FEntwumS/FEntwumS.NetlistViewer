@@ -14,6 +14,7 @@ public class YosysService : IYosysService
     private IChildProcessService _childProcessService;
     private IToolExecuterService _toolExecuterService;
     private IFpgaBbService _fpgaBbService;
+    private bool _useHierarchicalBackend;
 
     private string _yosysPath = string.Empty;
 
@@ -28,6 +29,12 @@ public class YosysService : IYosysService
 
         _settingsService.GetSettingObservable<string>("OssCadSuite_Path")
             .Subscribe(x => _yosysPath = Path.Combine(x, "bin", "yosys"));
+    }
+
+    public void SubscribeToSettings()
+    {
+        _settingsService.GetSettingObservable<bool>("NetlistViewer_UseHierarchicalBackend")
+            .Subscribe(x => _useHierarchicalBackend = x);
     }
 
     public Task<bool> LoadVhdlAsync(IProjectFile file)
@@ -76,7 +83,14 @@ public class YosysService : IYosysService
         List<string> yosysArgs =
         [
             "-p",
-            $"read_verilog -sv -nooverwrite \"{string.Join("\" \"", verilogFileList)}\" {(systemVerilogFileList.Count > 0 ? "\"" + string.Join("\" \"", systemVerilogFileList) + "\"" : "")}; scratchpad -set flatten.separator \";\"; {_fpgaBbService.getBbCommand(file)} hierarchy -check -purge_lib -top {top}; proc; memory -nomap; flatten -scopename; select *; write_json -compat-int {top}.json"
+            $"read_verilog -sv -nooverwrite \"{string.Join("\" \"", verilogFileList)}\" {(systemVerilogFileList.Count > 0 ? "\"" + string.Join("\" \"", systemVerilogFileList) + "\"" : "")}; "
+            + "scratchpad -set flatten.separator \";\"; "
+            + $"{_fpgaBbService.getBbCommand(file)} hierarchy -check -purge_lib -top {top}; "
+            + "proc; "
+            + "memory -nomap; "
+            + (_useHierarchicalBackend ?  "" : "flatten -scopename; ")
+            + "select *; "
+            + $"write_json -compat-int {top}.json"
         ];
 
         if (systemVerilogFileList.Count > 0)

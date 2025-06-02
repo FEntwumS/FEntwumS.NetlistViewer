@@ -377,6 +377,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_ContinueOnBinaryInstallError",
             new CheckBoxSetting("Continue if errors occur during dependency installation", false));
+        settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_UseHierarchicalBackend",
+            new CheckBoxSetting("Use hierarchical backend", false));
 
         logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
 
