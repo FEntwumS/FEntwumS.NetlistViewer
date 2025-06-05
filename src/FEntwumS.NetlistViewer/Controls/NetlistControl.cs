@@ -701,7 +701,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
                     // Port
                     case 5:
-                        if (element.ZIndex > lastVisibleNodeZIndex + 1)
+                        if (element.ZIndex > lastVisibleNodeZIndex + 2)
                         {
                             continue;
                         }
