@@ -424,6 +424,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
         bool previousNodeInView = true;
         int lastVisibleNodeZIndex = 0;
+        double dropshadowThickness = 2.5d * CurrentScale;
 
         _renderedNodeList.Clear();
         _renderedLabelList.Clear();
@@ -453,7 +454,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                     ? (Color)(Application.Current.FindResource(theme, "ThemeBorderHighColor") ??
                               new Color(0xFF, 0xA0, 0xA0, 0xA0))
                     : Colors.DarkGray)),
-                2.5 * CurrentScale, null, PenLineCap.Square);
+                dropshadowThickness, null, PenLineCap.Square);
         Pen edgePen = new Pen(
             Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? new SolidColorBrush(Colors.Black),
             1.2 * CurrentScale, null, PenLineCap.Square);
@@ -475,7 +476,8 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         // Draw background
         context.DrawRectangle(backgroundBrush, null, new Rect(0, 0, this.Bounds.Width, this.Bounds.Height));
 
-        Rect rect;
+        Rect hitboxRect;
+        Rect drawnRect;
         Rect boundingBox;
         Point center;
         Point start, bend, end;
@@ -540,12 +542,15 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                         x += OffsetX;
                         y += OffsetY;
 
-                        rect = new Rect(x, y, width, height);
+                        drawnRect = new Rect(x, y, width, height);
+                        
+                        // Add dropshadow thickness to hitbox for accurate intersection testing
+                        hitboxRect = new Rect(x, y, width + dropshadowThickness, height + dropshadowThickness);
 
                         if ((height >= NodeScaleClip && width >= NodeScaleClip) &&
-                            (containsBounds(rect) || intersectsBounds(rect)))
+                            (containsBounds(hitboxRect) || intersectsBounds(hitboxRect)))
                         {
-                            context.DrawRectangle(rectFillBrush, borderPen, rect);
+                            context.DrawRectangle(rectFillBrush, borderPen, drawnRect);
 
                             _renderedNodeList.Add(new DRect(x, y, width, height, element.ZIndex, element));
 
@@ -718,11 +723,12 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                         double rx = lx + edgeLength;
                         double by = ty + edgeLength;
 
-                        rect = new Rect(x - edgeLength / 2, y - edgeLength / 2, edgeLength, edgeLength);
+                        drawnRect = new Rect(x - edgeLength / 2, y - edgeLength / 2, edgeLength, edgeLength);
+                        hitboxRect = drawnRect;
 
-                        if (edgeLength >= PortScaleClip && (intersectsBounds(rect) || containsBounds(rect)))
+                        if (edgeLength >= PortScaleClip && (intersectsBounds(hitboxRect) || containsBounds(hitboxRect)))
                         {
-                            context.DrawRectangle(rectFillBrush, borderPen, rect);
+                            context.DrawRectangle(rectFillBrush, borderPen, drawnRect);
 
                             if (element.NotConnected)
                             {
@@ -730,7 +736,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                                 context.DrawLine(notConnectedPen, new Point(rx, ty), new Point(lx, by));
                             }
 
-                            _renderedPortList.Add(new DRect(rect.X, rect.Y, edgeLength, edgeLength, element.ZIndex,
+                            _renderedPortList.Add(new DRect(hitboxRect.X, hitboxRect.Y, edgeLength, edgeLength, element.ZIndex,
                                 element));
                         }
 
