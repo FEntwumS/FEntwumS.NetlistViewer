@@ -440,6 +440,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
             }
             catch (Exception)
             {
+                // ignored
             }
         });
     }
