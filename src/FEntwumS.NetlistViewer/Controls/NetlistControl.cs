@@ -544,8 +544,8 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
                         drawnRect = new Rect(x, y, width, height);
                         
-                        // Add dropshadow thickness to hitbox for accurate intersection testing
-                        hitboxRect = new Rect(x, y, width + dropshadowThickness, height + dropshadowThickness);
+                        // Add dropshadow thickness and border thickness to hitbox for accurate intersection testing
+                        hitboxRect = new Rect(x, y, width + dropshadowThickness + 0.5d * CurrentScale, height + dropshadowThickness + 0.5d * CurrentScale);
 
                         if ((height >= NodeScaleClip && width >= NodeScaleClip) &&
                             (containsBounds(hitboxRect) || intersectsBounds(hitboxRect)))
