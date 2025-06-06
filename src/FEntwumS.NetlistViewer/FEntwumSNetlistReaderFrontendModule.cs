@@ -379,6 +379,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
             new CheckBoxSetting("Continue if errors occur during dependency installation", false));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_UseHierarchicalBackend",
             new CheckBoxSetting("Use hierarchical backend", false));
+        settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_PerformanceTarget",
+            new ComboBoxSetting("Performance Target", "Preloading", ["Preloading", "Just In Time", "Intelligent Ahead Of Time"]));
 
         logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
 

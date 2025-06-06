@@ -34,7 +34,8 @@ public class FrontendService : IFrontendService
     private static string _javaBinaryFolder = string.Empty;
     private static string _extraJarArgs = string.Empty;
     private static bool _continueOnBinaryInstallError = false;
-    
+    private static string _performanceTarget = string.Empty;
+
     private static bool _restartRequired = false;
 
     private UInt64 currentNetlist = 0;
@@ -206,22 +207,32 @@ public class FrontendService : IFrontendService
 
         _settingsService.GetSettingObservable<bool>("NetlistViewer_ContinueOnBinaryInstallError")
             .Subscribe(x => _continueOnBinaryInstallError = x);
+
+        _settingsService.GetSettingObservable<string>("NetlistViewer_PerformanceTarget")
+            .Subscribe(x => _performanceTarget = x switch
+            {
+                "Preloading" => "Preloading",
+                "Just In Time" => "JustInTime",
+                "Intelligent Ahead Of Time" => "IntelligentAheadOfTime",
+                _ => "Preloading"
+            });
     }
 
     private async Task<(bool success, bool needsRestart)> InstallDependenciesAsync()
     {
         ApplicationProcess checkProc = _applicationStateService.AddState("Checking dependencies", AppState.Loading);
-        
+
         bool globalSuccess = true, needsRestart = false;
 
         (string id, Version minversion)[] dependencyIDs = new (string, Version)
-        [ ] {
-            ("OneWare.GhdlExtension", new Version(0, 10, 7)),
-            ("osscadsuite", new Version(2025, 01, 21)),
-            ("ghdl", new Version(5, 0, 1)),
-            (FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id!, new Version(0, 8, 1)),
-            (FEntwumSNetlistReaderFrontendModule.JDKPackage.Id!, new Version(21, 0, 6))
-        };
+            []
+            {
+                ("OneWare.GhdlExtension", new Version(0, 10, 7)),
+                ("osscadsuite", new Version(2025, 01, 21)),
+                ("ghdl", new Version(5, 0, 1)),
+                (FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id!, new Version(0, 8, 1)),
+                (FEntwumSNetlistReaderFrontendModule.JDKPackage.Id!, new Version(21, 0, 6))
+            };
 
         // Install osscadsuite binary between GHDL plugin and ghdl binary to allow for the addition of the ghdl binary to the store
 
@@ -261,13 +272,15 @@ public class FrontendService : IFrontendService
                         {
                             continue;
                         }
-                        
+
                         PackageVersion? installedVersion = dependencyModel.InstalledVersion;
 
                         if (installedVersion == packageVersion)
                         {
-                            _logger.Log($"Failed to update {dependencyPackage.Name} from version {installedVersion.Version} to version {dependencyPackage.Versions!.Last()}", true);
-                            
+                            _logger.Log(
+                                $"Failed to update {dependencyPackage.Name} from version {installedVersion.Version} to version {dependencyPackage.Versions!.Last()}",
+                                true);
+
                             updatePerformed = false;
                             localSuccess = true;
                             break;
@@ -315,12 +328,14 @@ public class FrontendService : IFrontendService
             {
                 if (minVersion.CompareTo(Version.Parse(dependencyModel.InstalledVersion!.Version!)) <= 0)
                 {
-                    _logger.Log($"Dependency {dependencyPackage.Id} installed with version {dependencyModel.InstalledVersion.Version} greater than or equal to expected version {minVersion.ToString()}");
+                    _logger.Log(
+                        $"Dependency {dependencyPackage.Id} installed with version {dependencyModel.InstalledVersion.Version} greater than or equal to expected version {minVersion.ToString()}");
                 }
                 else
                 {
-                    _logger.Error($"Installed version {dependencyModel.InstalledVersion.Version} for {dependencyPackage.Name} is below the minimum version {minVersion.ToString()}. Please update {dependencyPackage.Name}!");
-                    
+                    _logger.Error(
+                        $"Installed version {dependencyModel.InstalledVersion.Version} for {dependencyPackage.Name} is below the minimum version {minVersion.ToString()}. Please update {dependencyPackage.Name}!");
+
                     globalSuccess = false;
                 }
             }
@@ -330,7 +345,7 @@ public class FrontendService : IFrontendService
         {
             _logger.Log("Dependencies were successfully installed. Please restart OneWare Studio!", true);
         }
-        
+
         _applicationStateService.RemoveState(checkProc);
 
         return (globalSuccess, needsRestart || _restartRequired);
@@ -339,19 +354,19 @@ public class FrontendService : IFrontendService
     public async Task CreateVhdlNetlistAsync(IProjectFile vhdl)
     {
         ApplicationProcess proc = _applicationStateService.AddState("Visualizing VHDL netlist", AppState.Loading);
-        
+
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
         if (needsRestart)
         {
             _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
-            
+
             return;
         }
         else if (!(success || _continueOnBinaryInstallError))
         {
             _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
-            
+
             return;
         }
 
@@ -360,7 +375,7 @@ public class FrontendService : IFrontendService
         if (!success)
         {
             _applicationStateService.RemoveState(proc, "Error: The backend could not be started");
-            
+
             return;
         }
 
@@ -374,7 +389,7 @@ public class FrontendService : IFrontendService
         if (!success)
         {
             _applicationStateService.RemoveState(proc, "Error: GHDL could not elaborate the design");
-            
+
             return;
         }
 
@@ -384,7 +399,7 @@ public class FrontendService : IFrontendService
         if (!success)
         {
             _applicationStateService.RemoveState(proc, "Error: GHDL could not synthesize the design into Verilog");
-            
+
             return;
         }
 
@@ -393,7 +408,7 @@ public class FrontendService : IFrontendService
         if (!success)
         {
             _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
-            
+
             return;
         }
 
@@ -402,9 +417,9 @@ public class FrontendService : IFrontendService
         if (!File.Exists(netlistPath))
         {
             _logger.Error($"Netlist file not found: {netlistPath}");
-            
+
             _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
-            
+
             return;
         }
 
@@ -415,31 +430,31 @@ public class FrontendService : IFrontendService
         if (!success)
         {
             _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
-            
+
             return;
         }
 
         await ShowViewerAsync(test);
-        
+
         _applicationStateService.RemoveState(proc);
     }
 
     public async Task CreateVerilogNetlistAsync(IProjectFile verilog)
     {
         ApplicationProcess proc = _applicationStateService.AddState("Visualizing Verilog netlist", AppState.Loading);
-        
+
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
         if (needsRestart)
         {
             _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
-            
+
             return;
         }
         else if (!(success || _continueOnBinaryInstallError))
         {
             _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
-            
+
             return;
         }
 
@@ -448,7 +463,7 @@ public class FrontendService : IFrontendService
         if (!success)
         {
             _applicationStateService.RemoveState(proc, "Error: The backend could not be started");
-            
+
             return;
         }
 
@@ -457,11 +472,11 @@ public class FrontendService : IFrontendService
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
 
         success = await yosysService.LoadVerilogAsync(verilog);
-        
+
         if (!success)
         {
             _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
-            
+
             return;
         }
 
@@ -470,9 +485,9 @@ public class FrontendService : IFrontendService
         if (!File.Exists(netlistPath))
         {
             _logger.Error($"Netlist file not found: {netlistPath}");
-            
+
             _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
-            
+
             return;
         }
 
@@ -483,31 +498,32 @@ public class FrontendService : IFrontendService
         if (!success)
         {
             _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
-            
+
             return;
         }
 
         await ShowViewerAsync(test);
-        
+
         _applicationStateService.RemoveState(proc);
     }
 
     public async Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog)
     {
-        ApplicationProcess proc = _applicationStateService.AddState("Visualizing SystemVerilog netlist", AppState.Loading);
-        
+        ApplicationProcess proc =
+            _applicationStateService.AddState("Visualizing SystemVerilog netlist", AppState.Loading);
+
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
         if (needsRestart)
         {
             _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
-            
+
             return;
         }
         else if (!(success || _continueOnBinaryInstallError))
         {
             _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
-            
+
             return;
         }
 
@@ -516,7 +532,7 @@ public class FrontendService : IFrontendService
         if (!success)
         {
             _applicationStateService.RemoveState(proc, "Error: Backend could not be started");
-            
+
             return;
         }
 
@@ -525,22 +541,22 @@ public class FrontendService : IFrontendService
         IYosysService yosysService = ServiceManager.GetService<IYosysService>();
 
         success = await yosysService.LoadSystemVerilogAsync(sVerilog);
-        
+
         if (!success)
         {
             _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
-            
+
             return;
         }
-        
+
         string netlistPath = Path.Combine(sVerilog.Root!.FullPath, "build", "netlist", $"{top}.json");
 
         if (!File.Exists(netlistPath))
         {
             _logger.Error($"Netlist file not found: {netlistPath}");
-            
+
             _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
-            
+
             return;
         }
 
@@ -551,26 +567,26 @@ public class FrontendService : IFrontendService
         if (!success)
         {
             _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
-            
+
             return;
         }
 
         await ShowViewerAsync(test);
-        
+
         _applicationStateService.RemoveState(proc);
     }
 
     public async Task ShowViewerAsync(IProjectFile json)
     {
         ApplicationProcess proc = _applicationStateService.AddState("Starting viewer", AppState.Loading);
-        
+
         HttpResponseMessage? resp = null;
         string top = Path.GetFileNameWithoutExtension(json.FullPath);
 
         if (!File.Exists(json.FullPath))
         {
             _applicationStateService.RemoveState(proc, "Error: No JSON netlist was found");
-            
+
             _logger.Log(
                 "No json netlist was found. Aborting...");
             return;
@@ -610,13 +626,13 @@ public class FrontendService : IFrontendService
 
         ApplicationProcess waitForBackendProc =
             _applicationStateService.AddState("Layouting in progress", AppState.Loading);
-        
+
         resp = await PostAsync(
             "/graphRemoteFile" + $"?hash={combinedHash}" + $"&entityLabelFontSize={_entityLabelFontSize}" +
             $"&cellLabelFontSize={_cellLabelFontSize}" + $"&edgeLabelFontSize={_edgeLabelFontSize}" +
-            $"&portLabelFontSize={_portLabelFontSize}",
+            $"&portLabelFontSize={_portLabelFontSize}" + $"&performance-target={_performanceTarget}",
             formDataContent);
-        
+
         _applicationStateService.RemoveState(waitForBackendProc);
 
         jsonFileStream.Close();
@@ -624,7 +640,7 @@ public class FrontendService : IFrontendService
         if (resp == null)
         {
             _applicationStateService.RemoveState(proc, "Error: No response from backend");
-            
+
             return;
         }
 
@@ -633,12 +649,12 @@ public class FrontendService : IFrontendService
         if (!resp.IsSuccessStatusCode)
         {
             _applicationStateService.RemoveState(proc, "Error: The backend returned an error");
-            
+
             return;
         }
 
         ApplicationProcess indexProc = _applicationStateService.AddState("Indexing", AppState.Loading);
-        
+
         // create code index for cross-compiled VHDL
         string ccFile = Path.Combine(json.Root.FullPath, "build", "netlist", "design.v");
 
@@ -656,21 +672,21 @@ public class FrontendService : IFrontendService
                 _logger.Log($"Failed to index {top}");
             }
         }
-        
+
         _applicationStateService.RemoveState(indexProc);
 
         _dockService.Show(vm, DockShowLocation.Document);
         _dockService.InitializeContent();
         vm.NetlistId = currentNetlist;
         await vm.OpenFileImplAsync();
-        
+
         _applicationStateService.RemoveState(proc);
     }
 
     public async Task ExpandNodeAsync(string? nodePath, FrontendViewModel vm)
     {
         ApplicationProcess expandProc = _applicationStateService.AddState("Layouting in progress", AppState.Loading);
-        
+
         _logger.Log("Sending request to ExpandNode");
 
         var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath, null);
@@ -678,7 +694,7 @@ public class FrontendService : IFrontendService
         if (resp is not { IsSuccessStatusCode: true })
         {
             _applicationStateService.RemoveState(expandProc);
-            
+
             return;
         }
 
@@ -689,7 +705,7 @@ public class FrontendService : IFrontendService
         await vm.OpenFileImplAsync();
 
         _logger.Log("Done");
-        
+
         _applicationStateService.RemoveState(expandProc);
     }
 
@@ -935,9 +951,9 @@ public class FrontendService : IFrontendService
     {
         const int timeBetweenRetriesMS = 100;
         const int retriesPerSecond = 1000 / timeBetweenRetriesMS;
-        
+
         ApplicationProcess liveProc = _applicationStateService.AddState("Connecting to backend", AppState.Loading);
-        
+
         HttpClient client = new();
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.Add(
@@ -946,7 +962,7 @@ public class FrontendService : IFrontendService
         client.BaseAddress = new Uri($"http://{_backendAddress}:{_backendPort}");
         client.Timeout = TimeSpan.FromMilliseconds(timeBetweenRetriesMS);
         bool done = false;
-        
+
         int failures = 0;
 
         while (!done)
@@ -964,9 +980,9 @@ public class FrontendService : IFrontendService
                     _logger.Error(
                         "The remote server could not be reached. Make sure the server is started and reachable or switch to the local server");
 
-                    
+
                     _applicationStateService.RemoveState(liveProc, "Error: The backend could not be reached");
-                    
+
                     return false;
                 }
 
@@ -977,17 +993,18 @@ public class FrontendService : IFrontendService
                 if (failures % retriesPerSecond == 0)
                 {
                     _logger.Log("The backend could not be reached. Retrying...", true);
-                } else if (failures > 10 * retriesPerSecond)
+                }
+                else if (failures > 10 * retriesPerSecond)
                 {
                     _logger.Log("The backend could not be reached. Aborting...", true);
-                    
+
                     _applicationStateService.RemoveState(liveProc, "Error: The backend could not be reached");
-                    
+
                     return false;
                 }
             }
         }
-        
+
         _applicationStateService.RemoveState(liveProc);
 
         return true;
