@@ -15,6 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Avalonia.Controls.TreeDataGrid" Version="11.1.1" />
       <PackageReference Include="OneWare.Essentials" Version="0.11.5" />
       <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.6" />
     </ItemGroup>
