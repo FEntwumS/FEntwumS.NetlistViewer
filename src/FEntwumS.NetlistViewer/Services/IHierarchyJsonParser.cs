@@ -1,4 +1,4 @@
-﻿using FEntwumS.NetlistViewer.Types.HierarchyView;
+using FEntwumS.NetlistViewer.Types.HierarchyView;
 
 namespace FEntwumS.NetlistViewer.Services;
 
