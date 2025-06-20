@@ -251,6 +251,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<ICcVhdlFileIndexService, CcVhdlFileIndexService>();
         containerRegistry.RegisterSingleton<IFrontendService, FrontendService>();
         containerRegistry.Register<FrontendViewModel>();
+        containerRegistry.RegisterSingleton<IHierarchyJsonParser, HierarchyJsonParser>();
     }
 
     public void OnInitialized(IContainerProvider? containerProvider)

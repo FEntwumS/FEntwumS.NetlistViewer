@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using Asmichi.ProcessManagement;
+using FEntwumS.NetlistViewer.Types.HierarchyView;
 using FEntwumS.NetlistViewer.Types;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
@@ -22,6 +23,7 @@ public class FrontendService : IFrontendService
     private static readonly IDockService _dockService;
     private static readonly ISettingsService _settingsService;
     private static readonly IPackageService _packageService;
+    private static readonly IHierarchyJsonParser _hierarchyJsonParser;
 
     private static string _backendAddress = string.Empty;
     private static string _backendPort = string.Empty;
@@ -52,6 +54,7 @@ public class FrontendService : IFrontendService
         _dockService = ServiceManager.GetService<IDockService>();
         _settingsService = ServiceManager.GetService<ISettingsService>();
         _packageService = ServiceManager.GetService<IPackageService>();
+        _hierarchyJsonParser = ServiceManager.GetService<IHierarchyJsonParser>();
     }
 
     public void SubscribeToSettings()
@@ -869,7 +872,90 @@ public class FrontendService : IFrontendService
 
     public async Task CreateVhdlHierarchyAsync(IProjectFile vhdlFile)
     {
-        
+        ApplicationProcess proc = _applicationStateService.AddState("Visualizing VHDL hierarchy", AppState.Loading);
+
+        (bool success, bool needsRestart) = await InstallDependenciesAsync();
+
+        if (needsRestart)
+        {
+            _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
+
+            return;
+        }
+        else if (!(success || _continueOnBinaryInstallError))
+        {
+            _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
+
+            return;
+        }
+
+        success = await StartBackendIfNotStartedAsync();
+
+        if (!success)
+        {
+            _applicationStateService.RemoveState(proc, "Error: The backend could not be started");
+
+            return;
+        }
+
+        string top = Path.GetFileNameWithoutExtension(vhdlFile.FullPath);
+
+        IGhdlService ghdlService = ServiceManager.GetService<IGhdlService>();
+        IYosysService yosysService = ServiceManager.GetService<IYosysService>();
+
+        success = await ghdlService.ElaborateDesignAsync(vhdlFile);
+
+        if (!success)
+        {
+            _applicationStateService.RemoveState(proc, "Error: GHDL could not elaborate the design");
+
+            return;
+        }
+
+        success = await ghdlService.CrossCompileDesignAsync(vhdlFile);
+
+
+        if (!success)
+        {
+            _applicationStateService.RemoveState(proc, "Error: GHDL could not synthesize the design into Verilog");
+
+            return;
+        }
+
+        success = await yosysService.LoadVerilogAsync(vhdlFile);
+
+        if (!success)
+        {
+            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
+
+            return;
+        }
+
+        string netlistPath = Path.Combine(vhdlFile.Root!.FullPath, "build", "netlist", $"{top}.json");
+
+        if (!File.Exists(netlistPath))
+        {
+            _logger.Error($"Netlist file not found: {netlistPath}");
+
+            _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
+
+            return;
+        }
+
+        IProjectFile test = new ProjectFile(netlistPath, vhdlFile.TopFolder!);
+
+        success = await ServerStartedAsync();
+
+        if (!success)
+        {
+            _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
+
+            return;
+        }
+
+        await ShowHierarchyAsync(test);
+
+        _applicationStateService.RemoveState(proc);
     }
 
     public async Task CreateVerilogHierarchyAsync(IProjectFile verilogFile)
@@ -880,5 +966,81 @@ public class FrontendService : IFrontendService
     public async Task CreateSystemVerilogHierarchyAsync(IProjectFile systemVerilogFile)
     {
         
+    }
+
+    private async Task<bool> ShowHierarchyAsync(IProjectFile netlistFile)
+    {
+        ApplicationProcess proc = _applicationStateService.AddState("Starting viewer", AppState.Loading);
+
+        HttpResponseMessage? resp = null;
+        string top = Path.GetFileNameWithoutExtension(netlistFile.FullPath);
+
+        if (!File.Exists(netlistFile.FullPath))
+        {
+            _applicationStateService.RemoveState(proc, "Error: No JSON netlist was found");
+
+            _logger.Log(
+                "No json netlist was found. Aborting...");
+            return false;
+        }
+
+        string content = await File.ReadAllTextAsync(netlistFile.FullPath);
+
+        IHashService hashService = ServiceManager.GetHashService();
+        ReadOnlySpan<byte> contentByteSpan = new ReadOnlySpan<Byte>(Encoding.UTF8.GetBytes(content));
+        ReadOnlySpan<byte> pathByteSpan = new ReadOnlySpan<byte>(Encoding.UTF8.GetBytes(netlistFile.FullPath));
+        UInt32 pathHash = hashService.ComputeHash(pathByteSpan);
+        UInt32 contenthash = hashService.ComputeHash(contentByteSpan);
+
+        UInt64 combinedHash = ((UInt64)pathHash) << 32 | contenthash;
+
+        currentNetlist = combinedHash;
+
+        ServiceManager.GetCustomLogger().Log("Path hash: " + pathHash);
+        ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash);
+        ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash);
+
+        ServiceManager.GetViewportDimensionService()!.SetClickedElementPath(combinedHash, string.Empty);
+        ServiceManager.GetViewportDimensionService()!.SetCurrentElementCount(combinedHash, 0);
+        ServiceManager.GetViewportDimensionService()!.SetZoomElementDimensions(combinedHash, null);
+
+        FileStream jsonFileStream = File.Open(netlistFile.FullPath, FileMode.Open, FileAccess.Read);
+
+        MultipartFormDataContent formDataContent = new MultipartFormDataContent()
+        {
+            { new StreamContent(jsonFileStream), "file", netlistFile.Name }
+        };
+
+        ApplicationProcess waitForBackendProc =
+            _applicationStateService.AddState("Layouting in progress", AppState.Loading);
+
+        resp = await PostAsync(
+            "/extractHierarchy" + $"?hash={combinedHash}",
+            formDataContent);
+
+        _applicationStateService.RemoveState(waitForBackendProc);
+
+        jsonFileStream.Close();
+
+        if (resp == null)
+        {
+            _applicationStateService.RemoveState(proc, "Error: No response from backend");
+
+            return false;
+        }
+
+        if (!resp.IsSuccessStatusCode)
+        {
+            _applicationStateService.RemoveState(proc, "Error: The backend returned an error");
+
+            return false;
+        }
+        
+        (HierarchySideBarElement? elem, List<HierarchyViewElement>? elements) = await _hierarchyJsonParser.LoadHierarchyAsync(await resp.Content.ReadAsStreamAsync());
+
+
+        _applicationStateService.RemoveState(proc);
+        
+        return true;
     }
 }
