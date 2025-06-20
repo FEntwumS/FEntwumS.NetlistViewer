@@ -435,7 +435,6 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         #region Brushes
 
         ThemeVariant theme = Application.Current!.ActualThemeVariant;
-
         Brush backgroundBrush =
             new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeBackgroundColor") is Color
                 ? (Color)Application.Current!.FindResource(theme, "ThemeBackgroundColor")!
