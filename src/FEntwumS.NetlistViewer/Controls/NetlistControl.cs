@@ -435,7 +435,10 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         #region Brushes
 
         ThemeVariant theme = Application.Current!.ActualThemeVariant;
-        
+        Brush backgroundBrush =
+            new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeBackgroundColor") is Color
+                ? (Color)Application.Current!.FindResource(theme, "ThemeBackgroundColor")!
+                : Colors.LightGray);
         Pen highlightPen = new Pen(new SolidColorBrush(Colors.Yellow, 0.5d), 5.5 * CurrentScale, null, PenLineCap.Round,
             PenLineJoin.Miter, 10d);
         Pen notConnectedPen = new Pen(new SolidColorBrush(Colors.Red), 2 * CurrentScale, null, PenLineCap.Round);
@@ -470,7 +473,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         #endregion
 
         // Draw background
-        context.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, this.Bounds.Width, this.Bounds.Height));
+        context.DrawRectangle(backgroundBrush, null, new Rect(0, 0, this.Bounds.Width, this.Bounds.Height));
 
         Rect hitboxRect;
         Rect drawnRect;
