@@ -1014,4 +1014,19 @@ public class FrontendService : IFrontendService
     {
         await PostAsync("/close-netlist?hash=" + netlistId, null, false);
     }
+
+    public async Task CreateVhdlHierarchyAsync(IProjectFile vhdlFile)
+    {
+        
+    }
+
+    public async Task CreateVerilogHierarchyAsync(IProjectFile verilogFile)
+    {
+        
+    }
+
+    public async Task CreateSystemVerilogHierarchyAsync(IProjectFile systemVerilogFile)
+    {
+        
+    }
 }
