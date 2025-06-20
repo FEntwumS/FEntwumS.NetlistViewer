@@ -352,6 +352,32 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
             }
         });
 
+        containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
+        {
+            if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
+            {
+                menuItems.Add(new MenuItemViewModel("NetlistViewer_VHDLHierarchy")
+                {
+                    Header = $"View design hierarchy for {vhdlFile.Header}",
+                    Command = new AsyncRelayCommand(() => frontendService.CreateVhdlHierarchyAsync(vhdlFile))
+                });
+            } else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
+            {
+                menuItems.Add(new MenuItemViewModel("NetlistViewer_VerilogHierarchy")
+                {
+                    Header = $"View design hierarchy for {verilogFile.Header}",
+                    Command = new AsyncRelayCommand(() => frontendService.CreateVerilogHierarchyAsync(verilogFile))
+                });
+            } else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
+            {
+                menuItems.Add(new MenuItemViewModel("NetlistViewer_SystemVerilogHierarchy")
+                {
+                    Header = $"View design hierarchy for {systemVerilogFile.Header}",
+                    Command = new AsyncRelayCommand(() => frontendService.CreateSystemVerilogHierarchyAsync(systemVerilogFile))
+                });
+            }
+        });
+
         logger.Log("FEntwumS.NetlistViewer: Registered custom context menu entries");
 
         settingsService.RegisterSettingCategory("Netlist Viewer", 100, "netlistIcon");
@@ -402,7 +428,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_UseHierarchicalBackend",
             new CheckBoxSetting("Use hierarchical backend", false));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_PerformanceTarget",
-            new ComboBoxSetting("Performance Target", "Preloading", ["Preloading", "Just In Time", "Intelligent Ahead Of Time"]));
+            new ComboBoxSetting("Performance Target", "Preloading",
+                ["Preloading", "Just In Time", "Intelligent Ahead Of Time"]));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_AlwaysRegenerateNetlists",
             new CheckBoxSetting("Always regenerate netlists", true));
 
