@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace FEntwumS.NetlistViewer.Types;
+namespace FEntwumS.NetlistViewer.Types.HierarchyView;
 
 public class HierarchySideBarElement
 {
