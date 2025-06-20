@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Nodes;
+using System.Text.Json.Nodes;
 using FEntwumS.NetlistViewer.Types.HierarchyView;
 
 namespace FEntwumS.NetlistViewer.Services;
