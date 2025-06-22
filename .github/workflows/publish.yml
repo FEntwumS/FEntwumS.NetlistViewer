@@ -52,3 +52,4 @@ jobs:
           allowUpdates: true
           replacesArtifacts: false
           generateReleaseNotes: true
+          omitBodyDuringUpdate: true
