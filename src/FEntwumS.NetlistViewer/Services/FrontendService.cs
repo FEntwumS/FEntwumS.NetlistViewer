@@ -22,6 +22,7 @@ public class FrontendService : IFrontendService
     private static readonly IDockService _dockService;
     private static readonly ISettingsService _settingsService;
     private static readonly IPackageService _packageService;
+    private static readonly INetlistGenerator _netlistGenerator;
 
     private static string _backendAddress = string.Empty;
     private static string _backendPort = string.Empty;
@@ -52,6 +53,7 @@ public class FrontendService : IFrontendService
         _dockService = ServiceManager.GetService<IDockService>();
         _settingsService = ServiceManager.GetService<ISettingsService>();
         _packageService = ServiceManager.GetService<IPackageService>();
+        _netlistGenerator = ServiceManager.GetService<INetlistGenerator>();
     }
 
     public void SubscribeToSettings()
@@ -388,9 +390,7 @@ public class FrontendService : IFrontendService
             return;
         }
         
-        INetlistGenerator netlistGenerator = new NetlistGenerator();
-        
-        (IProjectFile? netlistFile, success) = await netlistGenerator.GenerateNetlistAsync(projectFile, netlistType);
+        (IProjectFile? netlistFile, success) = await _netlistGenerator.GenerateNetlistAsync(projectFile, netlistType);
 
         if (!success)
         {

@@ -9,11 +9,15 @@ public class NetlistGenerator : INetlistGenerator
 {
     private static readonly ICustomLogger _logger;
     private static readonly IApplicationStateService _applicationStateService;
+    private static readonly ISettingsService _settingsService;
+    
+    private bool _alwaysRegenerateNetlists = true;
     
     static NetlistGenerator()
     {
         _logger = ServiceManager.GetCustomLogger();
         _applicationStateService = ServiceManager.GetService<IApplicationStateService>();
+        _settingsService = ServiceManager.GetService<ISettingsService>();
     }
     
     public async Task<bool> GenerateVhdlNetlistAsync(IProjectFile vhdlProject)
@@ -53,14 +57,17 @@ public class NetlistGenerator : INetlistGenerator
     {
         bool success;
         IProjectFile? netlistFile;
-        
-        (netlistFile, success) = GetExisitingNetlist(projectFile);
 
-        if (success)
+        if (!_alwaysRegenerateNetlists)
         {
-            return(netlistFile, true);
+            (netlistFile, success) = GetExisitingNetlist(projectFile);
+
+            if (success)
+            {
+                return (netlistFile, true);
+            }
         }
-        
+
         switch (netlistType)
         {
             case NetlistType.VHDL:
@@ -119,5 +126,11 @@ public class NetlistGenerator : INetlistGenerator
         }
 
         return (null, false);
+    }
+
+    public void SubscribeToSettings()
+    {
+        _settingsService.GetSettingObservable<bool>("NetlistViewer_AlwaysRegenerateNetlists")
+            .Subscribe((x) => _alwaysRegenerateNetlists = x);
     }
 }

@@ -250,6 +250,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IFpgaBbService, FpgaBbService>();
         containerRegistry.RegisterSingleton<ICcVhdlFileIndexService, CcVhdlFileIndexService>();
         containerRegistry.RegisterSingleton<IFrontendService, FrontendService>();
+        containerRegistry.RegisterSingleton<INetlistGenerator, NetlistGenerator>();
         containerRegistry.Register<FrontendViewModel>();
     }
 
@@ -381,6 +382,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
             new CheckBoxSetting("Use hierarchical backend", false));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_PerformanceTarget",
             new ComboBoxSetting("Performance Target", "Preloading", ["Preloading", "Just In Time", "Intelligent Ahead Of Time"]));
+        settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_AlwaysRegenerateNetlists",
+            new CheckBoxSetting("Always regenerate netlists", true));
 
         logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
 
@@ -419,6 +422,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         ServiceManager.GetService<FrontendService>().SubscribeToSettings();
         ServiceManager.GetService<IFpgaBbService>().SubscribeToSettings();
         ServiceManager.GetService<IYosysService>().SubscribeToSettings();
+        ServiceManager.GetService<INetlistGenerator>().SubscribeToSettings();
 
         logger.Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
 
