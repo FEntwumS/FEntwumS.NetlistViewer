@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using Asmichi.ProcessManagement;
+using FEntwumS.NetlistViewer.Types;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
@@ -351,9 +352,17 @@ public class FrontendService : IFrontendService
         return (globalSuccess, needsRestart || _restartRequired);
     }
 
-    public async Task CreateVhdlNetlistAsync(IProjectFile vhdl)
+    private async Task GenerateNetlistAsync(IProjectFile projectFile, NetlistType netlistType)
     {
-        ApplicationProcess proc = _applicationStateService.AddState("Visualizing VHDL netlist", AppState.Loading);
+        string netlistTypeString  = netlistType switch
+        {
+            NetlistType.VHDL => "VHDL",
+            NetlistType.Verilog => "Verilog",
+            NetlistType.System_Verilog => "System Verilog",
+            _ => ""
+        };
+
+        ApplicationProcess proc = _applicationStateService.AddState($"Visualizing {netlistTypeString} netlist", AppState.Loading);
 
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
@@ -378,52 +387,17 @@ public class FrontendService : IFrontendService
 
             return;
         }
-
-        string top = Path.GetFileNameWithoutExtension(vhdl.FullPath);
-
-        IGhdlService ghdlService = ServiceManager.GetService<IGhdlService>();
-        IYosysService yosysService = ServiceManager.GetService<IYosysService>();
-
-        success = await ghdlService.ElaborateDesignAsync(vhdl);
+        
+        INetlistGenerator netlistGenerator = new NetlistGenerator();
+        
+        (IProjectFile? netlistFile, success) = await netlistGenerator.GenerateNetlistAsync(projectFile, netlistType);
 
         if (!success)
         {
-            _applicationStateService.RemoveState(proc, "Error: GHDL could not elaborate the design");
+            _applicationStateService.RemoveState(proc, "Error: The netlist could not be generated");
 
             return;
         }
-
-        success = await ghdlService.CrossCompileDesignAsync(vhdl);
-
-
-        if (!success)
-        {
-            _applicationStateService.RemoveState(proc, "Error: GHDL could not synthesize the design into Verilog");
-
-            return;
-        }
-
-        success = await yosysService.LoadVerilogAsync(vhdl);
-
-        if (!success)
-        {
-            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
-
-            return;
-        }
-
-        string netlistPath = Path.Combine(vhdl.Root!.FullPath, "build", "netlist", $"{top}.json");
-
-        if (!File.Exists(netlistPath))
-        {
-            _logger.Error($"Netlist file not found: {netlistPath}");
-
-            _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
-
-            return;
-        }
-
-        IProjectFile test = new ProjectFile(netlistPath, vhdl.TopFolder!);
 
         success = await ServerStartedAsync();
 
@@ -434,146 +408,24 @@ public class FrontendService : IFrontendService
             return;
         }
 
-        await ShowViewerAsync(test);
+        await ShowViewerAsync(netlistFile!);
 
         _applicationStateService.RemoveState(proc);
+    }
+
+    public async Task CreateVhdlNetlistAsync(IProjectFile vhdl)
+    {
+        await GenerateNetlistAsync(vhdl, NetlistType.VHDL);
     }
 
     public async Task CreateVerilogNetlistAsync(IProjectFile verilog)
     {
-        ApplicationProcess proc = _applicationStateService.AddState("Visualizing Verilog netlist", AppState.Loading);
-
-        (bool success, bool needsRestart) = await InstallDependenciesAsync();
-
-        if (needsRestart)
-        {
-            _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
-
-            return;
-        }
-        else if (!(success || _continueOnBinaryInstallError))
-        {
-            _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
-
-            return;
-        }
-
-        success = await StartBackendIfNotStartedAsync();
-
-        if (!success)
-        {
-            _applicationStateService.RemoveState(proc, "Error: The backend could not be started");
-
-            return;
-        }
-
-        string top = Path.GetFileNameWithoutExtension(verilog.FullPath);
-
-        IYosysService yosysService = ServiceManager.GetService<IYosysService>();
-
-        success = await yosysService.LoadVerilogAsync(verilog);
-
-        if (!success)
-        {
-            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
-
-            return;
-        }
-
-        string netlistPath = Path.Combine(verilog.Root!.FullPath, "build", "netlist", $"{top}.json");
-
-        if (!File.Exists(netlistPath))
-        {
-            _logger.Error($"Netlist file not found: {netlistPath}");
-
-            _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
-
-            return;
-        }
-
-        IProjectFile test = new ProjectFile(netlistPath, verilog.TopFolder!);
-
-        success = await ServerStartedAsync();
-
-        if (!success)
-        {
-            _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
-
-            return;
-        }
-
-        await ShowViewerAsync(test);
-
-        _applicationStateService.RemoveState(proc);
+        await GenerateNetlistAsync(verilog, NetlistType.Verilog);
     }
 
     public async Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog)
     {
-        ApplicationProcess proc =
-            _applicationStateService.AddState("Visualizing SystemVerilog netlist", AppState.Loading);
-
-        (bool success, bool needsRestart) = await InstallDependenciesAsync();
-
-        if (needsRestart)
-        {
-            _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
-
-            return;
-        }
-        else if (!(success || _continueOnBinaryInstallError))
-        {
-            _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
-
-            return;
-        }
-
-        success = await StartBackendIfNotStartedAsync();
-
-        if (!success)
-        {
-            _applicationStateService.RemoveState(proc, "Error: Backend could not be started");
-
-            return;
-        }
-
-        string top = Path.GetFileNameWithoutExtension(sVerilog.FullPath);
-
-        IYosysService yosysService = ServiceManager.GetService<IYosysService>();
-
-        success = await yosysService.LoadSystemVerilogAsync(sVerilog);
-
-        if (!success)
-        {
-            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
-
-            return;
-        }
-
-        string netlistPath = Path.Combine(sVerilog.Root!.FullPath, "build", "netlist", $"{top}.json");
-
-        if (!File.Exists(netlistPath))
-        {
-            _logger.Error($"Netlist file not found: {netlistPath}");
-
-            _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
-
-            return;
-        }
-
-        IProjectFile test = new ProjectFile(netlistPath, sVerilog.TopFolder!);
-
-        success = await ServerStartedAsync();
-
-        if (!success)
-        {
-            _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
-
-            return;
-        }
-
-        await ShowViewerAsync(test);
-
-        _applicationStateService.RemoveState(proc);
+        await GenerateNetlistAsync(sVerilog, NetlistType.System_Verilog);
     }
 
     public async Task ShowViewerAsync(IProjectFile json)
