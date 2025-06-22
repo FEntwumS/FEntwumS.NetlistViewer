@@ -45,10 +45,9 @@ jobs:
           directory: ./publish
       - name: Debug
         run: ls && ls -lshaR publish
-      - uses: ncipollo/release-action@v1.14.0
+      - uses: ncipollo/release-action@v1
         with:
           artifacts: "FEntwumS.NetlistViewer_${{steps.get-version.outputs.version}}_all.zip,./publish/compatibility.txt"
-          tag: ${{steps.get-version.outputs.version}}
           allowUpdates: true
           replacesArtifacts: false
           generateReleaseNotes: true
