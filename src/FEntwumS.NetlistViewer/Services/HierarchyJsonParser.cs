@@ -77,10 +77,19 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         double xRef, double yRef, HierarchySideBarElement? sidebarRoot)
     {
         HierarchySideBarElement newSidebarElement = new HierarchySideBarElement();
+        JsonArray? subNodes = node["children"] as JsonArray;
 
         if (sidebarRoot != null)
         {
             sidebarRoot.Children.Add(newSidebarElement);
+        }
+
+        if (subNodes != null)
+        {
+            foreach (JsonNode? subNode in subNodes)
+            {
+                parseSubNode(subNode!, hierarchyViewElements, xRef, yRef, newSidebarElement);
+            }
         }
 
         return null;
@@ -89,5 +98,70 @@ public class HierarchyJsonParser : IHierarchyJsonParser
     private void parseSubNode(JsonNode node, List<HierarchyViewElement> hierarchyViewElements, double xRef, double yRef,
         HierarchySideBarElement currentSidebarElement)
     {
+        JsonArray? labels = node["labels"] as JsonArray;
+        JsonArray? ports = node["ports"] as JsonArray;
+        JsonNode? layoutOptions = node["layoutOptions"] as JsonNode;
+
+        if (layoutOptions is null)
+        {
+            return;
+        }
+
+        if (!layoutOptions.AsObject().ContainsKey("hierarchy-container-sub-node-type"))
+        {
+            return;
+        }
+
+        if (labels is null || ports is null)
+        {
+            return;
+        }
+
+        if (labels.Count > 1)
+        {
+            _logger.Error("Multiple labels on subnode");
+        }
+
+        if (labels.Count == 0)
+        {
+            return;
+        }
+
+        switch (layoutOptions["hierarchy-container-sub-node-type"]!.GetValue<string>())
+        {
+            case "NAME":
+                currentSidebarElement.Name = parseLabel(labels[0], hierarchyViewElements, xRef, yRef);
+                break;
+            case "TYPE":
+                currentSidebarElement.Type = parseLabel(labels[0], hierarchyViewElements, xRef, yRef);
+                break;
+            case "PARAMETERS":
+                foreach (JsonNode? parameter in ports)
+                {
+                    currentSidebarElement.Attributes.Add(parsePort(parameter, hierarchyViewElements, xRef, yRef));
+                }
+                break;
+            case "PORTS":
+                foreach (JsonNode? port in ports)
+                {
+                    currentSidebarElement.Ports.Add(parsePort(port, hierarchyViewElements, xRef, yRef));
+                }
+                break;
+            default:
+                return;
+        }
+        
+    }
+
+    private string parseLabel(JsonNode labelNode, List<HierarchyViewElement> hierarchyViewElements, double xRef,
+        double yRef)
+    {
+        return "";
+    }
+
+    private string parsePort(JsonNode portNode, List<HierarchyViewElement> hierarchyViewElements, double xRef,
+        double yRef)
+    {
+        return "";
     }
 }
