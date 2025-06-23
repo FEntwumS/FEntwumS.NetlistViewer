@@ -36,6 +36,9 @@ jobs:
       - name: Copy font license
         id: font-license
         run: cp ./src/FEntwumS.NetlistViewer/Assets/Fonts/MartianMono-LICENSE.txt ./publish/THIRD-PARTY-LICENSES/Martian-Mono-License.txt
+      - name : Copy icons license
+        id: icons-license
+        run: cp ./src/FEntwumS.NetlistViewer/Assets/Icons/fluentui-system-icons-LICENSE.txt ./publish/THIRD-PARTY-LICENSES/fluentui-system-icons-LICENSE.txt
       - name: Compress
         if: steps.license.outcome == 'success'
         uses: thedoctor0/zip-release@0.7.1
