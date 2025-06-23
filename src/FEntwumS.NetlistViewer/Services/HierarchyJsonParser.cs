@@ -1,4 +1,6 @@
 using System.Text.Json.Nodes;
+using Avalonia.Media;
+using FEntwumS.NetlistViewer.Assets;
 using FEntwumS.NetlistViewer.Types.HierarchyView;
 
 namespace FEntwumS.NetlistViewer.Services;
@@ -140,28 +142,131 @@ public class HierarchyJsonParser : IHierarchyJsonParser
                 {
                     currentSidebarElement.Attributes.Add(parsePort(parameter, hierarchyViewElements, xRef, yRef));
                 }
+
                 break;
             case "PORTS":
                 foreach (JsonNode? port in ports)
                 {
                     currentSidebarElement.Ports.Add(parsePort(port, hierarchyViewElements, xRef, yRef));
                 }
+
                 break;
             default:
                 return;
         }
-        
     }
 
     private string parseLabel(JsonNode labelNode, List<HierarchyViewElement> hierarchyViewElements, double xRef,
         double yRef)
     {
-        return "";
+        JsonNode? layoutOptions = labelNode["layoutOptions"];
+        double x = 0,
+            y = 0,
+            width = 0,
+            height = 0,
+            fontSize = 10;
+        string text = "";
+
+        if (labelNode.AsObject().ContainsKey("x"))
+        {
+            x = labelNode["x"]!.GetValue<double>();
+        }
+
+        if (labelNode.AsObject().ContainsKey("y"))
+        {
+            y = labelNode["y"]!.GetValue<double>();
+        }
+
+        if (labelNode.AsObject().ContainsKey("width"))
+        {
+            width = labelNode["width"]!.GetValue<double>();
+        }
+
+        if (labelNode.AsObject().ContainsKey("height"))
+        {
+            height = labelNode["height"]!.GetValue<double>();
+        }
+
+        if (labelNode.AsObject().ContainsKey("text"))
+        {
+            text = labelNode["text"]!.GetValue<string>();
+        }
+
+        if (layoutOptions != null && layoutOptions.AsObject().ContainsKey("font-size"))
+        {
+            fontSize = double.Parse(layoutOptions["font-size"]!.GetValue<string>(),
+                System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        hierarchyViewElements.Add(new HierarchyViewLabel()
+        {
+            Content = text,
+            X = xRef + x,
+            Y = yRef + y,
+            Width = width,
+            Height = height,
+            FontSize = fontSize
+        });
+
+        return text;
     }
 
     private string parsePort(JsonNode portNode, List<HierarchyViewElement> hierarchyViewElements, double xRef,
         double yRef)
     {
-        return "";
+        JsonNode? layoutOptions = portNode["layoutOptions"];
+        JsonArray? labels = portNode["labels"] as JsonArray;
+        double x = 0,
+            y = 0,
+            width = 0,
+            height = 0;
+        StreamGeometry? geometry = null;
+
+        if (portNode.AsObject().ContainsKey("x"))
+        {
+            x = portNode["x"]!.GetValue<double>();
+        }
+
+        if (portNode.AsObject().ContainsKey("y"))
+        {
+            y = portNode["y"]!.GetValue<double>();
+        }
+
+        if (portNode.AsObject().ContainsKey("width"))
+        {
+            width = portNode["width"]!.GetValue<double>();
+        }
+
+        if (portNode.AsObject().ContainsKey("height"))
+        {
+            height = portNode["height"]!.GetValue<double>();
+        }
+
+        if (layoutOptions != null && layoutOptions.AsObject().ContainsKey("port-direction"))
+        {
+            geometry = layoutOptions["port-direction"]!.GetValue<string>() switch
+            {
+                "IN" => AppIcons.IN,
+                "OUT" => AppIcons.OUT,
+                "INOUT" => AppIcons.INOUT,
+                _ => null
+            };
+        }
+
+        hierarchyViewElements.Add(new HierarchyViewPort()
+        {
+            Geometry = geometry,
+            Height = height,
+            Width = width,
+            X = xRef + x,
+            Y = yRef + y
+        });
+
+        if (labels is null || labels.Count == 0)
+        {
+            return "";
+        }
+
+        return parseLabel(labels[0], hierarchyViewElements, xRef, yRef);
     }
 }
