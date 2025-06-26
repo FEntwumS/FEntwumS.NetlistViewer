@@ -28,9 +28,9 @@ public class HierarchyJsonParser : IHierarchyJsonParser
             return (null, null);
         }
 
-        HierarchySideBarElement? sidebarRoot = null;
+        HierarchySideBarElement? sidebarRoot = parseRootNode(rootNode, hierarchyViewElements);
 
-        return (null, hierarchyViewElements);
+        return (sidebarRoot, hierarchyViewElements);
     }
 
     private HierarchySideBarElement? parseRootNode(JsonNode node, List<HierarchyViewElement> hierarchyViewElements)
@@ -85,6 +85,8 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         {
             sidebarRoot.Children.Add(newSidebarElement);
         }
+        
+        parseNode(node, hierarchyViewElements, xRef, yRef);
 
         if (subNodes != null)
         {
@@ -118,6 +120,8 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         {
             return;
         }
+        
+        parseNode(node, hierarchyViewElements, xRef, yRef);
 
         if (labels.Count > 1)
         {
@@ -268,5 +272,41 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         }
 
         return parseLabel(labels[0], hierarchyViewElements, xRef, yRef);
+    }
+
+    private void parseNode(JsonNode node, List<HierarchyViewElement> hierarchyViewElements, double xRef, double yRef)
+    {
+        double x = 0,
+            y = 0,
+            width = 0,
+            height = 0;
+
+        if (node.AsObject().ContainsKey("x"))
+        {
+            x = node["x"]!.GetValue<double>();
+        }
+
+        if (node.AsObject().ContainsKey("y"))
+        {
+            y = node["y"]!.GetValue<double>();
+        }
+
+        if (node.AsObject().ContainsKey("width"))
+        {
+            width = node["width"]!.GetValue<double>();
+        }
+
+        if (node.AsObject().ContainsKey("height"))
+        {
+            height = node["height"]!.GetValue<double>();
+        }
+        
+        hierarchyViewElements.Add(new HierarchyViewNode()
+        {
+            X = xRef + x,
+            Y = yRef + y,
+            Width = width,
+            Height = height
+        });
     }
 }
