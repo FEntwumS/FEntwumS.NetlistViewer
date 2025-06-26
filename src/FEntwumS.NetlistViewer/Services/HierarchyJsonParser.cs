@@ -20,6 +20,8 @@ public class HierarchyJsonParser : IHierarchyJsonParser
     {
         List<HierarchyViewElement> hierarchyViewElements = new List<HierarchyViewElement>();
         JsonNode? rootNode = await JsonNode.ParseAsync(hierarchyStream);
+        
+        Dictionary<string, HierarchySideBarElement> nodeNameMap = new Dictionary<string, HierarchySideBarElement>();
 
         if (rootNode == null)
         {
@@ -28,12 +30,12 @@ public class HierarchyJsonParser : IHierarchyJsonParser
             return (null, null);
         }
 
-        HierarchySideBarElement? sidebarRoot = parseRootNode(rootNode, hierarchyViewElements);
+        HierarchySideBarElement? sidebarRoot = parseRootNode(rootNode, hierarchyViewElements, nodeNameMap);
 
         return (sidebarRoot, hierarchyViewElements);
     }
 
-    private HierarchySideBarElement? parseRootNode(JsonNode node, List<HierarchyViewElement> hierarchyViewElements)
+    private HierarchySideBarElement? parseRootNode(JsonNode node, List<HierarchyViewElement> hierarchyViewElements, Dictionary<string, HierarchySideBarElement> nodeNameMap)
     {
         double width = 0, height = 0;
         JsonArray? containerNodes = node["children"] as JsonArray;
@@ -63,11 +65,11 @@ public class HierarchyJsonParser : IHierarchyJsonParser
                 if (firstNode == true)
                 {
                     firstNode = false;
-                    sidebarRoot = parseContainerNode(containerNode, hierarchyViewElements, 0, 0, null);
+                    sidebarRoot = parseContainerNode(containerNode, hierarchyViewElements, 0, 0, new HierarchySideBarElement(), nodeNameMap);
                 }
                 else
                 {
-                    parseContainerNode(containerNode, hierarchyViewElements, width, height, sidebarRoot);
+                    parseContainerNode(containerNode, hierarchyViewElements, width, height, sidebarRoot, nodeNameMap);
                 }
             }
         }
@@ -76,12 +78,30 @@ public class HierarchyJsonParser : IHierarchyJsonParser
     }
 
     private HierarchySideBarElement parseContainerNode(JsonNode node, List<HierarchyViewElement> hierarchyViewElements,
-        double xRef, double yRef, HierarchySideBarElement? sidebarRoot)
+        double xRef, double yRef, HierarchySideBarElement? sidebarRoot, Dictionary<string, HierarchySideBarElement> nodeNameMap)
     {
         HierarchySideBarElement newSidebarElement = new HierarchySideBarElement();
         JsonArray? subNodes = node["children"] as JsonArray;
+        JsonNode layoutOptions = node["layoutOptions"] as JsonNode;
+        string ancestorName = "";
+        HierarchySideBarElement? ancestor = null;
 
-        if (sidebarRoot != null)
+        if (layoutOptions is null)
+        {
+            return newSidebarElement;
+        }
+
+        if (layoutOptions.AsObject().ContainsKey("hierarchy-ancestor-name"))
+        {
+            ancestorName = layoutOptions["hierarchy-ancestor-name"]!.GetValue<string>();
+
+            ancestor = nodeNameMap.GetValueOrDefault(ancestorName, null);
+        }
+
+        if (ancestor is not null)
+        {
+            ancestor.Children.Add(newSidebarElement);
+        } else if (sidebarRoot != null)
         {
             sidebarRoot.Children.Add(newSidebarElement);
         }
@@ -92,15 +112,15 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         {
             foreach (JsonNode? subNode in subNodes)
             {
-                parseSubNode(subNode!, hierarchyViewElements, xRef, yRef, newSidebarElement);
+                parseSubNode(subNode!, hierarchyViewElements, xRef, yRef, newSidebarElement, nodeNameMap);
             }
         }
 
-        return null;
+        return sidebarRoot;
     }
 
     private void parseSubNode(JsonNode node, List<HierarchyViewElement> hierarchyViewElements, double xRef, double yRef,
-        HierarchySideBarElement currentSidebarElement)
+        HierarchySideBarElement currentSidebarElement, Dictionary<string, HierarchySideBarElement> nodeNameMap)
     {
         JsonArray? labels = node["labels"] as JsonArray;
         JsonArray? ports = node["ports"] as JsonArray;
@@ -116,7 +136,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
             return;
         }
 
-        if (labels is null || ports is null)
+        if (labels is null && ports is null)
         {
             return;
         }
@@ -137,21 +157,28 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         {
             case "NAME":
                 currentSidebarElement.Name = parseLabel(labels[0], hierarchyViewElements, xRef, yRef);
+                nodeNameMap.Add(currentSidebarElement.Name, currentSidebarElement);
                 break;
             case "TYPE":
                 currentSidebarElement.Type = parseLabel(labels[0], hierarchyViewElements, xRef, yRef);
                 break;
             case "PARAMETERS":
-                foreach (JsonNode? parameter in ports)
+                if (ports is not null)
                 {
-                    currentSidebarElement.Attributes.Add(parsePort(parameter, hierarchyViewElements, xRef, yRef));
+                    foreach (JsonNode? parameter in ports)
+                    {
+                        currentSidebarElement.Attributes.Add(parsePort(parameter, hierarchyViewElements, xRef, yRef));
+                    }
                 }
 
                 break;
             case "PORTS":
-                foreach (JsonNode? port in ports)
+                if (ports is not null)
                 {
-                    currentSidebarElement.Ports.Add(parsePort(port, hierarchyViewElements, xRef, yRef));
+                    foreach (JsonNode? port in ports)
+                    {
+                        currentSidebarElement.Ports.Add(parsePort(port, hierarchyViewElements, xRef, yRef));
+                    }
                 }
 
                 break;
