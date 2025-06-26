@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         x:Class="FEntwumS.NetlistViewer.Views.HierarchyView"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:DataType="vm:HierarchyViewModel"
+        x:DataType="vm:HierarchySidebarViewModel"
         x:CompileBindings="True"
         xmlns:controls="clr-namespace:FEntwumS.NetlistViewer.Controls"
         xmlns:viewModels="clr-namespace:FEntwumS.NetlistViewer.ViewModels">

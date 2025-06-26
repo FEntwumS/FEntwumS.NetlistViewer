@@ -1,0 +1,48 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FEntwumS.NetlistViewer.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:types="clr-namespace:FEntwumS.NetlistViewer.Types"
+             xmlns:hierarchicaltypes="clr-namespace:FEntwumS.NetlistViewer.Types.HierarchyView"
+             
+             x:Class="FEntwumS.NetlistViewer.Views.HierarchySidebarView"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:HierarchySidebarViewModel"
+             x:CompileBindings="True"
+             xmlns:controls="clr-namespace:FEntwumS.NetlistViewer.Controls"
+             xmlns:viewModels="clr-namespace:FEntwumS.NetlistViewer.ViewModels">
+    <!--
+    <TreeDataGrid Source="{Binding Source}"
+                  VerticalAlignment="Stretch"
+                  HorizontalAlignment="Stretch"
+                  MinHeight="100"
+                  MinWidth="100"
+                  Background="White">
+        <TreeDataGrid.Styles>
+            <FluentTheme/>
+            <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml"></StyleInclude>
+        </TreeDataGrid.Styles>
+    </TreeDataGrid>
+    -->
+    <StackPanel Orientation="Vertical">
+        <TreeView ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                  ItemsSource="{Binding Elements}"
+                  SelectedItem="{Binding SelectedElement}">
+            <TreeView.Styles>
+                <Style Selector="TreeViewItem" x:DataType="hierarchicaltypes:HierarchySideBarElement">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded}"/>
+                </Style>
+            </TreeView.Styles>
+            <TreeView.DataTemplates>
+                <TreeDataTemplate DataType="hierarchicaltypes:HierarchySideBarElement" ItemsSource="{Binding Children}">
+                    <TextBlock FontSize="13" Text="{Binding Name}"></TextBlock>
+                </TreeDataTemplate>
+            </TreeView.DataTemplates>
+        </TreeView>
+        <Border BorderBrush="Aqua">
+            <TextBlock FontSize="13" Text="{Binding SelectedElementType}"></TextBlock>
+        </Border>
+    </StackPanel>
+</UserControl>
