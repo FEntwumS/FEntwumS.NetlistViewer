@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.ObjectModel;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,6 +10,7 @@ using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using FEntwumS.NetlistViewer.ViewModels;
+using FEntwumS.NetlistViewer.Views;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.PackageManager;
 using OneWare.ProjectSystem.Models;
@@ -357,7 +359,7 @@ public class FrontendService : IFrontendService
         return (globalSuccess, needsRestart || _restartRequired);
     }
 
-    private async Task GenerateNetlistAsync(IProjectFile projectFile, NetlistType netlistType)
+    private async Task<IProjectFile?> GenerateNetlistAsync(IProjectFile projectFile, NetlistType netlistType)
     {
         string netlistTypeString  = netlistType switch
         {
@@ -375,13 +377,13 @@ public class FrontendService : IFrontendService
         {
             _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
 
-            return;
+            return null;
         }
         else if (!(success || _continueOnBinaryInstallError))
         {
             _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
 
-            return;
+            return null;
         }
 
         success = await StartBackendIfNotStartedAsync();
@@ -390,7 +392,7 @@ public class FrontendService : IFrontendService
         {
             _applicationStateService.RemoveState(proc, "Error: The backend could not be started");
 
-            return;
+            return null;
         }
         
         (IProjectFile? netlistFile, success) = await _netlistGenerator.GenerateNetlistAsync(projectFile, netlistType);
@@ -399,7 +401,7 @@ public class FrontendService : IFrontendService
         {
             _applicationStateService.RemoveState(proc, "Error: The netlist could not be generated");
 
-            return;
+            return null;
         }
 
         success = await ServerStartedAsync();
@@ -408,27 +410,27 @@ public class FrontendService : IFrontendService
         {
             _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
 
-            return;
+            return null;
         }
-
-        await ShowViewerAsync(netlistFile!);
-
+        
         _applicationStateService.RemoveState(proc);
+
+        return netlistFile;
     }
 
     public async Task CreateVhdlNetlistAsync(IProjectFile vhdl)
     {
-        await GenerateNetlistAsync(vhdl, NetlistType.VHDL);
+        await ShowViewerAsync((await GenerateNetlistAsync(vhdl, NetlistType.VHDL))!);
     }
 
     public async Task CreateVerilogNetlistAsync(IProjectFile verilog)
     {
-        await GenerateNetlistAsync(verilog, NetlistType.Verilog);
+        await ShowViewerAsync((await GenerateNetlistAsync(verilog, NetlistType.Verilog))!);
     }
 
     public async Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog)
     {
-        await GenerateNetlistAsync(sVerilog, NetlistType.System_Verilog);
+        await ShowViewerAsync((await GenerateNetlistAsync(sVerilog, NetlistType.System_Verilog))!);
     }
 
     public async Task ShowViewerAsync(IProjectFile json)
@@ -872,100 +874,17 @@ public class FrontendService : IFrontendService
 
     public async Task CreateVhdlHierarchyAsync(IProjectFile vhdlFile)
     {
-        ApplicationProcess proc = _applicationStateService.AddState("Visualizing VHDL hierarchy", AppState.Loading);
-
-        (bool success, bool needsRestart) = await InstallDependenciesAsync();
-
-        if (needsRestart)
-        {
-            _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
-
-            return;
-        }
-        else if (!(success || _continueOnBinaryInstallError))
-        {
-            _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
-
-            return;
-        }
-
-        success = await StartBackendIfNotStartedAsync();
-
-        if (!success)
-        {
-            _applicationStateService.RemoveState(proc, "Error: The backend could not be started");
-
-            return;
-        }
-
-        string top = Path.GetFileNameWithoutExtension(vhdlFile.FullPath);
-
-        IGhdlService ghdlService = ServiceManager.GetService<IGhdlService>();
-        IYosysService yosysService = ServiceManager.GetService<IYosysService>();
-
-        success = await ghdlService.ElaborateDesignAsync(vhdlFile);
-
-        if (!success)
-        {
-            _applicationStateService.RemoveState(proc, "Error: GHDL could not elaborate the design");
-
-            return;
-        }
-
-        success = await ghdlService.CrossCompileDesignAsync(vhdlFile);
-
-
-        if (!success)
-        {
-            _applicationStateService.RemoveState(proc, "Error: GHDL could not synthesize the design into Verilog");
-
-            return;
-        }
-
-        success = await yosysService.LoadVerilogAsync(vhdlFile);
-
-        if (!success)
-        {
-            _applicationStateService.RemoveState(proc, "Error: Yosys could not create a JSON netlist");
-
-            return;
-        }
-
-        string netlistPath = Path.Combine(vhdlFile.Root!.FullPath, "build", "netlist", $"{top}.json");
-
-        if (!File.Exists(netlistPath))
-        {
-            _logger.Error($"Netlist file not found: {netlistPath}");
-
-            _applicationStateService.RemoveState(proc, "Error: The netlist could not be found");
-
-            return;
-        }
-
-        IProjectFile test = new ProjectFile(netlistPath, vhdlFile.TopFolder!);
-
-        success = await ServerStartedAsync();
-
-        if (!success)
-        {
-            _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
-
-            return;
-        }
-
-        await ShowHierarchyAsync(test);
-
-        _applicationStateService.RemoveState(proc);
+        await ShowHierarchyAsync((await GenerateNetlistAsync(vhdlFile, NetlistType.VHDL))!);
     }
 
     public async Task CreateVerilogHierarchyAsync(IProjectFile verilogFile)
     {
-        
+        await ShowHierarchyAsync((await GenerateNetlistAsync(verilogFile, NetlistType.Verilog))!);
     }
 
     public async Task CreateSystemVerilogHierarchyAsync(IProjectFile systemVerilogFile)
     {
-        
+        await ShowHierarchyAsync((await GenerateNetlistAsync(systemVerilogFile, NetlistType.System_Verilog))!);
     }
 
     private async Task<bool> ShowHierarchyAsync(IProjectFile netlistFile)
@@ -1040,6 +959,16 @@ public class FrontendService : IFrontendService
 
 
         _applicationStateService.RemoveState(proc);
+        
+        HierarchySidebarViewModel sidebarVM = new HierarchySidebarViewModel();
+        sidebarVM.InitializeContent();
+        sidebarVM.Title = "Design hierarchy";
+        ObservableCollection<HierarchySideBarElement> sidebarelements = new ObservableCollection<HierarchySideBarElement>();
+        sidebarelements.Add(elem!.Children[0]);
+        sidebarVM.Elements = sidebarelements;
+        
+        _dockService.Show(sidebarVM, DockShowLocation.Left);
+        _dockService.InitializeContent();
         
         return true;
     }
