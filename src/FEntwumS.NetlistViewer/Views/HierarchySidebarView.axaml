@@ -1,0 +1,97 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FEntwumS.NetlistViewer.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:types="clr-namespace:FEntwumS.NetlistViewer.Types"
+             xmlns:hierarchicaltypes="clr-namespace:FEntwumS.NetlistViewer.Types.HierarchyView"
+             
+             x:Class="FEntwumS.NetlistViewer.Views.HierarchySidebarView"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:HierarchySidebarViewModel"
+             x:CompileBindings="True"
+             xmlns:controls="clr-namespace:FEntwumS.NetlistViewer.Controls"
+             xmlns:viewModels="clr-namespace:FEntwumS.NetlistViewer.ViewModels">
+    <!--
+    <TreeDataGrid Source="{Binding Source}"
+                  VerticalAlignment="Stretch"
+                  HorizontalAlignment="Stretch"
+                  MinHeight="100"
+                  MinWidth="100"
+                  Background="White">
+        <TreeDataGrid.Styles>
+            <FluentTheme/>
+            <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml"></StyleInclude>
+        </TreeDataGrid.Styles>
+    </TreeDataGrid>
+    -->
+    <Grid ColumnDefinitions="*"
+          RowDefinitions="5*,2*">
+        <TreeView ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                  ItemsSource="{Binding Elements}"
+                  SelectedItem="{Binding SelectedElement}"
+                  VerticalAlignment="Top"
+                  Grid.Row="0">
+            <TreeView.Styles>
+                <Style Selector="TreeViewItem" x:DataType="hierarchicaltypes:HierarchySideBarElement">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded}"/>
+                </Style>
+            </TreeView.Styles>
+            <TreeView.DataTemplates>
+                <TreeDataTemplate DataType="hierarchicaltypes:HierarchySideBarElement" ItemsSource="{Binding Children}">
+                    <TextBlock FontSize="13" Text="{Binding Name}"></TextBlock>
+                </TreeDataTemplate>
+            </TreeView.DataTemplates>
+        </TreeView>
+        <Border Grid.Row="1"
+                BorderThickness="0 1 0 1"
+                BorderBrush="{DynamicResource ThemeBorderLowBrush}"> 
+        <ScrollViewer>
+            <StackPanel>
+                <Border BorderThickness="0 1"
+                        BorderBrush="{DynamicResource ThemeBorderLowBrush}">
+                    <StackPanel>
+                        <TextBlock Text="Type: " FontSize="13"></TextBlock>
+                        <TextBlock FontSize="13" Text="{Binding SelectedElementType}"></TextBlock>
+                    </StackPanel>
+                </Border>
+                <Border BorderThickness="0 1"
+                        BorderBrush="{DynamicResource ThemeBorderLowBrush}">
+                    <StackPanel>
+                        <TextBlock Text="Parameters: " FontSize="13"></TextBlock>
+                        <ItemsControl ItemsSource="{Binding SelectedElement.Attributes}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock FontSize="13" Text="{Binding Name}"></TextBlock>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+                <Border BorderThickness="0 1"
+                        BorderBrush="{DynamicResource ThemeBorderLowBrush}">
+                    <StackPanel>
+                        <TextBlock Text="Ports: " FontSize="13"></TextBlock>
+                        <ItemsControl ItemsSource="{Binding SelectedElement.Ports}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="Auto, *"
+                                          ColumnSpacing="4">
+                                        <PathIcon Grid.Column="0"
+                                              Data="{Binding Geometry}"
+                                              Height="13"
+                                              Width="13">
+                                        </PathIcon>
+                                        <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="13"></TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

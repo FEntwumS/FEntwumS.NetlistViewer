@@ -17,6 +17,7 @@
     
     <ItemGroup>
       <Folder Include="Assets\Fonts\" />
+      <Folder Include="Styles\" />
     </ItemGroup>
     
     <ItemGroup>
@@ -32,6 +33,12 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>compile; build; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Reference Include="Avalonia.Themes.Fluent">
+        <HintPath>..\..\..\..\..\..\..\.nuget\packages\avalonia.themes.fluent\11.3.0\lib\net8.0\Avalonia.Themes.Fluent.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
     <Target Name="GenerateCompatibilityFile" AfterTargets="Build">

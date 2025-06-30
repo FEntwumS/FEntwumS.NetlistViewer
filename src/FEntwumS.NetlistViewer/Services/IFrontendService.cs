@@ -5,8 +5,6 @@ namespace FEntwumS.NetlistViewer.Services;
 
 public interface IFrontendService : SettingsSubscriber
 {
-    public void SubscribeToSettings();
-
     public Task CreateVhdlNetlistAsync(IProjectFile vhdl);
 
     public Task CreateVerilogNetlistAsync(IProjectFile verilog);
@@ -22,4 +20,8 @@ public interface IFrontendService : SettingsSubscriber
     public Task<bool> ServerStartedAsync();
 
     public Task CloseNetlistOnServerAsync(UInt64 netlistId);
+    
+    public Task CreateVhdlHierarchyAsync(IProjectFile vhdlFile);
+    public Task CreateVerilogHierarchyAsync(IProjectFile verilogFile);
+    public Task CreateSystemVerilogHierarchyAsync(IProjectFile systemVerilogFile);
 }

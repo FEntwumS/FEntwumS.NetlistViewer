@@ -129,6 +129,27 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                         ]
                     }
                 ]
+            },
+            new PackageVersion()
+            {
+                Version = "0.11.0",
+                Targets =
+                [
+                    new PackageTarget()
+                    {
+                        Target = "all",
+                        Url =
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.11.0/fentwums-netlist-reader-server-v0.11.0.tar.gz",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-netlist-reader",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
+                    }
+                ]
             }
         ]
     };
@@ -257,6 +278,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
     public const string NetlistPathSetting = "FEntwumS_NetlistReaderBackend";
     public const string JavaPathSetting = "FEntwumS_JDKPath";
+    public static bool EnableHierarchyView = false;
 
     public void RegisterTypes(IContainerRegistry containerRegistry)
     {
@@ -273,6 +295,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IFrontendService, FrontendService>();
         containerRegistry.RegisterSingleton<INetlistGenerator, NetlistGenerator>();
         containerRegistry.Register<FrontendViewModel>();
+        containerRegistry.RegisterSingleton<IHierarchyJsonParser, HierarchyJsonParser>();
     }
 
     public void OnInitialized(IContainerProvider? containerProvider)
@@ -312,6 +335,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         var frontendService = containerProvider.Resolve<IFrontendService>();
 
         containerProvider.Resolve<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
+        containerProvider.Resolve<IDockService>().RegisterLayoutExtension<HierarchySidebarViewModel>(DockShowLocation.Left);
 
         logger.Log("FEntwumS.NetlistViewer: Registered FrontendViewModel as Document in dock system");
 
@@ -348,6 +372,37 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                     Header = $"View netlist for {systemVerilogFile.Header}",
                     Command = new AsyncRelayCommand(() =>
                         frontendService.CreateSystemVerilogNetlistAsync(systemVerilogFile))
+                });
+            }
+        });
+
+        containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
+        {
+            if (!EnableHierarchyView)
+            {
+                return;
+            }
+            
+            if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
+            {
+                menuItems.Add(new MenuItemViewModel("NetlistViewer_VHDLHierarchy")
+                {
+                    Header = $"View design hierarchy for {vhdlFile.Header}",
+                    Command = new AsyncRelayCommand(() => frontendService.CreateVhdlHierarchyAsync(vhdlFile))
+                });
+            } else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
+            {
+                menuItems.Add(new MenuItemViewModel("NetlistViewer_VerilogHierarchy")
+                {
+                    Header = $"View design hierarchy for {verilogFile.Header}",
+                    Command = new AsyncRelayCommand(() => frontendService.CreateVerilogHierarchyAsync(verilogFile))
+                });
+            } else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
+            {
+                menuItems.Add(new MenuItemViewModel("NetlistViewer_SystemVerilogHierarchy")
+                {
+                    Header = $"View design hierarchy for {systemVerilogFile.Header}",
+                    Command = new AsyncRelayCommand(() => frontendService.CreateSystemVerilogHierarchyAsync(systemVerilogFile))
                 });
             }
         });
@@ -402,11 +457,17 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_UseHierarchicalBackend",
             new CheckBoxSetting("Use hierarchical backend", false));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_PerformanceTarget",
-            new ComboBoxSetting("Performance Target", "Preloading", ["Preloading", "Just In Time", "Intelligent Ahead Of Time"]));
+            new ComboBoxSetting("Performance Target", "Preloading",
+                ["Preloading", "Just In Time", "Intelligent Ahead Of Time"]));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_AlwaysRegenerateNetlists",
             new CheckBoxSetting("Always regenerate netlists", true));
+        settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_EnableHierarchyView",
+            new CheckBoxSetting("Enable hierarchy view", false));
 
         logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
+
+        settingsService.GetSettingObservable<bool>("NetlistViewer_EnableHierarchyView")
+            .Subscribe(x => EnableHierarchyView = x);
 
         IProjectSettingsService projectSettingsService = ServiceManager.GetService<IProjectSettingsService>();
         projectSettingsService.AddProjectSetting("FEntwumS_VHDL_Standard",

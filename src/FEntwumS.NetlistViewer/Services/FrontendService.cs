@@ -1,13 +1,16 @@
-﻿using System.Net;
+﻿using System.Collections.ObjectModel;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using Asmichi.ProcessManagement;
+using FEntwumS.NetlistViewer.Types.HierarchyView;
 using FEntwumS.NetlistViewer.Types;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using FEntwumS.NetlistViewer.ViewModels;
+using FEntwumS.NetlistViewer.Views;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.PackageManager;
 using OneWare.ProjectSystem.Models;
@@ -22,6 +25,7 @@ public class FrontendService : IFrontendService
     private static readonly IDockService _dockService;
     private static readonly ISettingsService _settingsService;
     private static readonly IPackageService _packageService;
+    private static readonly IHierarchyJsonParser _hierarchyJsonParser;
     private static readonly INetlistGenerator _netlistGenerator;
 
     private static string _backendAddress = string.Empty;
@@ -53,6 +57,7 @@ public class FrontendService : IFrontendService
         _dockService = ServiceManager.GetService<IDockService>();
         _settingsService = ServiceManager.GetService<ISettingsService>();
         _packageService = ServiceManager.GetService<IPackageService>();
+        _hierarchyJsonParser = ServiceManager.GetService<IHierarchyJsonParser>();
         _netlistGenerator = ServiceManager.GetService<INetlistGenerator>();
     }
 
@@ -354,7 +359,7 @@ public class FrontendService : IFrontendService
         return (globalSuccess, needsRestart || _restartRequired);
     }
 
-    private async Task GenerateNetlistAsync(IProjectFile projectFile, NetlistType netlistType)
+    private async Task<IProjectFile?> GenerateNetlistAsync(IProjectFile projectFile, NetlistType netlistType)
     {
         string netlistTypeString  = netlistType switch
         {
@@ -372,13 +377,13 @@ public class FrontendService : IFrontendService
         {
             _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
 
-            return;
+            return null;
         }
         else if (!(success || _continueOnBinaryInstallError))
         {
             _applicationStateService.RemoveState(proc, "An error occured during dependency installation/checking");
 
-            return;
+            return null;
         }
 
         success = await StartBackendIfNotStartedAsync();
@@ -387,7 +392,7 @@ public class FrontendService : IFrontendService
         {
             _applicationStateService.RemoveState(proc, "Error: The backend could not be started");
 
-            return;
+            return null;
         }
         
         (IProjectFile? netlistFile, success) = await _netlistGenerator.GenerateNetlistAsync(projectFile, netlistType);
@@ -396,7 +401,7 @@ public class FrontendService : IFrontendService
         {
             _applicationStateService.RemoveState(proc, "Error: The netlist could not be generated");
 
-            return;
+            return null;
         }
 
         success = await ServerStartedAsync();
@@ -405,27 +410,27 @@ public class FrontendService : IFrontendService
         {
             _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
 
-            return;
+            return null;
         }
-
-        await ShowViewerAsync(netlistFile!);
-
+        
         _applicationStateService.RemoveState(proc);
+
+        return netlistFile;
     }
 
     public async Task CreateVhdlNetlistAsync(IProjectFile vhdl)
     {
-        await GenerateNetlistAsync(vhdl, NetlistType.VHDL);
+        await ShowViewerAsync((await GenerateNetlistAsync(vhdl, NetlistType.VHDL))!);
     }
 
     public async Task CreateVerilogNetlistAsync(IProjectFile verilog)
     {
-        await GenerateNetlistAsync(verilog, NetlistType.Verilog);
+        await ShowViewerAsync((await GenerateNetlistAsync(verilog, NetlistType.Verilog))!);
     }
 
     public async Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog)
     {
-        await GenerateNetlistAsync(sVerilog, NetlistType.System_Verilog);
+        await ShowViewerAsync((await GenerateNetlistAsync(sVerilog, NetlistType.System_Verilog))!);
     }
 
     public async Task ShowViewerAsync(IProjectFile json)
@@ -865,5 +870,106 @@ public class FrontendService : IFrontendService
     public async Task CloseNetlistOnServerAsync(UInt64 netlistId)
     {
         await PostAsync("/close-netlist?hash=" + netlistId, null, false);
+    }
+
+    public async Task CreateVhdlHierarchyAsync(IProjectFile vhdlFile)
+    {
+        await ShowHierarchyAsync((await GenerateNetlistAsync(vhdlFile, NetlistType.VHDL))!);
+    }
+
+    public async Task CreateVerilogHierarchyAsync(IProjectFile verilogFile)
+    {
+        await ShowHierarchyAsync((await GenerateNetlistAsync(verilogFile, NetlistType.Verilog))!);
+    }
+
+    public async Task CreateSystemVerilogHierarchyAsync(IProjectFile systemVerilogFile)
+    {
+        await ShowHierarchyAsync((await GenerateNetlistAsync(systemVerilogFile, NetlistType.System_Verilog))!);
+    }
+
+    private async Task<bool> ShowHierarchyAsync(IProjectFile netlistFile)
+    {
+        ApplicationProcess proc = _applicationStateService.AddState("Starting viewer", AppState.Loading);
+
+        HttpResponseMessage? resp = null;
+        string top = Path.GetFileNameWithoutExtension(netlistFile.FullPath);
+
+        if (!File.Exists(netlistFile.FullPath))
+        {
+            _applicationStateService.RemoveState(proc, "Error: No JSON netlist was found");
+
+            _logger.Log(
+                "No json netlist was found. Aborting...");
+            return false;
+        }
+
+        string content = await File.ReadAllTextAsync(netlistFile.FullPath);
+
+        IHashService hashService = ServiceManager.GetHashService();
+        ReadOnlySpan<byte> contentByteSpan = new ReadOnlySpan<Byte>(Encoding.UTF8.GetBytes(content));
+        ReadOnlySpan<byte> pathByteSpan = new ReadOnlySpan<byte>(Encoding.UTF8.GetBytes(netlistFile.FullPath));
+        UInt32 pathHash = hashService.ComputeHash(pathByteSpan);
+        UInt32 contenthash = hashService.ComputeHash(contentByteSpan);
+
+        UInt64 combinedHash = ((UInt64)pathHash) << 32 | contenthash;
+
+        currentNetlist = combinedHash;
+
+        ServiceManager.GetCustomLogger().Log("Path hash: " + pathHash);
+        ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash);
+        ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash);
+
+        ServiceManager.GetViewportDimensionService()!.SetClickedElementPath(combinedHash, string.Empty);
+        ServiceManager.GetViewportDimensionService()!.SetCurrentElementCount(combinedHash, 0);
+        ServiceManager.GetViewportDimensionService()!.SetZoomElementDimensions(combinedHash, null);
+
+        FileStream jsonFileStream = File.Open(netlistFile.FullPath, FileMode.Open, FileAccess.Read);
+
+        MultipartFormDataContent formDataContent = new MultipartFormDataContent()
+        {
+            { new StreamContent(jsonFileStream), "file", netlistFile.Name }
+        };
+
+        ApplicationProcess waitForBackendProc =
+            _applicationStateService.AddState("Layouting in progress", AppState.Loading);
+
+        resp = await PostAsync(
+            "/extractHierarchy" + $"?hash={combinedHash}",
+            formDataContent);
+
+        _applicationStateService.RemoveState(waitForBackendProc);
+
+        jsonFileStream.Close();
+
+        if (resp == null)
+        {
+            _applicationStateService.RemoveState(proc, "Error: No response from backend");
+
+            return false;
+        }
+
+        if (!resp.IsSuccessStatusCode)
+        {
+            _applicationStateService.RemoveState(proc, "Error: The backend returned an error");
+
+            return false;
+        }
+        
+        (HierarchySideBarElement? elem, List<HierarchyViewElement>? elements) = await _hierarchyJsonParser.LoadHierarchyAsync(await resp.Content.ReadAsStreamAsync());
+
+
+        _applicationStateService.RemoveState(proc);
+        
+        HierarchySidebarViewModel sidebarVM = new HierarchySidebarViewModel();
+        sidebarVM.InitializeContent();
+        sidebarVM.Title = "Design hierarchy";
+        ObservableCollection<HierarchySideBarElement> sidebarelements = new ObservableCollection<HierarchySideBarElement>();
+        sidebarelements.Add(elem!.Children[0]);
+        sidebarVM.Elements = sidebarelements;
+        
+        _dockService.Show(sidebarVM, DockShowLocation.Left);
+        _dockService.InitializeContent();
+        
+        return true;
     }
 }
