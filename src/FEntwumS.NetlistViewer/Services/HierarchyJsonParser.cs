@@ -156,8 +156,9 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         switch (layoutOptions["hierarchy-container-sub-node-type"]!.GetValue<string>())
         {
             case "NAME":
-                currentSidebarElement.Name = parseLabel(labels[0], hierarchyViewElements, xRef, yRef);
-                nodeNameMap.Add(currentSidebarElement.Name, currentSidebarElement);
+                string namePath = parseLabel(labels[0], hierarchyViewElements, xRef, yRef);
+                nodeNameMap.Add(namePath, currentSidebarElement);
+                currentSidebarElement.Name = namePath.Split(' ', StringSplitOptions.None).Last();
                 break;
             case "TYPE":
                 currentSidebarElement.Type = parseLabel(labels[0], hierarchyViewElements, xRef, yRef);
