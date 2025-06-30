@@ -25,11 +25,14 @@
         </TreeDataGrid.Styles>
     </TreeDataGrid>
     -->
-    <StackPanel Orientation="Vertical">
+    <Grid ColumnDefinitions="*"
+          RowDefinitions="5*,2*">
         <TreeView ScrollViewer.VerticalScrollBarVisibility="Auto"
                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
                   ItemsSource="{Binding Elements}"
-                  SelectedItem="{Binding SelectedElement}">
+                  SelectedItem="{Binding SelectedElement}"
+                  VerticalAlignment="Top"
+                  Grid.Row="0">
             <TreeView.Styles>
                 <Style Selector="TreeViewItem" x:DataType="hierarchicaltypes:HierarchySideBarElement">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded}"/>
@@ -41,8 +44,54 @@
                 </TreeDataTemplate>
             </TreeView.DataTemplates>
         </TreeView>
-        <Border BorderBrush="Aqua">
-            <TextBlock FontSize="13" Text="{Binding SelectedElementType}"></TextBlock>
+        <Border Grid.Row="1"
+                BorderThickness="0 1 0 1"
+                BorderBrush="{DynamicResource ThemeBorderLowBrush}"> 
+        <ScrollViewer>
+            <StackPanel>
+                <Border BorderThickness="0 1"
+                        BorderBrush="{DynamicResource ThemeBorderLowBrush}">
+                    <StackPanel>
+                        <TextBlock Text="Type: " FontSize="13"></TextBlock>
+                        <TextBlock FontSize="13" Text="{Binding SelectedElementType}"></TextBlock>
+                    </StackPanel>
+                </Border>
+                <Border BorderThickness="0 1"
+                        BorderBrush="{DynamicResource ThemeBorderLowBrush}">
+                    <StackPanel>
+                        <TextBlock Text="Parameters: " FontSize="13"></TextBlock>
+                        <ItemsControl ItemsSource="{Binding SelectedElement.Attributes}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock FontSize="13" Text="{Binding Name}"></TextBlock>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+                <Border BorderThickness="0 1"
+                        BorderBrush="{DynamicResource ThemeBorderLowBrush}">
+                    <StackPanel>
+                        <TextBlock Text="Ports: " FontSize="13"></TextBlock>
+                        <ItemsControl ItemsSource="{Binding SelectedElement.Ports}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="Auto, *"
+                                          ColumnSpacing="4">
+                                        <PathIcon Grid.Column="0"
+                                              Data="{Binding Geometry}"
+                                              Height="13"
+                                              Width="13">
+                                        </PathIcon>
+                                        <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="13"></TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
         </Border>
-    </StackPanel>
+    </Grid>
 </UserControl>

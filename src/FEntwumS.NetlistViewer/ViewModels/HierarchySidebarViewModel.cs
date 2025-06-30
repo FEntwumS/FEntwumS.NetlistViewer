@@ -1,7 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using Avalonia.Controls;
-using Avalonia.Controls.Models.TreeDataGrid;
 using FEntwumS.NetlistViewer.Types.HierarchyView;
 using OneWare.Essentials.ViewModels;
 
@@ -20,8 +17,6 @@ public class HierarchySidebarViewModel : ExtendedTool
         }
     }
     private ObservableCollection<HierarchySideBarElement> _elements { get; }
-
-    public HierarchicalTreeDataGridSource<HierarchySideBarElement> Source { get; }
     
     private HierarchySideBarElement _selectedElement { get; set; }
 
@@ -53,16 +48,6 @@ public class HierarchySidebarViewModel : ExtendedTool
         _elements = new ObservableCollection<HierarchySideBarElement>();
         Elements = new ObservableCollection<HierarchySideBarElement>();
         SelectedElementType = "";
-        
-        Source = new HierarchicalTreeDataGridSource<HierarchySideBarElement>(_elements)
-        {
-            Columns =
-            {
-                new HierarchicalExpanderColumn<HierarchySideBarElement>(
-                    new TextColumn<HierarchySideBarElement, string>("Instance name", x => x.Name ?? "TEST"),
-                    x => x.Children)
-            }
-        };
     }
 
     void updateType()

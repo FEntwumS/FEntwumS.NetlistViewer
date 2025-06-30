@@ -9,5 +9,5 @@ public interface INetlistGenerator: SettingsSubscriber
     public Task<bool> GenerateVerilogNetlistAsync(IProjectFile verilogProject);
     public Task<bool> GenerateSystemVerilogNetlistAsync(IProjectFile systemVerilogProject);
     public Task<(IProjectFile? netlistFile, bool success)> GenerateNetlistAsync(IProjectFile projectFile, NetlistType netlistType);
-    public (IProjectFile? netlistFile, bool success) GetExisitingNetlist(IProjectFile projectFile);
+    public (IProjectFile? netlistFile, bool success) GetExistingNetlist(IProjectFile projectFile);
 }

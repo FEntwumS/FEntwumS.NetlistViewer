@@ -313,6 +313,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         var frontendService = containerProvider.Resolve<IFrontendService>();
 
         containerProvider.Resolve<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
+        containerProvider.Resolve<IDockService>().RegisterLayoutExtension<HierarchySidebarViewModel>(DockShowLocation.Left);
 
         logger.Log("FEntwumS.NetlistViewer: Registered FrontendViewModel as Document in dock system");
 

@@ -167,7 +167,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
                 {
                     foreach (JsonNode? parameter in ports)
                     {
-                        currentSidebarElement.Attributes.Add(parsePort(parameter, hierarchyViewElements, xRef, yRef));
+                        currentSidebarElement.Attributes.Add(new Parameter(){ Name = parsePort(parameter, hierarchyViewElements, xRef, yRef).Name});
                     }
                 }
 
@@ -242,7 +242,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         return text;
     }
 
-    private string parsePort(JsonNode portNode, List<HierarchyViewElement> hierarchyViewElements, double xRef,
+    private Port parsePort(JsonNode portNode, List<HierarchyViewElement> hierarchyViewElements, double xRef,
         double yRef)
     {
         JsonNode? layoutOptions = portNode["layoutOptions"];
@@ -295,10 +295,14 @@ public class HierarchyJsonParser : IHierarchyJsonParser
 
         if (labels is null || labels.Count == 0)
         {
-            return "";
+            return new Port();
         }
 
-        return parseLabel(labels[0], hierarchyViewElements, xRef, yRef);
+        return new Port()
+        {
+            Geometry = geometry,
+            Name = parseLabel(labels[0], hierarchyViewElements, xRef, yRef)
+        };
     }
 
     private void parseNode(JsonNode node, List<HierarchyViewElement> hierarchyViewElements, double xRef, double yRef)

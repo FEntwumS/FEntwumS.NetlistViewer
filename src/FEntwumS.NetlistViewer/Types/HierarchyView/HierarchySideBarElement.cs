@@ -8,8 +8,8 @@ public class HierarchySideBarElement : INotifyPropertyChanged
 {
     public string? Name { get; set; }
     public string? Type { get; set; }
-    public ObservableCollection<string?> Attributes { get; set; } = new();
-    public ObservableCollection<string?> Ports { get; set; } = new();
+    public ObservableCollection<Parameter> Attributes { get; set; } = new();
+    public ObservableCollection<Port> Ports { get; set; } = new();
     public bool IsExpanded { get; set; }
     
     public ObservableCollection<HierarchySideBarElement> Children { get; } = new();

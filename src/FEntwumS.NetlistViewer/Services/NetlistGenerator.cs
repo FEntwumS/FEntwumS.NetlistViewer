@@ -60,7 +60,7 @@ public class NetlistGenerator : INetlistGenerator
 
         if (!_alwaysRegenerateNetlists)
         {
-            (netlistFile, success) = GetExisitingNetlist(projectFile);
+            (netlistFile, success) = GetExistingNetlist(projectFile);
 
             if (success)
             {
@@ -107,7 +107,7 @@ public class NetlistGenerator : INetlistGenerator
         return (netlistFile, true);
     }
 
-    public (IProjectFile? netlistFile, bool success) GetExisitingNetlist(IProjectFile projectFile)
+    public (IProjectFile? netlistFile, bool success) GetExistingNetlist(IProjectFile projectFile)
     {
         string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
         string netlistPath = Path.Combine(projectFile.Root!.FullPath, "build", "netlist", $"{top}.json");
