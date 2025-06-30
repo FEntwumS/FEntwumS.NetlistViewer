@@ -129,6 +129,27 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                         ]
                     }
                 ]
+            },
+            new PackageVersion()
+            {
+                Version = "0.11.0",
+                Targets =
+                [
+                    new PackageTarget()
+                    {
+                        Target = "all",
+                        Url =
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.11.0/fentwums-netlist-reader-server-v0.11.0.tar.gz",
+                        AutoSetting =
+                        [
+                            new PackageAutoSetting()
+                            {
+                                RelativePath = "fentwums-netlist-reader",
+                                SettingKey = NetlistPathSetting,
+                            }
+                        ]
+                    }
+                ]
             }
         ]
     };
@@ -257,6 +278,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
     public const string NetlistPathSetting = "FEntwumS_NetlistReaderBackend";
     public const string JavaPathSetting = "FEntwumS_JDKPath";
+    public static bool EnableHierarchyView = false;
 
     public void RegisterTypes(IContainerRegistry containerRegistry)
     {
@@ -356,6 +378,11 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
         containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
         {
+            if (!EnableHierarchyView)
+            {
+                return;
+            }
+            
             if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
             {
                 menuItems.Add(new MenuItemViewModel("NetlistViewer_VHDLHierarchy")
@@ -434,8 +461,13 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
                 ["Preloading", "Just In Time", "Intelligent Ahead Of Time"]));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_AlwaysRegenerateNetlists",
             new CheckBoxSetting("Always regenerate netlists", true));
+        settingsService.RegisterSetting("Netlist Viewer", "Experimental", "NetlistViewer_EnableHierarchyView",
+            new CheckBoxSetting("Enable hierarchy view", false));
 
         logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
+
+        settingsService.GetSettingObservable<bool>("NetlistViewer_EnableHierarchyView")
+            .Subscribe(x => EnableHierarchyView = x);
 
         IProjectSettingsService projectSettingsService = ServiceManager.GetService<IProjectSettingsService>();
         projectSettingsService.AddProjectSetting("FEntwumS_VHDL_Standard",
