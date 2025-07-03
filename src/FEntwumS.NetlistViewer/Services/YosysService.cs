@@ -57,9 +57,9 @@ public class YosysService : IYosysService
 
         List<string> systemVerilogFileList = new List<string>();
 
-        if (File.Exists(Path.Combine(workingDirectory, "design.v")))
+        if (File.Exists(Path.Combine(workingDirectory, $"{top}.v")))
         {
-            verilogFileList.Add(Path.Combine(workingDirectory, "design.v"));
+            verilogFileList.Add(Path.Combine(workingDirectory, $"{top}.v"));
         }
         else
         {

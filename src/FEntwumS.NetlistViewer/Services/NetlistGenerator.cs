@@ -22,19 +22,11 @@ public class NetlistGenerator : INetlistGenerator
     
     public async Task<bool> GenerateVhdlNetlistAsync(IProjectFile vhdlProject)
     {
-        IGhdlService ghdlService = ServiceManager.GetService<IGhdlService>();
-        bool success;
+        OneWare.GhdlExtension.Services.GhdlService ghdlService = ServiceManager.GetService<OneWare.GhdlExtension.Services.GhdlService>();
 
-        success = await ghdlService.ElaborateDesignAsync(vhdlProject);
-
-        if (!success)
-        {
-            return false;
-        }
+        string outputDir = Path.Combine(vhdlProject.Root!.FullPath, "build", "netlist");
         
-        success = await ghdlService.CrossCompileDesignAsync(vhdlProject);
-        
-        return success;
+        return await ghdlService.SynthAsync(vhdlProject, "verilog", outputDir);
     }
 
     public async Task<bool> GenerateVerilogNetlistAsync(IProjectFile verilogProject)
