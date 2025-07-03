@@ -30,7 +30,7 @@
               <IncludeAssets>compile; build; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="OneWare.GhdlExtension" Version="0.11.0" Private="true">
-          <IncludeAssets>runtime; Native</IncludeAssets>
+          <IncludeAssets>compile; build; analyzers; runtime; Native</IncludeAssets>
       </PackageReference>
       <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.6" Private="false" ExcludeAssets="runtime;Native">
           <PrivateAssets>all</PrivateAssets>
