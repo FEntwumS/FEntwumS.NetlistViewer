@@ -305,5 +305,15 @@
     "License": "MIT",
     "LicenseUrl": "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/license-information.md",
     "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OneWare.GhdlExtension",
+    "Version": "0.11.0",
+    "ProjectUrl": "https://github.com/one-ware/OneWare.GhdlExtension",
+    "Copyright": "Protop Solutions UG",
+    "Authors": "Hendrik Mennen",
+    "License": "GPL-2.0-only",
+    "LicenseUrl": "https://raw.githubusercontent.com/one-ware/OneWare.GhdlExtension/refs/heads/master/License.md",
+    "LicenseInformationOrigin": 1
   }
 ]
