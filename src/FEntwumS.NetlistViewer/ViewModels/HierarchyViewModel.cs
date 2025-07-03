@@ -1,6 +1,15 @@
-﻿namespace FEntwumS.NetlistViewer.ViewModels;
+﻿using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
+using OneWare.Essentials.ViewModels;
 
-public class HierarchyViewModel
+namespace FEntwumS.NetlistViewer.ViewModels;
+
+public class HierarchyViewModel : ExtendedTool
 {
-    
+    public ICommand FitToZoomCommand { get; }
+
+    public HierarchyViewModel() : base("Hierarchy")
+    {
+        FitToZoomCommand = new RelayCommand(() => { });
+    }   
 }
