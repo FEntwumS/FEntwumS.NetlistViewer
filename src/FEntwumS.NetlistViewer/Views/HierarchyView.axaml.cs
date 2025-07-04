@@ -1,5 +1,8 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using CommunityToolkit.Mvvm.Input;
+using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.Types;
 using FEntwumS.NetlistViewer.ViewModels;
 
@@ -17,6 +20,8 @@ public partial class HierarchyView : UserControl
         {
             Initialize(vm);
         }
+        
+        DataContextChanged += OnDataContextChanged;
     }
     
     public static readonly RoutedEvent<RoutedEventArgs> ZoomToFitEvent = RoutedEvent.Register<HierarchyView, RoutedEventArgs>(nameof(HierarchyView), RoutingStrategies.Bubble);
@@ -30,5 +35,30 @@ public partial class HierarchyView : UserControl
     private void Initialize(HierarchyViewModel vm)
     {
         _hierarchyViewModel = vm;
+    }
+
+    private void OnDataContextChanged(object? sender, EventArgs e)
+    {
+        if (IsInitialized)
+        {
+            _hierarchyViewModel = DataContext as HierarchyViewModel;
+        }
+        else
+        {
+            Initialized += delegate { OnDataContextChanged(sender, e); };
+        }
+    }
+    
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == DataContextProperty)
+        {
+            if (_hierarchyViewModel == null)
+            {
+                _hierarchyViewModel = e.NewValue as HierarchyViewModel;
+            }
+        }
+
+        base.OnPropertyChanged(e);
     }
 }

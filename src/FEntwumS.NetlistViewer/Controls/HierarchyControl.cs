@@ -5,7 +5,11 @@ using Avalonia.Data;
 using Avalonia.Media;
 using Avalonia.Rendering;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.Messaging;
+using FEntwumS.NetlistViewer.Helpers;
+using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.Types.HierarchyView;
+using FEntwumS.NetlistViewer.Types.Messages;
 
 namespace FEntwumS.NetlistViewer.Controls;
 
@@ -110,6 +114,19 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
             defaultBindingMode: BindingMode.TwoWay);
 
     #endregion
+
+    public HierarchyControl()
+    {
+        WeakReferenceMessenger.Default.Register<ZoomToFitmessage, int>(this, FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel, (recipient, message) =>
+        {
+            ZoomToFit();
+        });
+    }
+
+    private void ZoomToFit()
+    {
+        ServiceManager.GetService<ICustomLogger>().Log("HierarchyControl: Received ZoomToFit Message");
+    }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
     {

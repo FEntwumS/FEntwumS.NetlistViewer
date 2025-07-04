@@ -970,6 +970,13 @@ public class FrontendService : IFrontendService
         _dockService.Show(sidebarVM, DockShowLocation.Left);
         _dockService.InitializeContent();
         
+        HierarchyViewModel hierarchyVM = new HierarchyViewModel();
+        hierarchyVM.InitializeContent();
+        hierarchyVM.Title = "Design hierarchy";
+        
+        _dockService.Show(hierarchyVM, DockShowLocation.Document);
+        _dockService.InitializeContent();
+        
         return true;
     }
 }
