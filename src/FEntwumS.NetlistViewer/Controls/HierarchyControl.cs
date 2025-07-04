@@ -127,6 +127,13 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
     #endregion
 
+    #region Variables
+
+    private bool _pointerPressed = false;
+    private Point _pointerPosition = new Point(0, 0);
+
+    #endregion
+
     public HierarchyControl()
     {
         WeakReferenceMessenger.Default.Register<ZoomToFitmessage, int>(this,
@@ -170,27 +177,54 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
     private void HierarchyControl_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
+        PointerPoint currentPoint = e.GetCurrentPoint(this);
         
+        _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
+        
+        _pointerPosition = currentPoint.Position;
     }
 
     private void HierarchyControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
+        PointerPoint currentPoint = e.GetCurrentPoint(this);
         
+        _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
+        
+        _pointerPosition = currentPoint.Position;
     }
 
     private void HierarchyControl_Tapped(object? sender, TappedEventArgs e)
     {
-        
+        ServiceManager.GetService<ICustomLogger>().Log("HierarchyControl: Tapped");
     }
 
     private void HierarchyControl_PointerMoved(object? sender, PointerEventArgs e)
     {
+        IReadOnlyList<PointerPoint> pointerPoints = e.GetIntermediatePoints(this);
+        double dx = 0,
+            dy = 0;
         
+        Point currentPos = e.GetPosition(this);
+
+        if (_pointerPressed || pointerPoints.First().Properties.IsLeftButtonPressed)
+        {
+            dx = currentPos.X - _pointerPosition.X;
+            dy = currentPos.Y - _pointerPosition.Y;
+        }
+        
+        _pointerPosition = currentPos;
+
+        DeltaX += dx;
+        DeltaY += dy;
     }
 
     private void HierarchyControl_PointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
+        Vector wheel = e.Delta;
+
+        DeltaScale += wheel.Y;
         
+        _pointerPosition = e.GetPosition(this);
     }
 
     #endregion
