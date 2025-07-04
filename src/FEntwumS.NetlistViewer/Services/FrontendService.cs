@@ -973,6 +973,7 @@ public class FrontendService : IFrontendService
         HierarchyViewModel hierarchyVM = new HierarchyViewModel();
         hierarchyVM.InitializeContent();
         hierarchyVM.Title = "Design hierarchy";
+        hierarchyVM.NetlistId = combinedHash;
         
         _dockService.Show(hierarchyVM, DockShowLocation.Document);
         _dockService.InitializeContent();

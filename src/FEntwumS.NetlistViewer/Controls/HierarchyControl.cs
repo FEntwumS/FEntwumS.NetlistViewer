@@ -2,6 +2,7 @@
 using Avalonia;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Rendering;
 using Avalonia.Threading;
@@ -130,6 +131,12 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
     {
         WeakReferenceMessenger.Default.Register<ZoomToFitmessage, int>(this,
             FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel, (recipient, message) => { ZoomToFit(); });
+        
+        PointerPressed += HierarchyControl_PointerPressed;
+        PointerReleased += HierarchyControl_PointerReleased;
+        PointerMoved += HierarchyControl_PointerMoved;
+        PointerWheelChanged += HierarchyControl_PointerWheelChanged;
+        Tapped += HierarchyControl_Tapped;
     }
 
     private void ZoomToFit()
@@ -141,6 +148,8 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
     {
         base.OnPropertyChanged(e);
     }
+
+    #region Rendering
 
     public void Redraw()
     {
@@ -155,8 +164,44 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         }
     }
 
+    #endregion
+
+    #region Event handlers
+
+    private void HierarchyControl_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        
+    }
+
+    private void HierarchyControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        
+    }
+
+    private void HierarchyControl_Tapped(object? sender, TappedEventArgs e)
+    {
+        
+    }
+
+    private void HierarchyControl_PointerMoved(object? sender, PointerEventArgs e)
+    {
+        
+    }
+
+    private void HierarchyControl_PointerWheelChanged(object? sender, PointerWheelEventArgs e)
+    {
+        
+    }
+
+    #endregion
+
+    #region ICustomHitTest implementation
+
     public bool HitTest(Point point)
     {
         return true;
     }
+
+    #endregion
+    
 }

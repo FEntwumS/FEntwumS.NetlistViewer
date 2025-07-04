@@ -22,7 +22,13 @@
         </Panel.Resources>
 
         <Panel ClipToBounds="True" Background="{DynamicResource ThemeControlLowBrush}">
-            <controls:HierarchyControl></controls:HierarchyControl>
+            <controls:HierarchyControl Items="{Binding Items}"
+                                       NetlistId="{Binding NetlistId}"
+                                       OffsetX="{Binding OffsetX}"
+                                       OffsetY="{Binding OffsetY}"
+                                       Scale="{Binding Scale}">
+                
+            </controls:HierarchyControl>
 
             <Button Background="{DynamicResource ThemeBackgroundBrush}" Padding="5" CornerRadius="3"
                     BorderBrush="{DynamicResource ThemeBorderLowBrush}" BorderThickness="1"

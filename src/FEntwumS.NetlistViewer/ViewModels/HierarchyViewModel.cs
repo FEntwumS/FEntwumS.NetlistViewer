@@ -1,7 +1,9 @@
-﻿using System.Windows.Input;
+﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FEntwumS.NetlistViewer.Helpers;
+using FEntwumS.NetlistViewer.Types.HierarchyView;
 using FEntwumS.NetlistViewer.Types.Messages;
 using OneWare.Essentials.ViewModels;
 
@@ -10,7 +12,7 @@ namespace FEntwumS.NetlistViewer.ViewModels;
 public class HierarchyViewModel : ExtendedTool
 {
     public ICommand FitToZoomCommand { get; }
-    
+
     private ulong _netlistId { get; set; }
 
     public ulong NetlistId
@@ -23,6 +25,42 @@ public class HierarchyViewModel : ExtendedTool
         }
     }
 
+    private ObservableCollection<HierarchyViewElement> items { get; set; }
+
+    public ObservableCollection<HierarchyViewElement> Items
+    {
+        get => items;
+        set
+        {
+            items.Clear(); 
+            items.AddRange(value);
+            OnPropertyChanged(nameof(Items));
+        }
+    }
+    
+    private double _offsetX { get; set; }
+
+    public double OffsetX
+    {
+        get => _offsetX;
+        set => _offsetX = value;
+    }
+    
+    private double _offsetY { get; set; }
+
+    public double OffsetY
+    {
+        get => _offsetY;
+    }
+    
+    private double _scale { get; set; }
+
+    public double Scale
+    {
+        get => _scale;
+        set => _scale = value;
+    }
+
     public HierarchyViewModel() : base("Hierarchy")
     {
         FitToZoomCommand = new RelayCommand(() =>
@@ -30,5 +68,5 @@ public class HierarchyViewModel : ExtendedTool
             WeakReferenceMessenger.Default.Send(new ZoomToFitmessage(_netlistId),
                 FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel);
         });
-    }   
+    }
 }
