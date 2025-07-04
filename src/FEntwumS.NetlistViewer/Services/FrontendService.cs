@@ -955,7 +955,7 @@ public class FrontendService : IFrontendService
             return false;
         }
         
-        (HierarchySideBarElement? elem, List<HierarchyViewElement>? elements) = await _hierarchyJsonParser.LoadHierarchyAsync(await resp.Content.ReadAsStreamAsync());
+        (HierarchySideBarElement? elem, List<HierarchyViewElement>? elements) = await _hierarchyJsonParser.LoadHierarchyAsync(await resp.Content.ReadAsStreamAsync(), combinedHash);
 
 
         _applicationStateService.RemoveState(proc);

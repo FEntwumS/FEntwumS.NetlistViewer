@@ -9,19 +9,21 @@ namespace FEntwumS.NetlistViewer.Services;
 public class HierarchyJsonParser : IHierarchyJsonParser
 {
     private readonly ICustomLogger _logger;
+    private readonly IHierarchyInformationService _hierarchyInformationService;
 
     public HierarchyJsonParser()
     {
-        this._logger = new CustomLogger();
+        _logger = ServiceManager.GetService<ICustomLogger>();
+        _hierarchyInformationService = ServiceManager.GetService<IHierarchyInformationService>();
     }
 
 
     public async Task<(HierarchySideBarElement? sidebarRoot, List<HierarchyViewElement>? hierarchyViewElements)>
-        LoadHierarchyAsync(Stream hierarchyStream)
+        LoadHierarchyAsync(Stream hierarchyStream, ulong netlistId)
     {
         List<HierarchyViewElement> hierarchyViewElements = new List<HierarchyViewElement>();
         JsonNode? rootNode = await JsonNode.ParseAsync(hierarchyStream);
-        
+
         Dictionary<string, HierarchySideBarElement> nodeNameMap = new Dictionary<string, HierarchySideBarElement>();
 
         if (rootNode == null)
@@ -31,17 +33,31 @@ public class HierarchyJsonParser : IHierarchyJsonParser
             return (null, null);
         }
 
-        HierarchySideBarElement? sidebarRoot = parseRootNode(rootNode, hierarchyViewElements, nodeNameMap);
+        HierarchySideBarElement? sidebarRoot = parseRootNode(rootNode, hierarchyViewElements, nodeNameMap, netlistId);
 
         return (sidebarRoot, hierarchyViewElements);
     }
 
-    private HierarchySideBarElement? parseRootNode(JsonNode node, List<HierarchyViewElement> hierarchyViewElements, Dictionary<string, HierarchySideBarElement> nodeNameMap)
+    private HierarchySideBarElement? parseRootNode(JsonNode node, List<HierarchyViewElement> hierarchyViewElements,
+        Dictionary<string, HierarchySideBarElement> nodeNameMap, ulong netlistId)
     {
-        double width = 0, height = 0;
+        double x = 0,
+            y = 0,
+            width = 0,
+            height = 0;
         JsonArray? containerNodes = node["children"] as JsonArray;
         JsonArray? edges = node["edges"] as JsonArray;
         HierarchySideBarElement? sidebarRoot = null;
+
+        if (node.AsObject().ContainsKey("x"))
+        {
+            x = node["x"].GetValue<double>();
+        }
+
+        if (node.AsObject().ContainsKey("y"))
+        {
+            y = node["y"].GetValue<double>();
+        }
 
         if (node.AsObject().ContainsKey("width"))
         {
@@ -52,6 +68,9 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         {
             height = node["height"]!.GetValue<double>();
         }
+        
+        _hierarchyInformationService.setMaxHeight(netlistId, height);
+        _hierarchyInformationService.setMaxWidth(netlistId, width);
 
         bool firstNode = true;
 
@@ -67,11 +86,19 @@ public class HierarchyJsonParser : IHierarchyJsonParser
                 if (firstNode == true)
                 {
                     firstNode = false;
-                    sidebarRoot = parseContainerNode(containerNode, hierarchyViewElements, 0, 0, new HierarchySideBarElement(), nodeNameMap);
+                    sidebarRoot = parseContainerNode(containerNode, hierarchyViewElements, 0, 0,
+                        new HierarchySideBarElement(), nodeNameMap);
+                    
+                    var firstElem = hierarchyViewElements.First();
+                    
+                    _hierarchyInformationService.setTopX(netlistId, firstElem.X);
+                    _hierarchyInformationService.setTopY(netlistId, firstElem.Y);
+                    _hierarchyInformationService.setTopHeight(netlistId, ((HierarchyViewNode) firstElem).Height);
+                    _hierarchyInformationService.setTopWidth(netlistId, ((HierarchyViewNode) firstElem).Width);
                 }
                 else
                 {
-                    parseContainerNode(containerNode, hierarchyViewElements, width, height, sidebarRoot, nodeNameMap);
+                    parseContainerNode(containerNode, hierarchyViewElements, x, y, sidebarRoot, nodeNameMap);
                 }
             }
         }
@@ -84,7 +111,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
                 {
                     continue;
                 }
-                
+
                 parseEdge(edge, hierarchyViewElements, width, height);
             }
         }
@@ -93,7 +120,8 @@ public class HierarchyJsonParser : IHierarchyJsonParser
     }
 
     private HierarchySideBarElement parseContainerNode(JsonNode node, List<HierarchyViewElement> hierarchyViewElements,
-        double xRef, double yRef, HierarchySideBarElement? sidebarRoot, Dictionary<string, HierarchySideBarElement> nodeNameMap)
+        double xRef, double yRef, HierarchySideBarElement? sidebarRoot,
+        Dictionary<string, HierarchySideBarElement> nodeNameMap)
     {
         HierarchySideBarElement newSidebarElement = new HierarchySideBarElement();
         JsonArray? subNodes = node["children"] as JsonArray;
@@ -116,11 +144,12 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         if (ancestor is not null)
         {
             ancestor.Children.Add(newSidebarElement);
-        } else if (sidebarRoot != null)
+        }
+        else if (sidebarRoot != null)
         {
             sidebarRoot.Children.Add(newSidebarElement);
         }
-        
+
         parseNode(node, hierarchyViewElements, xRef, yRef);
 
         if (subNodes != null)
@@ -155,7 +184,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         {
             return;
         }
-        
+
         parseNode(node, hierarchyViewElements, xRef, yRef);
 
         if (labels.Count > 1)
@@ -183,7 +212,8 @@ public class HierarchyJsonParser : IHierarchyJsonParser
                 {
                     foreach (JsonNode? parameter in ports)
                     {
-                        currentSidebarElement.Attributes.Add(new Parameter(){ Name = parsePort(parameter, hierarchyViewElements, xRef, yRef).Name});
+                        currentSidebarElement.Attributes.Add(new Parameter()
+                            { Name = parsePort(parameter, hierarchyViewElements, xRef, yRef).Name });
                     }
                 }
 
@@ -347,7 +377,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         {
             height = node["height"]!.GetValue<double>();
         }
-        
+
         hierarchyViewElements.Add(new HierarchyViewNode()
         {
             X = xRef + x,
@@ -372,108 +402,108 @@ public class HierarchyJsonParser : IHierarchyJsonParser
             {
                 continue;
             }
-            
+
             JsonNode? start = section["start"], end = section["end"];
             JsonArray? bendpoints = section["bendPoints"] as JsonArray;
             List<Point> pointList = new List<Point>();
             double x = 0.0d, y = 0.0d;
             Point cPoint = new Point(), ePoint = new Point();
-            
+
             if (start != null)
+            {
+                if (start.AsObject().ContainsKey("x"))
                 {
-                    if (start.AsObject().ContainsKey("x"))
+                    x = start["x"]!.GetValue<double>();
+                }
+
+                if (start.AsObject().ContainsKey("y"))
+                {
+                    y = start["y"]!.GetValue<double>();
+                }
+
+                cPoint = new Point(x, y);
+
+                pointList.Add(cPoint);
+            }
+
+            // Add bends
+            if (bendpoints != null)
+            {
+                foreach (JsonNode? bend in bendpoints)
+                {
+                    if (bend is null) continue;
+
+                    x = 0;
+                    y = 0;
+
+                    if (bend.AsObject().ContainsKey("x"))
                     {
-                        x = start["x"]!.GetValue<double>();
+                        x = bend["x"]!.GetValue<double>();
                     }
 
-                    if (start.AsObject().ContainsKey("y"))
+                    if (bend.AsObject().ContainsKey("y"))
                     {
-                        y = start["y"]!.GetValue<double>();
+                        y = bend["y"]!.GetValue<double>();
                     }
 
                     cPoint = new Point(x, y);
 
                     pointList.Add(cPoint);
                 }
+            }
 
-                // Add bends
-                if (bendpoints != null)
+            // Add end
+            if (end != null)
+            {
+                x = 0;
+                y = 0;
+
+                if (end.AsObject().ContainsKey("x"))
                 {
-                    foreach (JsonNode? bend in bendpoints)
-                    {
-                        if (bend is null) continue;
-                        
-                        x = 0;
-                        y = 0;
-
-                        if (bend.AsObject().ContainsKey("x"))
-                        {
-                            x = bend["x"]!.GetValue<double>();
-                        }
-
-                        if (bend.AsObject().ContainsKey("y"))
-                        {
-                            y = bend["y"]!.GetValue<double>();
-                        }
-
-                        cPoint = new Point(x, y);
-
-                        pointList.Add(cPoint);
-                    }
+                    x = end["x"]!.GetValue<double>();
                 }
 
-                // Add end
-                if (end != null)
+                if (end.AsObject().ContainsKey("y"))
                 {
-                    x = 0;
-                    y = 0;
-
-                    if (end.AsObject().ContainsKey("x"))
-                    {
-                        x = end["x"]!.GetValue<double>();
-                    }
-
-                    if (end.AsObject().ContainsKey("y"))
-                    {
-                        y = end["y"]!.GetValue<double>();
-                    }
-
-                    ePoint = new Point(x, y);
-
-                    pointList.Add(ePoint);
+                    y = end["y"]!.GetValue<double>();
                 }
 
-                // Create arrow tip
-                double xDir = cPoint.X - ePoint.X;
-                double yDir = cPoint.Y - ePoint.Y;
+                ePoint = new Point(x, y);
 
-                double mag = Math.Sqrt(xDir * xDir + yDir * yDir);
-
-                xDir /= mag;
-                yDir /= mag;
-
-                xDir *= 7;
-                yDir *= 7;
-
-                // Angle of 30 degrees
-                double xUp = 0.86 * xDir - (0.5) * yDir;
-                double yUp = (0.5) * xDir + 0.86 * yDir;
-                double xDown = (-0.86) * xDir - (0.5) * yDir;
-                double yDown = (0.5) * xDir + (-0.86) * yDir;
-
-                Point upPoint = new Point(ePoint.X + xUp, ePoint.Y + yUp);
-                Point downPoint = new Point(ePoint.X - xDown, ePoint.Y - yDown);
-
-                pointList.Add(upPoint);
                 pointList.Add(ePoint);
-                pointList.Add(downPoint);
-                
-                hierarchyViewElements.Add(new HierarchyViewEdge()
-                {
-                    X = xRef,
-                    Y = yRef,
-                    Points = pointList
-                });
+            }
+
+            // Create arrow tip
+            double xDir = cPoint.X - ePoint.X;
+            double yDir = cPoint.Y - ePoint.Y;
+
+            double mag = Math.Sqrt(xDir * xDir + yDir * yDir);
+
+            xDir /= mag;
+            yDir /= mag;
+
+            xDir *= 7;
+            yDir *= 7;
+
+            // Angle of 30 degrees
+            double xUp = 0.86 * xDir - (0.5) * yDir;
+            double yUp = (0.5) * xDir + 0.86 * yDir;
+            double xDown = (-0.86) * xDir - (0.5) * yDir;
+            double yDown = (0.5) * xDir + (-0.86) * yDir;
+
+            Point upPoint = new Point(ePoint.X + xUp, ePoint.Y + yUp);
+            Point downPoint = new Point(ePoint.X - xDown, ePoint.Y - yDown);
+
+            pointList.Add(upPoint);
+            pointList.Add(ePoint);
+            pointList.Add(downPoint);
+
+            hierarchyViewElements.Add(new HierarchyViewEdge()
+            {
+                X = xRef,
+                Y = yRef,
+                Points = pointList
+            });
         }
     }
 }
