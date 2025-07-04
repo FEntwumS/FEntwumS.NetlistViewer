@@ -30,6 +30,17 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
             control => control.Items, (control, items) => control.Items = items,
             defaultBindingMode: BindingMode.TwoWay);
 
+    private ulong _netlistId { get; set; }
+
+    public ulong NetlistId
+    {
+        get => _netlistId;
+        set => _netlistId = value;
+    }
+
+    public static readonly StyledProperty<ulong> NetlistIdProperty =
+        AvaloniaProperty.Register<HierarchyControl, ulong>(nameof(NetlistId), defaultBindingMode: BindingMode.TwoWay);
+
     private double _stepSize { get; set; }
 
     public double StepSize
@@ -117,10 +128,8 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
     public HierarchyControl()
     {
-        WeakReferenceMessenger.Default.Register<ZoomToFitmessage, int>(this, FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel, (recipient, message) =>
-        {
-            ZoomToFit();
-        });
+        WeakReferenceMessenger.Default.Register<ZoomToFitmessage, int>(this,
+            FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel, (recipient, message) => { ZoomToFit(); });
     }
 
     private void ZoomToFit()

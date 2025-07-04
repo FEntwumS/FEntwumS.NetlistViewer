@@ -1,8 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using CommunityToolkit.Mvvm.Input;
-using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.Types;
 using FEntwumS.NetlistViewer.ViewModels;
 
