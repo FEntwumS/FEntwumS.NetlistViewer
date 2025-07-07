@@ -26,7 +26,8 @@
                                        NetlistId="{Binding NetlistId}"
                                        OffsetX="{Binding OffsetX}"
                                        OffsetY="{Binding OffsetY}"
-                                       Scale="{Binding Scale}">
+                                       Scale="{Binding Scale}"
+                                       FontFamily="{StaticResource MartianMono}">
                 
             </controls:HierarchyControl>
 

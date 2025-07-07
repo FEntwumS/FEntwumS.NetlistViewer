@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -133,6 +134,7 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
     private bool _pointerPressed = false;
     private Point _pointerPosition = new Point(0, 0);
+    private Typeface? _typeface;
 
     #endregion
 
@@ -140,7 +142,7 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
     {
         WeakReferenceMessenger.Default.Register<ZoomToFitmessage, int>(this,
             FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel, (recipient, message) => { ZoomToFit(); });
-        
+
         PointerPressed += HierarchyControl_PointerPressed;
         PointerReleased += HierarchyControl_PointerReleased;
         PointerMoved += HierarchyControl_PointerMoved;
@@ -157,9 +159,15 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
     {
         if (IsInitialized && Scale == 0)
         {
-            Scale = 0.2;
+            Scale = 0.4;
         }
-        
+
+        if (e.Property == FontFamilyProperty)
+        {
+            _typeface = new Typeface(this.FontFamily, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
+            ;
+        }
+
         base.OnPropertyChanged(e);
     }
 
@@ -177,15 +185,18 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
             return;
         }
 
+        _typeface ??= new Typeface(this.FontFamily, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
+
         double height,
             width,
             x,
             y;
-        
+
         Rect drawnRect;
-        
+        Geometry drawnGeometry;
+
         double dropshadowThickness = 2.5d * Scale;
-        
+
         #region Brushes
 
         ThemeVariant theme = Application.Current!.ActualThemeVariant;
@@ -234,24 +245,58 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
                 {
                     height = node.Height * Scale;
                     width = node.Width * Scale;
-                    
+
                     x = (node.X + node.Width / 2) * Scale;
                     y = (node.Y + node.Height / 2) * Scale;
-                    
+
                     x -= width / 2;
                     y -= height / 2;
-                    
+
                     drawnRect = new Rect(x, y, width, height);
-                    
+
                     context.DrawRectangle(rectFillBrush, borderPen, drawnRect);
+                }
+                else if (element is HierarchyViewPort port)
+                {
+                    height = port.Height * Scale;
+                    width = port.Width * Scale;
+
+                    x = (port.X + port.Width / 2) * Scale;
+                    y = (port.Y + port.Height / 2) * Scale;
+
+                    x -= width / 2;
+                    y -= height / 2;
+
+                    drawnRect = new Rect(x, y, width, height);
+
+                    drawnGeometry = port.Geometry.Clone();
                     
-                    ServiceManager.GetService<ICustomLogger>().Log($"HierarchyControl: Drawn node: {drawnRect}");
+                    drawnGeometry.Transform = new MatrixTransform(new Matrix(Scale, 0.0d, 0.0d, Scale, x, y));
+                    context.DrawGeometry(rectFillBrush, borderPen, drawnGeometry);
+                }
+                else if (element is HierarchyViewEdge edge)
+                {
+                }
+                else if (element is HierarchyViewLabel label)
+                {
+                    x = (label.X + label.Width / 2) * Scale;
+                    y = (label.Y + label.Height / 2) * Scale;
+
+                    height = label.Height * Scale;
+                    width = label.Width * Scale;
+
+                    x -= width / 2;
+                    y -= height / 2;
+
+                    FormattedText labeltext = new FormattedText(label.Content, CultureInfo.InvariantCulture,
+                        FlowDirection.LeftToRight, (Typeface)_typeface, label.FontSize * Scale, textBrush);
+                    
+                    context.DrawText(labeltext, new Point(x, y));
                 }
             }
         }
         catch
         {
-            
         }
     }
 
@@ -262,18 +307,18 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
     private void HierarchyControl_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         PointerPoint currentPoint = e.GetCurrentPoint(this);
-        
+
         _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
-        
+
         _pointerPosition = currentPoint.Position;
     }
 
     private void HierarchyControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         PointerPoint currentPoint = e.GetCurrentPoint(this);
-        
+
         _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
-        
+
         _pointerPosition = currentPoint.Position;
     }
 
@@ -287,7 +332,7 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         IReadOnlyList<PointerPoint> pointerPoints = e.GetIntermediatePoints(this);
         double dx = 0,
             dy = 0;
-        
+
         Point currentPos = e.GetPosition(this);
 
         if (_pointerPressed || pointerPoints.First().Properties.IsLeftButtonPressed)
@@ -295,7 +340,7 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
             dx = currentPos.X - _pointerPosition.X;
             dy = currentPos.Y - _pointerPosition.Y;
         }
-        
+
         _pointerPosition = currentPos;
 
         DeltaX += dx;
@@ -307,7 +352,7 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         Vector wheel = e.Delta;
 
         DeltaScale += wheel.Y;
-        
+
         _pointerPosition = e.GetPosition(this);
     }
 
@@ -321,5 +366,4 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
     }
 
     #endregion
-    
 }

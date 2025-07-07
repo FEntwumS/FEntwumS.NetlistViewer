@@ -182,10 +182,21 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         JsonArray? labels = node["labels"] as JsonArray;
         JsonArray? ports = node["ports"] as JsonArray;
         JsonNode? layoutOptions = node["layoutOptions"] as JsonNode;
+        double x = 0, y = 0;
 
         if (layoutOptions is null)
         {
             return;
+        }
+
+        if (node.AsObject().ContainsKey("x"))
+        {
+            x = node["x"].GetValue<double>();
+        }
+
+        if (node.AsObject().ContainsKey("y"))
+        {
+            y = node["y"].GetValue<double>();
         }
 
         if (!layoutOptions.AsObject().ContainsKey("hierarchy-container-sub-node-type"))
@@ -213,12 +224,12 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         switch (layoutOptions["hierarchy-container-sub-node-type"]!.GetValue<string>())
         {
             case "NAME":
-                string namePath = parseLabel(labels[0], hierarchyViewElements, xRef, yRef);
+                string namePath = parseLabel(labels[0], hierarchyViewElements, xRef + x, yRef + y);
                 nodeNameMap.Add(namePath, currentSidebarElement);
                 currentSidebarElement.Name = namePath.Split(' ', StringSplitOptions.None).Last();
                 break;
             case "TYPE":
-                currentSidebarElement.Type = parseLabel(labels[0], hierarchyViewElements, xRef, yRef);
+                currentSidebarElement.Type = parseLabel(labels[0], hierarchyViewElements, xRef + x, yRef + y);
                 break;
             case "PARAMETERS":
                 if (ports is not null)
@@ -226,7 +237,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
                     foreach (JsonNode? parameter in ports)
                     {
                         currentSidebarElement.Attributes.Add(new Parameter()
-                            { Name = parsePort(parameter, hierarchyViewElements, xRef, yRef).Name });
+                            { Name = parsePort(parameter, hierarchyViewElements, xRef + x, yRef + y).Name });
                     }
                 }
 
@@ -236,7 +247,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
                 {
                     foreach (JsonNode? port in ports)
                     {
-                        currentSidebarElement.Ports.Add(parsePort(port, hierarchyViewElements, xRef, yRef));
+                        currentSidebarElement.Ports.Add(parsePort(port, hierarchyViewElements, xRef + x, yRef + y));
                     }
                 }
 
@@ -360,7 +371,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         return new Port()
         {
             Geometry = geometry,
-            Name = parseLabel(labels[0], hierarchyViewElements, xRef, yRef)
+            Name = parseLabel(labels[0], hierarchyViewElements, xRef + x, yRef + y)
         };
     }
 
