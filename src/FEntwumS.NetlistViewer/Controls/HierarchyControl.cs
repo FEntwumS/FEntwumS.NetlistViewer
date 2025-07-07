@@ -258,6 +258,11 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
                 }
                 else if (element is HierarchyViewPort port)
                 {
+                    if (port.Geometry is null)
+                    {
+                        continue;
+                    }
+                    
                     height = port.Height * Scale;
                     width = port.Width * Scale;
 
@@ -271,7 +276,8 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
                     drawnGeometry = port.Geometry.Clone();
                     
-                    drawnGeometry.Transform = new MatrixTransform(new Matrix(Scale, 0.0d, 0.0d, Scale, x, y));
+                    // TODO: Scale factor needs to be determined
+                    drawnGeometry.Transform = new MatrixTransform(new Matrix(Scale * 0.5d, 0.0d, 0.0d, Scale * 0.5d, x, y));
                     context.DrawGeometry(rectFillBrush, borderPen, drawnGeometry);
                 }
                 else if (element is HierarchyViewEdge edge)
