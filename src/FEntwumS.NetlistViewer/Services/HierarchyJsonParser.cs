@@ -129,9 +129,22 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         string ancestorName = "";
         HierarchySideBarElement? ancestor = null;
 
+        double x = 0,
+            y = 0;
+
         if (layoutOptions is null)
         {
             return newSidebarElement;
+        }
+
+        if (node.AsObject().ContainsKey("x"))
+        {
+            x = node["x"].GetValue<double>();
+        }
+
+        if (node.AsObject().ContainsKey("y"))
+        {
+            y = node["y"].GetValue<double>();
         }
 
         if (layoutOptions.AsObject().ContainsKey("hierarchy-ancestor-name"))
@@ -156,7 +169,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         {
             foreach (JsonNode? subNode in subNodes)
             {
-                parseSubNode(subNode!, hierarchyViewElements, xRef, yRef, newSidebarElement, nodeNameMap);
+                parseSubNode(subNode!, hierarchyViewElements, xRef + x, yRef + y, newSidebarElement, nodeNameMap);
             }
         }
 

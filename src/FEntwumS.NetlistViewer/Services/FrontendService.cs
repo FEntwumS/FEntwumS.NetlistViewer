@@ -974,6 +974,9 @@ public class FrontendService : IFrontendService
         hierarchyVM.InitializeContent();
         hierarchyVM.Title = "Design hierarchy";
         hierarchyVM.NetlistId = combinedHash;
+        ObservableCollection<HierarchyViewElement> obsElements = new ObservableCollection<HierarchyViewElement>();
+        obsElements.AddRange(elements);
+        hierarchyVM.Items = obsElements;
         
         _dockService.Show(hierarchyVM, DockShowLocation.Document);
         _dockService.InitializeContent();

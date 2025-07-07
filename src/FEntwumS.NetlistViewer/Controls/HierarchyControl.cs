@@ -1,10 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Rendering;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using FEntwumS.NetlistViewer.Helpers;
@@ -153,6 +155,11 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
     {
+        if (IsInitialized && Scale == 0)
+        {
+            Scale = 0.2;
+        }
+        
         base.OnPropertyChanged(e);
     }
 
@@ -168,6 +175,83 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         if (!IsInitialized)
         {
             return;
+        }
+
+        double height,
+            width,
+            x,
+            y;
+        
+        Rect drawnRect;
+        
+        double dropshadowThickness = 2.5d * Scale;
+        
+        #region Brushes
+
+        ThemeVariant theme = Application.Current!.ActualThemeVariant;
+        Brush backgroundBrush =
+            new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeBackgroundColor") is Color
+                ? (Color)Application.Current!.FindResource(theme, "ThemeBackgroundColor")!
+                : Colors.LightGray);
+        Pen highlightPen = new Pen(new SolidColorBrush(Colors.Yellow, 0.5d), 5.5 * Scale, null, PenLineCap.Round,
+            PenLineJoin.Miter, 10d);
+        Pen notConnectedPen = new Pen(new SolidColorBrush(Colors.Red), 2 * Scale, null, PenLineCap.Round);
+
+        Pen borderPen = new Pen(
+            Application.Current!.FindResource(theme, "ThemeBorderMidBrush") as IBrush ??
+            new SolidColorBrush(Colors.MidnightBlue),
+            1.5 * Scale);
+        Pen dropShadowPen =
+            new Pen(
+                new SolidColorBrush((Application.Current.FindResource(theme, "ThemeBorderHighColor") is Color
+                    ? (Color)(Application.Current.FindResource(theme, "ThemeBorderHighColor") ??
+                              new Color(0xFF, 0xA0, 0xA0, 0xA0))
+                    : Colors.DarkGray)),
+                dropshadowThickness, null, PenLineCap.Square);
+        Pen edgePen = new Pen(
+            Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? new SolidColorBrush(Colors.Black),
+            1.2 * Scale, null, PenLineCap.Square);
+        Pen bundledEdgePen = new Pen(
+            Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? new SolidColorBrush(Colors.Black),
+            2.8 * Scale, null, PenLineCap.Square);
+        Brush rectFillBrush =
+            Application.Current!.FindResource(theme, "ThemeControlHighlightMidBrush") as SolidColorBrush ??
+            new SolidColorBrush(Colors.LightBlue);
+        Brush ellipseFillBrush =
+            Application.Current!.FindResource(theme, "ThemeAccentBrush") as SolidColorBrush ??
+            new SolidColorBrush(Colors.Black);
+        Brush textBrush = new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeAccentColor") is Color
+            ? (Color)(Application.Current!.FindResource(theme, "ThemeAccentColor") ?? new Color(0xFF, 0x00, 0x7A, 0xB8))
+            : Colors.Black);
+
+        #endregion
+
+        try
+        {
+            foreach (HierarchyViewElement element in Items)
+            {
+                if (element is HierarchyViewNode node)
+                {
+                    height = node.Height * Scale;
+                    width = node.Width * Scale;
+                    
+                    x = (node.X + node.Width / 2) * Scale;
+                    y = (node.Y + node.Height / 2) * Scale;
+                    
+                    x -= width / 2;
+                    y -= height / 2;
+                    
+                    drawnRect = new Rect(x, y, width, height);
+                    
+                    context.DrawRectangle(rectFillBrush, borderPen, drawnRect);
+                    
+                    ServiceManager.GetService<ICustomLogger>().Log($"HierarchyControl: Drawn node: {drawnRect}");
+                }
+            }
+        }
+        catch
+        {
+            
         }
     }
 

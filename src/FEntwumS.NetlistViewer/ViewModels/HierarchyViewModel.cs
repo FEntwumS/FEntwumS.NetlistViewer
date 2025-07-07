@@ -63,6 +63,10 @@ public class HierarchyViewModel : ExtendedTool
 
     public HierarchyViewModel() : base("Hierarchy")
     {
+        items = new ObservableCollection<HierarchyViewElement>();
+        
+        Scale = 1;
+        
         FitToZoomCommand = new RelayCommand(() =>
         {
             WeakReferenceMessenger.Default.Send(new ZoomToFitmessage(_netlistId),
