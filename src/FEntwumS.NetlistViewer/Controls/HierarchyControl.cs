@@ -112,6 +112,46 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         AvaloniaProperty.Register<HierarchyControl, double>(nameof(DeltaScale), defaultValue: 0.0d,
             defaultBindingMode: BindingMode.TwoWay);
 
+    public double NodeScaleClip
+    {
+        get => GetValue(NodeScaleClipProperty);
+        set => SetValue(NodeScaleClipProperty, value);
+    }
+
+    public static readonly StyledProperty<double> NodeScaleClipProperty =
+        AvaloniaProperty.Register<HierarchyControl, double>(nameof(NodeScaleClip),
+            defaultBindingMode: BindingMode.TwoWay);
+
+    public double PortScaleClip
+    {
+        get => GetValue(PortScaleClipProperty);
+        set => SetValue(PortScaleClipProperty, value);
+    }
+
+    public static readonly StyledProperty<double> PortScaleClipProperty =
+        AvaloniaProperty.Register<HierarchyControl, double>(nameof(PortScaleClip),
+            defaultBindingMode: BindingMode.TwoWay);
+
+    public double LabelScaleClip
+    {
+        get => GetValue(LabelScaleClipProperty);
+        set => SetValue(LabelScaleClipProperty, value);
+    }
+
+    public static readonly StyledProperty<double> LabelScaleClipProperty =
+        AvaloniaProperty.Register<HierarchyControl, double>(nameof(LabelScaleClip),
+            defaultBindingMode: BindingMode.TwoWay);
+
+    public double EdgeScaleClip
+    {
+        get => GetValue(EdgeScaleClipProperty);
+        set => SetValue(EdgeScaleClipProperty, value);
+    }
+
+    public static readonly StyledProperty<double> EdgeScaleClipProperty =
+        AvaloniaProperty.Register<HierarchyControl, double>(nameof(EdgeScaleClip),
+            defaultBindingMode: BindingMode.TwoWay);
+    
     #endregion
 
     #region Variables
@@ -279,7 +319,12 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
                     drawnRect = new Rect(x, y, width, height);
 
-                    context.DrawRectangle(rectFillBrush, borderPen, drawnRect);
+                    if ((NodeScaleClip < height && NodeScaleClip < width) &&
+                        (drawnRect.Contains(this.Bounds) || drawnRect.Intersects(this.Bounds) ||
+                         this.Bounds.Contains(drawnRect)))
+                    {
+                        context.DrawRectangle(rectFillBrush, borderPen, drawnRect);
+                    }
                 }
                 else if (element is HierarchyViewPort port)
                 {
@@ -302,11 +347,17 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
                     drawnRect = new Rect(x, y, width, height);
 
-                    drawnGeometry = port.Geometry.Clone();
-                    
-                    // TODO: Scale factor needs to be determined
-                    drawnGeometry.Transform = new MatrixTransform(new Matrix(Scale * 0.5d, 0.0d, 0.0d, Scale * 0.5d, x, y));
-                    context.DrawGeometry(rectFillBrush, borderPen, drawnGeometry);
+                    if ((PortScaleClip < width && PortScaleClip < height) && (drawnRect.Contains(this.Bounds) || drawnRect.Intersects(this.Bounds) ||
+                        this.Bounds.Contains(drawnRect)))
+                    {
+
+                        drawnGeometry = port.Geometry.Clone();
+
+                        // TODO: Scale factor needs to be determined
+                        drawnGeometry.Transform =
+                            new MatrixTransform(new Matrix(Scale * 0.5d, 0.0d, 0.0d, Scale * 0.5d, x, y));
+                        context.DrawGeometry(rectFillBrush, borderPen, drawnGeometry);
+                    }
                 }
                 else if (element is HierarchyViewEdge edge)
                 {
@@ -324,11 +375,18 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
                     
                     x += OffsetX;
                     y += OffsetY;
-
-                    FormattedText labeltext = new FormattedText(label.Content, CultureInfo.InvariantCulture,
-                        FlowDirection.LeftToRight, (Typeface)_typeface, label.FontSize * Scale, textBrush);
                     
-                    context.DrawText(labeltext, new Point(x, y));
+                    drawnRect = new Rect(x, y, width, height);
+
+                    if ((LabelScaleClip < height && LabelScaleClip < width) && (drawnRect.Contains(this.Bounds) || drawnRect.Intersects(this.Bounds) ||
+                        this.Bounds.Contains(drawnRect)))
+                    {
+
+                        FormattedText labeltext = new FormattedText(label.Content, CultureInfo.InvariantCulture,
+                            FlowDirection.LeftToRight, (Typeface)_typeface, label.FontSize * Scale, textBrush);
+
+                        context.DrawText(labeltext, new Point(x, y));
+                    }
                 }
             }
         }

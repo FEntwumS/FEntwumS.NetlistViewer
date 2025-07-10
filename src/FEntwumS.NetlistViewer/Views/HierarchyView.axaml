@@ -27,7 +27,11 @@
                                        OffsetX="{Binding OffsetX}"
                                        OffsetY="{Binding OffsetY}"
                                        Scale="{Binding Scale}"
-                                       FontFamily="{StaticResource MartianMono}">
+                                       FontFamily="{StaticResource MartianMono}"
+                                       NodeScaleClip="2"
+                                       PortScaleClip="3"
+                                       EdgeScaleClip="3"
+                                       LabelScaleClip="3">
                 
             </controls:HierarchyControl>
 
