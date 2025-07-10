@@ -26,7 +26,7 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
     public ObservableCollection<HierarchyViewElement> Items
     {
         get => _items ??= new ObservableCollection<HierarchyViewElement>();
-        set => _items = value;
+        set => SetAndRaise(ItemsProperty, ref _items, value);
     }
 
     public static readonly DirectProperty<HierarchyControl, ObservableCollection<HierarchyViewElement>> ItemsProperty =
@@ -34,94 +34,78 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
             control => control.Items, (control, items) => control.Items = items,
             defaultBindingMode: BindingMode.TwoWay);
 
-    private ulong _netlistId { get; set; }
-
     public ulong NetlistId
     {
-        get => _netlistId;
-        set => _netlistId = value;
+        get => GetValue(NetlistIdProperty);
+        set => SetValue(NetlistIdProperty, value);
     }
 
     public static readonly StyledProperty<ulong> NetlistIdProperty =
         AvaloniaProperty.Register<HierarchyControl, ulong>(nameof(NetlistId), defaultBindingMode: BindingMode.TwoWay);
 
-    private double _stepSize { get; set; }
-
     public double StepSize
     {
-        get => _stepSize;
-        set => _stepSize = value;
+        get => GetValue(StepSizeProperty);
+        set => SetValue(StepSizeProperty, value);
     }
 
     public static readonly StyledProperty<double> StepSizeProperty =
         AvaloniaProperty.Register<HierarchyControl, double>(nameof(StepSize), defaultBindingMode: BindingMode.TwoWay);
 
-    private double _scale { get; set; }
-
     public double Scale
     {
-        get => _scale;
-        set => _scale = value;
+        get => GetValue(ScaleProperty);
+        set => SetValue(ScaleProperty, value);
     }
 
     public static readonly StyledProperty<double> ScaleProperty =
         AvaloniaProperty.Register<HierarchyControl, double>(nameof(Scale), defaultValue: 1.0d,
             defaultBindingMode: BindingMode.TwoWay);
 
-    private double _offsetX { get; set; }
-
     public double OffsetX
     {
-        get => _offsetX;
-        set => _offsetX = value;
+        get => GetValue(OffsetXProperty);
+        set => SetValue(OffsetXProperty, value);
     }
 
     public static readonly StyledProperty<double> OffsetXProperty =
         AvaloniaProperty.Register<HierarchyControl, double>(nameof(OffsetX), defaultValue: 0.0d,
             defaultBindingMode: BindingMode.TwoWay);
 
-    private double _offsetY { get; set; }
-
     public double OffsetY
     {
-        get => _offsetY;
-        set => _offsetY = value;
+        get => GetValue(OffsetYProperty);
+        set => SetValue(OffsetYProperty, value);
     }
 
     public static readonly StyledProperty<double> OffsetYProperty =
         AvaloniaProperty.Register<HierarchyControl, double>(nameof(OffsetY), defaultValue: 0.0d,
             defaultBindingMode: BindingMode.TwoWay);
 
-    private double _deltaX { get; set; }
-
     public double DeltaX
     {
-        get => _deltaX;
-        set => _deltaX = value;
+        get => GetValue(DeltaXProperty);
+        set => SetValue(DeltaXProperty, value);
     }
 
     public static readonly StyledProperty<double> DeltaXProperty =
         AvaloniaProperty.Register<HierarchyControl, double>(nameof(DeltaX), defaultValue: 0.0d,
             defaultBindingMode: BindingMode.TwoWay);
 
-    private double _deltaY { get; set; }
-
     public double DeltaY
     {
-        get => _deltaY;
-        set => _deltaY = value;
+        get => GetValue(DeltaYProperty);
+        set => SetValue(DeltaYProperty, value);
     }
 
     public static readonly StyledProperty<double> DeltaYProperty =
         AvaloniaProperty.Register<HierarchyControl, double>(nameof(DeltaY), defaultValue: 0.0d,
             defaultBindingMode: BindingMode.TwoWay);
 
-    private double _deltaScale { get; set; }
-
     public double DeltaScale
     {
-        get => _deltaScale;
-        set => _deltaScale = value;
+        get => GetValue(DeltaScaleProperty);
+        set => SetValue(DeltaScaleProperty, value);
     }
 
     public static readonly StyledProperty<double> DeltaScaleProperty =
@@ -166,7 +150,12 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         {
             _typeface = new Typeface(this.FontFamily, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
             ;
+        } else if (e.Property == DeltaXProperty || e.Property == DeltaYProperty || e.Property == DeltaScaleProperty)
+        {
+            Redraw();
         }
+        
+        Redraw();
 
         base.OnPropertyChanged(e);
     }
@@ -195,7 +184,37 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         Rect drawnRect;
         Geometry drawnGeometry;
 
-        double dropshadowThickness = 2.5d * Scale;
+        double dropshadowThickness = 2.5d * Scale,
+            deltaX = DeltaX,
+            deltaY = DeltaY,
+            deltaScale = DeltaScale,
+            step = 0.9d;
+        
+        OffsetX += deltaX;
+        OffsetY += deltaY;
+
+        if (deltaScale != 0)
+        {
+            if (deltaScale > 0)
+            {
+                step = 1.1d;
+            }
+            
+            double allSteps = Math.Pow(step, Math.Abs(deltaScale));
+            
+            // Apply rescale
+            Scale *= allSteps;
+            
+            OffsetX *= allSteps;
+            OffsetY *= allSteps;
+
+            OffsetX += _pointerPosition.X - _pointerPosition.X * allSteps;
+            OffsetY += _pointerPosition.Y - _pointerPosition.Y * allSteps;
+        }
+        
+        DeltaX -= deltaX;
+        DeltaY -= deltaY;
+        DeltaScale -= deltaScale;
 
         #region Brushes
 
@@ -236,6 +255,9 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
             : Colors.Black);
 
         #endregion
+        
+        // Draw background
+        context.DrawRectangle(backgroundBrush, null, new Rect(0, 0, this.Bounds.Width, this.Bounds.Height));
 
         try
         {
@@ -251,6 +273,9 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
                     x -= width / 2;
                     y -= height / 2;
+                    
+                    x += OffsetX;
+                    y += OffsetY;
 
                     drawnRect = new Rect(x, y, width, height);
 
@@ -271,6 +296,9 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
                     x -= width / 2;
                     y -= height / 2;
+                    
+                    x += OffsetX;
+                    y += OffsetY;
 
                     drawnRect = new Rect(x, y, width, height);
 
@@ -293,6 +321,9 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
                     x -= width / 2;
                     y -= height / 2;
+                    
+                    x += OffsetX;
+                    y += OffsetY;
 
                     FormattedText labeltext = new FormattedText(label.Content, CultureInfo.InvariantCulture,
                         FlowDirection.LeftToRight, (Typeface)_typeface, label.FontSize * Scale, textBrush);
@@ -317,6 +348,8 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
 
         _pointerPosition = currentPoint.Position;
+        
+        ServiceManager.GetService<ICustomLogger>().Log("Pointer pressed");
     }
 
     private void HierarchyControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -326,6 +359,8 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
 
         _pointerPosition = currentPoint.Position;
+        
+        ServiceManager.GetService<ICustomLogger>().Log("Pointer released");
     }
 
     private void HierarchyControl_Tapped(object? sender, TappedEventArgs e)
@@ -351,6 +386,8 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
         DeltaX += dx;
         DeltaY += dy;
+        
+        ServiceManager.GetService<ICustomLogger>().Log($"Pointer moved: dX = {dx}, dy = {dy}");
     }
 
     private void HierarchyControl_PointerWheelChanged(object? sender, PointerWheelEventArgs e)
