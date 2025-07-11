@@ -413,8 +413,6 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
 
         _pointerPosition = currentPoint.Position;
-        
-        ServiceManager.GetService<ICustomLogger>().Log("Pointer pressed");
     }
 
     private void HierarchyControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -424,8 +422,6 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
 
         _pointerPosition = currentPoint.Position;
-        
-        ServiceManager.GetService<ICustomLogger>().Log("Pointer released");
     }
 
     private void HierarchyControl_Tapped(object? sender, TappedEventArgs e)
@@ -451,8 +447,6 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
         DeltaX += dx;
         DeltaY += dy;
-        
-        ServiceManager.GetService<ICustomLogger>().Log($"Pointer moved: dX = {dx}, dy = {dy}");
     }
 
     private void HierarchyControl_PointerWheelChanged(object? sender, PointerWheelEventArgs e)
