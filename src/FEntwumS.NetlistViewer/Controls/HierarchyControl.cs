@@ -3,6 +3,7 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Shapes;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Media;
@@ -368,6 +369,59 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
                 }
                 else if (element is HierarchyViewEdge edge)
                 {
+                    if (edge.Points is null)
+                    {
+                        continue;
+                    }
+                    
+                    List<Point> points = new List<Point>();
+
+                    bool previousPointInBounds = true;
+                    bool currentPointInBounds = false;
+                    bool drawLine = true;
+
+                    foreach (Point point in edge.Points)
+                    {
+                        points.Add(new Point((point.X + edge.X) * Scale + OffsetX,
+                            (point.Y + edge.Y) * Scale + OffsetY));
+                    }
+                    
+                    for (int i = 1; i < points.Count; i++)
+                    {
+                        drawLine = false;
+                        currentPointInBounds = Bounds.Contains(points[i]);
+
+                        if ((points[i - 1].X - points[i].X) * (points[i - 1].X - points[i].X) +
+                            (points[i - 1].Y - points[i].Y) * (points[i - 1].Y - points[i].Y) <=
+                            EdgeScaleClip * EdgeScaleClip)
+                        {
+                            continue;
+                        }
+                        
+                        Line line = new Line();
+                        line.StartPoint = points[i - 1];
+                        line.EndPoint = points[i];
+
+                        if (previousPointInBounds)
+                        {
+                            drawLine = true;
+                        }
+                        else if (currentPointInBounds)
+                        {
+                            drawLine = true;
+                        }
+                        else if (line.Bounds.Contains(this.Bounds))
+                        {
+                            drawLine = true;
+                        }
+
+                        previousPointInBounds = currentPointInBounds;
+
+                        if (drawLine)
+                        {
+                            context.DrawLine(edgePen, points[i - 1], points[i]);
+                        }
+                    }
                 }
                 else if (element is HierarchyViewLabel label)
                 {
