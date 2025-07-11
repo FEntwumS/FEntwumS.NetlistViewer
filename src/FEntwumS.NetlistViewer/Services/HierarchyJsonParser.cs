@@ -112,7 +112,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
                     continue;
                 }
 
-                parseEdge(edge, hierarchyViewElements, width, height);
+                parseEdge(edge, hierarchyViewElements, 0, 0);
             }
         }
 
@@ -427,7 +427,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
                 continue;
             }
 
-            JsonNode? start = section["start"], end = section["end"];
+            JsonNode? start = section["startPoint"], end = section["endPoint"];
             JsonArray? bendpoints = section["bendPoints"] as JsonArray;
             List<Point> pointList = new List<Point>();
             double x = 0.0d, y = 0.0d;
