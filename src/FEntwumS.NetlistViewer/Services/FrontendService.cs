@@ -974,6 +974,8 @@ public class FrontendService : IFrontendService
         hierarchyVM.InitializeContent();
         hierarchyVM.Title = "Design hierarchy";
         hierarchyVM.NetlistId = combinedHash;
+        hierarchyVM.OffsetX = -ServiceManager.GetService<IHierarchyInformationService>().getTopX(combinedHash);
+        hierarchyVM.OffsetY = -ServiceManager.GetService<IHierarchyInformationService>().getTopY(combinedHash);
         ObservableCollection<HierarchyViewElement> obsElements = new ObservableCollection<HierarchyViewElement>();
         obsElements.AddRange(elements);
         hierarchyVM.Items = obsElements;

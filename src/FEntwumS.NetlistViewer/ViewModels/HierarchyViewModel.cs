@@ -43,7 +43,11 @@ public class HierarchyViewModel : ExtendedTool
     public double OffsetX
     {
         get => _offsetX;
-        set => _offsetX = value;
+        set
+        {
+            _offsetX = value;
+            OnPropertyChanged(nameof(OffsetX));
+        }
     }
     
     private double _offsetY { get; set; }
@@ -51,6 +55,11 @@ public class HierarchyViewModel : ExtendedTool
     public double OffsetY
     {
         get => _offsetY;
+        set
+        {
+            _offsetY = value;
+            OnPropertyChanged(nameof(OffsetY));
+        }
     }
     
     private double _scale { get; set; }
@@ -58,7 +67,11 @@ public class HierarchyViewModel : ExtendedTool
     public double Scale
     {
         get => _scale;
-        set => _scale = value;
+        set
+        {
+            _scale = value;
+            OnPropertyChanged(nameof(Scale));
+        }
     }
 
     public HierarchyViewModel() : base("Hierarchy")
