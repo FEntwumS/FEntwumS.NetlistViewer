@@ -271,6 +271,10 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
             Application.Current!.FindResource(theme, "ThemeBorderMidBrush") as IBrush ??
             new SolidColorBrush(Colors.MidnightBlue),
             1.5 * Scale);
+        Pen symbolPen = new Pen(
+            Application.Current!.FindResource(theme, "ThemeBorderMidBrush") as IBrush ??
+            new SolidColorBrush(Colors.MidnightBlue),
+            0.1d * Scale);
         Pen dropShadowPen =
             new Pen(
                 new SolidColorBrush((Application.Current.FindResource(theme, "ThemeBorderHighColor") is Color
@@ -287,6 +291,9 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         Brush rectFillBrush =
             Application.Current!.FindResource(theme, "ThemeControlHighlightMidBrush") as SolidColorBrush ??
             new SolidColorBrush(Colors.LightBlue);
+        Brush symbolFillBrush =
+            Application.Current!.FindResource(theme, "ThemeBorderMidBrush") as SolidColorBrush ??
+            new SolidColorBrush(Colors.Black);
         Brush ellipseFillBrush =
             Application.Current!.FindResource(theme, "ThemeAccentBrush") as SolidColorBrush ??
             new SolidColorBrush(Colors.Black);
@@ -355,8 +362,8 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
                         // TODO: Scale factor needs to be determined
                         drawnGeometry.Transform =
-                            new MatrixTransform(new Matrix(Scale * 0.5d, 0.0d, 0.0d, Scale * 0.5d, x, y));
-                        context.DrawGeometry(rectFillBrush, borderPen, drawnGeometry);
+                            new MatrixTransform(new Matrix(Scale * 0.3d, 0.0d, 0.0d, Scale * 0.3d, x, y));
+                        context.DrawGeometry(symbolFillBrush, symbolPen, drawnGeometry);
                     }
                 }
                 else if (element is HierarchyViewEdge edge)
