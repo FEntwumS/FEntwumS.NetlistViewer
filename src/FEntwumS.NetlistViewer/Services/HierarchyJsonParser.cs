@@ -183,6 +183,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         JsonArray? ports = node["ports"] as JsonArray;
         JsonNode? layoutOptions = node["layoutOptions"] as JsonNode;
         double x = 0, y = 0;
+        string namePath = "";
 
         if (layoutOptions is null)
         {
@@ -204,6 +205,11 @@ public class HierarchyJsonParser : IHierarchyJsonParser
             return;
         }
 
+        if (layoutOptions.AsObject().ContainsKey("hierarchy-ancestor-path"))
+        {
+            namePath = layoutOptions["hierarchy-ancestor-path"]!.GetValue<string>();
+        }
+
         if (labels is null && ports is null)
         {
             return;
@@ -219,10 +225,10 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         switch (layoutOptions["hierarchy-container-sub-node-type"]!.GetValue<string>())
         {
             case "NAME":
-                string namePath = parseLabel(labels[0], hierarchyViewElements, xRef + x, yRef + y);
+                string name = parseLabel(labels[0], hierarchyViewElements, xRef + x, yRef + y);
                 nodeNameMap.Add(namePath, currentSidebarElement);
-                currentSidebarElement.Name = namePath.Split(' ', StringSplitOptions.None).Last();
-                parseLabel(labels[1], hierarchyViewElements, xRef + x, yRef + y, true);
+                currentSidebarElement.Name = name;
+                parseLabel(labels[1], hierarchyViewElements, xRef + x, yRef + y);
                 break;
             case "TYPE":
                 currentSidebarElement.Type = parseLabel(labels[0], hierarchyViewElements, xRef + x, yRef + y);
@@ -259,7 +265,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
     }
 
     private string parseLabel(JsonNode labelNode, List<HierarchyViewElement> hierarchyViewElements, double xRef,
-        double yRef, bool isName = false)
+        double yRef)
     {
         JsonNode? layoutOptions = labelNode["layoutOptions"];
         double x = 0,
@@ -298,11 +304,6 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         {
             fontSize = double.Parse(layoutOptions["font-size"]!.GetValue<string>(),
                 System.Globalization.CultureInfo.InvariantCulture);
-        }
-
-        if (isName)
-        {
-            text = text.Split(" ").Last();
         }
 
         hierarchyViewElements.Add(new HierarchyViewLabel()
