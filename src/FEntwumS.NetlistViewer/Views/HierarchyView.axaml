@@ -36,7 +36,9 @@
             </controls:HierarchyControl>
             
             <StackPanel VerticalAlignment="Top"
-                        HorizontalAlignment="Right">
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        FlowDirection="RightToLeft">
                 <Button Background="{DynamicResource ThemeBackgroundBrush}"
                         Padding="5"
                         CornerRadius="3"
