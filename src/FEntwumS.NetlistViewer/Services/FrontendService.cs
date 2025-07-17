@@ -728,9 +728,14 @@ public class FrontendService : IFrontendService
 
             return false;
         }
+        
+        PackageModel? dependencyModel = _packageService.Packages!.GetValueOrDefault(FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id);
+        string? installedVersion = (dependencyModel?.InstalledVersion!).Version;
 
         var serverJar = Directory.GetFiles(_backendJarFolder).Where(x =>
-            Regex.Match(x, @".*fentwums-netlist-reader-server-(\d+\.)(\d+\.)(\d+)-exec\.jar").Success);
+            Regex.Match(x, @$".*fentwums-netlist-reader-server-{installedVersion}-exec\.jar").Success);
+        
+        
 
         var enumeratedResults = serverJar.ToList();
         if (enumeratedResults.Count == 0)
@@ -789,7 +794,7 @@ public class FrontendService : IFrontendService
 
         string javaBinaryFile = Path.Combine(_javaBinaryFolder, $"{prefix}/java{suffix}");
 
-        var serverJarFile = enumeratedResults.First();
+        var serverJarFile = enumeratedResults.Last();
 
         // Start server to run independently
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
