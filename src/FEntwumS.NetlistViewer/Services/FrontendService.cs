@@ -955,7 +955,7 @@ public class FrontendService : IFrontendService
             return false;
         }
         
-        (HierarchySideBarElement? elem, List<HierarchyViewElement>? elements) = await _hierarchyJsonParser.LoadHierarchyAsync(await resp.Content.ReadAsStreamAsync());
+        (HierarchySideBarElement? elem, List<HierarchyViewElement>? elements) = await _hierarchyJsonParser.LoadHierarchyAsync(await resp.Content.ReadAsStreamAsync(), combinedHash);
 
 
         _applicationStateService.RemoveState(proc);
@@ -968,6 +968,19 @@ public class FrontendService : IFrontendService
         sidebarVM.Elements = sidebarelements;
         
         _dockService.Show(sidebarVM, DockShowLocation.Left);
+        _dockService.InitializeContent();
+        
+        HierarchyViewModel hierarchyVM = new HierarchyViewModel();
+        hierarchyVM.InitializeContent();
+        hierarchyVM.Title = "Design hierarchy";
+        hierarchyVM.NetlistId = combinedHash;
+        hierarchyVM.OffsetX = -ServiceManager.GetService<IHierarchyInformationService>().getTopX(combinedHash);
+        hierarchyVM.OffsetY = -ServiceManager.GetService<IHierarchyInformationService>().getTopY(combinedHash);
+        ObservableCollection<HierarchyViewElement> obsElements = new ObservableCollection<HierarchyViewElement>();
+        obsElements.AddRange(elements);
+        hierarchyVM.Items = obsElements;
+        
+        _dockService.Show(hierarchyVM, DockShowLocation.Document);
         _dockService.InitializeContent();
         
         return true;

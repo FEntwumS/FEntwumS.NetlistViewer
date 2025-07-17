@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
 using FEntwumS.NetlistViewer.Types.HierarchyView;
 using OneWare.Essentials.ViewModels;
 
