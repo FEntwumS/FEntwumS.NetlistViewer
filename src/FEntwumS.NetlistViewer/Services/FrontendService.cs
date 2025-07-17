@@ -889,6 +889,11 @@ public class FrontendService : IFrontendService
 
     private async Task<bool> ShowHierarchyAsync(IProjectFile netlistFile)
     {
+        if (netlistFile == null)
+        {
+            return false;
+        }
+        
         ApplicationProcess proc = _applicationStateService.AddState("Starting viewer", AppState.Loading);
 
         HttpResponseMessage? resp = null;
@@ -933,9 +938,19 @@ public class FrontendService : IFrontendService
         ApplicationProcess waitForBackendProc =
             _applicationStateService.AddState("Layouting in progress", AppState.Loading);
 
-        resp = await PostAsync(
-            "/extractHierarchy" + $"?hash={combinedHash}",
-            formDataContent);
+        try
+        {
+            resp = await PostAsync(
+                "/extractHierarchy" + $"?hash={combinedHash}",
+                formDataContent);
+        }
+        catch (Exception ex)
+        {
+            _logger.Error("An error occured trying to connect to the server");
+            _applicationStateService.RemoveState(waitForBackendProc);
+            _applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
+            return false;
+        }
 
         _applicationStateService.RemoveState(waitForBackendProc);
 
