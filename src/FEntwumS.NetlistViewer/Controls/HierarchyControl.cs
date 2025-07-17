@@ -397,10 +397,35 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
                         {
                             continue;
                         }
+
+                        double lx = 0.0d,
+                            ty = 0.0d,
+                            rx = 0.0d,
+                            by = 0.0d;
+
+                        if (points[i].X < points[i - 1].X)
+                        {
+                            lx = points[i].X;
+                            rx = points[i - 1].X;
+                        }
+                        else
+                        {
+                            lx = points[i - 1].X;
+                            rx = points[i].X;
+                        }
+
+                        if (points[i].Y < points[i - 1].Y)
+                        {
+                            ty = points[i].Y;
+                            by = points[i - 1].Y;
+                        }
+                        else
+                        {
+                            ty = points[i - 1].Y;
+                            by = points[i].Y;
+                        }
                         
-                        Line line = new Line();
-                        line.StartPoint = points[i - 1];
-                        line.EndPoint = points[i];
+                        drawnRect = new Rect(new Point(lx, ty), new Point(rx, by));
 
                         if (previousPointInBounds)
                         {
@@ -410,7 +435,8 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
                         {
                             drawLine = true;
                         }
-                        else if (line.Bounds.Contains(this.Bounds))
+                        else if (lx < Bounds.Right && rx > Bounds.Left && ty < Bounds.Bottom && ty > Bounds.Top && by < Bounds.Bottom && by > Bounds.Top
+                                 || ty < Bounds.Bottom && by > Bounds.Top && lx > Bounds.Left && lx < Bounds.Right && rx > Bounds.Left && rx < Bounds.Right)
                         {
                             drawLine = true;
                         }
