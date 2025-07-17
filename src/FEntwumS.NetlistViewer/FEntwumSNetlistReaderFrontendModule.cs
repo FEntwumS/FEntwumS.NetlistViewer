@@ -48,98 +48,14 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         [
             new PackageVersion()
             {
-                Version = "0.8.1",
+                Version = "0.11.1",
                 Targets =
                 [
                     new PackageTarget()
                     {
                         Target = "all",
                         Url =
-                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.8.1/fentwums-netlist-reader-server-v0.8.1.tar.gz",
-                        AutoSetting =
-                        [
-                            new PackageAutoSetting()
-                            {
-                                RelativePath = "fentwums-netlist-reader",
-                                SettingKey = NetlistPathSetting,
-                            }
-                        ]
-                    }
-                ]
-            },
-            new PackageVersion()
-            {
-                Version = "0.8.2",
-                Targets =
-                [
-                    new PackageTarget()
-                    {
-                        Target = "all",
-                        Url =
-                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.8.2/fentwums-netlist-reader-server-v0.8.2.tar.gz",
-                        AutoSetting =
-                        [
-                            new PackageAutoSetting()
-                            {
-                                RelativePath = "fentwums-netlist-reader",
-                                SettingKey = NetlistPathSetting,
-                            }
-                        ]
-                    }
-                ]
-            },
-            new PackageVersion()
-            {
-                Version = "0.9.0",
-                Targets =
-                [
-                    new PackageTarget()
-                    {
-                        Target = "all",
-                        Url =
-                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.9.0/fentwums-netlist-reader-server-v0.9.0.tar.gz",
-                        AutoSetting =
-                        [
-                            new PackageAutoSetting()
-                            {
-                                RelativePath = "fentwums-netlist-reader",
-                                SettingKey = NetlistPathSetting,
-                            }
-                        ]
-                    }
-                ]
-            },
-            new PackageVersion()
-            {
-                Version = "0.10.0",
-                Targets =
-                [
-                    new PackageTarget()
-                    {
-                        Target = "all",
-                        Url =
-                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.10.0/fentwums-netlist-reader-server-v0.10.0.tar.gz",
-                        AutoSetting =
-                        [
-                            new PackageAutoSetting()
-                            {
-                                RelativePath = "fentwums-netlist-reader",
-                                SettingKey = NetlistPathSetting,
-                            }
-                        ]
-                    }
-                ]
-            },
-            new PackageVersion()
-            {
-                Version = "0.11.0",
-                Targets =
-                [
-                    new PackageTarget()
-                    {
-                        Target = "all",
-                        Url =
-                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.11.0/fentwums-netlist-reader-server-v0.11.0.tar.gz",
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.11.1/fentwums-netlist-reader-server-v0.11.1.tar.gz",
                         AutoSetting =
                         [
                             new PackageAutoSetting()
