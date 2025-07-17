@@ -167,37 +167,15 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
     {
         WeakReferenceMessenger.Default.Register<ZoomToFitmessage, int>(this,
             FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel, (recipient, message) => { ZoomToFit(); });
+        
+        WeakReferenceMessenger.Default.Register<ZoomToToplevelMessage, int>(this,
+            FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel, (recipient, message) => { ZoomToToplevel(); });
 
         PointerPressed += HierarchyControl_PointerPressed;
         PointerReleased += HierarchyControl_PointerReleased;
         PointerMoved += HierarchyControl_PointerMoved;
         PointerWheelChanged += HierarchyControl_PointerWheelChanged;
         Tapped += HierarchyControl_Tapped;
-    }
-
-    private void ZoomToFit()
-    {
-        IHierarchyInformationService _hierarchyInformationService = ServiceManager.GetService<IHierarchyInformationService>();
-
-        double sx = Bounds.Width / _hierarchyInformationService.getMaxWidth(NetlistId);
-        double sy = Bounds.Height / _hierarchyInformationService.getMaxHeight(NetlistId);
-
-        if (sx < sy)
-        {
-            Scale = sx;
-
-            OffsetX = 0;
-            OffsetY = ((_hierarchyInformationService.getMaxHeight(NetlistId) / 2) * -Scale) + (Bounds.Height / 2);
-        }
-        else
-        {
-            Scale = sy;
-            
-            OffsetX = ((_hierarchyInformationService.getMaxWidth(NetlistId) / 2) * -Scale) + (Bounds.Width / 2);
-            OffsetY = 0;
-        }
-        
-        ServiceManager.GetService<ICustomLogger>().Log("HierarchyControl: Received ZoomToFit Message");
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
@@ -504,6 +482,55 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
     #endregion
 
+    #region Message handlers
+
+    private void ZoomToFit()
+    {
+        IHierarchyInformationService _hierarchyInformationService = ServiceManager.GetService<IHierarchyInformationService>();
+
+        double sx = Bounds.Width / _hierarchyInformationService.getMaxWidth(NetlistId);
+        double sy = Bounds.Height / _hierarchyInformationService.getMaxHeight(NetlistId);
+
+        if (sx < sy)
+        {
+            Scale = sx;
+
+            OffsetX = 0;
+            OffsetY = ((_hierarchyInformationService.getMaxHeight(NetlistId) / 2) * -Scale) + (Bounds.Height / 2);
+        }
+        else
+        {
+            Scale = sy;
+            
+            OffsetX = ((_hierarchyInformationService.getMaxWidth(NetlistId) / 2) * -Scale) + (Bounds.Width / 2);
+            OffsetY = 0;
+        }
+    }
+
+    private void ZoomToToplevel()
+    {
+        IHierarchyInformationService _hierarchyInformationService = ServiceManager.GetService<IHierarchyInformationService>();
+        double sx = Bounds.Width / _hierarchyInformationService.getTopWidth(NetlistId);
+        double sy = Bounds.Height / _hierarchyInformationService.getTopHeight(NetlistId);
+
+        if (sx < sy)
+        {
+            Scale = sx;
+            
+            OffsetX = _hierarchyInformationService.getTopX(NetlistId) * -Scale;
+            OffsetY = _hierarchyInformationService.getTopY(NetlistId) * -Scale + ((_hierarchyInformationService.getTopHeight(NetlistId) / 2) * -Scale) + (Bounds.Height / 2);
+        }
+        else
+        {
+            Scale = sy;
+            
+            OffsetX = _hierarchyInformationService.getTopX(NetlistId) * -Scale + ((_hierarchyInformationService.getTopWidth(NetlistId) / 2) * -Scale) + (Bounds.Width / 2);
+            OffsetY = _hierarchyInformationService.getTopY(NetlistId) * -Scale;
+        }
+    }
+
+    #endregion
+    
     #region Event handlers
 
     private void HierarchyControl_PointerPressed(object? sender, PointerPressedEventArgs e)

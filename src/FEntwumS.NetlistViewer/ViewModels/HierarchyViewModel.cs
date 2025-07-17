@@ -11,7 +11,9 @@ namespace FEntwumS.NetlistViewer.ViewModels;
 
 public class HierarchyViewModel : ExtendedTool
 {
-    public ICommand FitToZoomCommand { get; }
+    public ICommand ZoomToFitCommand { get; }
+    
+    public ICommand ZoomToToplevelCommand { get; }
 
     private ulong _netlistId { get; set; }
 
@@ -80,9 +82,15 @@ public class HierarchyViewModel : ExtendedTool
         
         Scale = 1;
         
-        FitToZoomCommand = new RelayCommand(() =>
+        ZoomToFitCommand = new RelayCommand(() =>
         {
             WeakReferenceMessenger.Default.Send(new ZoomToFitmessage(_netlistId),
+                FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel);
+        });
+
+        ZoomToToplevelCommand = new RelayCommand(() =>
+        {
+            WeakReferenceMessenger.Default.Send(new ZoomToToplevelMessage(_netlistId),
                 FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel);
         });
     }

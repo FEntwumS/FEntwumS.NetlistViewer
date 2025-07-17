@@ -34,13 +34,28 @@
                                        LabelScaleClip="3">
                 
             </controls:HierarchyControl>
-
-            <Button Background="{DynamicResource ThemeBackgroundBrush}" Padding="5" CornerRadius="3"
-                    BorderBrush="{DynamicResource ThemeBorderLowBrush}" BorderThickness="1"
-                    Command="{Binding FitToZoomCommand}"
-                    VerticalAlignment="Top" HorizontalAlignment="Right" Margin="5">
-                <Image Source="{DynamicResource FluentIconsFilled.FullScreenZoomFilled}" Height="16" />
-            </Button>
+            
+            <StackPanel VerticalAlignment="Top"
+                        HorizontalAlignment="Right">
+                <Button Background="{DynamicResource ThemeBackgroundBrush}"
+                        Padding="5"
+                        CornerRadius="3"
+                        BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+                        BorderThickness="1"
+                        Command="{Binding ZoomToFitCommand}"
+                        Margin="5">
+                    <Image Source="{DynamicResource FluentIconsFilled.FullScreenZoomFilled}" Height="16" />
+                </Button>
+                <Button Background="{DynamicResource ThemeBackgroundBrush}"
+                        Padding="5"
+                        CornerRadius="3"
+                        BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+                        BorderThickness="1"
+                        Command="{Binding ZoomToToplevelCommand}"
+                        Margin="5">
+                    <PathIcon Data="{DynamicResource home_regular}" Height="16" />
+                </Button>
+            </StackPanel>
         </Panel>
     </Panel>
 </UserControl>
