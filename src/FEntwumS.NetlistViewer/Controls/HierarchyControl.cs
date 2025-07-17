@@ -177,6 +177,26 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
     private void ZoomToFit()
     {
+        IHierarchyInformationService _hierarchyInformationService = ServiceManager.GetService<IHierarchyInformationService>();
+
+        double sx = Bounds.Width / _hierarchyInformationService.getMaxWidth(NetlistId);
+        double sy = Bounds.Height / _hierarchyInformationService.getMaxHeight(NetlistId);
+
+        if (sx < sy)
+        {
+            Scale = sx;
+
+            OffsetX = 0;
+            OffsetY = ((_hierarchyInformationService.getMaxHeight(NetlistId) / 2) * -Scale) + (Bounds.Height / 2);
+        }
+        else
+        {
+            Scale = sy;
+            
+            OffsetX = ((_hierarchyInformationService.getMaxWidth(NetlistId) / 2) * -Scale) + (Bounds.Width / 2);
+            OffsetY = 0;
+        }
+        
         ServiceManager.GetService<ICustomLogger>().Log("HierarchyControl: Received ZoomToFit Message");
     }
 
