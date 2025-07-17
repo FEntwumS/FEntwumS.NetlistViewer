@@ -211,11 +211,6 @@ public class HierarchyJsonParser : IHierarchyJsonParser
 
         parseNode(node, hierarchyViewElements, xRef, yRef);
 
-        if (labels.Count > 1)
-        {
-            _logger.Error("Multiple labels on subnode");
-        }
-
         if (labels.Count == 0)
         {
             return;
@@ -227,11 +222,15 @@ public class HierarchyJsonParser : IHierarchyJsonParser
                 string namePath = parseLabel(labels[0], hierarchyViewElements, xRef + x, yRef + y);
                 nodeNameMap.Add(namePath, currentSidebarElement);
                 currentSidebarElement.Name = namePath.Split(' ', StringSplitOptions.None).Last();
+                parseLabel(labels[1], hierarchyViewElements, xRef + x, yRef + y, true);
                 break;
             case "TYPE":
                 currentSidebarElement.Type = parseLabel(labels[0], hierarchyViewElements, xRef + x, yRef + y);
+                parseLabel(labels[1], hierarchyViewElements, xRef + x, yRef + y);
                 break;
             case "PARAMETERS":
+                parseLabel(labels[0], hierarchyViewElements, xRef + x, yRef + y);
+                
                 if (ports is not null)
                 {
                     foreach (JsonNode? parameter in ports)
@@ -243,6 +242,8 @@ public class HierarchyJsonParser : IHierarchyJsonParser
 
                 break;
             case "PORTS":
+                parseLabel(labels[0], hierarchyViewElements, xRef + x, yRef + y);
+                
                 if (ports is not null)
                 {
                     foreach (JsonNode? port in ports)
@@ -258,7 +259,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
     }
 
     private string parseLabel(JsonNode labelNode, List<HierarchyViewElement> hierarchyViewElements, double xRef,
-        double yRef)
+        double yRef, bool isName = false)
     {
         JsonNode? layoutOptions = labelNode["layoutOptions"];
         double x = 0,
@@ -297,6 +298,11 @@ public class HierarchyJsonParser : IHierarchyJsonParser
         {
             fontSize = double.Parse(layoutOptions["font-size"]!.GetValue<string>(),
                 System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        if (isName)
+        {
+            text = text.Split(" ").Last();
         }
 
         hierarchyViewElements.Add(new HierarchyViewLabel()
