@@ -201,7 +201,6 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IJsonLoader, JsonLoader>();
         containerRegistry.RegisterSingleton<ICustomLogger, CustomLogger>();
         containerRegistry.RegisterSingleton<IHashService, OAATHashService>();
-        containerRegistry.RegisterSingleton<IGhdlService, GhdlService>();
         containerRegistry.RegisterSingleton<IYosysService, YosysService>();
         containerRegistry.RegisterSingleton<IToolExecuterService, ToolExecuterService>();
         containerRegistry.RegisterSingleton<IFpgaBbService, FpgaBbService>();
