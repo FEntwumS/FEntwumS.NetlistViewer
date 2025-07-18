@@ -326,7 +326,6 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         logger.Log("FEntwumS.NetlistViewer: Registered custom context menu entries");
 
         settingsService.RegisterSettingCategory("Netlist Viewer", 100, "netlistIcon");
-        settingsService.RegisterSettingSubCategory("Netlist Viewer", "VHDL");
 
         settingsService.RegisterSettingSubCategory("Netlist Viewer", "FPGA");
 
