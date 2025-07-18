@@ -1,7 +1,6 @@
-﻿using OneWare.Essentials.Enums;
+﻿using FEntwumS.NetlistViewer.Helpers;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
-using OneWare.ProjectSystem.Models;
 using OneWare.UniversalFpgaProjectSystem.Models;
 
 namespace FEntwumS.NetlistViewer.Services;
@@ -27,13 +26,13 @@ public class YosysService : IYosysService
         _toolExecuterService = ServiceManager.GetService<IToolExecuterService>();
         _fpgaBbService = ServiceManager.GetService<IFpgaBbService>();
 
-        _settingsService.GetSettingObservable<string>("OssCadSuite_Path")
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.OssCadSuitePathKey)
             .Subscribe(x => _yosysPath = Path.Combine(x, "bin", "yosys"));
     }
 
     public void SubscribeToSettings()
     {
-        _settingsService.GetSettingObservable<bool>("NetlistViewer_UseHierarchicalBackend")
+        _settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.UseHierarchicalBackendKey)
             .Subscribe(x => _useHierarchicalBackend = x);
     }
 

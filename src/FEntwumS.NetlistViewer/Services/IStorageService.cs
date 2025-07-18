@@ -2,11 +2,11 @@
 
 public interface IStorageService
 {
-    public Task Save(string path);
-    public Task Load(string path);
-    public void RegisterKeyValuePair(string key, object value);
+    public Task SaveAsync();
+    public Task LoadAsync();
+    public void RegisterKeyValuePair(string key, string value);
     public void RemoveKeyValuePair(string key);
-    public void SetKeyValuePairValue(string key, object value);
-    public IObservable<object> GetKeyValuePairObservable(string key);
+    public void SetKeyValuePairValue(string key, string value);
+    public string? GetKeyValuePairValue(string key);
     public bool KeyExists(string key);
 }

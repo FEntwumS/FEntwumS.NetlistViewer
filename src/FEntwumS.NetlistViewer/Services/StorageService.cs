@@ -1,16 +1,29 @@
 ﻿using System.Text.Json;
-using OneWare.Essentials.Helpers;
+using FEntwumS.NetlistViewer.Helpers;
+using DynamicData.Binding;
 
 namespace FEntwumS.NetlistViewer.Services;
 
 public class StorageService : IStorageService
 {
-    private static Dictionary<string, object> _storage = new Dictionary<string, object>();
-
-    public async Task Save(string path)
+    public StorageService()
     {
+        _ = LoadAsync();
+    }
+    
+    private static Dictionary<string, string> _storage = new Dictionary<string, string>();
+
+    public async Task SaveAsync()
+    {
+        string path = FentwumSNetlistViewerSettingsHelper.DataFilePath;
+        
         try
         {
+            if (!Directory.Exists(FentwumSNetlistViewerSettingsHelper.DataDirectory))
+            {
+                Directory.CreateDirectory(FentwumSNetlistViewerSettingsHelper.DataDirectory);
+            }
+            
             var saveD = _storage.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             await using FileStream stream = new FileStream(path, FileMode.Create);
@@ -22,19 +35,26 @@ public class StorageService : IStorageService
         }
     }
 
-    public async Task Load(string path)
+    public async Task LoadAsync()
     {
+        string path = FentwumSNetlistViewerSettingsHelper.DataFilePath;
+        
         try
         {
             if (!File.Exists(path))
             {
-                ServiceManager.GetCustomLogger().Error("Storage file not found: " + path);
+                ServiceManager.GetCustomLogger().Log("Storage file not found: " + path);
                 return;
             }
+            
+            _storage.Clear();
 
             await using FileStream stream = new FileStream(path, FileMode.Open);
-            _storage = await JsonSerializer.DeserializeAsync<Dictionary<string, object>>(stream) ??
-                       new Dictionary<string, object>();
+            Dictionary<string, JsonElement> json = await JsonSerializer.DeserializeAsync<Dictionary<string, JsonElement>>(stream) ?? new Dictionary<string, JsonElement>();
+            foreach ((string key, JsonElement value) in json)
+            {
+                _storage.Add(key, value.Deserialize<string>());
+            }
         }
         catch (Exception e)
         {
@@ -42,7 +62,7 @@ public class StorageService : IStorageService
         }
     }
 
-    public void RegisterKeyValuePair(string key, object value)
+    public void RegisterKeyValuePair(string key, string value)
     {
         _storage.Add(key, value);
     }
@@ -52,7 +72,7 @@ public class StorageService : IStorageService
         _storage.Remove(key);
     }
 
-    public void SetKeyValuePairValue(string key, object value)
+    public void SetKeyValuePairValue(string key, string value)
     {
         if (!_storage.ContainsKey(key))
         {
@@ -64,10 +84,9 @@ public class StorageService : IStorageService
         }
     }
 
-    public IObservable<object> GetKeyValuePairObservable(string key)
+    public string? GetKeyValuePairValue(string key)
     {
-        _storage.TryGetValue(key, out object? value);
-        return value as IObservable<object> ?? throw new InvalidOperationException($"Key {key} is not registered");
+        return _storage.TryGetValue(key, out var value) ? value : null;
     }
 
     public bool KeyExists(string key)
