@@ -1,4 +1,5 @@
-﻿using OneWare.Essentials.Models;
+﻿using FEntwumS.NetlistViewer.Helpers;
+using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.UniversalFpgaProjectSystem.Models;
 
@@ -23,7 +24,7 @@ public class FpgaBbService : IFpgaBbService
 
     public void SubscribeToSettings()
     {
-        _settingsService.GetSettingObservable<string>("NetlistViewer_FPGA_Manufacturer").Subscribe(x =>
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.FpgaManufacturerKey).Subscribe(x =>
         {
             _currentManufacturer = x;
             UpdateBbCommand(_currentManufacturer, _currentDeviceFamily);
@@ -31,7 +32,7 @@ public class FpgaBbService : IFpgaBbService
             _logger.Log($"Manufacturer: {_currentManufacturer}");
             _logger.Log($"Command: {_currentBbCommand}");
         });
-        _settingsService.GetSettingObservable<string>("NetlistViewer_FPGA_DeviceFamily").Subscribe(x =>
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.FpgaDeviceFamilyKey).Subscribe(x =>
         {
             _currentDeviceFamily = x;
             UpdateBbCommand(_currentManufacturer, _currentDeviceFamily);
@@ -58,20 +59,20 @@ public class FpgaBbService : IFpgaBbService
         else
         {
 
-            manufacturer = root.GetProjectProperty("FEntwumS_FPGA_Manufacturer");
+            manufacturer = root.GetProjectProperty(FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey);
 
             if (manufacturer is null)
             {
                 manufacturer = _currentManufacturer;
-                root.SetProjectProperty("FEntwumS_FPGA_Manufacturer", manufacturer);
+                root.SetProjectProperty(FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey, manufacturer);
             }
             
-            deviceFamily = root.GetProjectProperty("FEntwumS_FPGA_DeviceFamily");
+            deviceFamily = root.GetProjectProperty(FentwumSNetlistViewerSettingsHelper.ProjectFpgaDeviceFamilyKey);
 
             if (deviceFamily is null)
             {
                 deviceFamily = _currentDeviceFamily;
-                root.SetProjectProperty("FEntwumS_FPGA_DeviceFamily", deviceFamily);
+                root.SetProjectProperty(FentwumSNetlistViewerSettingsHelper.ProjectFpgaDeviceFamilyKey, deviceFamily);
             }
         }
 

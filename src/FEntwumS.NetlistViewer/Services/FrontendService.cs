@@ -4,16 +4,15 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using Asmichi.ProcessManagement;
+using FEntwumS.NetlistViewer.Helpers;
 using FEntwumS.NetlistViewer.Types.HierarchyView;
 using FEntwumS.NetlistViewer.Types;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using FEntwumS.NetlistViewer.ViewModels;
-using FEntwumS.NetlistViewer.Views;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.PackageManager;
-using OneWare.ProjectSystem.Models;
 using StreamContent = System.Net.Http.StreamContent;
 
 namespace FEntwumS.NetlistViewer.Services;
@@ -63,7 +62,7 @@ public class FrontendService : IFrontendService
 
     public void SubscribeToSettings()
     {
-        _settingsService.GetSettingObservable<string>("NetlistViewer_Backend_Address").Subscribe(x =>
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.BackendAddressKey).Subscribe(x =>
         {
             if (isAddressValid(x))
             {
@@ -76,7 +75,7 @@ public class FrontendService : IFrontendService
             }
         });
 
-        _settingsService.GetSettingObservable<string>("NetlistViewer_Backend_Port").Subscribe(x =>
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.BackendPortKey).Subscribe(x =>
         {
             if (isPortValid(x))
             {
@@ -89,19 +88,19 @@ public class FrontendService : IFrontendService
             }
         });
 
-        _settingsService.GetSettingObservable<bool>("NetlistViewer_Backend_UseLocal")
+        _settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.BackendUseLocalKey)
             .Subscribe(x =>
             {
                 _useLocalBackend = x;
                 if (_useLocalBackend)
                 {
                     ServiceManager.GetService<ISettingsService>()
-                        .SetSettingValue("NetlistViewer_Backend_Address", "127.0.0.1");
+                        .SetSettingValue(FentwumSNetlistViewerSettingsHelper.BackendAddressKey, "127.0.0.1");
                     ServiceManager.GetService<ISettingsService>()
-                        .SetSettingValue("NetlistViewer_Backend_Port", "8080");
+                        .SetSettingValue(FentwumSNetlistViewerSettingsHelper.BackendPortKey, "8080");
                 }
             });
-        _settingsService.GetSettingObservable<string>("NetlistViewer_Backend_RequestTimeout").Subscribe(x =>
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.BackendRequestTimeoutKey).Subscribe(x =>
         {
             try
             {
@@ -122,10 +121,10 @@ public class FrontendService : IFrontendService
             }
         });
 
-        _settingsService.GetSettingObservable<string>(FEntwumSNetlistReaderFrontendModule.NetlistPathSetting)
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.NetlistPathSettingKey)
             .Subscribe(x => _backendJarFolder = x);
 
-        _settingsService.GetSettingObservable<string>("NetlistViewer_EntityFontSize").Subscribe(x =>
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.EntityFontSizeKey).Subscribe(x =>
         {
             try
             {
@@ -145,7 +144,7 @@ public class FrontendService : IFrontendService
             }
         });
 
-        _settingsService.GetSettingObservable<string>("NetlistViewer_CellFontSize").Subscribe(x =>
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.CellFontSizeKey).Subscribe(x =>
         {
             try
             {
@@ -166,7 +165,7 @@ public class FrontendService : IFrontendService
             }
         });
 
-        _settingsService.GetSettingObservable<string>("NetlistViewer_EdgeFontSize").Subscribe(x =>
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.EdgeFontSizeKey).Subscribe(x =>
         {
             try
             {
@@ -187,7 +186,7 @@ public class FrontendService : IFrontendService
             }
         });
 
-        _settingsService.GetSettingObservable<string>("NetlistViewer_PortFontSize").Subscribe(x =>
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.PortFontSizeKey).Subscribe(x =>
         {
             try
             {
@@ -208,15 +207,15 @@ public class FrontendService : IFrontendService
             }
         });
 
-        _settingsService.GetSettingObservable<string>(FEntwumSNetlistReaderFrontendModule.JavaPathSetting).Subscribe(
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey).Subscribe(
             x => _javaBinaryFolder = x);
 
-        _settingsService.GetSettingObservable<string>("NetlistViewer_java_args").Subscribe(x => _extraJarArgs = x);
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.JavaArgsKey).Subscribe(x => _extraJarArgs = x);
 
-        _settingsService.GetSettingObservable<bool>("NetlistViewer_ContinueOnBinaryInstallError")
+        _settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.ContinueOnBinaryInstallErrorKey)
             .Subscribe(x => _continueOnBinaryInstallError = x);
 
-        _settingsService.GetSettingObservable<string>("NetlistViewer_PerformanceTarget")
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.PerformanceTargetKey)
             .Subscribe(x => _performanceTarget = x switch
             {
                 "Preloading" => "Preloading",
@@ -265,7 +264,7 @@ public class FrontendService : IFrontendService
             {
                 bool updatePerformed = true;
 
-                if (_settingsService.GetSettingValue<bool>("Experimental_AutoDownloadBinaries"))
+                if (_settingsService.GetSettingValue<bool>(FentwumSNetlistViewerSettingsHelper.AutoDownloadBinariesKey))
                 {
                     _logger.Log($"Installing \"{dependencyPackage.Name}\"...", true);
 

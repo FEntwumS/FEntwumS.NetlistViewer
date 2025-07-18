@@ -1,4 +1,5 @@
-﻿using FEntwumS.NetlistViewer.Types;
+﻿using FEntwumS.NetlistViewer.Helpers;
+using FEntwumS.NetlistViewer.Types;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.ProjectSystem.Models;
@@ -122,7 +123,7 @@ public class NetlistGenerator : INetlistGenerator
 
     public void SubscribeToSettings()
     {
-        _settingsService.GetSettingObservable<bool>("NetlistViewer_AlwaysRegenerateNetlists")
+        _settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.AlwaysRegenerateNetlistsKey)
             .Subscribe((x) => _alwaysRegenerateNetlists = x);
     }
 }
