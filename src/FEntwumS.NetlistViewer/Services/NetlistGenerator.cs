@@ -10,7 +10,6 @@ namespace FEntwumS.NetlistViewer.Services;
 public class NetlistGenerator : INetlistGenerator
 {
     private static readonly ICustomLogger _logger;
-    private static readonly IApplicationStateService _applicationStateService;
     private static readonly ISettingsService _settingsService;
     
     private bool _alwaysRegenerateNetlists = true;
@@ -18,7 +17,6 @@ public class NetlistGenerator : INetlistGenerator
     static NetlistGenerator()
     {
         _logger = ServiceManager.GetCustomLogger();
-        _applicationStateService = ServiceManager.GetService<IApplicationStateService>();
         _settingsService = ServiceManager.GetService<ISettingsService>();
     }
     
