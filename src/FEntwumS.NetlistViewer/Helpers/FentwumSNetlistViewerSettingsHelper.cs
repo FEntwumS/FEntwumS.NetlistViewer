@@ -4,8 +4,13 @@ namespace FEntwumS.NetlistViewer.Helpers;
 
 public class FentwumSNetlistViewerSettingsHelper
 {
+    #region Message Channel IDs
+
     public static readonly int HierarchyMessageChannel = 1;
     public static readonly int NetlistMessageChannel = 2;
+    public static readonly int ProjectChangedMessageChannel = 3;
+
+    #endregion
 
     public static readonly string ExpectedSettingsVersion = "1";
     
