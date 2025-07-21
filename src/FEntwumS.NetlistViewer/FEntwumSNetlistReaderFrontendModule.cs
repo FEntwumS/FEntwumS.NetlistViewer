@@ -375,6 +375,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
             new CheckBoxSetting("Always regenerate netlists", true));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.EnableHierarchyViewKey,
             new CheckBoxSetting("Enable hierarchy view", false));
+        settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationKey,
+            new ComboBoxSetting("Automatic netlist generation", "Never", ["Never", "Always", "Every 5 minutes"]));
 
         logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
 

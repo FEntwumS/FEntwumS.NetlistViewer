@@ -46,6 +46,7 @@ public class FentwumSNetlistViewerSettingsHelper
     public static readonly string PerformanceTargetKey = "NetlistViewer_PerformanceTarget";
     public static readonly string AlwaysRegenerateNetlistsKey = "NetlistViewer_AlwaysRegenerateNetlists";
     public static readonly string EnableHierarchyViewKey = "NetlistViewer_EnableHierarchyView";
+    public static readonly string AutomaticNetlistGenerationKey = "NetlistViewer_AutomaticNetlistGeneration";
 
     #endregion
     
