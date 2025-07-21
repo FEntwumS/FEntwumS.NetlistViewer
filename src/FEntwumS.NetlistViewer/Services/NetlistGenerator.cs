@@ -3,6 +3,7 @@ using FEntwumS.NetlistViewer.Types;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.ProjectSystem.Models;
+using OneWare.UniversalFpgaProjectSystem.Models;
 
 namespace FEntwumS.NetlistViewer.Services;
 
@@ -102,23 +103,37 @@ public class NetlistGenerator : INetlistGenerator
 
     public (IProjectFile? netlistFile, bool success) GetExistingNetlist(IProjectFile projectFile)
     {
-        string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
-        string netlistPath = Path.Combine(projectFile.Root!.FullPath, "build", "netlist", $"{top}.json");
-        
-        if (!File.Exists(netlistPath))
+        if (projectFile.Root is not UniversalFpgaProjectRoot root)
         {
             return (null, false);
         }
-        
+        string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
+        string netlistPath = Path.Combine(root.FullPath, "build", "netlist", $"{top}.json");
+
         FileInfo netlistFile = new FileInfo(netlistPath);
-        if (netlistFile.CreationTime.CompareTo(projectFile.LastSaveTime) > 0)
+        bool newNetlistNecessary = false;
+        
+        foreach (string file in root.Files
+                     .Where(x => !root.CompileExcluded.Contains(x))
+                     .Where(x => x.Extension is ".v" or ".sv" or ".vhdl" or ".vhd")
+                     .Where(x => !root.TestBenches.Contains(x))
+                     .Select(x => x.FullPath))
         {
-            // netlist is newer
-            // therefore we dont need to re-generate the netlist, saving the user lots of time
-            return (new ProjectFile(netlistPath, projectFile.TopFolder!), true);
+            FileInfo srcFileInfo = new FileInfo(file);
+
+            if (netlistFile.LastWriteTimeUtc.CompareTo(srcFileInfo.LastWriteTimeUtc) < 0)
+            {
+                newNetlistNecessary = true;
+                break;
+            }
+        }
+        
+        if (newNetlistNecessary)
+        {
+            return (null, false);
         }
 
-        return (null, false);
+        return (new ProjectFile(netlistPath, projectFile.TopFolder!), true);
     }
 
     public void SubscribeToSettings()
