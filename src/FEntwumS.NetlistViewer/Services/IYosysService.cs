@@ -2,7 +2,7 @@
 
 namespace FEntwumS.NetlistViewer.Services;
 
-public interface IYosysService : SettingsSubscriber
+public interface IYosysService : ISettingsSubscriber
 {
     Task<bool> LoadVhdlAsync(IProjectFile file);
     Task<bool> LoadVerilogAsync(IProjectFile file);
