@@ -1,4 +1,5 @@
 ﻿using Avalonia.Threading;
+using DynamicData.Binding;
 using FEntwumS.NetlistViewer.Helpers;
 using FEntwumS.NetlistViewer.Types;
 using OneWare.Essentials.Models;
@@ -29,6 +30,12 @@ public class NetlistGenerator : INetlistGenerator
         _logger = ServiceManager.GetCustomLogger();
         _settingsService = ServiceManager.GetService<ISettingsService>();
         _projectExplorerService = ServiceManager.GetService<IProjectExplorerService>();
+        
+        // Add or remove watchers as necessary when loaded projects list changes
+        _projectExplorerService.Projects.CollectionChanged += (sender, args) =>
+        {
+            setupWatchers();
+        };
     }
 
     public async Task<bool> GenerateVhdlNetlistAsync(IProjectFile vhdlProject)
@@ -196,6 +203,8 @@ public class NetlistGenerator : INetlistGenerator
                         _logger.Error($"Watcher: {watcher.Path}");
                     }
                 };
+                
+                _watchers.Add(watcher);
             }
         }
     }
