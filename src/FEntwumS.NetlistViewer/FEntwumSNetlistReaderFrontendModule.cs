@@ -376,7 +376,9 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.EnableHierarchyViewKey,
             new CheckBoxSetting("Enable hierarchy view", false));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationKey,
-            new ComboBoxSetting("Automatic netlist generation", "Never", ["Never", "Always", "Every 5 minutes"]));
+            new ComboBoxSetting("Automatic netlist generation", "Never", ["Never", "Always", "Interval"]));
+        settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey,
+            new SliderSetting("Automatic netlist generation interval (s)", 60.0d, 15.0d, 3600.0d, 5.0d));
 
         logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
 
