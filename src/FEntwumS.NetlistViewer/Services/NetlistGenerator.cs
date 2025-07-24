@@ -214,8 +214,30 @@ public class NetlistGenerator : INetlistGenerator
     {
         if (sender is FileSystemWatcher watcher)
         {
-            _logger.Log($"Sender: {watcher.Path}");
+            IEnumerable<IProjectRoot> candidates = _projectExplorerService.Projects.Where(project => watcher.Path == project.FullPath);
+            List<IProjectRoot> candidatesList = candidates.ToList();
+
+            UniversalProjectRoot? projectCandidate = candidatesList.FirstOrDefault(x => x is UniversalProjectRoot) as UniversalProjectRoot;
+            
+            if (projectCandidate is null)
+            {
+                _logger.Error($"Project {e.FullPath} was not found");
+            }
+            else
+            {
+                lock (_lock)
+                {
+                    _changedProjectSet.Add(projectCandidate);
+                }
+                
+                
+            }
         }
+    }
+
+    private void ProcessQueue()
+    {
+        
     }
 
     public void SubscribeToSettings()
