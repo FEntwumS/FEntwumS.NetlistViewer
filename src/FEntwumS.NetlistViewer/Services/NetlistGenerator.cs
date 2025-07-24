@@ -24,6 +24,7 @@ public class NetlistGenerator : INetlistGenerator
     private List<FileSystemWatcher> _watchers = new();
     private readonly Lock _lock = new();
     private HashSet<UniversalProjectRoot> _changedProjectSet = new();
+    private AutomaticNetlistGenerationType _generationType = AutomaticNetlistGenerationType.Never;
 
     public NetlistGenerator()
     {
@@ -221,5 +222,18 @@ public class NetlistGenerator : INetlistGenerator
     {
         _settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.AlwaysRegenerateNetlistsKey)
             .Subscribe((x) => _alwaysRegenerateNetlists = x);
+        
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationKey).Subscribe(
+            x =>
+            {
+                _generationType = x switch
+                {
+                    "Never" => AutomaticNetlistGenerationType.Never,
+                    "Always" => AutomaticNetlistGenerationType.Always,
+                    "Interval" => AutomaticNetlistGenerationType.Interval,
+                    _ => AutomaticNetlistGenerationType.Never,
+                };
+
+            });
     }
 }

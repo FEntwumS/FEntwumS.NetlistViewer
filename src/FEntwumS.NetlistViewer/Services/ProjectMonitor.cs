@@ -40,7 +40,7 @@ public class ProjectMonitor: IProjectMonitor
                     {
                         "Never" => AutomaticNetlistGenerationType.Never,
                         "Always" => AutomaticNetlistGenerationType.Always,
-                        "Every 5 minutes" => AutomaticNetlistGenerationType.Interval,
+                        "Interval" => AutomaticNetlistGenerationType.Interval,
                         _ => AutomaticNetlistGenerationType.Never,
                     };
 
