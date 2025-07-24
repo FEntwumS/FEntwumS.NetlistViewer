@@ -23,7 +23,7 @@ public class NetlistGenerator : INetlistGenerator
 
     private List<FileSystemWatcher> _watchers = new();
     private readonly Lock _lock = new();
-    private HashSet<UniversalProjectRoot> _changedProjectSet = new();
+    private HashSet<UniversalFpgaProjectRoot> _changedProjectSet = new();
     private AutomaticNetlistGenerationType _generationType = AutomaticNetlistGenerationType.Never;
 
     public NetlistGenerator()
@@ -158,12 +158,9 @@ public class NetlistGenerator : INetlistGenerator
         return (new ProjectFile(netlistPath, projectFile.TopFolder!), true);
     }
 
-    private void timer_Tick(object? sender, EventArgs e)
+    private void TimerTick(object? sender, EventArgs e)
     {
-    }
-
-    private async Task RegenerateNetlistAsync(IProjectFile projectFile)
-    {
+        ProcessQueue();
     }
 
     private void SetupWatchers()
@@ -220,12 +217,14 @@ public class NetlistGenerator : INetlistGenerator
             return;
         }
         
+        // TODO check whether an HDL source file changed. Only then should the project be added to the queue
+        
         if (sender is FileSystemWatcher watcher)
         {
             IEnumerable<IProjectRoot> candidates = _projectExplorerService.Projects.Where(project => watcher.Path == project.FullPath);
             List<IProjectRoot> candidatesList = candidates.ToList();
 
-            UniversalProjectRoot? projectCandidate = candidatesList.FirstOrDefault(x => x is UniversalProjectRoot) as UniversalProjectRoot;
+            UniversalFpgaProjectRoot? projectCandidate = candidatesList.FirstOrDefault(x => x is UniversalFpgaProjectRoot) as UniversalFpgaProjectRoot;
             
             if (projectCandidate is null)
             {
@@ -249,7 +248,23 @@ public class NetlistGenerator : INetlistGenerator
 
     private void ProcessQueue()
     {
-        
+        lock (_lock)
+        {
+            foreach (UniversalFpgaProjectRoot projectRoot in _changedProjectSet)
+            {
+                NetlistType netlistType = NetlistType.Verilog;
+
+                if (projectRoot.Files.Any(x => x.Extension is ".vhdl" or ".vhd"))
+                {
+                    netlistType = NetlistType.VHDL;
+                } else if (projectRoot.Files.Any(x => x.Extension is ".sv"))
+                {
+                    netlistType = NetlistType.System_Verilog;
+                }
+                
+                _ = GenerateNetlistAsync(projectRoot.Files.First(), netlistType);
+            }
+        }
     }
 
     public void SubscribeToSettings()
@@ -271,14 +286,14 @@ public class NetlistGenerator : INetlistGenerator
                 if (_generationType == AutomaticNetlistGenerationType.Interval)
                 {
                     _timer.IsEnabled = true;
-                    _timer.Tick += timer_Tick;
+                    _timer.Tick += TimerTick;
                     _timer.Interval = TimeSpan.FromSeconds(_generationInterval);
                     _timer.Start();
                 }
                 else
                 {
                     _timer.IsEnabled = false;
-                    _timer.Tick -= timer_Tick;
+                    _timer.Tick -= TimerTick;
                     _timer.Stop();
                 }
             });
