@@ -35,8 +35,10 @@ public class NetlistGenerator : INetlistGenerator
         // Add or remove watchers as necessary when loaded projects list changes
         _projectExplorerService.Projects.CollectionChanged += (sender, args) =>
         {
-            setupWatchers();
+            SetupWatchers();
         };
+        
+        _timer.Interval = TimeSpan.FromSeconds(_generationInterval);
     }
 
     public async Task<bool> GenerateVhdlNetlistAsync(IProjectFile vhdlProject)
@@ -164,7 +166,7 @@ public class NetlistGenerator : INetlistGenerator
     {
     }
 
-    private void setupWatchers()
+    private void SetupWatchers()
     {
         IEnumerable<IProjectRoot> missingWatchers =
             _projectExplorerService.Projects.Where(project => _watchers.All(watcher => watcher.Path != project.FullPath));
@@ -212,6 +214,12 @@ public class NetlistGenerator : INetlistGenerator
 
     private void ProjectChanged(object sender, FileSystemEventArgs e)
     {
+        // Don't process changes to projects, if the user wants this
+        if (_generationType == AutomaticNetlistGenerationType.Never)
+        {
+            return;
+        }
+        
         if (sender is FileSystemWatcher watcher)
         {
             IEnumerable<IProjectRoot> candidates = _projectExplorerService.Projects.Where(project => watcher.Path == project.FullPath);
@@ -229,8 +237,12 @@ public class NetlistGenerator : INetlistGenerator
                 {
                     _changedProjectSet.Add(projectCandidate);
                 }
-                
-                
+
+                // Directly process the change, if the user wants this
+                if (_generationType == AutomaticNetlistGenerationType.Always)
+                {
+                    ProcessQueue();
+                }
             }
         }
     }
@@ -256,6 +268,32 @@ public class NetlistGenerator : INetlistGenerator
                     _ => AutomaticNetlistGenerationType.Never,
                 };
 
+                if (_generationType == AutomaticNetlistGenerationType.Interval)
+                {
+                    _timer.IsEnabled = true;
+                    _timer.Tick += timer_Tick;
+                    _timer.Interval = TimeSpan.FromSeconds(_generationInterval);
+                    _timer.Start();
+                }
+                else
+                {
+                    _timer.IsEnabled = false;
+                    _timer.Tick -= timer_Tick;
+                    _timer.Stop();
+                }
             });
+
+        _settingsService
+            .GetSettingObservable<double>(FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey)
+            .Subscribe(
+                x =>
+                {
+                    _generationInterval = x;
+
+                    if (_generationType == AutomaticNetlistGenerationType.Interval)
+                    {
+                        _timer.Interval = TimeSpan.FromSeconds(_generationInterval);
+                    }
+                });
     }
 }
