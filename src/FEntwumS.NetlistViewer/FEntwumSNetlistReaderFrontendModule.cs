@@ -416,6 +416,9 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
         logger.Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
 
+        logger.Log("Starting the backend");
+        _ = ServiceManager.GetService<FrontendService>().StartBackendIfNotStartedAsync();
+
         ServiceManager.GetService<IApplicationStateService>().RegisterShutdownAction(() =>
         {
             try
