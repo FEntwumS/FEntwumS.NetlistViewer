@@ -160,7 +160,7 @@ public class NetlistGenerator : INetlistGenerator
 
     private void TimerTick(object? sender, EventArgs e)
     {
-        ProcessQueue();
+        _ = ProcessQueueAsync();
     }
 
     private void SetupWatchers()
@@ -244,30 +244,40 @@ public class NetlistGenerator : INetlistGenerator
                 // Directly process the change, if the user wants this
                 if (_generationType == AutomaticNetlistGenerationType.Always)
                 {
-                    ProcessQueue();
+                    _ = ProcessQueueAsync();
                 }
             }
         }
     }
 
-    private void ProcessQueue()
+    private async Task ProcessQueueAsync()
     {
+        List<UniversalFpgaProjectRoot> projects = new();
+        
         lock (_lock)
         {
-            foreach (UniversalFpgaProjectRoot projectRoot in _changedProjectSet)
-            {
-                NetlistType netlistType = NetlistType.Verilog;
+            projects.AddRange(_changedProjectSet);
+            _changedProjectSet.Clear();
+        }
+        
+        foreach (UniversalFpgaProjectRoot projectRoot in projects)
+        {
+            NetlistType netlistType = NetlistType.Verilog;
 
-                if (projectRoot.Files.Any(x => x.Extension is ".vhdl" or ".vhd"))
-                {
-                    netlistType = NetlistType.VHDL;
-                } else if (projectRoot.Files.Any(x => x.Extension is ".sv"))
-                {
-                    netlistType = NetlistType.System_Verilog;
-                }
-                
-                _ = GenerateNetlistAsync(projectRoot.Files.First(), netlistType);
+            if (projectRoot.Files.Any(x => x.Extension is ".vhdl" or ".vhd"))
+            {
+                netlistType = NetlistType.VHDL;
+            } else if (projectRoot.Files.Any(x => x.Extension is ".sv"))
+            {
+                netlistType = NetlistType.System_Verilog;
             }
+
+            // It is sadly necessary to run the netlist generation via the UI thread to avoid exceptions regarding
+            // DockService.Show inside the GhdlService
+            await Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                await GenerateNetlistAsync(projectRoot.Files.First(), netlistType);
+            });
         }
     }
 
