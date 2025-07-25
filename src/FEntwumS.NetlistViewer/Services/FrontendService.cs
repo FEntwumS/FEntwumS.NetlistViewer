@@ -518,7 +518,7 @@ public class FrontendService : IFrontendService
         ApplicationProcess indexProc = _applicationStateService.AddState("Indexing", AppState.Loading);
 
         // create code index for cross-compiled VHDL
-        string ccFile = Path.Combine(json.Root.FullPath, "build", "netlist", "design.v");
+        string ccFile = Path.Combine(json.Root.FullPath, "build", "netlist", $"{top}.v");
 
         if (File.Exists(ccFile))
         {

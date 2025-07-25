@@ -33,6 +33,8 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
         long currentLine = 1, actualSrcLine = -1;
         string formattedLine = "";
 
+        bool isRelativePath = false;
+
         foreach (string line in linesToIndex)
         {
             if (Regex.IsMatch(line, @"\s+\/\*.+\*\/"))
@@ -43,11 +45,14 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
                 formattedLine = line.Trim();
                 // Remove block comment (first and last three characters)
                 formattedLine = formattedLine.Substring(3, formattedLine.Length - 6);
+                
+                isRelativePath = !(formattedLine.StartsWith('/') || formattedLine.IndexOf(':') == 1);
 
                 string[] formattedLineSplit = formattedLine.Split(':');
 
-                if (PlatformHelper.Platform is PlatformId.WinArm64 or PlatformId.WinX64)
+                if (PlatformHelper.Platform is PlatformId.WinArm64 or PlatformId.WinX64 && formattedLineSplit[0].Length == 1)
                 {
+                    // If necessary, re-add the drive letter for absolute paths on windows
                     formattedLine = $"{formattedLineSplit[0]}:{formattedLineSplit[1]}";
                     actualSrcLine = long.Parse(formattedLineSplit[2]);
                 } else if (PlatformHelper.Platform is not PlatformId.Wasm or PlatformId.Unknown)
@@ -66,6 +71,12 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
                 else
                 {
                     return false;
+                }
+
+                if (isRelativePath)
+                {
+                    var filePathSplit = filePath.Split("build");
+                    formattedLine = filePathSplit[0] + formattedLine;
                 }
                 
                 fileIndexToSource[currentLine] = formattedLine;
