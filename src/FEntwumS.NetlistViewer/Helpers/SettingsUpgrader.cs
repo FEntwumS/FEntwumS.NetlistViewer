@@ -26,6 +26,15 @@ public class SettingsUpgrader
         {
             settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.EnableHierarchyViewKey, true);
         }
+
+        if (currentSettingsVersion <= 1)
+        {
+            if (settingsService.GetSettingValue<string>(FentwumSNetlistViewerSettingsHelper
+                    .AutomaticNetlistGenerationKey) == "Every 5 minutes")
+            {
+                settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationKey, "Interval");
+            }
+        }
         
         storageService.SetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey, FentwumSNetlistViewerSettingsHelper.ExpectedSettingsVersion);
         await storageService.SaveAsync();

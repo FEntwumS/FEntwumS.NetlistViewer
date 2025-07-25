@@ -3,7 +3,7 @@ using OneWare.Essentials.Models;
 
 namespace FEntwumS.NetlistViewer.Services;
 
-public interface IFrontendService : SettingsSubscriber
+public interface IFrontendService : ISettingsSubscriber
 {
     public Task CreateVhdlNetlistAsync(IProjectFile vhdl);
 

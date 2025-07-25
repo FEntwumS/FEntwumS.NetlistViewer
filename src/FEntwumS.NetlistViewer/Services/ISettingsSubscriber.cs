@@ -1,6 +1,6 @@
 ﻿namespace FEntwumS.NetlistViewer.Services;
 
-public interface SettingsSubscriber
+public interface ISettingsSubscriber
 {
     public void SubscribeToSettings();
 }

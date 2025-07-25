@@ -4,10 +4,15 @@ namespace FEntwumS.NetlistViewer.Helpers;
 
 public class FentwumSNetlistViewerSettingsHelper
 {
+    #region Message Channel IDs
+
     public static readonly int HierarchyMessageChannel = 1;
     public static readonly int NetlistMessageChannel = 2;
+    public static readonly int ProjectChangedMessageChannel = 3;
 
-    public static readonly string ExpectedSettingsVersion = "1";
+    #endregion
+
+    public static readonly string ExpectedSettingsVersion = "2";
     
     public static readonly string DataDirectory = Path.Combine(
         Environment.GetFolderPath(
@@ -16,6 +21,7 @@ public class FentwumSNetlistViewerSettingsHelper
                 : Environment.SpecialFolder.ApplicationData), "FEntwumSNetlistViewer");
     public static readonly string DataFilePath = Path.Combine(DataDirectory, "data.json");
     public static readonly string FentwumsSettingVersionKey = "Extension_SettingsVersion";
+    public static readonly string NetlistGenerationSettingsChangedKey = "NetlistGenerationSettingsChanged";
 
     #region Settings keys
 
@@ -41,6 +47,8 @@ public class FentwumSNetlistViewerSettingsHelper
     public static readonly string PerformanceTargetKey = "NetlistViewer_PerformanceTarget";
     public static readonly string AlwaysRegenerateNetlistsKey = "NetlistViewer_AlwaysRegenerateNetlists";
     public static readonly string EnableHierarchyViewKey = "NetlistViewer_EnableHierarchyView";
+    public static readonly string AutomaticNetlistGenerationKey = "NetlistViewer_AutomaticNetlistGeneration";
+    public static readonly string AutomaticNetlistGenerationIntervalKey = "NetlistViewer_AutomaticNetlistGenerationInterval";
 
     #endregion
     

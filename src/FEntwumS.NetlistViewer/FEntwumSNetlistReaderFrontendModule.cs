@@ -211,6 +211,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IHierarchyJsonParser, HierarchyJsonParser>();
         containerRegistry.RegisterSingleton<IHierarchyInformationService, HierarchyInformationService>();
         containerRegistry.RegisterSingleton<IStorageService, StorageService>();
+        containerRegistry.RegisterSingleton<IProjectMonitor, ProjectMonitor>();
     }
 
     public void OnInitialized(IContainerProvider? containerProvider)
@@ -374,6 +375,10 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
             new CheckBoxSetting("Always regenerate netlists", true));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.EnableHierarchyViewKey,
             new CheckBoxSetting("Enable hierarchy view", false));
+        settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationKey,
+            new ComboBoxSetting("Automatic netlist generation", "Never", ["Never", "Always", "Interval"]));
+        settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey,
+            new SliderSetting("Automatic netlist generation interval (s)", 60.0d, 15.0d, 3600.0d, 5.0d));
 
         logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
 
@@ -407,8 +412,12 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         ServiceManager.GetService<IFpgaBbService>().SubscribeToSettings();
         ServiceManager.GetService<IYosysService>().SubscribeToSettings();
         ServiceManager.GetService<INetlistGenerator>().SubscribeToSettings();
+        ServiceManager.GetService<IProjectMonitor>().SubscribeToSettings();
 
         logger.Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
+
+        logger.Log("Starting the backend");
+        _ = ServiceManager.GetService<FrontendService>().StartBackendIfNotStartedAsync();
 
         ServiceManager.GetService<IApplicationStateService>().RegisterShutdownAction(() =>
         {

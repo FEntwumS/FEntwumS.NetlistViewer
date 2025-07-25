@@ -419,21 +419,27 @@ public class FrontendService : IFrontendService
 
     public async Task CreateVhdlNetlistAsync(IProjectFile vhdl)
     {
-        await ShowViewerAsync((await GenerateNetlistAsync(vhdl, NetlistType.VHDL))!);
+        await ShowViewerAsync(await GenerateNetlistAsync(vhdl, NetlistType.VHDL));
     }
 
     public async Task CreateVerilogNetlistAsync(IProjectFile verilog)
     {
-        await ShowViewerAsync((await GenerateNetlistAsync(verilog, NetlistType.Verilog))!);
+        await ShowViewerAsync(await GenerateNetlistAsync(verilog, NetlistType.Verilog));
     }
 
     public async Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog)
     {
-        await ShowViewerAsync((await GenerateNetlistAsync(sVerilog, NetlistType.System_Verilog))!);
+        await ShowViewerAsync(await GenerateNetlistAsync(sVerilog, NetlistType.System_Verilog));
     }
 
-    public async Task ShowViewerAsync(IProjectFile json)
+    public async Task ShowViewerAsync(IProjectFile? json)
     {
+        if (json is null)
+        {
+            _logger.Error("No netlist was generated");
+            return;
+        }
+        
         ApplicationProcess proc = _applicationStateService.AddState("Starting viewer", AppState.Loading);
 
         HttpResponseMessage? resp = null;

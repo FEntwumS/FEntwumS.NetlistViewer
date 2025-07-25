@@ -3,7 +3,7 @@ using OneWare.Essentials.Models;
 
 namespace FEntwumS.NetlistViewer.Services;
 
-public interface INetlistGenerator: SettingsSubscriber
+public interface INetlistGenerator: ISettingsSubscriber
 {
     public Task<bool> GenerateVhdlNetlistAsync(IProjectFile vhdlProject);
     public Task<bool> GenerateVerilogNetlistAsync(IProjectFile verilogProject);
