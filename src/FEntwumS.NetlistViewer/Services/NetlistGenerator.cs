@@ -68,9 +68,14 @@ public class NetlistGenerator : INetlistGenerator
         return await GenerateVerilogNetlistAsync(systemVerilogProject);
     }
 
-    public async Task<(IProjectFile? netlistFile, bool success)> GenerateNetlistAsync(IProjectFile projectFile,
+    public async Task<(IProjectFile? netlistFile, bool success)> GenerateNetlistAsync(IProjectFile? projectFile,
         NetlistType netlistType)
     {
+        if (projectFile is null)
+        {
+            return (null, false);
+        }
+        
         bool success;
         IProjectFile? netlistFile;
 
@@ -297,7 +302,7 @@ public class NetlistGenerator : INetlistGenerator
             // DockService.Show inside the GhdlService
             await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                await GenerateNetlistAsync(projectRoot.Files.First(), netlistType);
+                await GenerateNetlistAsync((IProjectFile?) projectRoot.TopEntity, netlistType);
             });
         }
     }
