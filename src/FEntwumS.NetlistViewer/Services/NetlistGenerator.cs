@@ -27,6 +27,7 @@ public class NetlistGenerator : INetlistGenerator
     private readonly Lock _lock = new();
     private HashSet<UniversalFpgaProjectRoot> _changedProjectSet = new();
     private AutomaticNetlistGenerationType _generationType = AutomaticNetlistGenerationType.Never;
+    private bool _settingsLoaded = false;
 
     public NetlistGenerator()
     {
@@ -155,7 +156,7 @@ public class NetlistGenerator : INetlistGenerator
             _storageService.GetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper
                 .NetlistGenerationSettingsChangedKey) ?? DateTime.Now.ToString("R"), "R", new DateTimeFormatInfo());
 
-        if (DateTime.Now.CompareTo(settingsChangedTime) <= 0)
+        if (netlistFile.LastWriteTimeUtc.CompareTo(settingsChangedTime.ToUniversalTime()) <= 0)
         {
             newNetlistNecessary = true;
         }
@@ -349,6 +350,12 @@ public class NetlistGenerator : INetlistGenerator
         _settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.UseHierarchicalBackendKey)
             .Subscribe(x =>
             {
+                if (!_settingsLoaded)
+                {
+                    _settingsLoaded = true;
+                    return;
+                }
+                
                 _storageService.SetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper.NetlistGenerationSettingsChangedKey, DateTime.Now.ToString("R"));
                 _ = _storageService.SaveAsync();
             });
