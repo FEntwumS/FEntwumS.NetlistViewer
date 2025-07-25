@@ -1,4 +1,5 @@
-﻿using Avalonia.Threading;
+﻿using System.Globalization;
+using Avalonia.Threading;
 using DynamicData.Binding;
 using FEntwumS.NetlistViewer.Helpers;
 using FEntwumS.NetlistViewer.Types;
@@ -14,6 +15,7 @@ public class NetlistGenerator : INetlistGenerator
     private readonly ICustomLogger _logger;
     private readonly ISettingsService _settingsService;
     private readonly IProjectExplorerService _projectExplorerService;
+    private readonly IStorageService _storageService;
 
     private bool _alwaysRegenerateNetlists = true;
 
@@ -31,13 +33,11 @@ public class NetlistGenerator : INetlistGenerator
         _logger = ServiceManager.GetCustomLogger();
         _settingsService = ServiceManager.GetService<ISettingsService>();
         _projectExplorerService = ServiceManager.GetService<IProjectExplorerService>();
-        
+        _storageService = ServiceManager.GetService<IStorageService>();
+
         // Add or remove watchers as necessary when loaded projects list changes
-        _projectExplorerService.Projects.CollectionChanged += (sender, args) =>
-        {
-            SetupWatchers();
-        };
-        
+        _projectExplorerService.Projects.CollectionChanged += (sender, args) => { SetupWatchers(); };
+
         _timer.Interval = TimeSpan.FromSeconds(_generationInterval);
     }
 
@@ -150,6 +150,16 @@ public class NetlistGenerator : INetlistGenerator
             }
         }
 
+        // Date format "R" is the RFC1123 pattern
+        DateTime settingsChangedTime = DateTime.ParseExact(
+            _storageService.GetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper
+                .NetlistGenerationSettingsChangedKey) ?? DateTime.Now.ToString("R"), "R", new DateTimeFormatInfo());
+
+        if (DateTime.Now.CompareTo(settingsChangedTime) <= 0)
+        {
+            newNetlistNecessary = true;
+        }
+
         if (newNetlistNecessary)
         {
             return (null, false);
@@ -166,7 +176,8 @@ public class NetlistGenerator : INetlistGenerator
     private void SetupWatchers()
     {
         IEnumerable<IProjectRoot> missingWatchers =
-            _projectExplorerService.Projects.Where(project => _watchers.All(watcher => watcher.Path != project.FullPath));
+            _projectExplorerService.Projects.Where(
+                project => _watchers.All(watcher => watcher.Path != project.FullPath));
         IEnumerable<FileSystemWatcher> unnecessaryWatchers = _watchers.Where(watcher =>
             _projectExplorerService.Projects.All(project => watcher.Path != project.FullPath));
 
@@ -177,7 +188,7 @@ public class NetlistGenerator : INetlistGenerator
         }
 
         _watchers.RemoveAll(x => unnecessaryFileSystemWatchers.Any(w => w == x));
-        
+
         List<IProjectRoot> projectsMissingWatchers = missingWatchers.ToList();
         foreach (var p in projectsMissingWatchers)
         {
@@ -203,7 +214,7 @@ public class NetlistGenerator : INetlistGenerator
                         _logger.Error($"Watcher: {watcher.Path}");
                     }
                 };
-                
+
                 _watchers.Add(watcher);
             }
         }
@@ -216,26 +227,34 @@ public class NetlistGenerator : INetlistGenerator
         {
             return;
         }
-        
+
         // Only add project to regeneration queue if a supported HDL source file has changed
         if (Path.GetExtension(e.FullPath) is not (".vhdl" or ".vhd" or ".v" or ".sv"))
         {
             return;
         }
-        
+
         if (sender is FileSystemWatcher watcher)
         {
-            IEnumerable<IProjectRoot> candidates = _projectExplorerService.Projects.Where(project => watcher.Path == project.FullPath);
+            IEnumerable<IProjectRoot> candidates =
+                _projectExplorerService.Projects.Where(project => watcher.Path == project.FullPath);
             List<IProjectRoot> candidatesList = candidates.ToList();
 
-            UniversalFpgaProjectRoot? projectCandidate = candidatesList.FirstOrDefault(x => x is UniversalFpgaProjectRoot) as UniversalFpgaProjectRoot;
-            
+            UniversalFpgaProjectRoot? projectCandidate =
+                candidatesList.FirstOrDefault(x => x is UniversalFpgaProjectRoot) as UniversalFpgaProjectRoot;
+
             if (projectCandidate is null)
             {
                 _logger.Error($"Project {e.FullPath} was not found");
             }
             else
             {
+                // Don't add the project to the regeneration queue if the changed file is the intermediate verilog file generated for VHDL designs
+                if (projectCandidate.Files.All(x => x.FullPath != e.FullPath))
+                {
+                    return;
+                }
+                
                 lock (_lock)
                 {
                     _changedProjectSet.Add(projectCandidate);
@@ -253,13 +272,13 @@ public class NetlistGenerator : INetlistGenerator
     private async Task ProcessQueueAsync()
     {
         List<UniversalFpgaProjectRoot> projects = new();
-        
+
         lock (_lock)
         {
             projects.AddRange(_changedProjectSet);
             _changedProjectSet.Clear();
         }
-        
+
         foreach (UniversalFpgaProjectRoot projectRoot in projects)
         {
             NetlistType netlistType = NetlistType.Verilog;
@@ -267,7 +286,8 @@ public class NetlistGenerator : INetlistGenerator
             if (projectRoot.Files.Any(x => x.Extension is ".vhdl" or ".vhd"))
             {
                 netlistType = NetlistType.VHDL;
-            } else if (projectRoot.Files.Any(x => x.Extension is ".sv"))
+            }
+            else if (projectRoot.Files.Any(x => x.Extension is ".sv"))
             {
                 netlistType = NetlistType.System_Verilog;
             }
@@ -285,32 +305,33 @@ public class NetlistGenerator : INetlistGenerator
     {
         _settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.AlwaysRegenerateNetlistsKey)
             .Subscribe((x) => _alwaysRegenerateNetlists = x);
-        
-        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationKey).Subscribe(
-            x =>
-            {
-                _generationType = x switch
-                {
-                    "Never" => AutomaticNetlistGenerationType.Never,
-                    "Always" => AutomaticNetlistGenerationType.Always,
-                    "Interval" => AutomaticNetlistGenerationType.Interval,
-                    _ => AutomaticNetlistGenerationType.Never,
-                };
 
-                if (_generationType == AutomaticNetlistGenerationType.Interval)
+        _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationKey)
+            .Subscribe(
+                x =>
                 {
-                    _timer.IsEnabled = true;
-                    _timer.Tick += TimerTick;
-                    _timer.Interval = TimeSpan.FromSeconds(_generationInterval);
-                    _timer.Start();
-                }
-                else
-                {
-                    _timer.IsEnabled = false;
-                    _timer.Tick -= TimerTick;
-                    _timer.Stop();
-                }
-            });
+                    _generationType = x switch
+                    {
+                        "Never" => AutomaticNetlistGenerationType.Never,
+                        "Always" => AutomaticNetlistGenerationType.Always,
+                        "Interval" => AutomaticNetlistGenerationType.Interval,
+                        _ => AutomaticNetlistGenerationType.Never,
+                    };
+
+                    if (_generationType == AutomaticNetlistGenerationType.Interval)
+                    {
+                        _timer.IsEnabled = true;
+                        _timer.Tick += TimerTick;
+                        _timer.Interval = TimeSpan.FromSeconds(_generationInterval);
+                        _timer.Start();
+                    }
+                    else
+                    {
+                        _timer.IsEnabled = false;
+                        _timer.Tick -= TimerTick;
+                        _timer.Stop();
+                    }
+                });
 
         _settingsService
             .GetSettingObservable<double>(FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey)
@@ -324,5 +345,12 @@ public class NetlistGenerator : INetlistGenerator
                         _timer.Interval = TimeSpan.FromSeconds(_generationInterval);
                     }
                 });
+
+        _settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.UseHierarchicalBackendKey)
+            .Subscribe(x =>
+            {
+                _storageService.SetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper.NetlistGenerationSettingsChangedKey, DateTime.Now.ToString("R"));
+                _ = _storageService.SaveAsync();
+            });
     }
 }

@@ -21,6 +21,7 @@ public class FentwumSNetlistViewerSettingsHelper
                 : Environment.SpecialFolder.ApplicationData), "FEntwumSNetlistViewer");
     public static readonly string DataFilePath = Path.Combine(DataDirectory, "data.json");
     public static readonly string FentwumsSettingVersionKey = "Extension_SettingsVersion";
+    public static readonly string NetlistGenerationSettingsChangedKey = "NetlistGenerationSettingsChanged";
 
     #region Settings keys
 
