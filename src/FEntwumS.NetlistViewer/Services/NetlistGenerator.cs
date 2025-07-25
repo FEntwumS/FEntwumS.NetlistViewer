@@ -217,7 +217,11 @@ public class NetlistGenerator : INetlistGenerator
             return;
         }
         
-        // TODO check whether an HDL source file changed. Only then should the project be added to the queue
+        // Only add project to regeneration queue if a supported HDL source file has changed
+        if (Path.GetExtension(e.FullPath) is not (".vhdl" or ".vhd" or ".v" or ".sv"))
+        {
+            return;
+        }
         
         if (sender is FileSystemWatcher watcher)
         {
