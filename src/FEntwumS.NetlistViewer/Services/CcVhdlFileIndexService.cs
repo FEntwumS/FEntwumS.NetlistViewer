@@ -46,8 +46,9 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
 
                 string[] formattedLineSplit = formattedLine.Split(':');
 
-                if (PlatformHelper.Platform is PlatformId.WinArm64 or PlatformId.WinX64)
+                if (PlatformHelper.Platform is PlatformId.WinArm64 or PlatformId.WinX64 && formattedLineSplit[0].Length == 1)
                 {
+                    // If necessary, re-add the drive letter for absolute paths on windows
                     formattedLine = $"{formattedLineSplit[0]}:{formattedLineSplit[1]}";
                     actualSrcLine = long.Parse(formattedLineSplit[2]);
                 } else if (PlatformHelper.Platform is not PlatformId.Wasm or PlatformId.Unknown)
