@@ -48,7 +48,7 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
                 
                 isRelativePath = !(formattedLine.StartsWith('/') || formattedLine.IndexOf(':') == 1);
 
-                string[] formattedLineSplit = formattedLine.Split(':');
+                string[] formattedLineSplit = Path.GetFileName(formattedLine).Split(':');
 
                 if (PlatformHelper.Platform is PlatformId.WinArm64 or PlatformId.WinX64 && formattedLineSplit[0].Length == 1)
                 {
@@ -57,12 +57,7 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
                     actualSrcLine = long.Parse(formattedLineSplit[2]);
                 } else if (PlatformHelper.Platform is not PlatformId.Wasm or PlatformId.Unknown)
                 {
-                    formattedLine = formattedLineSplit[0];
-
-                    for (int i = 1; i < formattedLineSplit.Length - 2; i++)
-                    {
-                        formattedLine = $"{formattedLine}:{formattedLineSplit[i]}";
-                    }
+                    formattedLine = Path.Combine(Path.GetDirectoryName(formattedLine)!, formattedLineSplit[0]);
                     
                     // second to last element is the line number
                     // last element is column number (currently unused)
