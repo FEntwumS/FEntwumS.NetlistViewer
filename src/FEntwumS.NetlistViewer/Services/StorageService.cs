@@ -49,22 +49,23 @@ public class StorageService : IStorageService
             
             _storage.Clear();
 
-            await using FileStream stream = new FileStream(path, FileMode.Open);
+            FileStream stream = new FileStream(path, FileMode.Open);
             Dictionary<string, JsonElement> json = await JsonSerializer.DeserializeAsync<Dictionary<string, JsonElement>>(stream) ?? new Dictionary<string, JsonElement>();
             foreach ((string key, JsonElement value) in json)
             {
                 _storage.Add(key, value.Deserialize<string>());
             }
+            stream.Close();
         }
         catch (Exception e)
         {
-            ServiceManager.GetCustomLogger().Error(e.Message);
+            ServiceManager.GetCustomLogger().Log(e.Message);
         }
     }
 
     public void RegisterKeyValuePair(string key, string value)
     {
-        _storage.Add(key, value);
+        _storage.TryAdd(key, value);
     }
 
     public void RemoveKeyValuePair(string key)

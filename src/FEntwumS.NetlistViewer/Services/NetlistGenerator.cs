@@ -47,7 +47,7 @@ public class NetlistGenerator : INetlistGenerator
         OneWare.GhdlExtension.Services.GhdlService ghdlService =
             ServiceManager.GetService<OneWare.GhdlExtension.Services.GhdlService>();
 
-        string outputDir = Path.Combine(vhdlProject.Root!.FullPath, "build", "netlist");
+        string outputDir = FentwumSNetlistViewerSettingsHelper.GetBuildDirectory(vhdlProject);
 
         if (!Directory.Exists(outputDir))
         {
@@ -119,7 +119,7 @@ public class NetlistGenerator : INetlistGenerator
         }
 
         string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
-        string netlistPath = Path.Combine(projectFile.Root!.FullPath, "build", "netlist", $"{top}.json");
+        string netlistPath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(projectFile);
 
         if (!File.Exists(netlistPath))
         {
@@ -141,7 +141,7 @@ public class NetlistGenerator : INetlistGenerator
         }
 
         string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
-        string netlistPath = Path.Combine(root.FullPath, "build", "netlist", $"{top}.json");
+        string netlistPath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(projectFile);
 
         FileInfo netlistFile = new FileInfo(netlistPath);
         bool newNetlistNecessary = false;

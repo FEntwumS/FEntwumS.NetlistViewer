@@ -1,4 +1,5 @@
 ﻿using OneWare.Essentials.Helpers;
+using OneWare.Essentials.Models;
 
 namespace FEntwumS.NetlistViewer.Helpers;
 
@@ -64,5 +65,27 @@ public class FentwumSNetlistViewerSettingsHelper
     public static readonly string OssCadSuitePathKey = "OssCadSuite_Path";
     public static readonly string AutoDownloadBinariesKey = "Experimental_AutoDownloadBinaries";
 
+    #endregion
+    
+    #region Path generation methods
+
+    public static string GetCcVhdlFilePath(IProjectFile projectFile)
+    {
+        string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
+        
+        return Path.Combine(GetBuildDirectory(projectFile), $"{top}.v");
+    }
+
+    public static string GetBuildDirectory(IProjectFile projectFile)
+    {
+        return Path.Combine(projectFile.Root.FullPath, "build", "netlist");
+    }
+
+    public static string GetNetlistFilePath(IProjectFile json)
+    {
+        string top = Path.GetFileNameWithoutExtension(json.FullPath);
+        
+        return Path.Combine(GetBuildDirectory(json), $"{top}.json");
+    }
     #endregion
 }

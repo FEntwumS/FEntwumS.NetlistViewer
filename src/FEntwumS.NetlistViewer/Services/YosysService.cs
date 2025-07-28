@@ -43,7 +43,7 @@ public class YosysService : IYosysService
 
     public async Task<bool> LoadVerilogAsync(IProjectFile file)
     {
-        string workingDirectory = Path.Combine(file.Root!.FullPath, "build", "netlist");
+        string workingDirectory = FentwumSNetlistViewerSettingsHelper.GetBuildDirectory(file);
 
         if (!Directory.Exists(workingDirectory))
         {
@@ -56,9 +56,11 @@ public class YosysService : IYosysService
 
         List<string> systemVerilogFileList = new List<string>();
 
-        if (File.Exists(Path.Combine(workingDirectory, $"{top}.v")))
+        string ccVerilogFilePath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(file);
+        
+        if (File.Exists(ccVerilogFilePath))
         {
-            verilogFileList.Add(Path.Combine(workingDirectory, $"{top}.v"));
+            verilogFileList.Add(ccVerilogFilePath);
         }
         else
         {
@@ -112,7 +114,7 @@ public class YosysService : IYosysService
 
     public async Task<bool> LoadSystemVerilogAsync(IProjectFile file)
     {
-        string workingDirectory = Path.Combine(file.Root!.FullPath, "build", "netlist");
+        string workingDirectory = FentwumSNetlistViewerSettingsHelper.GetBuildDirectory(file);
 
         if (!Directory.Exists(workingDirectory))
         {

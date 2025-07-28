@@ -64,7 +64,7 @@ public class FrontendService : IFrontendService
     {
         _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.BackendAddressKey).Subscribe(x =>
         {
-            if (isAddressValid(x))
+            if (IsAddressValid(x))
             {
                 _logger.Log($"New address: {x}", _backendAddress != string.Empty);
                 _backendAddress = x;
@@ -77,7 +77,7 @@ public class FrontendService : IFrontendService
 
         _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.BackendPortKey).Subscribe(x =>
         {
-            if (isPortValid(x))
+            if (IsPortValid(x))
             {
                 _logger.Log($"New port: {x}", _backendPort != string.Empty);
                 _backendPort = x;
@@ -518,7 +518,7 @@ public class FrontendService : IFrontendService
         ApplicationProcess indexProc = _applicationStateService.AddState("Indexing", AppState.Loading);
 
         // create code index for cross-compiled VHDL
-        string ccFile = Path.Combine(json.Root.FullPath, "build", "netlist", $"{top}.v");
+        string ccFile = FentwumSNetlistViewerSettingsHelper.GetCcVhdlFilePath(json);
 
         if (File.Exists(ccFile))
         {
@@ -575,7 +575,7 @@ public class FrontendService : IFrontendService
     // https://stackoverflow.com/a/36760050
     private static string IpV4AddressPattern = "^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\\.(?!$)|$)){4}$";
 
-    private bool isAddressValid(string address)
+    private bool IsAddressValid(string address)
     {
         Match match;
 
@@ -593,7 +593,7 @@ public class FrontendService : IFrontendService
         return match.Success;
     }
 
-    private bool isPortValid(string port)
+    private bool IsPortValid(string port)
     {
         try
         {
