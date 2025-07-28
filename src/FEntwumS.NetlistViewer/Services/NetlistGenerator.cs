@@ -49,6 +49,11 @@ public class NetlistGenerator : INetlistGenerator
 
         string outputDir = Path.Combine(vhdlProject.Root!.FullPath, "build", "netlist");
 
+        if (!Directory.Exists(outputDir))
+        {
+            Directory.CreateDirectory(outputDir);
+        }
+
         return await ghdlService.SynthAsync(vhdlProject, "verilog", outputDir);
     }
 
