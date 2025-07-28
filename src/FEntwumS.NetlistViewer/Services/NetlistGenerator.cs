@@ -161,12 +161,18 @@ public class NetlistGenerator : INetlistGenerator
             }
         }
 
+        string? storedSettingsChangedTime = _storageService.GetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper
+            .NetlistGenerationSettingsChangedKey);
+        
         // Date format "R" is the RFC1123 pattern
         DateTime settingsChangedTime = DateTime.ParseExact(
-            _storageService.GetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper
-                .NetlistGenerationSettingsChangedKey) ?? DateTime.Now.ToString("R"), "R", new DateTimeFormatInfo());
+            storedSettingsChangedTime ?? DateTime.Now.ToString("R"), "R", new DateTimeFormatInfo());
 
-        if (netlistFile.LastWriteTimeUtc.CompareTo(settingsChangedTime.ToUniversalTime()) <= 0)
+        if (storedSettingsChangedTime is null)
+        {
+            _storageService.SetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper.NetlistGenerationSettingsChangedKey, DateTime.Now.ToString("R"));
+            _ = _storageService.SaveAsync();
+        } else if (netlistFile.LastWriteTimeUtc.CompareTo(settingsChangedTime.ToUniversalTime()) <= 0)
         {
             newNetlistNecessary = true;
         }
