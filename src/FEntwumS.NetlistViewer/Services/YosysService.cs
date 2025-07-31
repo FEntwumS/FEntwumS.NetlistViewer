@@ -34,7 +34,7 @@ public class YosysService : IYosysService
 
     public Task<bool> LoadVhdlAsync(IProjectFile file)
     {
-        // This method has not been implemented due to the windows version of the oss cad suite not including the
+        // This method has not been implemented due to the Windows version of the oss cad suite not including the
         // ghdl-yosys plugin
         
         throw new NotImplementedException();
@@ -57,6 +57,7 @@ public class YosysService : IYosysService
 
         string ccVerilogFilePath = FentwumSNetlistViewerSettingsHelper.GetCcVhdlFilePath(file);
         
+        // If cross-compiled VHDL exists, only the cross-compiled code will be included in the yosys command.
         if (File.Exists(ccVerilogFilePath))
         {
             verilogFileList.Add(ccVerilogFilePath);
@@ -93,6 +94,8 @@ public class YosysService : IYosysService
             + $"write_json -compat-int {top}.json"  // Write the JSON netlist to disk
         ];
         
+        // Load the yosys_slang plugin if the design contains SystemVerilog files
+        // The plugin is currently not used by the generated yosys command
         if (systemVerilogFileList.Count > 0)
         {
             yosysArgs.Insert(0, "-m");

@@ -50,6 +50,13 @@ public class ToolExecuterService : IToolExecuterService
         return (success && noErrors, stdout.ToString(), stderr.ToString());
     }
 
+    /// <summary>
+    /// Starts a process and returns the associated process handle. STDOUT and STDERR are not captured
+    /// </summary>
+    /// <param name="path"> The path of the executable</param>
+    /// <param name="args"> The arguments list</param>
+    /// <param name="workingDirectory"> The working directory</param>
+    /// <returns>Process handle of the spawned process</returns>
     public IChildProcess ExecuteBackgroundProcess(string path, IReadOnlyList<string> args, string? workingDirectory)
     {
         ChildProcessStartInfo info = new ChildProcessStartInfo
