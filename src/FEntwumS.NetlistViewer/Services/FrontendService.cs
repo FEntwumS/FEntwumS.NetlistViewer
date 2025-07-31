@@ -802,12 +802,10 @@ public class FrontendService : IFrontendService
         var serverJarFile = enumeratedResults.Last();
 
         // Start server to run independently
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         backendProcess = ServiceManager.GetService<IToolExecuterService>()
             .ExecuteBackgroundProcess(javaBinaryFile,
                 _extraJarArgs.Split(' ').Concat(["-jar", serverJarFile]).ToArray(),
                 Path.GetDirectoryName(serverJarFile));
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
         _logger.Log("Server started", true);
 
