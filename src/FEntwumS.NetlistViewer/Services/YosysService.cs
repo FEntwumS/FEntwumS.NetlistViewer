@@ -7,10 +7,8 @@ namespace FEntwumS.NetlistViewer.Services;
 
 public class YosysService : IYosysService
 {
-    private IDockService _dockService;
     private ISettingsService _settingsService;
     private ICustomLogger _logger;
-    private IChildProcessService _childProcessService;
     private IToolExecuterService _toolExecuterService;
     private IFpgaBbService _fpgaBbService;
     private bool _useHierarchicalBackend;
@@ -19,10 +17,8 @@ public class YosysService : IYosysService
 
     public YosysService()
     {
-        _dockService = ServiceManager.GetService<IDockService>();
         _settingsService = ServiceManager.GetService<ISettingsService>();
         _logger = ServiceManager.GetCustomLogger();
-        _childProcessService = ServiceManager.GetService<IChildProcessService>();
         _toolExecuterService = ServiceManager.GetService<IToolExecuterService>();
         _fpgaBbService = ServiceManager.GetService<IFpgaBbService>();
 
@@ -38,6 +34,9 @@ public class YosysService : IYosysService
 
     public Task<bool> LoadVhdlAsync(IProjectFile file)
     {
+        // This method has not been implemented due to the windows version of the oss cad suite not including the
+        // ghdl-yosys plugin
+        
         throw new NotImplementedException();
     }
 
@@ -56,7 +55,7 @@ public class YosysService : IYosysService
 
         List<string> systemVerilogFileList = new List<string>();
 
-        string ccVerilogFilePath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(file);
+        string ccVerilogFilePath = FentwumSNetlistViewerSettingsHelper.GetCcVhdlFilePath(file);
         
         if (File.Exists(ccVerilogFilePath))
         {
@@ -100,11 +99,7 @@ public class YosysService : IYosysService
             yosysArgs.Insert(1, "slang");
         }
 
-        bool success = false;
-        string stdout = string.Empty;
-        string stderr = string.Empty;
-
-        (success, stdout, stderr) =
+        (bool success, _, string stderr) =
             await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
 
         _logger.Log(stderr);

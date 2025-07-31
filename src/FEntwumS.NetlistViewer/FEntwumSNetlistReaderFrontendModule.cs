@@ -196,7 +196,6 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
     public void RegisterTypes(IContainerRegistry containerRegistry)
     {
-        containerRegistry.RegisterSingleton<IFileOpener, FileOpener>();
         containerRegistry.RegisterSingleton<IViewportDimensionService, ViewportDimensionService>();
         containerRegistry.RegisterSingleton<IJsonLoader, JsonLoader>();
         containerRegistry.RegisterSingleton<ICustomLogger, CustomLogger>();
@@ -211,7 +210,6 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IHierarchyJsonParser, HierarchyJsonParser>();
         containerRegistry.RegisterSingleton<IHierarchyInformationService, HierarchyInformationService>();
         containerRegistry.RegisterSingleton<IStorageService, StorageService>();
-        containerRegistry.RegisterSingleton<IProjectMonitor, ProjectMonitor>();
     }
 
     public void OnInitialized(IContainerProvider? containerProvider)
@@ -412,7 +410,6 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         ServiceManager.GetService<IFpgaBbService>().SubscribeToSettings();
         ServiceManager.GetService<IYosysService>().SubscribeToSettings();
         ServiceManager.GetService<INetlistGenerator>().SubscribeToSettings();
-        ServiceManager.GetService<IProjectMonitor>().SubscribeToSettings();
 
         logger.Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
 
