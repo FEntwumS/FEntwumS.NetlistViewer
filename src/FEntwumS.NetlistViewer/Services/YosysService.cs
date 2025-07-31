@@ -84,15 +84,15 @@ public class YosysService : IYosysService
         [
             "-p",
             $"read_verilog -sv -nooverwrite \"{string.Join("\" \"", verilogFileList)}\" {(systemVerilogFileList.Count > 0 ? "\"" + string.Join("\" \"", systemVerilogFileList) + "\"" : "")}; "
-            + "scratchpad -set flatten.separator \";\"; "
+            + "scratchpad -set flatten.separator \";\"; "   // Use the semicolon as hierarchy separator; See https://yosyshq.readthedocs.io/projects/yosys/en/v0.55/cmd/flatten.html
             + $"{_fpgaBbService.getBbCommand(file)} hierarchy -check -purge_lib -top {top}; "
-            + "proc; "
-            + "memory -nomap; "
-            + (_useHierarchicalBackend ?  "" : "flatten -scopename; ")
-            + "select *; "
-            + $"write_json -compat-int {top}.json"
+            + "proc; "  // proc needs to run because JSON netlists produced by yosys may not contain RTLIL processes
+            + "memory -nomap; " // Converts memories into simple blocks instead of basic cells
+            + (_useHierarchicalBackend ?  "" : "flatten -scopename; ")  // Flatten if desired by the user
+            + "select *; "  // Remove unnecessary library elements from the netlist
+            + $"write_json -compat-int {top}.json"  // Write the JSON netlist to disk
         ];
-
+        
         if (systemVerilogFileList.Count > 0)
         {
             yosysArgs.Insert(0, "-m");
@@ -109,6 +109,11 @@ public class YosysService : IYosysService
 
     public async Task<bool> LoadSystemVerilogAsync(IProjectFile file)
     {
+        // This method works essentially like LoadVerilogAsync(), but it uses the yosys_slang plugin as frontend for
+        // loading the HDL sources. This did not work when last tested (March 2025). It is therefore recommended to use
+        // LoadVerilogAsync() even for designs containing SystemVerilog source code, since yosys' limited SV support is
+        // enabled
+        
         string workingDirectory = FentwumSNetlistViewerSettingsHelper.GetBuildDirectory(file);
 
         if (!Directory.Exists(workingDirectory))
