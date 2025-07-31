@@ -229,7 +229,7 @@ public class FrontendService : IFrontendService
     {
         ApplicationProcess checkProc = _applicationStateService.AddState("Checking dependencies", AppState.Loading);
 
-        bool globalSuccess = true, needsRestart = false;
+        bool globalSuccess = true;
 
         (string id, Version minversion)[] dependencyIDs = new (string, Version)
             []
@@ -318,6 +318,8 @@ public class FrontendService : IFrontendService
                 }
                 else
                 {
+                    // Log an error if the user has not enabled automatic binary downloads
+                    
                     _logger.Error(
                         $"Extension \"{dependencyPackage.Name}\" is not installed. Please enable \"Automatically download Binaries\" under the \"Experimental\" settings or download the extension yourself");
 
@@ -326,11 +328,11 @@ public class FrontendService : IFrontendService
 
                 if (globalSuccess && updatePerformed)
                 {
-                    needsRestart = true;
                     _restartRequired = true;
                 }
             }
 
+            // Check whether now the correct version is installed
             if (dependencyModel!.Status is PackageStatus.Installed or PackageStatus.UpdateAvailable)
             {
                 if (minVersion.CompareTo(Version.Parse(dependencyModel.InstalledVersion!.Version!)) <= 0)
@@ -345,17 +347,20 @@ public class FrontendService : IFrontendService
 
                     globalSuccess = false;
                 }
+            } else if (dependencyModel!.Status is PackageStatus.NeedRestart)
+            {
+                _restartRequired = true;
             }
         }
 
-        if (globalSuccess && (needsRestart || _restartRequired))
+        if (globalSuccess && _restartRequired)
         {
             _logger.Log("Dependencies were successfully installed. Please restart OneWare Studio!", true);
         }
 
         _applicationStateService.RemoveState(checkProc);
 
-        return (globalSuccess, needsRestart || _restartRequired);
+        return (globalSuccess, _restartRequired);
     }
 
     private async Task<IProjectFile?> GenerateNetlistAsync(IProjectFile projectFile, NetlistType netlistType)
@@ -374,6 +379,9 @@ public class FrontendService : IFrontendService
 
         if (needsRestart)
         {
+            // Prompt the user to restart OneWare Studio if new binaries/plugins were previously installed
+            // TODO replace with notification when the associated service is available on nuget 
+            _logger.Error("Please restart OneWare Studio.");
             _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
 
             return null;
