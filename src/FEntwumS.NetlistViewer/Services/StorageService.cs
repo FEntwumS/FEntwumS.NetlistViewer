@@ -6,9 +6,11 @@ namespace FEntwumS.NetlistViewer.Services;
 public class StorageService : IStorageService
 {
     private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    private ICustomLogger _logger;
     public StorageService()
     {
         _ = LoadAsync();
+        _logger = ServiceManager.GetService<ICustomLogger>();
     }
     
     private static Dictionary<string, string> _storage = new Dictionary<string, string>();
@@ -41,7 +43,7 @@ public class StorageService : IStorageService
         }
         catch (Exception e)
         {
-            ServiceManager.GetCustomLogger().Error(e.Message);
+            _logger.Error(e.Message);
         }
     }
 
@@ -79,7 +81,7 @@ public class StorageService : IStorageService
         }
         catch (Exception e)
         {
-            ServiceManager.GetCustomLogger().Log(e.Message);
+            _logger.Log(e.Message);
         }
     }
 

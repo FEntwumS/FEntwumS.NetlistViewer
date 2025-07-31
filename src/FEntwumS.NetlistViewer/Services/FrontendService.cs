@@ -26,6 +26,7 @@ public class FrontendService : IFrontendService
     private static readonly IPackageService _packageService;
     private static readonly IHierarchyJsonParser _hierarchyJsonParser;
     private static readonly INetlistGenerator _netlistGenerator;
+    private static readonly IViewportDimensionService _viewportDimensionService;
 
     private static string _backendAddress = string.Empty;
     private static string _backendPort = string.Empty;
@@ -58,6 +59,7 @@ public class FrontendService : IFrontendService
         _packageService = ServiceManager.GetService<IPackageService>();
         _hierarchyJsonParser = ServiceManager.GetService<IHierarchyJsonParser>();
         _netlistGenerator = ServiceManager.GetService<INetlistGenerator>();
+        _viewportDimensionService = ServiceManager.GetService<IViewportDimensionService>();
     }
 
     public void SubscribeToSettings()
@@ -470,17 +472,17 @@ public class FrontendService : IFrontendService
         UInt32 pathHash = hashService.ComputeHash(pathByteSpan);
         UInt32 contenthash = hashService.ComputeHash(contentByteSpan);
 
-        UInt64 combinedHash = ((UInt64)pathHash) << 32 | contenthash;
+        UInt64 combinedHash = ((UInt64) pathHash) << 32 | contenthash;
 
         currentNetlist = combinedHash;
 
-        ServiceManager.GetCustomLogger().Log("Path hash: " + pathHash);
-        ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash);
-        ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash);
+        _logger.Log("Path hash: " + pathHash);
+        _logger.Log("Full file hash is: " + contenthash);
+        _logger.Log("Combined hash is: " + combinedHash);
 
-        ServiceManager.GetViewportDimensionService()!.SetClickedElementPath(combinedHash, string.Empty);
-        ServiceManager.GetViewportDimensionService()!.SetCurrentElementCount(combinedHash, 0);
-        ServiceManager.GetViewportDimensionService()!.SetZoomElementDimensions(combinedHash, null);
+        _viewportDimensionService.SetClickedElementPath(combinedHash, string.Empty);
+        _viewportDimensionService.SetCurrentElementCount(combinedHash, 0);
+        _viewportDimensionService.SetZoomElementDimensions(combinedHash, null);
 
         FrontendViewModel vm = new FrontendViewModel();
         vm.InitializeContent();
@@ -936,13 +938,13 @@ public class FrontendService : IFrontendService
 
         currentNetlist = combinedHash;
 
-        ServiceManager.GetCustomLogger().Log("Path hash: " + pathHash);
-        ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash);
-        ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash);
+        _logger.Log("Path hash: " + pathHash);
+        _logger.Log("Full file hash is: " + contenthash);
+        _logger.Log("Combined hash is: " + combinedHash);
 
-        ServiceManager.GetViewportDimensionService()!.SetClickedElementPath(combinedHash, string.Empty);
-        ServiceManager.GetViewportDimensionService()!.SetCurrentElementCount(combinedHash, 0);
-        ServiceManager.GetViewportDimensionService()!.SetZoomElementDimensions(combinedHash, null);
+        _viewportDimensionService.SetClickedElementPath(combinedHash, string.Empty);
+        _viewportDimensionService.SetCurrentElementCount(combinedHash, 0);
+        _viewportDimensionService.SetZoomElementDimensions(combinedHash, null);
 
         FileStream jsonFileStream = File.Open(netlistFile.FullPath, FileMode.Open, FileAccess.Read);
 
