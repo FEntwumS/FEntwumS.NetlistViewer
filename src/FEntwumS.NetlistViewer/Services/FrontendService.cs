@@ -237,8 +237,8 @@ public class FrontendService : IFrontendService
                 ("OneWare.GhdlExtension", new Version(0, 10, 7)),
                 ("osscadsuite", new Version(2025, 01, 21)),
                 ("ghdl", new Version(5, 0, 1)),
-                (FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id!, new Version(0, 11, 1)),
-                (FEntwumSNetlistReaderFrontendModule.JDKPackage.Id!, new Version(21, 0, 6))
+                (FEntwumSNetlistReaderFrontendModule.NetlistViewerBackendPackage.Id!, new Version(0, 11, 1)),
+                (FEntwumSNetlistReaderFrontendModule.JREPackage.Id!, new Version(21, 0, 6))
             };
 
         // Install osscadsuite binary between GHDL plugin and ghdl binary to allow for the addition of the ghdl binary to the store
@@ -251,7 +251,7 @@ public class FrontendService : IFrontendService
             if (dependencyPackage == null)
             {
                 _logger.Error(
-                    $"Dependency with ID {dependencyID} is not available in the package manager. Please file a bug report, if this issue persists");
+                    $"Dependency with ID {dependencyID} is not available in the package manager. Please file a bug report if this issue persists");
 
                 globalSuccess = false;
                 continue;
@@ -734,7 +734,7 @@ public class FrontendService : IFrontendService
             return false;
         }
         
-        PackageModel? dependencyModel = _packageService.Packages!.GetValueOrDefault(FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id);
+        PackageModel? dependencyModel = _packageService.Packages!.GetValueOrDefault(FEntwumSNetlistReaderFrontendModule.NetlistViewerBackendPackage.Id);
         string? installedVersion = (dependencyModel?.InstalledVersion!).Version;
 
         var serverJar = Directory.GetFiles(_backendJarFolder).Where(x =>

@@ -18,7 +18,7 @@ namespace FEntwumS.NetlistViewer;
 
 public class FEntwumSNetlistReaderFrontendModule : IModule
 {
-    public static readonly Package NetlistPackage = new()
+    public static readonly Package NetlistViewerBackendPackage = new()
     {
         Category = "Binaries",
         Id = "NetlistReaderBackend",
@@ -70,7 +70,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         ]
     };
 
-    public static readonly Package JDKPackage = new()
+    public static readonly Package JREPackage = new()
     {
         Category = "Binaries",
         Id = "OpenJDK",
@@ -219,8 +219,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         // Log some debug information
         logger.Log($"FEntwumS.NetlistViewer: Platform: {PlatformHelper.Platform}");
 
-        containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistPackage);
-        containerProvider.Resolve<IPackageService>().RegisterPackage(JDKPackage);
+        containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistViewerBackendPackage);
+        containerProvider.Resolve<IPackageService>().RegisterPackage(JREPackage);
 
         logger.Log("FEntwumS.NetlistViewer: Registered Packages");
 
