@@ -57,7 +57,7 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
                 // is the column number
                 string[] formattedLineSplit = Path.GetFileName(formattedLine).Split(':');
 
-                if (PlatformHelper.Platform is not PlatformId.Wasm or PlatformId.Unknown)
+                if (PlatformHelper.Platform is not (PlatformId.Wasm or PlatformId.Unknown))
                 {
                     formattedLine = Path.Combine(Path.GetDirectoryName(formattedLine)!, formattedLineSplit[0]);
                     
