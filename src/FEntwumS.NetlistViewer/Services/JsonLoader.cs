@@ -589,37 +589,6 @@ public class JsonLoader : IJsonLoader
 
             if (edge["labels"] is JsonArray labels)
             {
-                // foreach (JsonNode label in labels)
-                // {
-                //     string text = "";
-                //
-                //     if (label.AsObject().ContainsKey("text"))
-                //     {
-                //         text = label["text"].GetValue<string>();
-                //     }
-                //
-                //     if (string.Equals(text, "1"))
-                //     {
-                //         items.Last().Color = new SolidColorBrush(Color.FromArgb(255, 0, 125, 0));
-                //     }
-                //     else if (string.Equals(text, "0"))
-                //     {
-                //         items.Last().Color = new SolidColorBrush(Color.FromArgb(255, 0, 0, 255));
-                //     }
-                //     else if (string.Equals(text, "z"))
-                //     {
-                //         items.Last().Color = new SolidColorBrush(Color.FromArgb(255, 150, 75, 0));
-                //     }
-                //     else if (string.Equals(text, "x"))
-                //     {
-                //         items.Last().Color = new SolidColorBrush(Color.FromArgb(255, 255, 0, 0));
-                //     }
-                //     else
-                //     {
-                //         items.Last().Color = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
-                //     }
-                // }
-
                 CreateLabels(labels, items, xRef, yRef, (ushort)(depth + 1));
             }
 
