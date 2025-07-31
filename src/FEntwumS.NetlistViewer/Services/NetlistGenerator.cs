@@ -293,7 +293,6 @@ public class NetlistGenerator : INetlistGenerator
         lock (_lock)
         {
             projects.AddRange(_changedProjectSet);
-            _changedProjectSet.Clear();
         }
 
         foreach (UniversalFpgaProjectRoot projectRoot in projects)
@@ -315,6 +314,11 @@ public class NetlistGenerator : INetlistGenerator
             {
                 await GenerateNetlistAsync((IProjectFile?) projectRoot.TopEntity, netlistType);
             });
+
+            lock (_lock)
+            {
+                _changedProjectSet.Remove(projectRoot);
+            }
         }
     }
 
