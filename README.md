@@ -39,22 +39,15 @@ the [FEntwumS research project](https://www.th-koeln.de/informations-medien-und-
 
 ## Installation
 
-Since this plugin is currently in a testing phase, it is not yet available by default from the OneWare Studio Package
-Manager. To install this plugin, you will need to add a custom package source. Please follow these steps:
+This plugin and all its dependencies are available in the package manager. Just follow these steps to install it:
 
-1. Open the settings menu
-2. Go to the `Package Manager` tab
-3. Add a new custom package source pointing to
-   `https://raw.githubusercontent.com/FEntwumS/FEntwumS.NetlistViewer/refs/heads/master/oneware-extension.json`
-4. Click `Save`, then exit the settings menu
-5. Open the package manager
-6. Refresh the package manager
-7. Done! The plugin should now be available for you to install!
-8. Install the `FEntwumS.NetlistViewer Extension` plugin
-9. Install both the `FEntwumS NetlistViewer Backend` and the
+1. Open the package manager
+2. Install the `FEntwumS.NetlistViewer Extension` plugin
+3. Install the `GHDL Extension` plugin
+4. Install the `FEntwumS NetlistViewer Backend`, `GHDL` and
    `Eclipse Adoptiom OpenJDK` binaries using the package manager
-10. And that's it. You have successfully installed the FEntwumS Netlist Viewer. For usage instructions, see the
-    following sections
+5. And that's it. You have successfully installed the FEntwumS Netlist Viewer. For usage instructions, see the
+   following sections
 
 ## Netlist viewer
 
@@ -122,31 +115,35 @@ The FEntwumS Netlist Viewer adds several global and project-specific settings to
 
 #### Global settings
 
-| Category     | Name                                                    | Description                                                  | Intended Use                                                             |
-|--------------|---------------------------------------------------------|--------------------------------------------------------------|--------------------------------------------------------------------------|
-| Backend      | Path to folder containing server jar                    | Points the plugin to the location of the backend executable  | Plugin development                                                       |
-| Backend      | Path to folder containing java binary                   | Points the plugin to the location of the java executable     | Plugin development                                                       |
-| Backend      | Extra arguments for the Java Virtual Machine            | Settings that will be passed to the JVM during its creation  | Plugin development, memory size adjustment                               |
-| Backend      | Server address                                          | The address under which the backend is reachable             | Specifying the location of a remote backend                              |
-| Backend      | Port                                                    | The port on which the backend listens                        | Specifies the port of a remote backend                                   |
-| Backend      | Request timeout                                         | Time in seconds after which requests to the backend time out | Large designs can take quite a while to be read, this sets a hard cutoff |
-| Backend      | Use local backend server                                | Whether to use the local backend                             | Untick if you want to use a remote backend                               |
-| VHDL         | VHDL Standard                                           | Global VHDL Standard                                         | Default value, can be overridden in the settings of each project         |
-| FPGA         | FPGA manufacturer                                       | Global FPGA manufacturer                                     | Default value, can be overridden in the settings of each project         |
-| FPGA         | Device Family                                           | Global device family                                         | Default value, can be overridden in the settings of each project         |
-| Font sizes   | Entity Label Font Size                                  | Font size to be used in the netlist view for entities        | Self explanatory                                                         |
-| Font sizes   | Cell Label Font Size                                    | Font size to be used in the netlist view for cells           | Self explanatory                                                         |
-| Font sizes   | Edge Label Font Size                                    | Font size to be used in the netlist view for connections     | Self explanatory                                                         |
-| Font sizes   | Port Font Size                                          | Font size to be used in the netlist view for ports           | Self explanatory                                                         |
-| Experimental | Continue if errors occur during dependency installation | Disables the dependency version checker                      | Plugin development                                                       |
+| Category     | Name                                                    | Description                                                                                                                    | Intended Use                                                             |
+|--------------|:--------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| Backend      | Path to folder containing server jar                    | Points the plugin to the location of the backend executable                                                                    | Plugin development                                                       |
+| Backend      | Path to folder containing java binary                   | Points the plugin to the location of the java executable                                                                       | Plugin development                                                       |
+| Backend      | Extra arguments for the Java Virtual Machine            | Settings that will be passed to the JVM during its creation                                                                    | Plugin development, memory size adjustment                               |
+| Backend      | Server address                                          | The address under which the backend is reachable                                                                               | Specifying the location of a remote backend                              |
+| Backend      | Port                                                    | The port on which the backend listens                                                                                          | Specifies the port of a remote backend                                   |
+| Backend      | Request timeout                                         | Time in seconds after which requests to the backend time out                                                                   | Large designs can take quite a while to be read, this sets a hard cutoff |
+| Backend      | Use local backend server                                | Whether to use the local backend                                                                                               | Untick if you want to use a remote backend                               |
+| FPGA         | FPGA manufacturer                                       | Global FPGA manufacturer                                                                                                       | Default value, can be overridden in the settings of each project         |
+| FPGA         | Device Family                                           | Global device family                                                                                                           | Default value, can be overridden in the settings of each project         |
+| Font sizes   | Entity Label Font Size                                  | Font size to be used in the netlist view for entities                                                                          | Self explanatory                                                         |
+| Font sizes   | Cell Label Font Size                                    | Font size to be used in the netlist view for cells                                                                             | Self explanatory                                                         |
+| Font sizes   | Edge Label Font Size                                    | Font size to be used in the netlist view for connections                                                                       | Self explanatory                                                         |
+| Font sizes   | Port Font Size                                          | Font size to be used in the netlist view for ports                                                                             | Self explanatory                                                         |
+| Experimental | Continue if errors occur during dependency installation | Disables the dependency version checker                                                                                        | Plugin development                                                       |
+| Experimental | Use hierarchical backend                                | Uses the backend for hierarchical netlists                                                                                     | Beta-testing the hierarchical backend                                    |
+| Experimental | Performance Target                                      | Sets the way the hierarchical backend loads enitities from the netlist                                                         | Testing the different modes                                              |
+| Experimental | Always regenerate netlists                              | By unticking this checkbox, netlists are only generted for the netlist viewer if the underlying HDL files changed              | Beta-testing performance improvements                                    |
+| Experimental | Enable hierarchy view                                   | Enables two views that allow for the easy exploration of the desgins hierarchy                                                 | Beta-testing the hierarchy view                                          |
+| Experimental | Automatic netlist generation                            | Allows enabling and setting the mode for automatic netlist generation following changes to the underlying HDL source files     | Beta-testing automatic netlist generation                                |
+| Experimental | Automatic netlist generation interval (s)               | The interval in which netlists shall be regenerated, if `Automatic netlist generation` is set to interval. Measured in seconds | Beta-testing automatic netlist generation                                |
 
 #### Project-specific settings
 
-| Name              | Description                                     | Availability                       |
-|-------------------|-------------------------------------------------|------------------------------------|
-| VHDL Standard     | Overrides the global VHDL standard              | All projects containing VHDL files |
-| FPGA Manufacturer | Overrides the global FPGA manufacturer setting  | All projects                       |
-| Device family     | Overrides the global FPGA device family setting | All projects                       |
+| Name              | Description                                     | Availability |
+|-------------------|-------------------------------------------------|--------------|
+| FPGA Manufacturer | Overrides the global FPGA manufacturer setting  | All projects |
+| Device family     | Overrides the global FPGA device family setting | All projects |
 
 # Troubleshooting
 
