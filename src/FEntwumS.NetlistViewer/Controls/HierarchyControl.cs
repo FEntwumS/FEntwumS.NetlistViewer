@@ -166,10 +166,22 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
     public HierarchyControl()
     {
         WeakReferenceMessenger.Default.Register<ZoomToFitmessage, int>(this,
-            FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel, (recipient, message) => { ZoomToFit(); });
+            FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel, (recipient, message) =>
+            {
+                if (message.Value == NetlistId)
+                {
+                    ZoomToFit();
+                }
+            });
         
         WeakReferenceMessenger.Default.Register<ZoomToToplevelMessage, int>(this,
-            FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel, (recipient, message) => { ZoomToToplevel(); });
+            FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel, (recipient, message) =>
+            {
+                if (message.Value == NetlistId)
+                {
+                    ZoomToToplevel();
+                }
+            });
 
         PointerPressed += HierarchyControl_PointerPressed;
         PointerReleased += HierarchyControl_PointerReleased;
