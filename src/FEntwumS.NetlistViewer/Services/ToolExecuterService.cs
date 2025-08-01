@@ -1,4 +1,5 @@
-﻿using Asmichi.ProcessManagement;
+﻿using System.Text;
+using Asmichi.ProcessManagement;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Services;
 
@@ -18,8 +19,8 @@ public class ToolExecuterService : IToolExecuterService
     public async Task<(bool success, string stdout, string stderr)> ExecuteToolAsync(string toolPath, IReadOnlyList<string> args, string workingDirectory)
     {
         bool noErrors = true;
-        string stdout = string.Empty;
-        string stderr = string.Empty;
+        StringBuilder stdout = new StringBuilder();
+        StringBuilder stderr = new StringBuilder();
         
         (bool success, _) = await _childProcessService.ExecuteShellAsync(toolPath, args, workingDirectory, $"Executing {Path.GetFileNameWithoutExtension(toolPath)}", AppState.Loading, false, x =>
         {
@@ -29,7 +30,7 @@ public class ToolExecuterService : IToolExecuterService
                 noErrors = false;
             }
 
-            stdout += x + "\n";
+            stdout.AppendLine(x);
 
             _logger.Log(x);
             return true;
@@ -40,15 +41,22 @@ public class ToolExecuterService : IToolExecuterService
                 noErrors = false;
             }
             
-            stderr += x + "\n";
+            stderr.AppendLine(x);
                 
             _logger.Error(x);
             return true;
         });
         
-        return (success && noErrors, stdout, stderr);
+        return (success && noErrors, stdout.ToString(), stderr.ToString());
     }
 
+    /// <summary>
+    /// Starts a process and returns the associated process handle. STDOUT and STDERR are not captured
+    /// </summary>
+    /// <param name="path"> The path of the executable</param>
+    /// <param name="args"> The arguments list</param>
+    /// <param name="workingDirectory"> The working directory</param>
+    /// <returns>Process handle of the spawned process</returns>
     public IChildProcess ExecuteBackgroundProcess(string path, IReadOnlyList<string> args, string? workingDirectory)
     {
         ChildProcessStartInfo info = new ChildProcessStartInfo

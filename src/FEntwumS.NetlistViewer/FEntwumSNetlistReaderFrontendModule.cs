@@ -18,7 +18,7 @@ namespace FEntwumS.NetlistViewer;
 
 public class FEntwumSNetlistReaderFrontendModule : IModule
 {
-    public static readonly Package NetlistPackage = new()
+    public static readonly Package NetlistViewerBackendPackage = new()
     {
         Category = "Binaries",
         Id = "NetlistReaderBackend",
@@ -48,14 +48,14 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         [
             new PackageVersion()
             {
-                Version = "0.11.1",
+                Version = "0.11.2",
                 Targets =
                 [
                     new PackageTarget()
                     {
                         Target = "all",
                         Url =
-                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.11.1/fentwums-netlist-reader-server-v0.11.1.tar.gz",
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.11.2/fentwums-netlist-reader-server-v0.11.2.tar.gz",
                         AutoSetting =
                         [
                             new PackageAutoSetting()
@@ -70,7 +70,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         ]
     };
 
-    public static readonly Package JDKPackage = new()
+    public static readonly Package JREPackage = new()
     {
         Category = "Binaries",
         Id = "OpenJDK",
@@ -196,7 +196,6 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
     public void RegisterTypes(IContainerRegistry containerRegistry)
     {
-        containerRegistry.RegisterSingleton<IFileOpener, FileOpener>();
         containerRegistry.RegisterSingleton<IViewportDimensionService, ViewportDimensionService>();
         containerRegistry.RegisterSingleton<IJsonLoader, JsonLoader>();
         containerRegistry.RegisterSingleton<ICustomLogger, CustomLogger>();
@@ -211,7 +210,6 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         containerRegistry.RegisterSingleton<IHierarchyJsonParser, HierarchyJsonParser>();
         containerRegistry.RegisterSingleton<IHierarchyInformationService, HierarchyInformationService>();
         containerRegistry.RegisterSingleton<IStorageService, StorageService>();
-        containerRegistry.RegisterSingleton<IProjectMonitor, ProjectMonitor>();
     }
 
     public void OnInitialized(IContainerProvider? containerProvider)
@@ -221,8 +219,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         // Log some debug information
         logger.Log($"FEntwumS.NetlistViewer: Platform: {PlatformHelper.Platform}");
 
-        containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistPackage);
-        containerProvider.Resolve<IPackageService>().RegisterPackage(JDKPackage);
+        containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistViewerBackendPackage);
+        containerProvider.Resolve<IPackageService>().RegisterPackage(JREPackage);
 
         logger.Log("FEntwumS.NetlistViewer: Registered Packages");
 
@@ -412,7 +410,6 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         ServiceManager.GetService<IFpgaBbService>().SubscribeToSettings();
         ServiceManager.GetService<IYosysService>().SubscribeToSettings();
         ServiceManager.GetService<INetlistGenerator>().SubscribeToSettings();
-        ServiceManager.GetService<IProjectMonitor>().SubscribeToSettings();
 
         logger.Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
 

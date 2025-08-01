@@ -27,11 +27,6 @@ public class ServiceManager
         return _containerProvider.Resolve<ILogger>();
     }
 
-    public static IFileOpener GetFileOpener()
-    {
-        return _containerProvider.Resolve<IFileOpener>();
-    }
-
     public static ICustomLogger GetCustomLogger()
     {
         return _containerProvider.Resolve<ICustomLogger>();

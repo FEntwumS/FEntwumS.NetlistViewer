@@ -47,7 +47,7 @@ public class NetlistGenerator : INetlistGenerator
         OneWare.GhdlExtension.Services.GhdlService ghdlService =
             ServiceManager.GetService<OneWare.GhdlExtension.Services.GhdlService>();
 
-        string outputDir = Path.Combine(vhdlProject.Root!.FullPath, "build", "netlist");
+        string outputDir = FentwumSNetlistViewerSettingsHelper.GetBuildDirectory(vhdlProject);
 
         if (!Directory.Exists(outputDir))
         {
@@ -119,7 +119,7 @@ public class NetlistGenerator : INetlistGenerator
         }
 
         string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
-        string netlistPath = Path.Combine(projectFile.Root!.FullPath, "build", "netlist", $"{top}.json");
+        string netlistPath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(projectFile);
 
         if (!File.Exists(netlistPath))
         {
@@ -141,7 +141,7 @@ public class NetlistGenerator : INetlistGenerator
         }
 
         string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
-        string netlistPath = Path.Combine(root.FullPath, "build", "netlist", $"{top}.json");
+        string netlistPath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(projectFile);
 
         FileInfo netlistFile = new FileInfo(netlistPath);
         bool newNetlistNecessary = false;
@@ -161,12 +161,18 @@ public class NetlistGenerator : INetlistGenerator
             }
         }
 
+        string? storedSettingsChangedTime = _storageService.GetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper
+            .NetlistGenerationSettingsChangedKey);
+        
         // Date format "R" is the RFC1123 pattern
         DateTime settingsChangedTime = DateTime.ParseExact(
-            _storageService.GetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper
-                .NetlistGenerationSettingsChangedKey) ?? DateTime.Now.ToString("R"), "R", new DateTimeFormatInfo());
+            storedSettingsChangedTime ?? DateTime.Now.ToString("R"), "R", new DateTimeFormatInfo());
 
-        if (netlistFile.LastWriteTimeUtc.CompareTo(settingsChangedTime.ToUniversalTime()) <= 0)
+        if (storedSettingsChangedTime is null)
+        {
+            _storageService.SetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper.NetlistGenerationSettingsChangedKey, DateTime.Now.ToString("R"));
+            _ = _storageService.SaveAsync();
+        } else if (netlistFile.LastWriteTimeUtc.CompareTo(settingsChangedTime.ToUniversalTime()) <= 0)
         {
             newNetlistNecessary = true;
         }
@@ -287,7 +293,6 @@ public class NetlistGenerator : INetlistGenerator
         lock (_lock)
         {
             projects.AddRange(_changedProjectSet);
-            _changedProjectSet.Clear();
         }
 
         foreach (UniversalFpgaProjectRoot projectRoot in projects)
@@ -309,6 +314,11 @@ public class NetlistGenerator : INetlistGenerator
             {
                 await GenerateNetlistAsync((IProjectFile?) projectRoot.TopEntity, netlistType);
             });
+
+            lock (_lock)
+            {
+                _changedProjectSet.Remove(projectRoot);
+            }
         }
     }
 

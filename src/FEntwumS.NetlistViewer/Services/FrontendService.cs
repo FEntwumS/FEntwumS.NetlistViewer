@@ -26,6 +26,7 @@ public class FrontendService : IFrontendService
     private static readonly IPackageService _packageService;
     private static readonly IHierarchyJsonParser _hierarchyJsonParser;
     private static readonly INetlistGenerator _netlistGenerator;
+    private static readonly IViewportDimensionService _viewportDimensionService;
 
     private static string _backendAddress = string.Empty;
     private static string _backendPort = string.Empty;
@@ -58,13 +59,14 @@ public class FrontendService : IFrontendService
         _packageService = ServiceManager.GetService<IPackageService>();
         _hierarchyJsonParser = ServiceManager.GetService<IHierarchyJsonParser>();
         _netlistGenerator = ServiceManager.GetService<INetlistGenerator>();
+        _viewportDimensionService = ServiceManager.GetService<IViewportDimensionService>();
     }
 
     public void SubscribeToSettings()
     {
         _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.BackendAddressKey).Subscribe(x =>
         {
-            if (isAddressValid(x))
+            if (IsAddressValid(x))
             {
                 _logger.Log($"New address: {x}", _backendAddress != string.Empty);
                 _backendAddress = x;
@@ -77,7 +79,7 @@ public class FrontendService : IFrontendService
 
         _settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.BackendPortKey).Subscribe(x =>
         {
-            if (isPortValid(x))
+            if (IsPortValid(x))
             {
                 _logger.Log($"New port: {x}", _backendPort != string.Empty);
                 _backendPort = x;
@@ -229,7 +231,7 @@ public class FrontendService : IFrontendService
     {
         ApplicationProcess checkProc = _applicationStateService.AddState("Checking dependencies", AppState.Loading);
 
-        bool globalSuccess = true, needsRestart = false;
+        bool globalSuccess = true;
 
         (string id, Version minversion)[] dependencyIDs = new (string, Version)
             []
@@ -237,8 +239,8 @@ public class FrontendService : IFrontendService
                 ("OneWare.GhdlExtension", new Version(0, 10, 7)),
                 ("osscadsuite", new Version(2025, 01, 21)),
                 ("ghdl", new Version(5, 0, 1)),
-                (FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id!, new Version(0, 11, 1)),
-                (FEntwumSNetlistReaderFrontendModule.JDKPackage.Id!, new Version(21, 0, 6))
+                (FEntwumSNetlistReaderFrontendModule.NetlistViewerBackendPackage.Id!, new Version(0, 11, 2)),
+                (FEntwumSNetlistReaderFrontendModule.JREPackage.Id!, new Version(21, 0, 6))
             };
 
         // Install osscadsuite binary between GHDL plugin and ghdl binary to allow for the addition of the ghdl binary to the store
@@ -251,7 +253,7 @@ public class FrontendService : IFrontendService
             if (dependencyPackage == null)
             {
                 _logger.Error(
-                    $"Dependency with ID {dependencyID} is not available in the package manager. Please file a bug report, if this issue persists");
+                    $"Dependency with ID {dependencyID} is not available in the package manager. Please file a bug report if this issue persists");
 
                 globalSuccess = false;
                 continue;
@@ -318,6 +320,8 @@ public class FrontendService : IFrontendService
                 }
                 else
                 {
+                    // Log an error if the user has not enabled automatic binary downloads
+                    
                     _logger.Error(
                         $"Extension \"{dependencyPackage.Name}\" is not installed. Please enable \"Automatically download Binaries\" under the \"Experimental\" settings or download the extension yourself");
 
@@ -326,11 +330,11 @@ public class FrontendService : IFrontendService
 
                 if (globalSuccess && updatePerformed)
                 {
-                    needsRestart = true;
                     _restartRequired = true;
                 }
             }
 
+            // Check whether now the correct version is installed
             if (dependencyModel!.Status is PackageStatus.Installed or PackageStatus.UpdateAvailable)
             {
                 if (minVersion.CompareTo(Version.Parse(dependencyModel.InstalledVersion!.Version!)) <= 0)
@@ -345,17 +349,20 @@ public class FrontendService : IFrontendService
 
                     globalSuccess = false;
                 }
+            } else if (dependencyModel!.Status is PackageStatus.NeedRestart)
+            {
+                _restartRequired = true;
             }
         }
 
-        if (globalSuccess && (needsRestart || _restartRequired))
+        if (globalSuccess && _restartRequired)
         {
             _logger.Log("Dependencies were successfully installed. Please restart OneWare Studio!", true);
         }
 
         _applicationStateService.RemoveState(checkProc);
 
-        return (globalSuccess, needsRestart || _restartRequired);
+        return (globalSuccess, _restartRequired);
     }
 
     private async Task<IProjectFile?> GenerateNetlistAsync(IProjectFile projectFile, NetlistType netlistType)
@@ -374,6 +381,9 @@ public class FrontendService : IFrontendService
 
         if (needsRestart)
         {
+            // Prompt the user to restart OneWare Studio if new binaries/plugins were previously installed
+            // TODO replace with notification when the associated service is available on nuget 
+            _logger.Error("Please restart OneWare Studio.");
             _applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
 
             return null;
@@ -462,17 +472,17 @@ public class FrontendService : IFrontendService
         UInt32 pathHash = hashService.ComputeHash(pathByteSpan);
         UInt32 contenthash = hashService.ComputeHash(contentByteSpan);
 
-        UInt64 combinedHash = ((UInt64)pathHash) << 32 | contenthash;
+        UInt64 combinedHash = ((UInt64) pathHash) << 32 | contenthash;
 
         currentNetlist = combinedHash;
 
-        ServiceManager.GetCustomLogger().Log("Path hash: " + pathHash);
-        ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash);
-        ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash);
+        _logger.Log("Path hash: " + pathHash);
+        _logger.Log("Full file hash is: " + contenthash);
+        _logger.Log("Combined hash is: " + combinedHash);
 
-        ServiceManager.GetViewportDimensionService()!.SetClickedElementPath(combinedHash, string.Empty);
-        ServiceManager.GetViewportDimensionService()!.SetCurrentElementCount(combinedHash, 0);
-        ServiceManager.GetViewportDimensionService()!.SetZoomElementDimensions(combinedHash, null);
+        _viewportDimensionService.SetClickedElementPath(combinedHash, string.Empty);
+        _viewportDimensionService.SetCurrentElementCount(combinedHash, 0);
+        _viewportDimensionService.SetZoomElementDimensions(combinedHash, null);
 
         FrontendViewModel vm = new FrontendViewModel();
         vm.InitializeContent();
@@ -518,7 +528,7 @@ public class FrontendService : IFrontendService
         ApplicationProcess indexProc = _applicationStateService.AddState("Indexing", AppState.Loading);
 
         // create code index for cross-compiled VHDL
-        string ccFile = Path.Combine(json.Root.FullPath, "build", "netlist", $"{top}.v");
+        string ccFile = FentwumSNetlistViewerSettingsHelper.GetCcVhdlFilePath(json);
 
         if (File.Exists(ccFile))
         {
@@ -575,7 +585,7 @@ public class FrontendService : IFrontendService
     // https://stackoverflow.com/a/36760050
     private static string IpV4AddressPattern = "^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\\.(?!$)|$)){4}$";
 
-    private bool isAddressValid(string address)
+    private bool IsAddressValid(string address)
     {
         Match match;
 
@@ -593,7 +603,7 @@ public class FrontendService : IFrontendService
         return match.Success;
     }
 
-    private bool isPortValid(string port)
+    private bool IsPortValid(string port)
     {
         try
         {
@@ -734,7 +744,7 @@ public class FrontendService : IFrontendService
             return false;
         }
         
-        PackageModel? dependencyModel = _packageService.Packages!.GetValueOrDefault(FEntwumSNetlistReaderFrontendModule.NetlistPackage.Id);
+        PackageModel? dependencyModel = _packageService.Packages!.GetValueOrDefault(FEntwumSNetlistReaderFrontendModule.NetlistViewerBackendPackage.Id);
         string? installedVersion = (dependencyModel?.InstalledVersion!).Version;
 
         var serverJar = Directory.GetFiles(_backendJarFolder).Where(x =>
@@ -802,12 +812,10 @@ public class FrontendService : IFrontendService
         var serverJarFile = enumeratedResults.Last();
 
         // Start server to run independently
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         backendProcess = ServiceManager.GetService<IToolExecuterService>()
             .ExecuteBackgroundProcess(javaBinaryFile,
                 _extraJarArgs.Split(' ').Concat(["-jar", serverJarFile]).ToArray(),
                 Path.GetDirectoryName(serverJarFile));
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
         _logger.Log("Server started", true);
 
@@ -930,13 +938,13 @@ public class FrontendService : IFrontendService
 
         currentNetlist = combinedHash;
 
-        ServiceManager.GetCustomLogger().Log("Path hash: " + pathHash);
-        ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash);
-        ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash);
+        _logger.Log("Path hash: " + pathHash);
+        _logger.Log("Full file hash is: " + contenthash);
+        _logger.Log("Combined hash is: " + combinedHash);
 
-        ServiceManager.GetViewportDimensionService()!.SetClickedElementPath(combinedHash, string.Empty);
-        ServiceManager.GetViewportDimensionService()!.SetCurrentElementCount(combinedHash, 0);
-        ServiceManager.GetViewportDimensionService()!.SetZoomElementDimensions(combinedHash, null);
+        _viewportDimensionService.SetClickedElementPath(combinedHash, string.Empty);
+        _viewportDimensionService.SetCurrentElementCount(combinedHash, 0);
+        _viewportDimensionService.SetZoomElementDimensions(combinedHash, null);
 
         FileStream jsonFileStream = File.Open(netlistFile.FullPath, FileMode.Open, FileAccess.Read);
 

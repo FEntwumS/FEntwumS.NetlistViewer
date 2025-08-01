@@ -1,14 +1,16 @@
 ﻿using System.Text.Json;
 using FEntwumS.NetlistViewer.Helpers;
-using DynamicData.Binding;
 
 namespace FEntwumS.NetlistViewer.Services;
 
 public class StorageService : IStorageService
 {
+    private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    private ICustomLogger _logger;
     public StorageService()
     {
         _ = LoadAsync();
+        _logger = ServiceManager.GetService<ICustomLogger>();
     }
     
     private static Dictionary<string, string> _storage = new Dictionary<string, string>();
@@ -26,12 +28,22 @@ public class StorageService : IStorageService
             
             var saveD = _storage.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-            await using FileStream stream = new FileStream(path, FileMode.Create);
-            await JsonSerializer.SerializeAsync(stream, saveD, saveD.GetType(), new JsonSerializerOptions(){WriteIndented = true, AllowTrailingCommas = true});
+            try
+            {
+                await _semaphore.WaitAsync();
+
+                await using FileStream stream = new FileStream(path, FileMode.Create);
+                await JsonSerializer.SerializeAsync(stream, saveD, saveD.GetType(),
+                    new JsonSerializerOptions() { WriteIndented = true, AllowTrailingCommas = true });
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
         catch (Exception e)
         {
-            ServiceManager.GetCustomLogger().Error(e.Message);
+            _logger.Error(e.Message);
         }
     }
 
@@ -49,22 +61,33 @@ public class StorageService : IStorageService
             
             _storage.Clear();
 
-            await using FileStream stream = new FileStream(path, FileMode.Open);
-            Dictionary<string, JsonElement> json = await JsonSerializer.DeserializeAsync<Dictionary<string, JsonElement>>(stream) ?? new Dictionary<string, JsonElement>();
-            foreach ((string key, JsonElement value) in json)
+            try
             {
-                _storage.Add(key, value.Deserialize<string>());
+                await _semaphore.WaitAsync();
+                
+                await using FileStream stream = new FileStream(path, FileMode.Open);
+                Dictionary<string, JsonElement> json =
+                    await JsonSerializer.DeserializeAsync<Dictionary<string, JsonElement>>(stream) ??
+                    new Dictionary<string, JsonElement>();
+                foreach ((string key, JsonElement value) in json)
+                {
+                    _storage.Add(key, value.Deserialize<string>());
+                }
+            }
+            finally
+            {
+                _semaphore.Release();
             }
         }
         catch (Exception e)
         {
-            ServiceManager.GetCustomLogger().Error(e.Message);
+            _logger.Log(e.Message);
         }
     }
 
     public void RegisterKeyValuePair(string key, string value)
     {
-        _storage.Add(key, value);
+        _storage.TryAdd(key, value);
     }
 
     public void RemoveKeyValuePair(string key)
