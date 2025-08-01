@@ -48,14 +48,14 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         [
             new PackageVersion()
             {
-                Version = "0.11.1",
+                Version = "0.11.2",
                 Targets =
                 [
                     new PackageTarget()
                     {
                         Target = "all",
                         Url =
-                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.11.1/fentwums-netlist-reader-server-v0.11.1.tar.gz",
+                            "https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.11.2/fentwums-netlist-reader-server-v0.11.2.tar.gz",
                         AutoSetting =
                         [
                             new PackageAutoSetting()
