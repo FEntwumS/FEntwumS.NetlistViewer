@@ -147,9 +147,14 @@ public class HierarchyJsonParser : IHierarchyJsonParser
             y = node["y"].GetValue<double>();
         }
 
-        if (layoutOptions.AsObject().ContainsKey("hierarchy-ancestor-name"))
+        if (layoutOptions.AsObject().ContainsKey("hierarchy-ancestor-path"))
         {
-            ancestorName = layoutOptions["hierarchy-ancestor-name"]!.GetValue<string>();
+            ancestorName = layoutOptions["hierarchy-ancestor-path"]!.GetValue<string>();
+
+            if (ancestorName.Contains(" "))
+            {
+                ancestorName = ancestorName.Substring(0, ancestorName.LastIndexOf(" ", StringComparison.Ordinal));
+            }
 
             ancestor = nodeNameMap.GetValueOrDefault(ancestorName, null);
         }
