@@ -41,6 +41,19 @@ public class FrontendService : IFrontendService
     private static string _extraJarArgs = string.Empty;
     private static bool _continueOnBinaryInstallError = false;
     private static string _performanceTarget = string.Empty;
+    private static bool _useHierarchicalBackend = true;
+
+    private static NetlistType netlistType
+    {
+	    get  {
+	    NetlistType netlistType = _useHierarchicalBackend switch
+	    {
+	    true => NetlistType.Hier,
+	    false => NetlistType.Flat
+    };
+     return netlistType;
+    }
+    }
 
     private static bool _restartRequired = false;
 
@@ -225,6 +238,8 @@ public class FrontendService : IFrontendService
                 "Intelligent Ahead Of Time" => "IntelligentAheadOfTime",
                 _ => "Preloading"
             });
+        
+        _settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.UseHierarchicalBackendKey).Subscribe(x => _useHierarchicalBackend = x);
     }
 
     private async Task<(bool success, bool needsRestart)> InstallDependenciesAsync()
@@ -365,17 +380,17 @@ public class FrontendService : IFrontendService
         return (globalSuccess, _restartRequired);
     }
 
-    private async Task<IProjectFile?> GenerateNetlistAsync(IProjectFile projectFile, NetlistType netlistType)
+    private async Task<IProjectFile?> GenerateNetlistAsync(IProjectFile projectFile, NetlistLanguage netlistLanguage, NetlistType netlistType)
     {
-        string netlistTypeString  = netlistType switch
+        string netlistLanguageString  = netlistLanguage switch
         {
-            NetlistType.VHDL => "VHDL",
-            NetlistType.Verilog => "Verilog",
-            NetlistType.System_Verilog => "System Verilog",
+            NetlistLanguage.VHDL => "VHDL",
+            NetlistLanguage.Verilog => "Verilog",
+            NetlistLanguage.System_Verilog => "System Verilog",
             _ => ""
         };
 
-        ApplicationProcess proc = _applicationStateService.AddState($"Visualizing {netlistTypeString} netlist", AppState.Loading);
+        ApplicationProcess proc = _applicationStateService.AddState($"Visualizing {netlistLanguageString} netlist", AppState.Loading);
 
         (bool success, bool needsRestart) = await InstallDependenciesAsync();
 
@@ -404,7 +419,7 @@ public class FrontendService : IFrontendService
             return null;
         }
         
-        (IProjectFile? netlistFile, success) = await _netlistGenerator.GenerateNetlistAsync(projectFile, netlistType);
+        (IProjectFile? netlistFile, success) = await _netlistGenerator.GenerateNetlistAsync(projectFile, netlistLanguage, netlistType);
 
         if (!success)
         {
@@ -429,17 +444,17 @@ public class FrontendService : IFrontendService
 
     public async Task CreateVhdlNetlistAsync(IProjectFile vhdl)
     {
-        await ShowViewerAsync(await GenerateNetlistAsync(vhdl, NetlistType.VHDL));
+        await ShowViewerAsync(await GenerateNetlistAsync(vhdl, NetlistLanguage.VHDL, netlistType));
     }
 
     public async Task CreateVerilogNetlistAsync(IProjectFile verilog)
     {
-        await ShowViewerAsync(await GenerateNetlistAsync(verilog, NetlistType.Verilog));
+        await ShowViewerAsync(await GenerateNetlistAsync(verilog, NetlistLanguage.Verilog, netlistType));
     }
 
     public async Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog)
     {
-        await ShowViewerAsync(await GenerateNetlistAsync(sVerilog, NetlistType.System_Verilog));
+        await ShowViewerAsync(await GenerateNetlistAsync(sVerilog, NetlistLanguage.System_Verilog, netlistType));
     }
 
     public async Task ShowViewerAsync(IProjectFile? json)
@@ -502,7 +517,7 @@ public class FrontendService : IFrontendService
         resp = await PostAsync(
             "/graphRemoteFile" + $"?hash={combinedHash}" + $"&entityLabelFontSize={_entityLabelFontSize}" +
             $"&cellLabelFontSize={_cellLabelFontSize}" + $"&edgeLabelFontSize={_edgeLabelFontSize}" +
-            $"&portLabelFontSize={_portLabelFontSize}" + $"&performance-target={_performanceTarget}",
+            $"&portLabelFontSize={_portLabelFontSize}" + (_useHierarchicalBackend ? $"&performance-target={_performanceTarget}" : ""),
             formDataContent);
 
         _applicationStateService.RemoveState(waitForBackendProc);
@@ -892,17 +907,17 @@ public class FrontendService : IFrontendService
 
     public async Task CreateVhdlHierarchyAsync(IProjectFile vhdlFile)
     {
-        await ShowHierarchyAsync((await GenerateNetlistAsync(vhdlFile, NetlistType.VHDL))!);
+        await ShowHierarchyAsync((await GenerateNetlistAsync(vhdlFile, NetlistLanguage.VHDL, NetlistType.Hier))!);
     }
 
     public async Task CreateVerilogHierarchyAsync(IProjectFile verilogFile)
     {
-        await ShowHierarchyAsync((await GenerateNetlistAsync(verilogFile, NetlistType.Verilog))!);
+        await ShowHierarchyAsync((await GenerateNetlistAsync(verilogFile, NetlistLanguage.Verilog, NetlistType.Hier))!);
     }
 
     public async Task CreateSystemVerilogHierarchyAsync(IProjectFile systemVerilogFile)
     {
-        await ShowHierarchyAsync((await GenerateNetlistAsync(systemVerilogFile, NetlistType.System_Verilog))!);
+        await ShowHierarchyAsync((await GenerateNetlistAsync(systemVerilogFile, NetlistLanguage.System_Verilog, NetlistType.Hier))!);
     }
 
     private async Task<bool> ShowHierarchyAsync(IProjectFile netlistFile)

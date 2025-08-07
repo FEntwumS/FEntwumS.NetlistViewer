@@ -74,7 +74,7 @@ public class NetlistGenerator : INetlistGenerator
     }
 
     public async Task<(IProjectFile? netlistFile, bool success)> GenerateNetlistAsync(IProjectFile? projectFile,
-        NetlistType netlistType)
+        NetlistLanguage netlistLanguage, NetlistType netlistType)
     {
         if (projectFile is null)
         {
@@ -86,7 +86,7 @@ public class NetlistGenerator : INetlistGenerator
 
         if (!_alwaysRegenerateNetlists)
         {
-            (netlistFile, success) = GetExistingNetlist(projectFile);
+            (netlistFile, success) = GetExistingNetlist(projectFile, netlistType);
 
             if (success)
             {
@@ -94,17 +94,17 @@ public class NetlistGenerator : INetlistGenerator
             }
         }
 
-        switch (netlistType)
+        switch (netlistLanguage)
         {
-            case NetlistType.VHDL:
+            case NetlistLanguage.VHDL:
                 success = await GenerateVhdlNetlistAsync(projectFile) && await GenerateVerilogNetlistAsync(projectFile);
                 break;
 
-            case NetlistType.Verilog:
+            case NetlistLanguage.Verilog:
                 success = await GenerateVerilogNetlistAsync(projectFile);
                 break;
 
-            case NetlistType.System_Verilog:
+            case NetlistLanguage.System_Verilog:
                 success = await GenerateSystemVerilogNetlistAsync(projectFile);
                 break;
 
@@ -119,7 +119,7 @@ public class NetlistGenerator : INetlistGenerator
         }
 
         string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
-        string netlistPath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(projectFile);
+        string netlistPath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(projectFile, netlistType);
 
         if (!File.Exists(netlistPath))
         {
@@ -133,7 +133,7 @@ public class NetlistGenerator : INetlistGenerator
         return (netlistFile, true);
     }
 
-    public (IProjectFile? netlistFile, bool success) GetExistingNetlist(IProjectFile projectFile)
+    public (IProjectFile? netlistFile, bool success) GetExistingNetlist(IProjectFile projectFile, NetlistType netlistType)
     {
         if (projectFile.Root is not UniversalFpgaProjectRoot root)
         {
@@ -141,7 +141,7 @@ public class NetlistGenerator : INetlistGenerator
         }
 
         string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
-        string netlistPath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(projectFile);
+        string netlistPath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(projectFile, netlistType);
 
         FileInfo netlistFile = new FileInfo(netlistPath);
         bool newNetlistNecessary = false;
@@ -297,22 +297,22 @@ public class NetlistGenerator : INetlistGenerator
 
         foreach (UniversalFpgaProjectRoot projectRoot in projects)
         {
-            NetlistType netlistType = NetlistType.Verilog;
+            NetlistLanguage netlistLanguage = NetlistLanguage.Verilog;
 
             if (projectRoot.Files.Any(x => x.Extension is ".vhdl" or ".vhd"))
             {
-                netlistType = NetlistType.VHDL;
+                netlistLanguage = NetlistLanguage.VHDL;
             }
             else if (projectRoot.Files.Any(x => x.Extension is ".sv"))
             {
-                netlistType = NetlistType.System_Verilog;
+                netlistLanguage = NetlistLanguage.System_Verilog;
             }
 
             // It is sadly necessary to run the netlist generation via the UI thread to avoid exceptions regarding
             // DockService.Show inside the GhdlService
             await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                await GenerateNetlistAsync((IProjectFile?) projectRoot.TopEntity, netlistType);
+                await GenerateNetlistAsync((IProjectFile?) projectRoot.TopEntity, netlistLanguage, NetlistType.Hier);
             });
 
             lock (_lock)
@@ -367,17 +367,17 @@ public class NetlistGenerator : INetlistGenerator
                     }
                 });
 
-        _settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.UseHierarchicalBackendKey)
-            .Subscribe(x =>
-            {
-                if (!_settingsLoaded)
-                {
-                    _settingsLoaded = true;
-                    return;
-                }
-                
-                _storageService.SetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper.NetlistGenerationSettingsChangedKey, DateTime.Now.ToString("R"));
-                _ = _storageService.SaveAsync();
-            });
+        // _settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.UseHierarchicalBackendKey)
+        //     .Subscribe(x =>
+        //     {
+        //         if (!_settingsLoaded)
+        //         {
+        //             _settingsLoaded = true;
+        //             return;
+        //         }
+        //         
+        //         _storageService.SetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper.NetlistGenerationSettingsChangedKey, DateTime.Now.ToString("R"));
+        //         _ = _storageService.SaveAsync();
+        //     });
     }
 }

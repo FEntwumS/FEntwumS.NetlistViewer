@@ -89,9 +89,13 @@ public class YosysService : IYosysService
             + $"{_fpgaBbService.getBbCommand(file)} hierarchy -check -purge_lib -top {top}; "
             + "proc; "  // proc needs to run because JSON netlists produced by yosys may not contain RTLIL processes
             + "memory -nomap; " // Converts memories into simple blocks instead of basic cells
-            + (_useHierarchicalBackend ?  "" : "flatten -scopename; ")  // Flatten if desired by the user
             + "select *; "  // Remove unnecessary library elements from the netlist
-            + $"write_json -compat-int {top}.json"  // Write the JSON netlist to disk
+            + $"write_json -compat-int {top}-hier.json; " // Write hierarchical JSON netlist to disk
+            + "scratchpad -set flatten.separator \";\"; "
+            + "debug flatten -scopename; "                // Flatten the netlist
+            + "select *; "
+            + "clean; "
+            + $"write_json -compat-int {top}-flat.json" // Write flattened JSON netlist to disk
         ];
         
         // Load the yosys_slang plugin if the design contains SystemVerilog files
@@ -102,9 +106,10 @@ public class YosysService : IYosysService
             yosysArgs.Insert(1, "slang");
         }
 
-        (bool success, _, string stderr) =
+        (bool success, string stdout, string stderr) =
             await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
 
+        _logger.Log(stdout);
         _logger.Log(stderr);
 
         return success;

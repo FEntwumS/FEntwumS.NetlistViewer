@@ -2,7 +2,6 @@
 
 public enum NetlistType
 {
-    VHDL,
-    Verilog,
-    System_Verilog
+	Flat,
+	Hier
 }

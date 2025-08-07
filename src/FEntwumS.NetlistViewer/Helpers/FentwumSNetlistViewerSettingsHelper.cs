@@ -1,4 +1,5 @@
-﻿using OneWare.Essentials.Helpers;
+﻿using FEntwumS.NetlistViewer.Types;
+using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
 
 namespace FEntwumS.NetlistViewer.Helpers;
@@ -81,11 +82,16 @@ public class FentwumSNetlistViewerSettingsHelper
         return Path.Combine(projectFile.Root.FullPath, "build", "netlist");
     }
 
-    public static string GetNetlistFilePath(IProjectFile json)
+    public static string GetNetlistFilePath(IProjectFile json, NetlistType netlistType)
     {
         string top = Path.GetFileNameWithoutExtension(json.FullPath);
+        string suffix = netlistType switch
+        {
+	        NetlistType.Flat => "flat",
+	        NetlistType.Hier => "hier",
+        };
         
-        return Path.Combine(GetBuildDirectory(json), $"{top}.json");
+        return Path.Combine(GetBuildDirectory(json), $"{top}-{suffix}.json");
     }
     #endregion
 }
