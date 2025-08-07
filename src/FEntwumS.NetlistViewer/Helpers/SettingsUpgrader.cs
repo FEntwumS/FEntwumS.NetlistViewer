@@ -35,6 +35,14 @@ public class SettingsUpgrader
                 settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationKey, "Interval");
             }
         }
+
+        if (currentSettingsVersion <= 2)
+        {
+	        settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.UseHierarchicalBackendKey, true);
+	        settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.PerformanceTargetKey, "Intelligent Ahead Of Time");
+	        settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.EnableHierarchyViewKey, true);
+	        settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.AlwaysRegenerateNetlistsKey, false);
+        }
         
         storageService.SetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey, FentwumSNetlistViewerSettingsHelper.ExpectedSettingsVersion);
         await storageService.SaveAsync();

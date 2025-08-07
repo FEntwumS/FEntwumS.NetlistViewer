@@ -386,14 +386,14 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.ContinueOnBinaryInstallErrorKey,
             new CheckBoxSetting("Continue if errors occur during dependency installation", false));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.UseHierarchicalBackendKey,
-            new CheckBoxSetting("Use hierarchical backend", false));
+            new CheckBoxSetting("Use hierarchical backend", true));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.PerformanceTargetKey,
-            new ComboBoxSetting("Performance Target", "Preloading",
+            new ComboBoxSetting("Performance Target", "Intelligent Ahead Of Time",
                 ["Preloading", "Just In Time", "Intelligent Ahead Of Time"]));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.AlwaysRegenerateNetlistsKey,
-            new CheckBoxSetting("Always regenerate netlists", true));
+            new CheckBoxSetting("Always regenerate netlists", false));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.EnableHierarchyViewKey,
-            new CheckBoxSetting("Enable hierarchy view", false));
+            new CheckBoxSetting("Enable hierarchy view", true));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationKey,
             new ComboBoxSetting("Automatic netlist generation", "Never", ["Never", "Always", "Interval"]));
         settingsService.RegisterSetting("Netlist Viewer", "Experimental", FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey,
