@@ -4,7 +4,7 @@ namespace FEntwumS.NetlistViewer.Types.Messages;
 
 public class ZoomToFitmessage : ValueChangedMessage<ulong>
 {
-    public ZoomToFitmessage(ulong value) : base(value)
-    {
-    }
+	public ZoomToFitmessage(ulong value) : base(value)
+	{
+	}
 }

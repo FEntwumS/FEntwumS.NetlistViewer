@@ -4,5 +4,7 @@ namespace FEntwumS.NetlistViewer.Types.Messages;
 
 public class ZoomToToplevelMessage : ValueChangedMessage<ulong>
 {
-    public ZoomToToplevelMessage(ulong value) : base(value) { }
+	public ZoomToToplevelMessage(ulong value) : base(value)
+	{
+	}
 }

@@ -11,87 +11,87 @@ namespace FEntwumS.NetlistViewer.ViewModels;
 
 public class HierarchyViewModel : ExtendedTool
 {
-    public ICommand ZoomToFitCommand { get; }
-    
-    public ICommand ZoomToToplevelCommand { get; }
+	public ICommand ZoomToFitCommand { get; }
 
-    private ulong _netlistId { get; set; }
+	public ICommand ZoomToToplevelCommand { get; }
 
-    public ulong NetlistId
-    {
-        get => _netlistId;
-        set
-        {
-            _netlistId = value;
-            OnPropertyChanged(nameof(NetlistId));
-        }
-    }
+	private ulong _netlistId { get; set; }
 
-    private ObservableCollection<HierarchyViewElement> items { get; set; }
+	public ulong NetlistId
+	{
+		get => _netlistId;
+		set
+		{
+			_netlistId = value;
+			OnPropertyChanged(nameof(NetlistId));
+		}
+	}
 
-    public ObservableCollection<HierarchyViewElement> Items
-    {
-        get => items;
-        set
-        {
-            items.Clear(); 
-            items.AddRange(value);
-            OnPropertyChanged(nameof(Items));
-        }
-    }
-    
-    private double _offsetX { get; set; }
+	private ObservableCollection<HierarchyViewElement> items { get; set; }
 
-    public double OffsetX
-    {
-        get => _offsetX;
-        set
-        {
-            _offsetX = value;
-            OnPropertyChanged(nameof(OffsetX));
-        }
-    }
-    
-    private double _offsetY { get; set; }
+	public ObservableCollection<HierarchyViewElement> Items
+	{
+		get => items;
+		set
+		{
+			items.Clear();
+			items.AddRange(value);
+			OnPropertyChanged(nameof(Items));
+		}
+	}
 
-    public double OffsetY
-    {
-        get => _offsetY;
-        set
-        {
-            _offsetY = value;
-            OnPropertyChanged(nameof(OffsetY));
-        }
-    }
-    
-    private double _scale { get; set; }
+	private double _offsetX { get; set; }
 
-    public double Scale
-    {
-        get => _scale;
-        set
-        {
-            _scale = value;
-            OnPropertyChanged(nameof(Scale));
-        }
-    }
+	public double OffsetX
+	{
+		get => _offsetX;
+		set
+		{
+			_offsetX = value;
+			OnPropertyChanged(nameof(OffsetX));
+		}
+	}
 
-    public HierarchyViewModel() : base("Hierarchy")
-    {
-        items = new ObservableCollection<HierarchyViewElement>();
-        
-        Scale = 1;
-        
-        ZoomToFitCommand = new RelayCommand(() =>
-        {
-            WeakReferenceMessenger.Default.Send(new ZoomToFitmessage(_netlistId),
-                FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel);
-        });
+	private double _offsetY { get; set; }
 
-        ZoomToToplevelCommand = new RelayCommand(() =>
-        {
-            WeakReferenceMessenger.Default.Send(new ZoomToToplevelMessage(_netlistId),
-                FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel);
-        });
-    }
+	public double OffsetY
+	{
+		get => _offsetY;
+		set
+		{
+			_offsetY = value;
+			OnPropertyChanged(nameof(OffsetY));
+		}
+	}
+
+	private double _scale { get; set; }
+
+	public double Scale
+	{
+		get => _scale;
+		set
+		{
+			_scale = value;
+			OnPropertyChanged(nameof(Scale));
+		}
+	}
+
+	public HierarchyViewModel() : base("Hierarchy")
+	{
+		items = new ObservableCollection<HierarchyViewElement>();
+
+		Scale = 1;
+
+		ZoomToFitCommand = new RelayCommand(() =>
+		{
+			WeakReferenceMessenger.Default.Send(new ZoomToFitmessage(_netlistId),
+				FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel);
+		});
+
+		ZoomToToplevelCommand = new RelayCommand(() =>
+		{
+			WeakReferenceMessenger.Default.Send(new ZoomToToplevelMessage(_netlistId),
+				FentwumSNetlistViewerSettingsHelper.HierarchyMessageChannel);
+		});
+	}
 }

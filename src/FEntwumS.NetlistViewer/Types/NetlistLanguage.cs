@@ -2,7 +2,7 @@
 
 public enum NetlistLanguage
 {
-    VHDL,
-    Verilog,
-    System_Verilog
+	VHDL,
+	Verilog,
+	System_Verilog
 }

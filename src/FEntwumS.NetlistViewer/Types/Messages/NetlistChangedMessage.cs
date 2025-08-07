@@ -5,8 +5,7 @@ namespace FEntwumS.NetlistViewer.Types.Messages;
 
 public class NetlistChangedMessage : ValueChangedMessage<UniversalFpgaProjectRoot>
 {
-    public NetlistChangedMessage(UniversalFpgaProjectRoot value) : base(value)
-    {
-        
-    }
+	public NetlistChangedMessage(UniversalFpgaProjectRoot value) : base(value)
+	{
+	}
 }

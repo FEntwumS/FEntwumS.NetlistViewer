@@ -15,226 +15,226 @@ namespace FEntwumS.NetlistViewer.ViewModels;
 
 public class FrontendViewModel : ExtendedTool
 {
-    public ICommand LoadJsonCommand { get; }
-    private double scale { get; set; }
+	public ICommand LoadJsonCommand { get; }
+	private double scale { get; set; }
 
-    private AvaloniaList<NetlistElement> items { get; set; }
+	private AvaloniaList<NetlistElement> items { get; set; }
 
-    public AvaloniaList<NetlistElement> Items
-    {
-        get => this.items;
-        set
-        {
-            this.items.Clear();
-            this.items.AddRange(value);
-            OnPropertyChanged();
-        }
-    }
+	public AvaloniaList<NetlistElement> Items
+	{
+		get => this.items;
+		set
+		{
+			this.items.Clear();
+			this.items.AddRange(value);
+			OnPropertyChanged();
+		}
+	}
 
-    public double Scale
-    {
-        get => this.scale;
-        set
-        {
-            this.scale = value;
-            OnPropertyChanged();
-        }
-    }
+	public double Scale
+	{
+		get => this.scale;
+		set
+		{
+			this.scale = value;
+			OnPropertyChanged();
+		}
+	}
 
-    private double offX { get; set; }
+	private double offX { get; set; }
 
-    public double OffX
-    {
-        get => this.offX;
-        set
-        {
-            this.offX = value;
-            OnPropertyChanged();
-        }
-    }
+	public double OffX
+	{
+		get => this.offX;
+		set
+		{
+			this.offX = value;
+			OnPropertyChanged();
+		}
+	}
 
-    private double offY { get; set; }
+	private double offY { get; set; }
 
-    public double OffY
-    {
-        get => this.offY;
-        set
-        {
-            this.offY = value;
-            OnPropertyChanged();
-        }
-    }
+	public double OffY
+	{
+		get => this.offY;
+		set
+		{
+			this.offY = value;
+			OnPropertyChanged();
+		}
+	}
 
-    private bool fitToZoom { get; set; }
+	private bool fitToZoom { get; set; }
 
-    public bool FitToZoom
-    {
-        get => this.fitToZoom;
-        set
-        {
-            this.fitToZoom = value;
-            OnPropertyChanged();
-        }
-    }
+	public bool FitToZoom
+	{
+		get => this.fitToZoom;
+		set
+		{
+			this.fitToZoom = value;
+			OnPropertyChanged();
+		}
+	}
 
-    private bool isLoaded { get; set; }
+	private bool isLoaded { get; set; }
 
-    public bool IsLoaded
-    {
-        get => this.isLoaded;
-        set
-        {
-            this.isLoaded = value;
-            OnPropertyChanged();
-        }
-    }
+	public bool IsLoaded
+	{
+		get => this.isLoaded;
+		set
+		{
+			this.isLoaded = value;
+			OnPropertyChanged();
+		}
+	}
 
-    private Stream? file { get; set; }
+	private Stream? file { get; set; }
 
-    public Stream? File
-    {
-        get => file;
-        set
-        {
-            this.file = value;
-            OnPropertyChanged();
-        }
-    }
+	public Stream? File
+	{
+		get => file;
+		set
+		{
+			this.file = value;
+			OnPropertyChanged();
+		}
+	}
 
-    private string? clickedElementPath { get; set; }
+	private string? clickedElementPath { get; set; }
 
-    public string? ClickedElementPath
-    {
-        get => clickedElementPath;
-        set
-        {
-            this.clickedElementPath = value;
-            OnPropertyChanged();
-            _ = ClickedElementPathChangedAsync();
-        }
-    }
+	public string? ClickedElementPath
+	{
+		get => clickedElementPath;
+		set
+		{
+			this.clickedElementPath = value;
+			OnPropertyChanged();
+			_ = ClickedElementPathChangedAsync();
+		}
+	}
 
-    public ICommand FitToZoomCommand { get; }
+	public ICommand FitToZoomCommand { get; }
 
-    public UInt64 NetlistId
-    {
-        get => netlistId;
-        set
-        {
-            netlistId = value;
-            OnPropertyChanged();
-        }
-    }
+	public UInt64 NetlistId
+	{
+		get => netlistId;
+		set
+		{
+			netlistId = value;
+			OnPropertyChanged();
+		}
+	}
 
-    [DataMember] private UInt64 netlistId { get; set; }
-    
-    private bool fileLoaded { get; set; }
+	[DataMember] private UInt64 netlistId { get; set; }
 
-    [DataMember]
-    public bool FileLoaded
-    {
-        get => fileLoaded;
-        set
-        {
-            fileLoaded = value;
-            OnPropertyChanged();
-        }
-    }
+	private bool fileLoaded { get; set; }
+
+	[DataMember]
+	public bool FileLoaded
+	{
+		get => fileLoaded;
+		set
+		{
+			fileLoaded = value;
+			OnPropertyChanged();
+		}
+	}
 
 
-    private ICustomLogger _logger { get; set; }
-    private readonly IApplicationStateService _applicationStateService;
+	private ICustomLogger _logger { get; set; }
+	private readonly IApplicationStateService _applicationStateService;
 
-    private FrontendService _frontendService { get; set; }
+	private FrontendService _frontendService { get; set; }
 
-    public FrontendViewModel() : base("Frontend")
-    {
-        items = new AvaloniaList<NetlistElement>();
-        Items = new AvaloniaList<NetlistElement>();
+	public FrontendViewModel() : base("Frontend")
+	{
+		items = new AvaloniaList<NetlistElement>();
+		Items = new AvaloniaList<NetlistElement>();
 
-        FitToZoom = false;
+		FitToZoom = false;
 
-        _logger = ServiceManager.GetCustomLogger();
-        _applicationStateService = ServiceManager.GetService<IApplicationStateService>();
+		_logger = ServiceManager.GetCustomLogger();
+		_applicationStateService = ServiceManager.GetService<IApplicationStateService>();
 
-        // OneWare uses the Community MVVM Toolkit. If ReactiveUI is used in an extension, any access to a bound property
-        // inside a ReactiveCommand leads to an exception
-        LoadJsonCommand = new RelayCommand(() => _ = OpenFileImplAsync());
+		// OneWare uses the Community MVVM Toolkit. If ReactiveUI is used in an extension, any access to a bound property
+		// inside a ReactiveCommand leads to an exception
+		LoadJsonCommand = new RelayCommand(() => _ = OpenFileImplAsync());
 
-        FitToZoomCommand = new RelayCommand(() => { FitToZoom = !FitToZoom; });
+		FitToZoomCommand = new RelayCommand(() => { FitToZoom = !FitToZoom; });
 
-        _frontendService = ServiceManager.GetService<FrontendService>();
-        
-        FileLoaded = false;
-    }
+		_frontendService = ServiceManager.GetService<FrontendService>();
 
-    public async Task ClickedElementPathChangedAsync()
-    {
-        await _frontendService.ExpandNodeAsync(clickedElementPath, this);
-    }
+		FileLoaded = false;
+	}
 
-    public override bool OnClose()
-    {
-        _ = ServiceManager.GetService<FrontendService>().CloseNetlistOnServerAsync(netlistId);
+	public async Task ClickedElementPathChangedAsync()
+	{
+		await _frontendService.ExpandNodeAsync(clickedElementPath, this);
+	}
 
-        return base.OnClose();
-    }
+	public override bool OnClose()
+	{
+		_ = ServiceManager.GetService<FrontendService>().CloseNetlistOnServerAsync(netlistId);
 
-    private void UpdateScaleImpl()
-    {
-        IsLoaded = !IsLoaded;
-        FitToZoom = !FitToZoom;
-    }
+		return base.OnClose();
+	}
 
-    public async Task OpenFileImplAsync()
-    {
-        var jsonLoader = ServiceManager.GetJsonLoader();
+	private void UpdateScaleImpl()
+	{
+		IsLoaded = !IsLoaded;
+		FitToZoom = !FitToZoom;
+	}
 
-        await Task.Run(() =>
-        {
-            try
-            {
-                ApplicationProcess readProc = _applicationStateService.AddState("Reading response", AppState.Loading);
-                
-                _logger.Log("Opening file...");
+	public async Task OpenFileImplAsync()
+	{
+		var jsonLoader = ServiceManager.GetJsonLoader();
 
-                //var file = fileOpener.OpenFileAsync();
+		await Task.Run(() =>
+		{
+			try
+			{
+				ApplicationProcess readProc = _applicationStateService.AddState("Reading response", AppState.Loading);
 
-                if (File is null)
-                {
-                    _logger.Error("File is empty.");
-                    return;
-                }
+				_logger.Log("Opening file...");
 
-                _logger.Log("File loaded");
-                
-                _applicationStateService.RemoveState(readProc);
-                
-                ApplicationProcess loadProc = _applicationStateService.AddState("Loading JSON", AppState.Loading);
-                
-                Task t = jsonLoader.OpenJsonAsync(File, netlistId);
-                t.Wait();
-                
-                _applicationStateService.RemoveState(loadProc);
+				//var file = fileOpener.OpenFileAsync();
 
-                File.Close();
-                
-                FileLoaded = false;
+				if (File is null)
+				{
+					_logger.Error("File is empty.");
+					return;
+				}
 
-                Items.Clear();
+				_logger.Log("File loaded");
 
-                Items.AddRange(jsonLoader.ParseJsonAsync(0, 0, this, netlistId).Result);
+				_applicationStateService.RemoveState(readProc);
 
-                UpdateScaleImpl();
-                
-                FileLoaded = true;
+				ApplicationProcess loadProc = _applicationStateService.AddState("Loading JSON", AppState.Loading);
 
-                _logger.Log("JSON read");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        });
-    }
+				Task t = jsonLoader.OpenJsonAsync(File, netlistId);
+				t.Wait();
+
+				_applicationStateService.RemoveState(loadProc);
+
+				File.Close();
+
+				FileLoaded = false;
+
+				Items.Clear();
+
+				Items.AddRange(jsonLoader.ParseJsonAsync(0, 0, this, netlistId).Result);
+
+				UpdateScaleImpl();
+
+				FileLoaded = true;
+
+				_logger.Log("JSON read");
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+			}
+		});
+	}
 }

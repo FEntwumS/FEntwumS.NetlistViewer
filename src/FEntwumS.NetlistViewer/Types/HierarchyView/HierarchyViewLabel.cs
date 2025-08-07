@@ -2,18 +2,18 @@
 
 public class HierarchyViewLabel : HierarchyViewShape
 {
-    private string? _content;
-    private double _fontSize;
+	private string? _content;
+	private double _fontSize;
 
-    public string Content
-    {
-        get => this._content ?? "";
-        set => this._content = value;
-    }
+	public string Content
+	{
+		get => this._content ?? "";
+		set => this._content = value;
+	}
 
-    public double FontSize
-    {
-        get => this._fontSize;
-        set => this._fontSize = value;
-    }
+	public double FontSize
+	{
+		get => this._fontSize;
+		set => this._fontSize = value;
+	}
 }
