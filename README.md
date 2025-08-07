@@ -8,8 +8,7 @@ the software.
 ## System requirements
 
 Currently, only Windows and Linux are supported, but the plugin should work on all platforms OneWare Studio runs on,
-except
-browsers.
+except browsers.
 
 ## Dependencies
 
@@ -32,10 +31,8 @@ Verilog/SystemVerilog designs can likely be displayed, this is **not** guarantee
 
 # About
 
-This repository contains the source code for two plugins for [OneWare Studio](https://github.com/one-ware/OneWare). They
-are developed by
-TH Köln (University of Applied Sciences Cologne) as part of
-the [FEntwumS research project](https://www.th-koeln.de/informations-medien-und-elektrotechnik/forschungsprojekt-fentwums_121126.php).
+This repository contains the source code for two plugins for [OneWare Studio](https://github.com/one-ware/OneWare). They are developed by TH Köln 
+(University of Applied Sciences Cologne) as part of the [FEntwumS research project](https://www.th-koeln.de/informations-medien-und-elektrotechnik/forschungsprojekt-fentwums_121126.php).
 
 ## Installation
 
@@ -133,8 +130,8 @@ The FEntwumS Netlist Viewer adds several global and project-specific settings to
 | Experimental | Continue if errors occur during dependency installation | Disables the dependency version checker                                                                                        | Plugin development                                                       |
 | Experimental | Use hierarchical backend                                | Uses the backend for hierarchical netlists                                                                                     | Beta-testing the hierarchical backend                                    |
 | Experimental | Performance Target                                      | Sets the way the hierarchical backend loads enitities from the netlist                                                         | Testing the different modes                                              |
-| Experimental | Always regenerate netlists                              | By unticking this checkbox, netlists are only generted for the netlist viewer if the underlying HDL files changed              | Beta-testing performance improvements                                    |
-| Experimental | Enable hierarchy view                                   | Enables two views that allow for the easy exploration of the desgins hierarchy                                                 | Beta-testing the hierarchy view                                          |
+| Experimental | Always regenerate netlists                              | By unticking this checkbox, netlists are only generated for the netlist viewer if the underlying HDL files changed             | Beta-testing performance improvements                                    |
+| Experimental | Enable hierarchy view                                   | Enables two views that allow for the easy exploration of the design's hierarchy                                                | Beta-testing the hierarchy view                                          |
 | Experimental | Automatic netlist generation                            | Allows enabling and setting the mode for automatic netlist generation following changes to the underlying HDL source files     | Beta-testing automatic netlist generation                                |
 | Experimental | Automatic netlist generation interval (s)               | The interval in which netlists shall be regenerated, if `Automatic netlist generation` is set to interval. Measured in seconds | Beta-testing automatic netlist generation                                |
 
@@ -180,18 +177,19 @@ you need to right-click your toplevel entity and use the "View netlist for [...]
 ## I generated a netlist myself, but I can't seem to find it in the project explorer
 
 By default, OneWare Studio does not display `.json` files in the project explorer. To fix this, you will need to add the
-`.json` filetype manually. To do this, please right click on the project containing the netlist, choose the `Edit`
+`.json` filetype manually. To do this, please right-click on the project containing the netlist, choose the `Edit`
 option and add an entry `*.json` to the list `Files to Include`.
 
 ## `An internal server error occured. Please file a bug report if this problem persists.`
 
 First, please make sure that you have selected the correct device manufacturer and device family in the settings. If the
 design you are trying to view is written in VHDL, make sure that you have set the correct VHDL standard level in the
-settings (the default is 93c). You can find a detailed explanation of the VHDL standard levels in
+project settings (the default is 93c). You can find a detailed explanation of the VHDL standard levels in
 the [GHDL documentation](https://ghdl.github.io/ghdl/using/ImplementationOfVHDL.html#vhdl-standards).
 
 Please file a bug report including the netlist that you wanted to view. If you used our plugin to generate the netlist,
-you can find the file under `build/netlist/<top>.json` in your project directory.
+you can find the file under `build/netlist/<top>-hier.json` in your project directory. This folder is hidden inside
+OneWare Studio by default, so you may need to use your system's file explorer to retrieve the file.
 
 ## `The server could not be reached` or `The address ... could not be resolved`
 
@@ -206,4 +204,4 @@ To ensure that all the OneWare Studio plugins the netlist viewer depends on are 
 fails for you, for example due to using an older version of a certain plugin, you can tick the `Continue if errors occur
 during dependency installation` checkbox in the experimental section of the Netlist Viewer's settings. By enabling this
 setting, the result of the check is ignored. This means that **you are on your own**! While it may look as if everything
-is working as intended, this configuration is **not** supported and can stop working without notice.
+is working as intended, this configuration is **not** supported and can stop working at any moment without notice.
