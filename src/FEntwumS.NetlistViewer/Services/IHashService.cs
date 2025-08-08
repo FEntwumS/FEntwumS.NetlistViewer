@@ -2,5 +2,5 @@
 
 public interface IHashService
 {
-    public UInt32 ComputeHash(ReadOnlySpan<byte> input);
+	public UInt32 ComputeHash(ReadOnlySpan<byte> input);
 }

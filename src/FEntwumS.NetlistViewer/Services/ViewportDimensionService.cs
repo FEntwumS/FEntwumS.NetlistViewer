@@ -5,98 +5,100 @@ namespace FEntwumS.NetlistViewer.Services;
 
 public class ViewportDimensionService : IViewportDimensionService
 {
-    private ConcurrentDictionary<UInt64, ViewportInformation> _viewportData = new ConcurrentDictionary<UInt64, ViewportInformation>();
-    private double width { get; set; }
-    private double height { get; set; }
+	private ConcurrentDictionary<UInt64, ViewportInformation> _viewportData =
+		new ConcurrentDictionary<UInt64, ViewportInformation>();
 
-    public void SetHeight(double Height)
-    {
-        height = Height;
-    }
+	private double width { get; set; }
+	private double height { get; set; }
 
-    public double GetHeight()
-    {
-        return height;
-    }
+	public void SetHeight(double Height)
+	{
+		height = Height;
+	}
 
-    public void SetWidth(double Width)
-    {
-        width = Width;
-    }
+	public double GetHeight()
+	{
+		return height;
+	}
 
-    public double GetWidth()
-    {
-        return width;
-    }
+	public void SetWidth(double Width)
+	{
+		width = Width;
+	}
 
-    public DRect? GetZoomElementDimensions(UInt64 netlistId)
-    {
-        return _viewportData[netlistId].ClickedElementBounds;
-    }
+	public double GetWidth()
+	{
+		return width;
+	}
 
-    public void SetZoomElementDimensions(UInt64 netlistId, DRect? ZoomElementDimensions)
-    {
-        if (_viewportData.ContainsKey(netlistId))
-        {
-            _viewportData[netlistId].ClickedElementBounds = ZoomElementDimensions;
-        }
-        else
-        {
-            _viewportData[netlistId] = new ViewportInformation{ ClickedElementBounds = ZoomElementDimensions };
-        }
-    }
+	public DRect? GetZoomElementDimensions(UInt64 netlistId)
+	{
+		return _viewportData[netlistId].ClickedElementBounds;
+	}
 
-    public string? GetClickedElementPath(UInt64 netlistId)
-    {
-        return _viewportData[netlistId].ClickedElementPath;
-    }
+	public void SetZoomElementDimensions(UInt64 netlistId, DRect? ZoomElementDimensions)
+	{
+		if (_viewportData.ContainsKey(netlistId))
+		{
+			_viewportData[netlistId].ClickedElementBounds = ZoomElementDimensions;
+		}
+		else
+		{
+			_viewportData[netlistId] = new ViewportInformation { ClickedElementBounds = ZoomElementDimensions };
+		}
+	}
 
-    public void SetClickedElementPath(UInt64 netlistId, string? ClickedElementName)
-    {
-        if (_viewportData.ContainsKey(netlistId))
-        {
-            _viewportData[netlistId].ClickedElementPath = ClickedElementName;
-        }
-        else
-        {
-            _viewportData[netlistId] = new ViewportInformation{ ClickedElementPath = ClickedElementName };
-        }
-    }
+	public string? GetClickedElementPath(UInt64 netlistId)
+	{
+		return _viewportData[netlistId].ClickedElementPath;
+	}
 
-    public int getCurrentElementCount(UInt64 netlistId)
-    {
-        return _viewportData[netlistId].CurrentElementCount;
-    }
+	public void SetClickedElementPath(UInt64 netlistId, string? ClickedElementName)
+	{
+		if (_viewportData.ContainsKey(netlistId))
+		{
+			_viewportData[netlistId].ClickedElementPath = ClickedElementName;
+		}
+		else
+		{
+			_viewportData[netlistId] = new ViewportInformation { ClickedElementPath = ClickedElementName };
+		}
+	}
 
-    public void SetCurrentElementCount(UInt64 netlistId, int CurrentElementCount)
-    {
-        if (_viewportData.ContainsKey(netlistId))
-        {
-            _viewportData[netlistId].CurrentElementCount = CurrentElementCount;
-        }
-        else
-        {
-            _viewportData[netlistId] = new ViewportInformation{ CurrentElementCount = CurrentElementCount };
-        }
-    }
+	public int getCurrentElementCount(UInt64 netlistId)
+	{
+		return _viewportData[netlistId].CurrentElementCount;
+	}
 
-    public void SetMaxHeight(UInt64 netlistId, double MaxHeight)
-    {
-        _viewportData[netlistId].MaxHeight = MaxHeight;
-    }
+	public void SetCurrentElementCount(UInt64 netlistId, int CurrentElementCount)
+	{
+		if (_viewportData.ContainsKey(netlistId))
+		{
+			_viewportData[netlistId].CurrentElementCount = CurrentElementCount;
+		}
+		else
+		{
+			_viewportData[netlistId] = new ViewportInformation { CurrentElementCount = CurrentElementCount };
+		}
+	}
 
-    public double GetMaxHeight(UInt64 netlistId)
-    {
-        return _viewportData[netlistId].MaxHeight;
-    }
+	public void SetMaxHeight(UInt64 netlistId, double MaxHeight)
+	{
+		_viewportData[netlistId].MaxHeight = MaxHeight;
+	}
 
-    public void SetMaxWidth(UInt64 netlistId, double MaxWidth)
-    {
-        _viewportData[netlistId].MaxWidth = MaxWidth;
-    }
+	public double GetMaxHeight(UInt64 netlistId)
+	{
+		return _viewportData[netlistId].MaxHeight;
+	}
 
-    public double GetMaxWidth(UInt64 netlistId)
-    {
-        return _viewportData[netlistId].MaxWidth;
-    }
+	public void SetMaxWidth(UInt64 netlistId, double MaxWidth)
+	{
+		_viewportData[netlistId].MaxWidth = MaxWidth;
+	}
+
+	public double GetMaxWidth(UInt64 netlistId)
+	{
+		return _viewportData[netlistId].MaxWidth;
+	}
 }

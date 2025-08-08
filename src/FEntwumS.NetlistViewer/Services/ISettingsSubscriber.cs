@@ -2,5 +2,5 @@
 
 public interface ISettingsSubscriber
 {
-    public void SubscribeToSettings();
+	public void SubscribeToSettings();
 }

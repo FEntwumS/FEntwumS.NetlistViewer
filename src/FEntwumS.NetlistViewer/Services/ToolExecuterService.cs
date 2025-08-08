@@ -7,67 +7,69 @@ namespace FEntwumS.NetlistViewer.Services;
 
 public class ToolExecuterService : IToolExecuterService
 {
-    private readonly IChildProcessService _childProcessService;
-    private readonly ICustomLogger _logger;
+	private readonly IChildProcessService _childProcessService;
+	private readonly ICustomLogger _logger;
 
-    public ToolExecuterService()
-    {
-        _childProcessService = ServiceManager.GetService<IChildProcessService>();
-        _logger = ServiceManager.GetCustomLogger();
-    }
-    
-    public async Task<(bool success, string stdout, string stderr)> ExecuteToolAsync(string toolPath, IReadOnlyList<string> args, string workingDirectory)
-    {
-        bool noErrors = true;
-        StringBuilder stdout = new StringBuilder();
-        StringBuilder stderr = new StringBuilder();
-        
-        (bool success, _) = await _childProcessService.ExecuteShellAsync(toolPath, args, workingDirectory, $"Executing {Path.GetFileNameWithoutExtension(toolPath)}", AppState.Loading, false, x =>
-        {
-            if (x.StartsWith("ghdl:error:"))
-            {
-                _logger.Error(x);
-                noErrors = false;
-            }
+	public ToolExecuterService()
+	{
+		_childProcessService = ServiceManager.GetService<IChildProcessService>();
+		_logger = ServiceManager.GetCustomLogger();
+	}
 
-            stdout.AppendLine(x);
+	public async Task<(bool success, string stdout, string stderr)> ExecuteToolAsync(string toolPath,
+		IReadOnlyList<string> args, string workingDirectory)
+	{
+		bool noErrors = true;
+		StringBuilder stdout = new StringBuilder();
+		StringBuilder stderr = new StringBuilder();
 
-            _logger.Log(x);
-            return true;
-        }, x =>
-        {
-            if (x.StartsWith("ghdl:error:") || x.StartsWith("ERROR:") || x.Contains("error:"))
-            {
-                noErrors = false;
-            }
-            
-            stderr.AppendLine(x);
-                
-            _logger.Error(x);
-            return true;
-        });
-        
-        return (success && noErrors, stdout.ToString(), stderr.ToString());
-    }
+		(bool success, _) = await _childProcessService.ExecuteShellAsync(toolPath, args, workingDirectory,
+			$"Executing {Path.GetFileNameWithoutExtension(toolPath)}", AppState.Loading, false, x =>
+			{
+				if (x.StartsWith("ghdl:error:"))
+				{
+					_logger.Error(x);
+					noErrors = false;
+				}
 
-    /// <summary>
-    /// Starts a process and returns the associated process handle. STDOUT and STDERR are not captured
-    /// </summary>
-    /// <param name="path"> The path of the executable</param>
-    /// <param name="args"> The arguments list</param>
-    /// <param name="workingDirectory"> The working directory</param>
-    /// <returns>Process handle of the spawned process</returns>
-    public IChildProcess ExecuteBackgroundProcess(string path, IReadOnlyList<string> args, string? workingDirectory)
-    {
-        ChildProcessStartInfo info = new ChildProcessStartInfo
-        {
-            WorkingDirectory = workingDirectory,
-            FileName = path,
-            Arguments = args
-        };
-        
-        var process = ChildProcess.Start(info);
-        
-        return process;
-    }
+				stdout.AppendLine(x);
+
+				_logger.Log(x);
+				return true;
+			}, x =>
+			{
+				if (x.StartsWith("ghdl:error:") || x.StartsWith("ERROR:") || x.Contains("error:"))
+				{
+					noErrors = false;
+				}
+
+				stderr.AppendLine(x);
+
+				_logger.Error(x);
+				return true;
+			});
+
+		return (success && noErrors, stdout.ToString(), stderr.ToString());
+	}
+
+	/// <summary>
+	/// Starts a process and returns the associated process handle. STDOUT and STDERR are not captured
+	/// </summary>
+	/// <param name="path"> The path of the executable</param>
+	/// <param name="args"> The arguments list</param>
+	/// <param name="workingDirectory"> The working directory</param>
+	/// <returns>Process handle of the spawned process</returns>
+	public IChildProcess ExecuteBackgroundProcess(string path, IReadOnlyList<string> args, string? workingDirectory)
+	{
+		ChildProcessStartInfo info = new ChildProcessStartInfo
+		{
+			WorkingDirectory = workingDirectory,
+			FileName = path,
+			Arguments = args
+		};
+
+		var process = ChildProcess.Start(info);
+
+		return process;
+	}
 }

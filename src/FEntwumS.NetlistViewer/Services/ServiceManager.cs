@@ -5,45 +5,45 @@ namespace FEntwumS.NetlistViewer.Services;
 
 public class ServiceManager
 {
-    private static IContainerProvider? _containerProvider;
-    
-    public ServiceManager(IContainerProvider? containerProvider)
-    {
-        _containerProvider = containerProvider;
-    }
+	private static IContainerProvider? _containerProvider;
 
-    public static IJsonLoader GetJsonLoader()
-    {
-        return _containerProvider.Resolve<IJsonLoader>();
-    }
+	public ServiceManager(IContainerProvider? containerProvider)
+	{
+		_containerProvider = containerProvider;
+	}
 
-    public static IViewportDimensionService? GetViewportDimensionService()
-    {
-        return _containerProvider.Resolve<IViewportDimensionService>();
-    }
+	public static IJsonLoader GetJsonLoader()
+	{
+		return _containerProvider.Resolve<IJsonLoader>();
+	}
 
-    public static ILogger GetLogger()
-    {
-        return _containerProvider.Resolve<ILogger>();
-    }
+	public static IViewportDimensionService? GetViewportDimensionService()
+	{
+		return _containerProvider.Resolve<IViewportDimensionService>();
+	}
 
-    public static ICustomLogger GetCustomLogger()
-    {
-        return _containerProvider.Resolve<ICustomLogger>();
-    }
+	public static ILogger GetLogger()
+	{
+		return _containerProvider.Resolve<ILogger>();
+	}
 
-    public static ILanguageManager GetLanguageManager()
-    {
-        return _containerProvider.Resolve<ILanguageManager>();
-    }
+	public static ICustomLogger GetCustomLogger()
+	{
+		return _containerProvider.Resolve<ICustomLogger>();
+	}
 
-    public static IHashService GetHashService()
-    {
-        return _containerProvider.Resolve<IHashService>();
-    }
+	public static ILanguageManager GetLanguageManager()
+	{
+		return _containerProvider.Resolve<ILanguageManager>();
+	}
 
-    public static T GetService<T>()
-    {
-        return _containerProvider.Resolve<T>();
-    }
+	public static IHashService GetHashService()
+	{
+		return _containerProvider.Resolve<IHashService>();
+	}
+
+	public static T GetService<T>()
+	{
+		return _containerProvider.Resolve<T>();
+	}
 }

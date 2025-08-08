@@ -4,5 +4,6 @@ namespace FEntwumS.NetlistViewer.Services;
 
 public interface IHierarchyJsonParser
 {
-    public Task<(HierarchySideBarElement? sidebarRoot, List<HierarchyViewElement>? hierarchyViewElements)> LoadHierarchyAsync(Stream hierarchyStream, ulong netlistId);
+	public Task<(HierarchySideBarElement? sidebarRoot, List<HierarchyViewElement>? hierarchyViewElements)>
+		LoadHierarchyAsync(Stream hierarchyStream, ulong netlistId);
 }
