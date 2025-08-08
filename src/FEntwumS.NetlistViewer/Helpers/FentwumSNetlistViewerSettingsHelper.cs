@@ -92,6 +92,7 @@ public class FentwumSNetlistViewerSettingsHelper
 		{
 			NetlistType.Flat => "flat",
 			NetlistType.Hier => "hier",
+			_ => "hier"
 		};
 
 		return Path.Combine(GetBuildDirectory(json), $"{top}-{suffix}.json");

@@ -22,7 +22,7 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 {
     #region Properties
 
-    private ObservableCollection<HierarchyViewElement>? _items = new();
+    private ObservableCollection<HierarchyViewElement> _items = new();
 
     public ObservableCollection<HierarchyViewElement> Items
     {

@@ -996,6 +996,7 @@ public class FrontendService : IFrontendService
 		catch (Exception ex)
 		{
 			_logger.Error("An error occured trying to connect to the server");
+			_logger.Log(ex.Message);
 			_applicationStateService.RemoveState(waitForBackendProc);
 			_applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
 			return false;

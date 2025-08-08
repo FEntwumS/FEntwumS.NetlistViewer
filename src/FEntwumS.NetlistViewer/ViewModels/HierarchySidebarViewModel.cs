@@ -19,13 +19,13 @@ public class HierarchySidebarViewModel : ExtendedTool
 		}
 	}
 
-	private ObservableCollection<HierarchySideBarElement> _elements { get; }
+	private ObservableCollection<HierarchySideBarElement> _elements;
 
-	private HierarchySideBarElement _selectedElement { get; set; }
+	private HierarchySideBarElement? _selectedElement;
 
 	public HierarchySideBarElement SelectedElement
 	{
-		get => this._selectedElement;
+		get => this._selectedElement ?? new HierarchySideBarElement();
 		set
 		{
 			this._selectedElement = value;
@@ -34,11 +34,11 @@ public class HierarchySidebarViewModel : ExtendedTool
 		}
 	}
 
-	private string _selectedElementType { get; set; }
+	private string? _selectedElementType;
 
 	public string SelectedElementType
 	{
-		get => this._selectedElementType;
+		get => this._selectedElementType ?? string.Empty;
 		set
 		{
 			this._selectedElementType = value;

@@ -20,14 +20,13 @@ public class NetlistGenerator : INetlistGenerator
 	private bool _alwaysRegenerateNetlists = true;
 
 	private DispatcherTimer _timer = new();
-	private bool _timerNeeded = false;
 	private double _generationInterval = 60.0d;
 
 	private List<FileSystemWatcher> _watchers = new();
 	private readonly Lock _lock = new();
 	private HashSet<UniversalFpgaProjectRoot> _changedProjectSet = new();
 	private AutomaticNetlistGenerationType _generationType = AutomaticNetlistGenerationType.Never;
-	private bool _settingsLoaded = false;
+	// private bool _settingsLoaded = false;
 
 	public NetlistGenerator()
 	{

@@ -72,7 +72,7 @@ public class StorageService : IStorageService
 					new Dictionary<string, JsonElement>();
 				foreach ((string key, JsonElement value) in json)
 				{
-					_storage.Add(key, value.Deserialize<string>());
+					_storage.Add(key, value.Deserialize<string>() ?? string.Empty);
 				}
 			}
 			finally
