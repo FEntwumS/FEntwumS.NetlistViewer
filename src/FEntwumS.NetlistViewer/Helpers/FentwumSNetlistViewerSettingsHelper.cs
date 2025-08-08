@@ -73,9 +73,18 @@ public class FentwumSNetlistViewerSettingsHelper
 
 	#region Path generation methods
 
+	public static string GetTopNameFromJsonPath(IProjectFile jsonFile)
+	{
+		string top = Path.GetFileNameWithoutExtension(jsonFile.FullPath);
+
+		top = top.Replace("-hier", "").Replace("-flat", "");	// Remove suffixes
+
+		return top;
+	}
+
 	public static string GetCcVhdlFilePath(IProjectFile projectFile)
 	{
-		string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
+		string top = GetTopNameFromJsonPath(projectFile);
 
 		return Path.Combine(GetBuildDirectory(projectFile), $"{top}.v");
 	}
