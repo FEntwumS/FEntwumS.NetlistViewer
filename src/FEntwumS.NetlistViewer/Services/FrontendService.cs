@@ -517,7 +517,7 @@ public class FrontendService : IFrontendService
 		vm.Title = $"Netlist: {top}";
 		_logger.Log("Selected file: " + json.FullPath);
 
-		FileStream jsonFileStream = File.Open(json.FullPath, FileMode.Open, FileAccess.Read);
+		FileStream jsonFileStream = File.Open(json.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
 		MultipartFormDataContent formDataContent = new MultipartFormDataContent()
 		{
@@ -534,9 +534,9 @@ public class FrontendService : IFrontendService
 			(_useHierarchicalBackend ? $"&performance-target={_performanceTarget}" : ""),
 			formDataContent);
 
-		_applicationStateService.RemoveState(waitForBackendProc);
-
 		jsonFileStream.Close();
+
+		_applicationStateService.RemoveState(waitForBackendProc);
 
 		if (resp == null)
 		{
