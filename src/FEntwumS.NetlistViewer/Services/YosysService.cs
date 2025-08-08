@@ -106,11 +106,8 @@ public class YosysService : IYosysService
             yosysArgs.Insert(1, "slang");
         }
 
-        (bool success, string stdout, string stderr) =
+        (bool success, _, _) =
             await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
-
-        _logger.Log(stdout);
-        _logger.Log(stderr);
 
         return success;
     }
