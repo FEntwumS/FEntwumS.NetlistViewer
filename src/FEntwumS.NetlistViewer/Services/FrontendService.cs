@@ -481,7 +481,7 @@ public class FrontendService : IFrontendService
 		ApplicationProcess proc = _applicationStateService.AddState("Starting viewer", AppState.Loading);
 
 		HttpResponseMessage? resp = null;
-		string top = Path.GetFileNameWithoutExtension(json.FullPath);
+		string top = FentwumSNetlistViewerSettingsHelper.GetTopNameFromJsonPath(json);
 
 		if (!File.Exists(json.FullPath))
 		{
