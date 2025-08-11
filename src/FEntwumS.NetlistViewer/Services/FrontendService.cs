@@ -545,24 +545,26 @@ public class FrontendService : IFrontendService
 			return;
 		}
 
-		vm.File = await resp.Content.ReadAsStreamAsync();
-
 		if (!resp.IsSuccessStatusCode)
 		{
 			_applicationStateService.RemoveState(proc, "Error: The backend returned an error");
 
 			return;
 		}
+		
+		vm.File = await resp.Content.ReadAsStreamAsync();
 
 		ApplicationProcess indexProc = _applicationStateService.AddState("Indexing", AppState.Loading);
 
 		// create code index for cross-compiled VHDL
-		string ccFile = FentwumSNetlistViewerSettingsHelper.GetCcVhdlFilePath(json);
+		string ccVhdlFilePath = FentwumSNetlistViewerSettingsHelper.GetCcVhdlFilePath(json);
 
-		if (File.Exists(ccFile))
+		if (File.Exists(ccVhdlFilePath))
 		{
+			_logger.Log($"Found cross-compiled Verilog at {ccVhdlFilePath}");
+			
 			bool success = await ServiceManager.GetService<ICcVhdlFileIndexService>()
-				.IndexFileAsync(ccFile, combinedHash);
+				.IndexFileAsync(ccVhdlFilePath, combinedHash);
 
 			if (success)
 			{
@@ -676,6 +678,8 @@ public class FrontendService : IFrontendService
 						"An internal server error occured. Please file a bug report if this problem persists.",
 						printErrors);
 				}
+
+				// return null;
 			}
 
 			return resp;
