@@ -39,6 +39,11 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 		[
 			new PackageTab()
 			{
+				Title = "README",
+				ContentUrl = "https://raw.githubusercontent.com/FEntwumS/NetlistReaderBackend/refs/heads/master/README.md"
+			},
+			new PackageTab()
+			{
 				Title = "License",
 				ContentUrl =
 					"https://raw.githubusercontent.com/FEntwumS/NetlistReaderBackend/refs/heads/master/LICENSE.txt"
