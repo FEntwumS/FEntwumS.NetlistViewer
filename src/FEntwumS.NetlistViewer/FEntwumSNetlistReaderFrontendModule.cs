@@ -269,6 +269,9 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
 		containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
 		{
+			// JSON netlists can be directly passed to the ShowViewer() function. The backend determines whether it is a
+			// flattened or a hierarchical netlist. For the supported HDLs, the netlist is first retrieved or generated 
+			
 			if (selected is [IProjectFile { Extension: ".json" } jsonFile])
 			{
 				menuItems.Add(new MenuItemViewModel("NetlistViewer")
@@ -306,6 +309,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
 		containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
 		{
+			// Add no context menu entry for the hierarchy viewer if it has been disabled
+			
 			if (!EnableHierarchyView)
 			{
 				return;
@@ -431,6 +436,9 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
 		logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
 
+		// Subscribe to the setting that enables/disables the hierarchy viewer. The value is used to determine whether
+		// the context menu option for the hierarchy viewer is to be shown to the user 
+		
 		settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.EnableHierarchyViewKey)
 			.Subscribe(x => EnableHierarchyView = x);
 
@@ -466,6 +474,11 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
 		logger.Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
 
+		// Since the backend sometimes is not stopped when OneWare Studio is closed, the following shutdown action is
+		// registered. It sends an explicit request to shut down the server. The result and any errors are deliberately
+		// ignored. This request is only sent if a local backend is used to not inconvenience users of a shared
+		// remote backend 
+		
 		ServiceManager.GetService<IApplicationStateService>().RegisterShutdownAction(() =>
 		{
 			try
