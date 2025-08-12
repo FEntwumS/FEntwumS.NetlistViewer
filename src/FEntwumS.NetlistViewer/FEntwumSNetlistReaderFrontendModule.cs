@@ -250,22 +250,6 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
 		logger.Log("FEntwumS.NetlistViewer: Registered Packages");
 
-		containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
-			FentwumSNetlistViewerSettingsHelper.NetlistPathSettingKey,
-			new FolderPathSetting("Path to folder containing server jar", "fentwums-netlist-reader", "",
-				FentwumSNetlistViewerSettingsHelper.NetlistPathSettingKey, Path.Exists));
-
-		containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
-			FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
-			new FolderPathSetting("Path to folder containing java binary", "", "",
-				FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
-				Path.Exists));
-
-		containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
-			FentwumSNetlistViewerSettingsHelper.JavaArgsKey,
-			new TextBoxSetting("Extra arguments for the Java Virtual Machine", "-Xmx16G -XX:+UseZGC -XX:+ZGenerational",
-				"null"));
-
 		var resourceInclude = new ResourceInclude(new Uri("avares://FEntwumS.NetlistViewer/Styles/Icons.axaml"))
 			{ Source = new Uri("avares://FEntwumS.NetlistViewer/Styles/Icons.axaml") };
 
@@ -357,6 +341,24 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 		logger.Log("FEntwumS.NetlistViewer: Registered custom context menu entries");
 
 		settingsService.RegisterSettingCategory("Netlist Viewer", 100, "netlistIcon");
+		
+		settingsService.RegisterSettingSubCategory("Netlist Viewer", "Backend");
+		
+		containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
+			FentwumSNetlistViewerSettingsHelper.NetlistPathSettingKey,
+			new FolderPathSetting("Path to folder containing server jar", "fentwums-netlist-reader", "",
+				FentwumSNetlistViewerSettingsHelper.NetlistPathSettingKey, Path.Exists));
+
+		containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
+			FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
+			new FolderPathSetting("Path to folder containing java binary", "", "",
+				FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
+				Path.Exists));
+
+		containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
+			FentwumSNetlistViewerSettingsHelper.JavaArgsKey,
+			new TextBoxSetting("Extra arguments for the Java Virtual Machine", "-Xmx16G -XX:+UseZGC -XX:+ZGenerational",
+				"null"));
 
 		settingsService.RegisterSettingSubCategory("Netlist Viewer", "FPGA");
 
