@@ -138,15 +138,6 @@
     "LicenseInformationOrigin": 1
   },
   {
-    "Id": "OneWare.UniversalFpgaProjectSystem",
-    "Version": "0.41.2",
-    "Copyright": "Copyright \u00A9 One Ware 2024",
-    "Authors": "Hendrik Mennen",
-    "License": "MIT",
-    "LicenseUrl": "https://licenses.nuget.org/MIT",
-    "LicenseInformationOrigin": 1
-  },
-  {
     "Id": "Prism.Core",
     "Version": "8.1.97",
     "ProjectUrl": "https://github.com/PrismLibrary/Prism",
@@ -308,7 +299,7 @@
   },
   {
     "Id": "OneWare.GhdlExtension",
-    "Version": "0.11.0",
+    "Version": "0.11.1",
     "ProjectUrl": "https://github.com/one-ware/OneWare.GhdlExtension",
     "Copyright": "Protop Solutions UG",
     "Authors": "Hendrik Mennen",
