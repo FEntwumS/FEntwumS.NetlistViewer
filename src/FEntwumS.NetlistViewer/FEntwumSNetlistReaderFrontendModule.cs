@@ -218,7 +218,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
 	private ServiceManager? _serviceManager;
 
-	public static bool EnableHierarchyView = false;
+	private static bool EnableHierarchyView = false;
 
 	public void RegisterTypes(IContainerRegistry containerRegistry)
 	{

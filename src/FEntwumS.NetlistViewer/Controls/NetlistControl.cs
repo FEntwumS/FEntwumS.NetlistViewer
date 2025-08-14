@@ -298,37 +298,19 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             return;
         }
 
-        if (change.Property == ItemsProperty && Items != null)
-        {
-            _itemsInvalidated = true;
-            Redraw();
-        }
-
         if (!IsInitialized)
         {
             return;
         }
-
-        if (change.Property == IsLoadedProperty)
+        
+        if (change.Property == ItemsProperty && Items != null)
         {
-            Redraw();
+	        _itemsInvalidated = true;
         }
-        else if (change.Property == FitToZoomProperty)
+
+        if (change.Property == FitToZoomProperty)
         {
             ZoomToFit();
-            Redraw();
-        }
-        else if (change.Property == DeltaScaleProperty)
-        {
-            Redraw();
-        }
-        else if (change.Property == NetlistIDProperty)
-        {
-            Redraw();
-        }
-        else if (change.Property == BoundsProperty)
-        {
-            Redraw();
         }
         else if (change.Property == FontFamilyProperty)
         {
