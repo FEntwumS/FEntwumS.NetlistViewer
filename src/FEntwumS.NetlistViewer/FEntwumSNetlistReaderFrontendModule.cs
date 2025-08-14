@@ -307,8 +307,6 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 		]
 	};
 
-	private ServiceManager? _serviceManager;
-
 	private static bool EnableHierarchyView = false;
 
 	public void RegisterTypes(IContainerRegistry containerRegistry)
@@ -331,30 +329,28 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
 	public void OnInitialized(IContainerProvider? containerProvider)
 	{
-		ILogger logger = containerProvider.Resolve<ILogger>();
+		ILogger logger = ServiceManager.GetService<ILogger>();
 
 		// Log some debug information
-		logger.Log($"FEntwumS.NetlistViewer: Platform: {PlatformHelper.Platform}");
+		ServiceManager.GetCustomLogger().Log($"Platform: {PlatformHelper.Platform}");
 
-		containerProvider.Resolve<IPackageService>().RegisterPackage(NetlistViewerBackendPackage);
-		containerProvider.Resolve<IPackageService>().RegisterPackage(JREPackage);
+		ServiceManager.GetService<IPackageService>().RegisterPackage(NetlistViewerBackendPackage);
+		ServiceManager.GetService<IPackageService>().RegisterPackage(JREPackage);
 
-		logger.Log("FEntwumS.NetlistViewer: Registered Packages");
+		ServiceManager.GetCustomLogger().Log("Registered Packages");
 
 		var resourceInclude = new ResourceInclude(new Uri("avares://FEntwumS.NetlistViewer/Styles/Icons.axaml"))
 			{ Source = new Uri("avares://FEntwumS.NetlistViewer/Styles/Icons.axaml") };
 
 		Application.Current?.Resources.MergedDictionaries.Add(resourceInclude);
 
-		_serviceManager = new ServiceManager(containerProvider);
-
 		ISettingsService settingsService = ServiceManager.GetService<ISettingsService>();
 
-		containerProvider.Resolve<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
-		containerProvider.Resolve<IDockService>()
+		ServiceManager.GetService<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
+		ServiceManager.GetService<IDockService>()
 			.RegisterLayoutExtension<HierarchySidebarViewModel>(DockShowLocation.Left);
 
-		logger.Log("FEntwumS.NetlistViewer: Registered FrontendViewModel as Document in dock system");
+		ServiceManager.GetCustomLogger().Log("Registered FrontendViewModel as Document in dock system");
 		
 		RegisterContextMenus();
 		RegisterSettings();
@@ -371,7 +367,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 		// Upgrade settings, if necessary
 		if (SettingsUpgrader.NeedsUpgrade())
 		{
-			logger.Log("Upgrading settings");
+			ServiceManager.GetCustomLogger().Log("Upgrading settings");
 			_ = SettingsUpgrader.UpgradeSettingsIfNecessaryAsync();
 		}
 	}
@@ -585,7 +581,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 		ServiceManager.GetService<IYosysService>().SubscribeToSettings();
 		ServiceManager.GetService<INetlistGenerator>().SubscribeToSettings();
 
-		ServiceManager.GetCustomLogger().Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
+		ServiceManager.GetCustomLogger().Log("FEntwumS.NetlistViewer: Subscribed services to the settings relevant to them");
 	}
 
 	private void RegisterShutdownActions()
