@@ -463,8 +463,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 	private void RegisterProjectSettings()
 	{
 		IProjectSettingsService projectSettingsService = ServiceManager.GetService<IProjectSettingsService>();
-
-		projectSettingsService.AddProjectSetting(FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey,
+		
+		projectSettingsService.AddProjectSetting(new ProjectSetting(FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey,
 			new ComboBoxSetting("FPGA Manufacturer",
 				"gatemate",
 				[
@@ -472,10 +472,10 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 					"greenpak4",
 					"ice40", "intel", "intel_alm", "lattice", "microchip", "nanoxplore", "nexus", "quicklogic", "sf2",
 					"xilinx"
-				]), _ => true);
+				]), _ => true));
 
-		projectSettingsService.AddProjectSetting(FentwumSNetlistViewerSettingsHelper.ProjectFpgaDeviceFamilyKey,
-			new TextBoxSetting("Device family", "", null), _ => true);
+		projectSettingsService.AddProjectSetting(new ProjectSetting(FentwumSNetlistViewerSettingsHelper.ProjectFpgaDeviceFamilyKey,
+			new TextBoxSetting("Device family", "", null), _ => true));
 
 		ServiceManager.GetCustomLogger().Log("Added project-specific settings");
 	}
