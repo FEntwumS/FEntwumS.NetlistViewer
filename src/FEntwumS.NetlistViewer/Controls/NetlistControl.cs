@@ -715,7 +715,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 		        }
 	        }
         }
-        catch (Exception e)
+        catch
         {
 	        // ignored
 	        
@@ -725,7 +725,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         }
     }
 
-    #region IntersectionTests
+    #region Intersection Tests
 
     private bool isInBounds(Point toCheck)
     {
