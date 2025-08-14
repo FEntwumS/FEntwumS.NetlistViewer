@@ -285,6 +285,87 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 		}
 	}
 
+	private void RegisterContextMenus()
+	{
+		ServiceManager.GetService<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
+		{
+			// JSON netlists can be directly passed to the ShowViewer() function. The backend determines whether it is a
+			// flattened or a hierarchical netlist. For the supported HDLs, the netlist is first retrieved or generated 
+			
+			if (selected is [IProjectFile { Extension: ".json" } jsonFile])
+			{
+				menuItems.Add(new MenuItemViewModel("NetlistViewer")
+				{
+					Header = $"View netlist {jsonFile.Header}",
+					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().ShowViewerAsync(jsonFile))
+				});
+			}
+			else if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
+			{
+				menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateNetlist")
+				{
+					Header = $"View netlist for {vhdlFile.Header}",
+					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVhdlNetlistAsync(vhdlFile))
+				});
+			}
+			else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
+			{
+				menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateVerilogNetlist")
+				{
+					Header = $"View netlist for {verilogFile.Header}",
+					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVerilogNetlistAsync(verilogFile))
+				});
+			}
+			else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
+			{
+				menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateSystemVerilogNetlist")
+				{
+					Header = $"View netlist for {systemVerilogFile.Header}",
+					Command = new AsyncRelayCommand(() =>
+						ServiceManager.GetService<FrontendService>().CreateSystemVerilogNetlistAsync(systemVerilogFile))
+				});
+			}
+		});
+
+		ServiceManager.GetService<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
+		{
+			// Add no context menu entry for the hierarchy viewer if it has been disabled
+			
+			if (!EnableHierarchyView)
+			{
+				return;
+			}
+
+			if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
+			{
+				menuItems.Add(new MenuItemViewModel("NetlistViewer_VHDLHierarchy")
+				{
+					Header = $"View design hierarchy for {vhdlFile.Header}",
+					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVhdlHierarchyAsync(vhdlFile))
+				});
+			}
+			else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
+			{
+				menuItems.Add(new MenuItemViewModel("NetlistViewer_VerilogHierarchy")
+				{
+					Header = $"View design hierarchy for {verilogFile.Header}",
+					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVerilogHierarchyAsync(verilogFile))
+				});
+			}
+			else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
+			{
+				menuItems.Add(new MenuItemViewModel("NetlistViewer_SystemVerilogHierarchy")
+				{
+					Header = $"View design hierarchy for {systemVerilogFile.Header}",
+					Command = new AsyncRelayCommand(() =>
+						ServiceManager.GetService<FrontendService>().CreateSystemVerilogHierarchyAsync(systemVerilogFile))
+				});
+			}
+		});
+
+		ServiceManager.GetCustomLogger().Log("Registered custom context menu entries");
+	}
+	
 	private void RegisterSettings()
 	{
 		ServiceManager.GetService<ISettingsService>().RegisterSettingCategory("Netlist Viewer", 100, "netlistIcon");
@@ -376,88 +457,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 			FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey,
 			new SliderSetting("Automatic netlist generation interval (s)", 60.0d, 15.0d, 3600.0d, 5.0d));
 
-		ServiceManager.GetCustomLogger().Log("FEntwumS.NetlistViewer: Registered custom settings");
-	}
-
-	private void RegisterContextMenus()
-	{
-		ServiceManager.GetService<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
-		{
-			// JSON netlists can be directly passed to the ShowViewer() function. The backend determines whether it is a
-			// flattened or a hierarchical netlist. For the supported HDLs, the netlist is first retrieved or generated 
-			
-			if (selected is [IProjectFile { Extension: ".json" } jsonFile])
-			{
-				menuItems.Add(new MenuItemViewModel("NetlistViewer")
-				{
-					Header = $"View netlist {jsonFile.Header}",
-					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().ShowViewerAsync(jsonFile))
-				});
-			}
-			else if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
-			{
-				menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateNetlist")
-				{
-					Header = $"View netlist for {vhdlFile.Header}",
-					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVhdlNetlistAsync(vhdlFile))
-				});
-			}
-			else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
-			{
-				menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateVerilogNetlist")
-				{
-					Header = $"View netlist for {verilogFile.Header}",
-					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVerilogNetlistAsync(verilogFile))
-				});
-			}
-			else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
-			{
-				menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateSystemVerilogNetlist")
-				{
-					Header = $"View netlist for {systemVerilogFile.Header}",
-					Command = new AsyncRelayCommand(() =>
-						ServiceManager.GetService<FrontendService>().CreateSystemVerilogNetlistAsync(systemVerilogFile))
-				});
-			}
-		});
-
-		ServiceManager.GetService<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
-		{
-			// Add no context menu entry for the hierarchy viewer if it has been disabled
-			
-			if (!EnableHierarchyView)
-			{
-				return;
-			}
-
-			if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
-			{
-				menuItems.Add(new MenuItemViewModel("NetlistViewer_VHDLHierarchy")
-				{
-					Header = $"View design hierarchy for {vhdlFile.Header}",
-					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVhdlHierarchyAsync(vhdlFile))
-				});
-			}
-			else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
-			{
-				menuItems.Add(new MenuItemViewModel("NetlistViewer_VerilogHierarchy")
-				{
-					Header = $"View design hierarchy for {verilogFile.Header}",
-					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVerilogHierarchyAsync(verilogFile))
-				});
-			}
-			else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
-			{
-				menuItems.Add(new MenuItemViewModel("NetlistViewer_SystemVerilogHierarchy")
-				{
-					Header = $"View design hierarchy for {systemVerilogFile.Header}",
-					Command = new AsyncRelayCommand(() =>
-						ServiceManager.GetService<FrontendService>().CreateSystemVerilogHierarchyAsync(systemVerilogFile))
-				});
-			}
-		});
-
-		ServiceManager.GetCustomLogger().Log("FEntwumS.NetlistViewer: Registered custom context menu entries");
+		ServiceManager.GetCustomLogger().Log("Registered custom settings");
 	}
 
 	private void RegisterProjectSettings()
