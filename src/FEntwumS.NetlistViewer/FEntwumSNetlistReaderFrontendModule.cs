@@ -212,6 +212,97 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 						]
 					}
 				]
+			},
+			new PackageVersion()
+			{
+				Version = "21.0.8",
+				Targets =
+				[
+					new PackageTarget()
+					{
+						Target = "win-x64",
+						Url =
+							"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.8%2B9/OpenJDK21U-jre_x64_windows_hotspot_21.0.8_9.zip",
+						AutoSetting =
+						[
+							new PackageAutoSetting()
+							{
+								RelativePath = "",
+								SettingKey = FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
+							}
+						]
+					},
+					new PackageTarget()
+					{
+						Target = "win-arm64",
+						Url =
+							"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.8%2B9/OpenJDK21U-jre_aarch64_windows_hotspot_21.0.8_9.zip",
+						AutoSetting =
+						[
+							new PackageAutoSetting()
+							{
+								RelativePath = "",
+								SettingKey = FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
+							}
+						]
+					},
+					new PackageTarget()
+					{
+						Target = "linux-x64",
+						Url =
+							"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.8%2B9/OpenJDK21U-jre_x64_linux_hotspot_21.0.8_9.tar.gz",
+						AutoSetting =
+						[
+							new PackageAutoSetting()
+							{
+								RelativePath = "",
+								SettingKey = FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
+							}
+						]
+					},
+					new PackageTarget()
+					{
+						Target = "linux-arm64",
+						Url =
+							"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.8%2B9/OpenJDK21U-jre_aarch64_linux_hotspot_21.0.8_9.tar.gz",
+						AutoSetting =
+						[
+							new PackageAutoSetting()
+							{
+								RelativePath = "",
+								SettingKey = FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
+							}
+						]
+					},
+					new PackageTarget()
+					{
+						Target = "osx-x64",
+						Url =
+							"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.8%2B9/OpenJDK21U-jre_x64_mac_hotspot_21.0.8_9.tar.gz",
+						AutoSetting =
+						[
+							new PackageAutoSetting()
+							{
+								RelativePath = "",
+								SettingKey = FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
+							}
+						]
+					},
+					new PackageTarget()
+					{
+						Target = "osx-arm64",
+						Url =
+							"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.8%2B9/OpenJDK21U-jre_aarch64_mac_hotspot_21.0.8_9.tar.gz",
+						AutoSetting =
+						[
+							new PackageAutoSetting()
+							{
+								RelativePath = "",
+								SettingKey = FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
+							}
+						]
+					}
+				]
 			}
 		]
 	};
