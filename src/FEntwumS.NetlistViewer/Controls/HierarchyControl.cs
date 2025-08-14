@@ -196,6 +196,11 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         {
             Scale = 0.4;
         }
+        
+        if (!IsInitialized)
+        {
+	        return;
+        }
 
         if (e.Property == FontFamilyProperty)
         {
