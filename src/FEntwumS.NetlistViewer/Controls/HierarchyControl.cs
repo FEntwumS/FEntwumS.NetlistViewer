@@ -205,11 +205,7 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         if (e.Property == FontFamilyProperty)
         {
             _typeface = new Typeface(this.FontFamily, FontStyle.Normal, FontWeight.Regular, FontStretch.Normal);
-            ;
-        } else if (e.Property == DeltaXProperty || e.Property == DeltaYProperty || e.Property == DeltaScaleProperty)
-        {
-            Redraw();
-        }
+        } 
         
         Redraw();
 
