@@ -372,7 +372,6 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
                         drawnGeometry = port.Geometry.Clone();
 
-                        // TODO: Scale factor needs to be determined
                         drawnGeometry.Transform =
                             new MatrixTransform(new Matrix(Scale * 0.3d, 0.0d, 0.0d, Scale * 0.3d, x, y));
                         context.DrawGeometry(symbolFillBrush, symbolPen, drawnGeometry);
@@ -435,8 +434,6 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
                             ty = points[i - 1].Y;
                             by = points[i].Y;
                         }
-                        
-                        drawnRect = new Rect(new Point(lx, ty), new Point(rx, by));
 
                         if (previousPointInBounds)
                         {
@@ -490,6 +487,11 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
         }
         catch
         {
+	        // ignored 
+	        
+	        // This catch statement deliberately suppresses all exceptions. It is mainly intended to handle
+	        // ConcurrentModificationExceptions for the _items collection. Any exception just stops the rendering of the
+	        // control instead of breaking OneWare Studio as a whole
         }
     }
 
