@@ -259,15 +259,129 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
 		ISettingsService settingsService = ServiceManager.GetService<ISettingsService>();
 
-		var frontendService = containerProvider.Resolve<IFrontendService>();
-
 		containerProvider.Resolve<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
 		containerProvider.Resolve<IDockService>()
 			.RegisterLayoutExtension<HierarchySidebarViewModel>(DockShowLocation.Left);
 
 		logger.Log("FEntwumS.NetlistViewer: Registered FrontendViewModel as Document in dock system");
+		
+		RegisterContextMenus();
+		RegisterSettings();
+		RegisterProjectSettings();
+		SubscribeToSettings();
+		RegisterShutdownActions();
+		
+		// Subscribe to the setting that enables/disables the hierarchy viewer. The value is used to determine whether
+		// the context menu option for the hierarchy viewer is to be shown to the user 
+		
+		settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.EnableHierarchyViewKey)
+			.Subscribe(x => EnableHierarchyView = x);
 
-		containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
+		// Upgrade settings, if necessary
+		if (SettingsUpgrader.NeedsUpgrade())
+		{
+			logger.Log("Upgrading settings");
+			_ = SettingsUpgrader.UpgradeSettingsIfNecessaryAsync();
+		}
+	}
+
+	private void RegisterSettings()
+	{
+		ServiceManager.GetService<ISettingsService>().RegisterSettingCategory("Netlist Viewer", 100, "netlistIcon");
+		
+		ServiceManager.GetService<ISettingsService>().RegisterSettingSubCategory("Netlist Viewer", "Backend");
+		
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
+			FentwumSNetlistViewerSettingsHelper.NetlistPathSettingKey,
+			new FolderPathSetting("Path to folder containing server jar", "fentwums-netlist-reader", "",
+				FentwumSNetlistViewerSettingsHelper.NetlistPathSettingKey, Path.Exists));
+
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
+			FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
+			new FolderPathSetting("Path to folder containing java binary", "", "",
+				FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
+				Path.Exists));
+
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
+			FentwumSNetlistViewerSettingsHelper.JavaArgsKey,
+			new TextBoxSetting("Extra arguments for the Java Virtual Machine", "-Xmx16G -XX:+UseZGC -XX:+ZGenerational",
+				"null"));
+
+		ServiceManager.GetService<ISettingsService>().RegisterSettingSubCategory("Netlist Viewer", "FPGA");
+
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "FPGA",
+			FentwumSNetlistViewerSettingsHelper.FpgaManufacturerKey,
+			new ComboBoxSetting("FPGA manufacturer", "gatemate",
+			[
+				"achronix", "anlogic", "coolrunner2", "ecp5", "efinix", "fabulous", "gatemate", "gowin", "greenpak4",
+				"ice40", "intel", "intel_alm", "lattice", "microchip", "nanoxplore", "nexus", "quicklogic", "sf2",
+				"xilinx"
+			]));
+
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "FPGA",
+			FentwumSNetlistViewerSettingsHelper.FpgaDeviceFamilyKey,
+			new TextBoxSetting("Device family", "", null));
+
+		ServiceManager.GetService<ISettingsService>().RegisterSettingSubCategory("Netlist Viewer", "Backend");
+
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
+			FentwumSNetlistViewerSettingsHelper.BackendAddressKey,
+			new TextBoxSetting("Server address", "127.0.0.1", null));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", FentwumSNetlistViewerSettingsHelper.BackendPortKey,
+			new TextBoxSetting("Port", "8080", null));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
+			FentwumSNetlistViewerSettingsHelper.BackendRequestTimeoutKey,
+			new TextBoxSetting("Request Timeout (in seconds)", "8000", null));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
+			FentwumSNetlistViewerSettingsHelper.BackendUseLocalKey,
+			new CheckBoxSetting("Use local backend server", true));
+
+		ServiceManager.GetService<ISettingsService>().RegisterSettingSubCategory("Netlist Viewer", "Font sizes");
+
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Font sizes",
+			FentwumSNetlistViewerSettingsHelper.EntityFontSizeKey,
+			new TextBoxSetting("Entity Label Font Size", "25", null));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Font sizes",
+			FentwumSNetlistViewerSettingsHelper.CellFontSizeKey,
+			new TextBoxSetting("Cell Label Font Size", "15", null));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Font sizes",
+			FentwumSNetlistViewerSettingsHelper.EdgeFontSizeKey,
+			new TextBoxSetting("Edge Label Font Size", "10", null));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Font sizes",
+			FentwumSNetlistViewerSettingsHelper.PortFontSizeKey,
+			new TextBoxSetting("Port Font Size", "10", null));
+
+		ServiceManager.GetService<ISettingsService>().RegisterSettingSubCategory("Netlist Viewer", "Experimental");
+
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.ContinueOnBinaryInstallErrorKey,
+			new CheckBoxSetting("Continue if errors occur during dependency installation", false));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.UseHierarchicalBackendKey,
+			new CheckBoxSetting("Use hierarchical backend", true));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.PerformanceTargetKey,
+			new ComboBoxSetting("Performance Target", "Intelligent Ahead Of Time",
+				["Preloading", "Just In Time", "Intelligent Ahead Of Time"]));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.AlwaysRegenerateNetlistsKey,
+			new CheckBoxSetting("Always regenerate netlists", false));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.EnableHierarchyViewKey,
+			new CheckBoxSetting("Enable hierarchy view", true));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationKey,
+			new ComboBoxSetting("Automatic netlist generation", "Never", ["Never", "Always", "Interval"]));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey,
+			new SliderSetting("Automatic netlist generation interval (s)", 60.0d, 15.0d, 3600.0d, 5.0d));
+
+		ServiceManager.GetCustomLogger().Log("FEntwumS.NetlistViewer: Registered custom settings");
+	}
+
+	private void RegisterContextMenus()
+	{
+		ServiceManager.GetService<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
 		{
 			// JSON netlists can be directly passed to the ShowViewer() function. The backend determines whether it is a
 			// flattened or a hierarchical netlist. For the supported HDLs, the netlist is first retrieved or generated 
@@ -277,7 +391,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 				menuItems.Add(new MenuItemViewModel("NetlistViewer")
 				{
 					Header = $"View netlist {jsonFile.Header}",
-					Command = new AsyncRelayCommand(() => frontendService.ShowViewerAsync(jsonFile))
+					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().ShowViewerAsync(jsonFile))
 				});
 			}
 			else if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
@@ -285,7 +399,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 				menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateNetlist")
 				{
 					Header = $"View netlist for {vhdlFile.Header}",
-					Command = new AsyncRelayCommand(() => frontendService.CreateVhdlNetlistAsync(vhdlFile))
+					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVhdlNetlistAsync(vhdlFile))
 				});
 			}
 			else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
@@ -293,7 +407,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 				menuItems.Add(new MenuItemViewModel("NetlistViewer_CreateVerilogNetlist")
 				{
 					Header = $"View netlist for {verilogFile.Header}",
-					Command = new AsyncRelayCommand(() => frontendService.CreateVerilogNetlistAsync(verilogFile))
+					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVerilogNetlistAsync(verilogFile))
 				});
 			}
 			else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
@@ -302,12 +416,12 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 				{
 					Header = $"View netlist for {systemVerilogFile.Header}",
 					Command = new AsyncRelayCommand(() =>
-						frontendService.CreateSystemVerilogNetlistAsync(systemVerilogFile))
+						ServiceManager.GetService<FrontendService>().CreateSystemVerilogNetlistAsync(systemVerilogFile))
 				});
 			}
 		});
 
-		containerProvider.Resolve<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
+		ServiceManager.GetService<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
 		{
 			// Add no context menu entry for the hierarchy viewer if it has been disabled
 			
@@ -321,7 +435,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 				menuItems.Add(new MenuItemViewModel("NetlistViewer_VHDLHierarchy")
 				{
 					Header = $"View design hierarchy for {vhdlFile.Header}",
-					Command = new AsyncRelayCommand(() => frontendService.CreateVhdlHierarchyAsync(vhdlFile))
+					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVhdlHierarchyAsync(vhdlFile))
 				});
 			}
 			else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
@@ -329,7 +443,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 				menuItems.Add(new MenuItemViewModel("NetlistViewer_VerilogHierarchy")
 				{
 					Header = $"View design hierarchy for {verilogFile.Header}",
-					Command = new AsyncRelayCommand(() => frontendService.CreateVerilogHierarchyAsync(verilogFile))
+					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVerilogHierarchyAsync(verilogFile))
 				});
 			}
 			else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
@@ -338,110 +452,16 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 				{
 					Header = $"View design hierarchy for {systemVerilogFile.Header}",
 					Command = new AsyncRelayCommand(() =>
-						frontendService.CreateSystemVerilogHierarchyAsync(systemVerilogFile))
+						ServiceManager.GetService<FrontendService>().CreateSystemVerilogHierarchyAsync(systemVerilogFile))
 				});
 			}
 		});
 
-		logger.Log("FEntwumS.NetlistViewer: Registered custom context menu entries");
+		ServiceManager.GetCustomLogger().Log("FEntwumS.NetlistViewer: Registered custom context menu entries");
+	}
 
-		settingsService.RegisterSettingCategory("Netlist Viewer", 100, "netlistIcon");
-		
-		settingsService.RegisterSettingSubCategory("Netlist Viewer", "Backend");
-		
-		containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
-			FentwumSNetlistViewerSettingsHelper.NetlistPathSettingKey,
-			new FolderPathSetting("Path to folder containing server jar", "fentwums-netlist-reader", "",
-				FentwumSNetlistViewerSettingsHelper.NetlistPathSettingKey, Path.Exists));
-
-		containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
-			FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
-			new FolderPathSetting("Path to folder containing java binary", "", "",
-				FentwumSNetlistViewerSettingsHelper.JavaPathSettingKey,
-				Path.Exists));
-
-		containerProvider.Resolve<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
-			FentwumSNetlistViewerSettingsHelper.JavaArgsKey,
-			new TextBoxSetting("Extra arguments for the Java Virtual Machine", "-Xmx16G -XX:+UseZGC -XX:+ZGenerational",
-				"null"));
-
-		settingsService.RegisterSettingSubCategory("Netlist Viewer", "FPGA");
-
-		settingsService.RegisterSetting("Netlist Viewer", "FPGA",
-			FentwumSNetlistViewerSettingsHelper.FpgaManufacturerKey,
-			new ComboBoxSetting("FPGA manufacturer", "gatemate",
-			[
-				"achronix", "anlogic", "coolrunner2", "ecp5", "efinix", "fabulous", "gatemate", "gowin", "greenpak4",
-				"ice40", "intel", "intel_alm", "lattice", "microchip", "nanoxplore", "nexus", "quicklogic", "sf2",
-				"xilinx"
-			]));
-
-		settingsService.RegisterSetting("Netlist Viewer", "FPGA",
-			FentwumSNetlistViewerSettingsHelper.FpgaDeviceFamilyKey,
-			new TextBoxSetting("Device family", "", null));
-
-		settingsService.RegisterSettingSubCategory("Netlist Viewer", "Backend");
-
-		settingsService.RegisterSetting("Netlist Viewer", "Backend",
-			FentwumSNetlistViewerSettingsHelper.BackendAddressKey,
-			new TextBoxSetting("Server address", "127.0.0.1", null));
-		settingsService.RegisterSetting("Netlist Viewer", "Backend", FentwumSNetlistViewerSettingsHelper.BackendPortKey,
-			new TextBoxSetting("Port", "8080", null));
-		settingsService.RegisterSetting("Netlist Viewer", "Backend",
-			FentwumSNetlistViewerSettingsHelper.BackendRequestTimeoutKey,
-			new TextBoxSetting("Request Timeout (in seconds)", "8000", null));
-		settingsService.RegisterSetting("Netlist Viewer", "Backend",
-			FentwumSNetlistViewerSettingsHelper.BackendUseLocalKey,
-			new CheckBoxSetting("Use local backend server", true));
-
-		settingsService.RegisterSettingSubCategory("Netlist Viewer", "Font sizes");
-
-		settingsService.RegisterSetting("Netlist Viewer", "Font sizes",
-			FentwumSNetlistViewerSettingsHelper.EntityFontSizeKey,
-			new TextBoxSetting("Entity Label Font Size", "25", null));
-		settingsService.RegisterSetting("Netlist Viewer", "Font sizes",
-			FentwumSNetlistViewerSettingsHelper.CellFontSizeKey,
-			new TextBoxSetting("Cell Label Font Size", "15", null));
-		settingsService.RegisterSetting("Netlist Viewer", "Font sizes",
-			FentwumSNetlistViewerSettingsHelper.EdgeFontSizeKey,
-			new TextBoxSetting("Edge Label Font Size", "10", null));
-		settingsService.RegisterSetting("Netlist Viewer", "Font sizes",
-			FentwumSNetlistViewerSettingsHelper.PortFontSizeKey,
-			new TextBoxSetting("Port Font Size", "10", null));
-
-		settingsService.RegisterSettingSubCategory("Netlist Viewer", "Experimental");
-
-		settingsService.RegisterSetting("Netlist Viewer", "Experimental",
-			FentwumSNetlistViewerSettingsHelper.ContinueOnBinaryInstallErrorKey,
-			new CheckBoxSetting("Continue if errors occur during dependency installation", false));
-		settingsService.RegisterSetting("Netlist Viewer", "Experimental",
-			FentwumSNetlistViewerSettingsHelper.UseHierarchicalBackendKey,
-			new CheckBoxSetting("Use hierarchical backend", true));
-		settingsService.RegisterSetting("Netlist Viewer", "Experimental",
-			FentwumSNetlistViewerSettingsHelper.PerformanceTargetKey,
-			new ComboBoxSetting("Performance Target", "Intelligent Ahead Of Time",
-				["Preloading", "Just In Time", "Intelligent Ahead Of Time"]));
-		settingsService.RegisterSetting("Netlist Viewer", "Experimental",
-			FentwumSNetlistViewerSettingsHelper.AlwaysRegenerateNetlistsKey,
-			new CheckBoxSetting("Always regenerate netlists", false));
-		settingsService.RegisterSetting("Netlist Viewer", "Experimental",
-			FentwumSNetlistViewerSettingsHelper.EnableHierarchyViewKey,
-			new CheckBoxSetting("Enable hierarchy view", true));
-		settingsService.RegisterSetting("Netlist Viewer", "Experimental",
-			FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationKey,
-			new ComboBoxSetting("Automatic netlist generation", "Never", ["Never", "Always", "Interval"]));
-		settingsService.RegisterSetting("Netlist Viewer", "Experimental",
-			FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey,
-			new SliderSetting("Automatic netlist generation interval (s)", 60.0d, 15.0d, 3600.0d, 5.0d));
-
-		logger.Log("FEntwumS.NetlistViewer: Registered custom settings");
-
-		// Subscribe to the setting that enables/disables the hierarchy viewer. The value is used to determine whether
-		// the context menu option for the hierarchy viewer is to be shown to the user 
-		
-		settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.EnableHierarchyViewKey)
-			.Subscribe(x => EnableHierarchyView = x);
-
+	private void RegisterProjectSettings()
+	{
 		IProjectSettingsService projectSettingsService = ServiceManager.GetService<IProjectSettingsService>();
 
 		projectSettingsService.AddProjectSetting(FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey,
@@ -457,23 +477,22 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 		projectSettingsService.AddProjectSetting(FentwumSNetlistViewerSettingsHelper.ProjectFpgaDeviceFamilyKey,
 			new TextBoxSetting("Device family", "", null), _ => true);
 
-		logger.Log("Added project-specific settings");
+		ServiceManager.GetCustomLogger().Log("Added project-specific settings");
+	}
 
-		// Upgrade settings, if necessary
-		if (SettingsUpgrader.NeedsUpgrade())
-		{
-			logger.Log("Upgrading settings");
-			_ = SettingsUpgrader.UpgradeSettingsIfNecessaryAsync();
-		}
-
+	private void SubscribeToSettings()
+	{
 		// Subscribe the FrontendService _AFTER_ the relevant settings have been registered
 		ServiceManager.GetService<FrontendService>().SubscribeToSettings();
 		ServiceManager.GetService<IFpgaBbService>().SubscribeToSettings();
 		ServiceManager.GetService<IYosysService>().SubscribeToSettings();
 		ServiceManager.GetService<INetlistGenerator>().SubscribeToSettings();
 
-		logger.Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
+		ServiceManager.GetCustomLogger().Log("FEntwumS.NetlistViewer: Subscribed relevant services to the settings relevant to them");
+	}
 
+	private void RegisterShutdownActions()
+	{
 		// Since the backend sometimes is not stopped when OneWare Studio is closed, the following shutdown action is
 		// registered. It sends an explicit request to shut down the server. The result and any errors are deliberately
 		// ignored. This request is only sent if a local backend is used to not inconvenience users of a shared
