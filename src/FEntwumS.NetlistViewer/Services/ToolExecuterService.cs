@@ -26,19 +26,13 @@ public class ToolExecuterService : IToolExecuterService
 		(bool success, _) = await _childProcessService.ExecuteShellAsync(toolPath, args, workingDirectory,
 			$"Executing {Path.GetFileNameWithoutExtension(toolPath)}", AppState.Loading, false, x =>
 			{
-				if (x.StartsWith("ghdl:error:"))
-				{
-					_logger.Error(x);
-					noErrors = false;
-				}
-
 				stdout.AppendLine(x);
 
 				_logger.Log(x);
 				return true;
 			}, x =>
 			{
-				if (x.StartsWith("ghdl:error:") || x.StartsWith("ERROR:") || x.Contains("error:"))
+				if (x.Contains("ERROR:") || x.Contains("error:"))
 				{
 					noErrors = false;
 				}
