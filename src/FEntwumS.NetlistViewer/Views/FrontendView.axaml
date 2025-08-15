@@ -44,8 +44,8 @@
             
             <Button Background="{DynamicResource ThemeBackgroundBrush}" Padding="5" CornerRadius="3"
                     BorderBrush="{DynamicResource ThemeBorderLowBrush}" BorderThickness="1"
-                    Click="Button_OnClick" Command="{Binding FitToZoomCommand}"
-                    VerticalAlignment="Top" HorizontalAlignment="Right" Margin="5">
+                    Command="{Binding FitToZoomCommand}" VerticalAlignment="Top"
+                    HorizontalAlignment="Right" Margin="5">
                 <Image Source="{DynamicResource FluentIconsFilled.FullScreenZoomFilled}" Height="16"/>
             </Button>
         </Panel>

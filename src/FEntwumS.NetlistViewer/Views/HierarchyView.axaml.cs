@@ -22,15 +22,6 @@ public partial class HierarchyView : UserControl
 		DataContextChanged += OnDataContextChanged;
 	}
 
-	public static readonly RoutedEvent<RoutedEventArgs> ZoomToFitEvent =
-		RoutedEvent.Register<HierarchyView, RoutedEventArgs>(nameof(HierarchyView), RoutingStrategies.Bubble);
-
-	public event EventHandler<ZoomToFitEventArgs> ZoomToFit
-	{
-		add => AddHandler(ZoomToFitEvent, value);
-		remove => RemoveHandler(ZoomToFitEvent, value);
-	}
-
 	private void Initialize(HierarchyViewModel vm)
 	{
 		_hierarchyViewModel = vm;

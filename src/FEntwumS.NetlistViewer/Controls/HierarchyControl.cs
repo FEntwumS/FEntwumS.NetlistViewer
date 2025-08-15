@@ -501,46 +501,46 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
     private void ZoomToFit()
     {
-        IHierarchyInformationService _hierarchyInformationService = ServiceManager.GetService<IHierarchyInformationService>();
+        IHierarchyInformationService hierarchyInformationService = ServiceManager.GetService<IHierarchyInformationService>();
 
-        double sx = Bounds.Width / _hierarchyInformationService.getMaxWidth(NetlistId);
-        double sy = Bounds.Height / _hierarchyInformationService.getMaxHeight(NetlistId);
+        double sx = Bounds.Width / hierarchyInformationService.getMaxWidth(NetlistId);
+        double sy = Bounds.Height / hierarchyInformationService.getMaxHeight(NetlistId);
 
         if (sx < sy)
         {
             Scale = sx;
 
             OffsetX = 0;
-            OffsetY = ((_hierarchyInformationService.getMaxHeight(NetlistId) / 2) * -Scale) + (Bounds.Height / 2);
+            OffsetY = ((hierarchyInformationService.getMaxHeight(NetlistId) / 2) * -Scale) + (Bounds.Height / 2);
         }
         else
         {
             Scale = sy;
             
-            OffsetX = ((_hierarchyInformationService.getMaxWidth(NetlistId) / 2) * -Scale) + (Bounds.Width / 2);
+            OffsetX = ((hierarchyInformationService.getMaxWidth(NetlistId) / 2) * -Scale) + (Bounds.Width / 2);
             OffsetY = 0;
         }
     }
 
     private void ZoomToToplevel()
     {
-        IHierarchyInformationService _hierarchyInformationService = ServiceManager.GetService<IHierarchyInformationService>();
-        double sx = Bounds.Width / _hierarchyInformationService.getTopWidth(NetlistId);
-        double sy = Bounds.Height / _hierarchyInformationService.getTopHeight(NetlistId);
+        IHierarchyInformationService hierarchyInformationService = ServiceManager.GetService<IHierarchyInformationService>();
+        double sx = Bounds.Width / hierarchyInformationService.getTopWidth(NetlistId);
+        double sy = Bounds.Height / hierarchyInformationService.getTopHeight(NetlistId);
 
         if (sx < sy)
         {
             Scale = sx;
             
-            OffsetX = _hierarchyInformationService.getTopX(NetlistId) * -Scale;
-            OffsetY = _hierarchyInformationService.getTopY(NetlistId) * -Scale + ((_hierarchyInformationService.getTopHeight(NetlistId) / 2) * -Scale) + (Bounds.Height / 2);
+            OffsetX = hierarchyInformationService.getTopX(NetlistId) * -Scale;
+            OffsetY = hierarchyInformationService.getTopY(NetlistId) * -Scale + ((hierarchyInformationService.getTopHeight(NetlistId) / 2) * -Scale) + (Bounds.Height / 2);
         }
         else
         {
             Scale = sy;
             
-            OffsetX = _hierarchyInformationService.getTopX(NetlistId) * -Scale + ((_hierarchyInformationService.getTopWidth(NetlistId) / 2) * -Scale) + (Bounds.Width / 2);
-            OffsetY = _hierarchyInformationService.getTopY(NetlistId) * -Scale;
+            OffsetX = hierarchyInformationService.getTopX(NetlistId) * -Scale + ((hierarchyInformationService.getTopWidth(NetlistId) / 2) * -Scale) + (Bounds.Width / 2);
+            OffsetY = hierarchyInformationService.getTopY(NetlistId) * -Scale;
         }
     }
 

@@ -83,16 +83,6 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         set => SetValue(OffsetXProperty, value);
     }
 
-    public static readonly StyledProperty<ICommand> OnClickCommandProperty =
-        AvaloniaProperty.Register<NetlistControl, ICommand>(nameof(OnClickCommand),
-            defaultBindingMode: BindingMode.TwoWay);
-
-    public ICommand OnClickCommand
-    {
-        get => GetValue(OnClickCommandProperty);
-        set => SetValue(OnClickCommandProperty, value);
-    }
-
     public static readonly StyledProperty<double> OffsetYProperty = AvaloniaProperty.Register<NetlistControl, double>
         (nameof(OffsetY), defaultBindingMode: BindingMode.TwoWay);
 

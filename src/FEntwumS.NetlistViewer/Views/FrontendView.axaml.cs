@@ -69,11 +69,4 @@ public partial class FrontendView : UserControl
 	{
 		_vm = vm;
 	}
-
-	private void Button_OnClick(object? sender, RoutedEventArgs e)
-	{
-		NetlistControl? netlistControl = this.Find<NetlistControl>("NetlistView");
-
-		netlistControl?.ZoomToFit();
-	}
 }
