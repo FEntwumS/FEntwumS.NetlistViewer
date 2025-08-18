@@ -21,13 +21,12 @@ public class YosysService : IYosysService
 		_logger = ServiceManager.GetCustomLogger();
 		_toolExecuterService = ServiceManager.GetService<IToolExecuterService>();
 		_fpgaBbService = ServiceManager.GetService<IFpgaBbService>();
-
-		_settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.OssCadSuitePathKey)
-			.Subscribe(x => _yosysPath = Path.Combine(x, "bin", "yosys"));
 	}
 
 	public void SubscribeToSettings()
 	{
+		_settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.OssCadSuitePathKey)
+			.Subscribe(x => _yosysPath = Path.Combine(x, "bin", "yosys"));
 		_settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.UseHierarchicalBackendKey)
 			.Subscribe(x => _useHierarchicalBackend = x);
 	}
