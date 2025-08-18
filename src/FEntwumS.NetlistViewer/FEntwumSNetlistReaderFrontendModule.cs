@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Reflection;
 using Avalonia;
 using Avalonia.Markup.Xaml.Styling;
 using CommunityToolkit.Mvvm.Input;
@@ -573,13 +574,37 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 		ServiceManager.GetCustomLogger().Log("Added project-specific settings");
 	}
 
+	/// <summary>
+	/// This method automatically finds all interfaces inheriting from the ISettingsSubscriber interface. The
+	/// ISettingsSubscriber.SubscribeToSettings() method is called on the implementations of these interfaces. Thereby
+	/// all services that need to subscribe to some setting are automatically subscribed without them being needed to be
+	/// manually subscribed 
+	/// </summary>
 	private void SubscribeToSettings()
 	{
-		// Subscribe the FrontendService _AFTER_ the relevant settings have been registered
-		ServiceManager.GetService<FrontendService>().SubscribeToSettings();
-		ServiceManager.GetService<IFpgaBbService>().SubscribeToSettings();
-		ServiceManager.GetService<IYosysService>().SubscribeToSettings();
-		ServiceManager.GetService<INetlistGenerator>().SubscribeToSettings();
+		// Inspired by: https://stackoverflow.com/a/26745
+		
+		Type settingsSubscriberType = typeof(ISettingsSubscriber);
+
+		foreach (Assembly asmbly in AppDomain.CurrentDomain.GetAssemblies())
+		{
+			try
+			{
+				foreach (Type type in asmbly.GetTypes())
+				{
+					if (settingsSubscriberType.IsAssignableFrom(type) && type is { IsInterface: true } && settingsSubscriberType != type)
+					{
+						(ContainerLocator.Current.Resolve(type) as ISettingsSubscriber)?.SubscribeToSettings();
+						
+						ServiceManager.GetCustomLogger().Log($"Subscribed {type.FullName} to settings");
+					}
+				}
+			}
+			catch (ReflectionTypeLoadException ex)
+			{
+				ServiceManager.GetCustomLogger().Error($"An issue occured during settings subscription: {ex.Message}\n\n{ex.StackTrace}\n\nPlease file a bug report!");
+			}
+		}
 
 		ServiceManager.GetCustomLogger().Log("FEntwumS.NetlistViewer: Subscribed services to the settings relevant to them");
 	}
