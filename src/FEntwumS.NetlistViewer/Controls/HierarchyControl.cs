@@ -44,15 +44,6 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
     public static readonly StyledProperty<ulong> NetlistIdProperty =
         AvaloniaProperty.Register<HierarchyControl, ulong>(nameof(NetlistId), defaultBindingMode: BindingMode.TwoWay);
 
-    public double StepSize
-    {
-        get => GetValue(StepSizeProperty);
-        set => SetValue(StepSizeProperty, value);
-    }
-
-    public static readonly StyledProperty<double> StepSizeProperty =
-        AvaloniaProperty.Register<HierarchyControl, double>(nameof(StepSize), defaultBindingMode: BindingMode.TwoWay);
-
     public double Scale
     {
         get => GetValue(ScaleProperty);
