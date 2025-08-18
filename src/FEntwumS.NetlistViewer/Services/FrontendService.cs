@@ -1030,16 +1030,18 @@ public class FrontendService : IFrontendService
 
 		_applicationStateService.RemoveState(proc);
 
-		HierarchySidebarViewModel sidebarVM = new HierarchySidebarViewModel();
-		sidebarVM.InitializeContent();
-		sidebarVM.Title = "Design hierarchy";
-		ObservableCollection<HierarchySideBarElement> sidebarelements =
-			new ObservableCollection<HierarchySideBarElement>();
-		sidebarelements.Add(elem!.Children[0]);
-		sidebarVM.Elements = sidebarelements;
-
-		_dockService.Show(sidebarVM, DockShowLocation.Left);
-		_dockService.InitializeContent();
+		// Disabled due to stack overflow when setting the SelectedItems Property in the TreeView control. Cause unknown
+		
+		// HierarchySidebarViewModel sidebarVM = new HierarchySidebarViewModel();
+		// sidebarVM.InitializeContent();
+		// sidebarVM.Title = "Design hierarchy";
+		// ObservableCollection<HierarchySideBarElement> sidebarelements =
+		// 	new ObservableCollection<HierarchySideBarElement>();
+		// sidebarelements.Add(elem!.Children[0]);
+		// sidebarVM.Elements = sidebarelements;
+		//
+		// _dockService.Show(sidebarVM, DockShowLocation.Left);
+		// _dockService.InitializeContent();
 
 		HierarchyViewModel hierarchyVM = new HierarchyViewModel();
 		hierarchyVM.InitializeContent();
