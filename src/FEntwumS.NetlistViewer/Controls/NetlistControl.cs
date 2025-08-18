@@ -38,33 +38,6 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         set => SetAndRaise(ItemsProperty, ref _items, value);
     }
 
-    public static readonly StyledProperty<double> StepSizeProperty =
-        AvaloniaProperty.Register<NetlistControl, double>(nameof(StepSize), defaultBindingMode: BindingMode.TwoWay);
-
-    public double StepSize
-    {
-        get => GetValue(StepSizeProperty);
-        set => SetValue(StepSizeProperty, value);
-    }
-
-    public static readonly StyledProperty<double> DiagramWidthProperty = AvaloniaProperty.Register<NetlistControl,
-        double>(nameof(DiagramWidth), defaultBindingMode: BindingMode.TwoWay);
-
-    public double DiagramWidth
-    {
-        get => GetValue(DiagramWidthProperty);
-        set => SetValue(DiagramWidthProperty, value);
-    }
-
-    public static readonly StyledProperty<double> DiagramHeightProperty = AvaloniaProperty.Register<NetlistControl,
-        double>(nameof(DiagramHeight), defaultBindingMode: BindingMode.TwoWay);
-
-    public double DiagramHeight
-    {
-        get => GetValue(DiagramHeightProperty);
-        set => SetValue(DiagramHeightProperty, value);
-    }
-
     public static readonly StyledProperty<double> CurrentScaleProperty = AvaloniaProperty.Register<NetlistControl,
         double>(nameof(CurrentScale), defaultBindingMode: BindingMode.TwoWay);
 
