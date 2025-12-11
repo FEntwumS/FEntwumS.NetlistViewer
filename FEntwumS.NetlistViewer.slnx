@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/FEntwumS.NetlistViewer/FEntwumS.NetlistViewer.csproj" />
+  <Project Path="tests/FEntwumS.NetlistViewer.UnitTests/FEntwumS.NetlistViewer.UnitTests.csproj" />
+</Solution>
