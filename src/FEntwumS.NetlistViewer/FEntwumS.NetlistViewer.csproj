@@ -25,14 +25,14 @@
     </ItemGroup>
     
     <ItemGroup>
-      <PackageReference Include="OneWare.Essentials" Version="0.11.11" Private="false" ExcludeAssets="runtime;Native">
+      <PackageReference Include="OneWare.Essentials" Version="0.99.3" Private="false" ExcludeAssets="runtime;Native">
               <PrivateAssets>all</PrivateAssets>
               <IncludeAssets>compile; build; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="OneWare.GhdlExtension" Version="0.11.2" Private="true">
+      <PackageReference Include="OneWare.GhdlExtension" Version="0.12.1" Private="true">
           <ExcludeAssets>runtime; Native</ExcludeAssets>
       </PackageReference>
-      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.11" Private="false" ExcludeAssets="runtime;Native">
+      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.99.3" Private="false" ExcludeAssets="runtime;Native">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>compile; build; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
