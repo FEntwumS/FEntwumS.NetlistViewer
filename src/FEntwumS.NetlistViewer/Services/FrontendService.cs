@@ -346,12 +346,21 @@ public class FrontendService : IFrontendService
 				}
 				else
 				{
-					// Log an error if the user has not enabled automatic binary downloads
+					bool installPerformed = await ServiceManager.GetService<IPackageWindowService>()
+						.QuickInstallPackageAsync(dependencyID);
 
-					_logger.LogError(
-						$"Extension \"{dependencyPackage.Name}\" is not installed. Please enable \"Automatically download Binaries\" under the \"Experimental\" settings or download the extension yourself");
+					if (!installPerformed)
+					{
+						// Log error to prompt user for manual installation
+						_logger.LogError(
+							$"Extension \"{dependencyPackage.Name}\" is required for the correct functioning of the FEntwumS Netlist Viewer. Please install it manually or enable \"Automatically download Binaries\" under the \"Experimental\" settings.");
 
-					globalSuccess = false;
+						globalSuccess = false;
+					}
+					else
+					{
+						updatePerformed = true;
+					}
 				}
 
 				if (globalSuccess && updatePerformed)
@@ -385,6 +394,8 @@ public class FrontendService : IFrontendService
 		if (globalSuccess && _restartRequired)
 		{
 			_logger.LogInformation("Dependencies were successfully installed. Please restart OneWare Studio!", true);
+			
+			
 		}
 
 		_applicationStateService.RemoveState(checkProc);
