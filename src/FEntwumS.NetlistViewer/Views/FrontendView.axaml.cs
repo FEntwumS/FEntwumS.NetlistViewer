@@ -61,7 +61,7 @@ public partial class FrontendView : UserControl
 		if (_vm != null && netlistControl is { IsInitialized: true, FileLoaded: true } &&
 		    ((AvaloniaList<NetlistElement>)netlistControl.Items).Count == 0)
 		{
-			ServiceManager.GetService<IDockService>().CloseDockable(_vm);
+			ServiceManager.GetService<IMainDockService>().CloseDockable(_vm);
 		}
 	}
 

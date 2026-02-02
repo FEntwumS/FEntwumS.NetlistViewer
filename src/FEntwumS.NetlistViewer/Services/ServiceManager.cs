@@ -1,5 +1,4 @@
 ﻿using OneWare.Essentials.Services;
-using Prism.Ioc;
 
 namespace FEntwumS.NetlistViewer.Services;
 
@@ -13,11 +12,6 @@ public class ServiceManager
 	public static IViewportDimensionService? GetViewportDimensionService()
 	{
 		return ContainerLocator.Current.Resolve<IViewportDimensionService>();
-	}
-
-	public static ILogger GetLogger()
-	{
-		return ContainerLocator.Current.Resolve<ILogger>();
 	}
 
 	public static ICustomLogger GetCustomLogger()

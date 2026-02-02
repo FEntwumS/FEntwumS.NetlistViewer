@@ -12,12 +12,12 @@ using OneWare.Essentials.Models;
 using OneWare.Essentials.PackageManager;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
-using Prism.Ioc;
-using Prism.Modularity;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FEntwumS.NetlistViewer;
 
-public class FEntwumSNetlistReaderFrontendModule : IModule
+public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 {
 	public static readonly Package NetlistViewerBackendPackage = new()
 	{
@@ -373,25 +373,24 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
 	private static bool EnableHierarchyView = false;
 
-	public void RegisterTypes(IContainerRegistry containerRegistry)
+	public override void RegisterServices(IServiceCollection containerRegistry)
 	{
-		containerRegistry.RegisterSingleton<IViewportDimensionService, ViewportDimensionService>();
-		containerRegistry.RegisterSingleton<IJsonLoader, JsonLoader>();
-		containerRegistry.RegisterSingleton<ICustomLogger, CustomLogger>();
-		containerRegistry.RegisterSingleton<IHashService, OAATHashService>();
-		containerRegistry.RegisterSingleton<IYosysService, YosysService>();
-		containerRegistry.RegisterSingleton<IToolExecuterService, ToolExecuterService>();
-		containerRegistry.RegisterSingleton<IFpgaBbService, FpgaBbService>();
-		containerRegistry.RegisterSingleton<ICcVhdlFileIndexService, CcVhdlFileIndexService>();
-		containerRegistry.RegisterSingleton<IFrontendService, FrontendService>();
-		containerRegistry.RegisterSingleton<INetlistGenerator, NetlistGenerator>();
-		containerRegistry.Register<FrontendViewModel>();
-		containerRegistry.RegisterSingleton<IHierarchyJsonParser, HierarchyJsonParser>();
-		containerRegistry.RegisterSingleton<IHierarchyInformationService, HierarchyInformationService>();
-		containerRegistry.RegisterSingleton<IStorageService, StorageService>();
+		containerRegistry.AddSingleton<IViewportDimensionService, ViewportDimensionService>();
+		containerRegistry.AddSingleton<IJsonLoader, JsonLoader>();
+		containerRegistry.AddSingleton<ICustomLogger, CustomLogger>();
+		containerRegistry.AddSingleton<IHashService, OAATHashService>();
+		containerRegistry.AddSingleton<IYosysService, YosysService>();
+		containerRegistry.AddSingleton<IToolExecuterService, ToolExecuterService>();
+		containerRegistry.AddSingleton<IFpgaBbService, FpgaBbService>();
+		containerRegistry.AddSingleton<ICcVhdlFileIndexService, CcVhdlFileIndexService>();
+		containerRegistry.AddSingleton<IFrontendService, FrontendService>();
+		containerRegistry.AddSingleton<INetlistGenerator, NetlistGenerator>();
+		containerRegistry.AddSingleton<IHierarchyJsonParser, HierarchyJsonParser>();
+		containerRegistry.AddSingleton<IHierarchyInformationService, HierarchyInformationService>();
+		containerRegistry.AddSingleton<IStorageService, StorageService>();
 	}
 
-	public void OnInitialized(IContainerProvider? containerProvider)
+	public override void Initialize(IServiceProvider containerProvider)
 	{
 		ILogger logger = ServiceManager.GetService<ILogger>();
 
@@ -410,8 +409,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
 		ISettingsService settingsService = ServiceManager.GetService<ISettingsService>();
 
-		ServiceManager.GetService<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
-		ServiceManager.GetService<IDockService>()
+		ServiceManager.GetService<IMainDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
+		ServiceManager.GetService<IMainDockService>()
 			.RegisterLayoutExtension<HierarchySidebarViewModel>(DockShowLocation.Left);
 
 		ServiceManager.GetCustomLogger().Log("Registered FrontendViewModel as Document in dock system");
