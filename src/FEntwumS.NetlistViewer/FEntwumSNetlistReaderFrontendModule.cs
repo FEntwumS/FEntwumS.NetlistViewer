@@ -605,8 +605,6 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
 			FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey,
 			new SliderSetting("Automatic netlist generation interval (s)", 60.0d, 15.0d, 3600.0d, 5.0d));
-
-		ServiceManager.GetService<ILogger>().Log("blabla", true);
 		
 		ServiceManager.GetService<ILogger>().LogInformation("Registered custom settings");
 	}
