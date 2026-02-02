@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
+using Avalonia.Collections;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FEntwumS.NetlistViewer.Helpers;
@@ -27,9 +28,9 @@ public class HierarchyViewModel : ExtendedTool
 		}
 	}
 
-	private ObservableCollection<HierarchyViewElement> items { get; set; }
+	private AvaloniaList<HierarchyViewElement> items { get; set; }
 
-	public ObservableCollection<HierarchyViewElement> Items
+	public AvaloniaList<HierarchyViewElement> Items
 	{
 		get => items;
 		set
@@ -78,7 +79,7 @@ public class HierarchyViewModel : ExtendedTool
 
 	public HierarchyViewModel() : base("Hierarchy")
 	{
-		items = new ObservableCollection<HierarchyViewElement>();
+		items = new AvaloniaList<HierarchyViewElement>();
 
 		Scale = 1;
 

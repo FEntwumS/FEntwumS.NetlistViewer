@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using Asmichi.ProcessManagement;
+using Avalonia.Collections;
 using FEntwumS.NetlistViewer.Helpers;
 using FEntwumS.NetlistViewer.Types.HierarchyView;
 using FEntwumS.NetlistViewer.Types;
@@ -21,7 +22,7 @@ public class FrontendService : IFrontendService
 {
 	private static readonly ICustomLogger _logger;
 	private static readonly IApplicationStateService _applicationStateService;
-	private static readonly IDockService _dockService;
+	private static readonly IMainDockService _dockService;
 	private static readonly ISettingsService _settingsService;
 	private static readonly IPackageService _packageService;
 	private static readonly IHierarchyJsonParser _hierarchyJsonParser;
@@ -68,7 +69,7 @@ public class FrontendService : IFrontendService
 	{
 		_logger = ServiceManager.GetCustomLogger();
 		_applicationStateService = ServiceManager.GetService<IApplicationStateService>();
-		_dockService = ServiceManager.GetService<IDockService>();
+		_dockService = ServiceManager.GetService<IMainDockService>();
 		_settingsService = ServiceManager.GetService<ISettingsService>();
 		_packageService = ServiceManager.GetService<IPackageService>();
 		_hierarchyJsonParser = ServiceManager.GetService<IHierarchyJsonParser>();
@@ -1049,7 +1050,7 @@ public class FrontendService : IFrontendService
 		hierarchyVM.NetlistId = combinedHash;
 		hierarchyVM.OffsetX = -ServiceManager.GetService<IHierarchyInformationService>().getTopX(combinedHash);
 		hierarchyVM.OffsetY = -ServiceManager.GetService<IHierarchyInformationService>().getTopY(combinedHash);
-		ObservableCollection<HierarchyViewElement> obsElements = new ObservableCollection<HierarchyViewElement>();
+		AvaloniaList<HierarchyViewElement> obsElements = new AvaloniaList<HierarchyViewElement>();
 		obsElements.AddRange(elements);
 		hierarchyVM.Items = obsElements;
 

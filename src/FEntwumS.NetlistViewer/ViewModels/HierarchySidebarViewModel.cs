@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
+using Avalonia.Collections;
 using CommunityToolkit.Mvvm.Input;
 using FEntwumS.NetlistViewer.Types.HierarchyView;
 using OneWare.Essentials.ViewModels;
@@ -8,7 +9,7 @@ namespace FEntwumS.NetlistViewer.ViewModels;
 
 public class HierarchySidebarViewModel : ExtendedTool
 {
-	public ObservableCollection<HierarchySideBarElement> Elements
+	public AvaloniaList<HierarchySideBarElement> Elements
 	{
 		get => this._elements;
 		set
@@ -19,7 +20,7 @@ public class HierarchySidebarViewModel : ExtendedTool
 		}
 	}
 
-	private ObservableCollection<HierarchySideBarElement> _elements;
+	private AvaloniaList<HierarchySideBarElement> _elements;
 
 	private HierarchySideBarElement? _selectedElement;
 
@@ -48,8 +49,8 @@ public class HierarchySidebarViewModel : ExtendedTool
 
 	public HierarchySidebarViewModel() : base("HierarchySidebar")
 	{
-		_elements = new ObservableCollection<HierarchySideBarElement>();
-		Elements = new ObservableCollection<HierarchySideBarElement>();
+		_elements = new AvaloniaList<HierarchySideBarElement>();
+		Elements = new AvaloniaList<HierarchySideBarElement>();
 		SelectedElementType = "";
 	}
 
