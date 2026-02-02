@@ -377,7 +377,6 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 	{
 		containerRegistry.AddSingleton<IViewportDimensionService, ViewportDimensionService>();
 		containerRegistry.AddSingleton<IJsonLoader, JsonLoader>();
-		containerRegistry.AddSingleton<ICustomLogger, CustomLogger>();
 		containerRegistry.AddSingleton<IHashService, OAATHashService>();
 		containerRegistry.AddSingleton<IYosysService, YosysService>();
 		containerRegistry.AddSingleton<IToolExecuterService, ToolExecuterService>();
@@ -395,12 +394,12 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		ILogger logger = ServiceManager.GetService<ILogger>();
 
 		// Log some debug information
-		ServiceManager.GetCustomLogger().Log($"Platform: {PlatformHelper.Platform}");
+		ServiceManager.GetService<ILogger>().LogInformation($"Platform: {PlatformHelper.Platform}");
 
 		ServiceManager.GetService<IPackageService>().RegisterPackage(NetlistViewerBackendPackage);
 		ServiceManager.GetService<IPackageService>().RegisterPackage(JREPackage);
 
-		ServiceManager.GetCustomLogger().Log("Registered Packages");
+		ServiceManager.GetService<ILogger>().LogInformation("Registered Packages");
 
 		var resourceInclude = new ResourceInclude(new Uri("avares://FEntwumS.NetlistViewer/Styles/Icons.axaml"))
 			{ Source = new Uri("avares://FEntwumS.NetlistViewer/Styles/Icons.axaml") };
@@ -413,7 +412,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		ServiceManager.GetService<IMainDockService>()
 			.RegisterLayoutExtension<HierarchySidebarViewModel>(DockShowLocation.Left);
 
-		ServiceManager.GetCustomLogger().Log("Registered FrontendViewModel as Document in dock system");
+		ServiceManager.GetService<ILogger>().LogInformation("Registered FrontendViewModel as Document in dock system");
 		
 		RegisterContextMenus();
 		RegisterSettings();
@@ -430,7 +429,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		// Upgrade settings, if necessary
 		if (SettingsUpgrader.NeedsUpgrade())
 		{
-			ServiceManager.GetCustomLogger().Log("Upgrading settings");
+			ServiceManager.GetService<ILogger>().LogInformation("Upgrading settings");
 			_ = SettingsUpgrader.UpgradeSettingsIfNecessaryAsync();
 		}
 	}
@@ -513,7 +512,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			}
 		});
 
-		ServiceManager.GetCustomLogger().Log("Registered custom context menu entries");
+		ServiceManager.GetService<ILogger>().LogInformation("Registered custom context menu entries");
 	}
 	
 	private void RegisterSettings()
@@ -607,7 +606,9 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey,
 			new SliderSetting("Automatic netlist generation interval (s)", 60.0d, 15.0d, 3600.0d, 5.0d));
 
-		ServiceManager.GetCustomLogger().Log("Registered custom settings");
+		ServiceManager.GetService<ILogger>().Log("blabla", true);
+		
+		ServiceManager.GetService<ILogger>().LogInformation("Registered custom settings");
 	}
 
 	private void RegisterProjectSettings()
@@ -633,7 +634,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			.WithSetting(new TextBoxSetting("Device family", "", null))
 		.Build());
 
-		ServiceManager.GetCustomLogger().Log("Added project-specific settings");
+		ServiceManager.GetService<ILogger>().LogInformation("Added project-specific settings");
 	}
 
 	/// <summary>
@@ -658,17 +659,17 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 					{
 						(ContainerLocator.Current.Resolve(type) as ISettingsSubscriber)?.SubscribeToSettings();
 						
-						ServiceManager.GetCustomLogger().Log($"Subscribed {type.FullName} to settings");
+						ServiceManager.GetService<ILogger>().LogInformation($"Subscribed {type.FullName} to settings");
 					}
 				}
 			}
 			catch (ReflectionTypeLoadException ex)
 			{
-				ServiceManager.GetCustomLogger().Error($"An issue occured during settings subscription: {ex.Message}\n\n{ex.StackTrace}\n\nPlease file a bug report!");
+				ServiceManager.GetService<ILogger>().LogError(ex, "An issue occured during settings subscription\n\nPlease file a bug report!");
 			}
 		}
 
-		ServiceManager.GetCustomLogger().Log("FEntwumS.NetlistViewer: Subscribed services to the settings relevant to them");
+		ServiceManager.GetService<ILogger>().LogInformation("FEntwumS.NetlistViewer: Subscribed services to the settings relevant to them");
 	}
 
 	private void RegisterShutdownActions()

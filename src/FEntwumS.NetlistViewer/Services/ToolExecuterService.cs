@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Asmichi.ProcessManagement;
+using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Services;
 
@@ -8,12 +9,12 @@ namespace FEntwumS.NetlistViewer.Services;
 public class ToolExecuterService : IToolExecuterService
 {
 	private readonly IChildProcessService _childProcessService;
-	private readonly ICustomLogger _logger;
+	private readonly ILogger _logger;
 
 	public ToolExecuterService()
 	{
 		_childProcessService = ServiceManager.GetService<IChildProcessService>();
-		_logger = ServiceManager.GetCustomLogger();
+		_logger = ServiceManager.GetService<ILogger>();
 	}
 
 	public async Task<(bool success, string stdout, string stderr)> ExecuteToolAsync(string toolPath,
@@ -28,7 +29,7 @@ public class ToolExecuterService : IToolExecuterService
 			{
 				stdout.AppendLine(x);
 
-				_logger.Log(x);
+				_logger.LogInformation(x);
 				return true;
 			}, x =>
 			{
@@ -39,7 +40,7 @@ public class ToolExecuterService : IToolExecuterService
 
 				stderr.AppendLine(x);
 
-				_logger.Error(x);
+				_logger.LogError(x);
 				return true;
 			});
 

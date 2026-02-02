@@ -14,16 +14,6 @@ public class ServiceManager
 		return ContainerLocator.Current.Resolve<IViewportDimensionService>();
 	}
 
-	public static ICustomLogger GetCustomLogger()
-	{
-		return ContainerLocator.Current.Resolve<ICustomLogger>();
-	}
-
-	public static ILanguageManager GetLanguageManager()
-	{
-		return ContainerLocator.Current.Resolve<ILanguageManager>();
-	}
-
 	public static IHashService GetHashService()
 	{
 		return ContainerLocator.Current.Resolve<IHashService>();

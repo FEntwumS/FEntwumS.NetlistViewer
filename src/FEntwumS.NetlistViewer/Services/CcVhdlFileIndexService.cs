@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Helpers;
 
 namespace FEntwumS.NetlistViewer.Services;
@@ -9,18 +10,18 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
 	private static ConcurrentDictionary<UInt64, ConcurrentDictionary<long, long>> _index = new();
 	private static ConcurrentDictionary<UInt64, ConcurrentDictionary<long, string>> _indexToFile = new();
 
-	private ICustomLogger _logger;
+	private ILogger _logger;
 
 	public CcVhdlFileIndexService()
 	{
-		_logger = ServiceManager.GetCustomLogger();
+		_logger = ServiceManager.GetService<ILogger>();
 	}
 
 	public async Task<bool> IndexFileAsync(string filePath, ulong netlistId)
 	{
 		if (!File.Exists(filePath))
 		{
-			_logger.Log($"File {filePath} does not exist...");
+			_logger.LogError($"File {filePath} does not exist...");
 
 			return false;
 		}

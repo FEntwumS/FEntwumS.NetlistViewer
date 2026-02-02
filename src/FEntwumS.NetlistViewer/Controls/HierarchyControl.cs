@@ -15,6 +15,7 @@ using FEntwumS.NetlistViewer.Helpers;
 using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.Types.HierarchyView;
 using FEntwumS.NetlistViewer.Types.Messages;
+using Microsoft.Extensions.Logging;
 
 namespace FEntwumS.NetlistViewer.Controls;
 
@@ -559,7 +560,7 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 
     private void HierarchyControl_Tapped(object? sender, TappedEventArgs e)
     {
-        ServiceManager.GetService<ICustomLogger>().Log("HierarchyControl: Tapped");
+        ServiceManager.GetService<ILogger>().LogTrace("HierarchyControl: Tapped");
     }
 
     private void HierarchyControl_PointerMoved(object? sender, PointerEventArgs e)

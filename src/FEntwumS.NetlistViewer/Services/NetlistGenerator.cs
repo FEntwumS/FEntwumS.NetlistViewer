@@ -3,6 +3,7 @@ using Avalonia.Threading;
 using DynamicData.Binding;
 using FEntwumS.NetlistViewer.Helpers;
 using FEntwumS.NetlistViewer.Types;
+using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.ProjectSystem.Models;
@@ -12,7 +13,7 @@ namespace FEntwumS.NetlistViewer.Services;
 
 public class NetlistGenerator : INetlistGenerator
 {
-	private readonly ICustomLogger _logger;
+	private readonly ILogger _logger;
 	private readonly ISettingsService _settingsService;
 	private readonly IProjectExplorerService _projectExplorerService;
 	private readonly IStorageService _storageService;
@@ -30,7 +31,7 @@ public class NetlistGenerator : INetlistGenerator
 
 	public NetlistGenerator()
 	{
-		_logger = ServiceManager.GetCustomLogger();
+		_logger = ServiceManager.GetService<ILogger>();
 		_settingsService = ServiceManager.GetService<ISettingsService>();
 		_projectExplorerService = ServiceManager.GetService<IProjectExplorerService>();
 		_storageService = ServiceManager.GetService<IStorageService>();
@@ -122,7 +123,7 @@ public class NetlistGenerator : INetlistGenerator
 
 		if (!File.Exists(netlistPath))
 		{
-			_logger.Error($"Netlist file not found: {netlistPath}");
+			_logger.LogError($"Netlist file not found: {netlistPath}");
 
 			return (null, false);
 		}
@@ -227,10 +228,10 @@ public class NetlistGenerator : INetlistGenerator
 
 				watcher.Error += (sender, args) =>
 				{
-					_logger.Error("Error in watcher");
+					_logger.LogError("Error in watcher");
 					if (sender is FileSystemWatcher watcher)
 					{
-						_logger.Error($"Watcher: {watcher.Path}");
+						_logger.LogError($"Watcher: {watcher.Path}");
 					}
 				};
 
@@ -264,7 +265,7 @@ public class NetlistGenerator : INetlistGenerator
 
 			if (projectCandidate is null)
 			{
-				_logger.Error($"Project {e.FullPath} was not found");
+				_logger.LogError($"Project {e.FullPath} was not found");
 			}
 			else
 			{
