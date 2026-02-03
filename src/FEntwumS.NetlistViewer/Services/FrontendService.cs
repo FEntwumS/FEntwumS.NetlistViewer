@@ -85,12 +85,12 @@ public class FrontendService : IFrontendService
 			{
 				if (IsAddressValid(x))
 				{
-					_logger.LogInformation($"New address: {x}", _backendAddress != string.Empty);
+					_logger.Log($"New address: {x}", _backendAddress != string.Empty);
 					_backendAddress = x;
 				}
 				else
 				{
-					_logger.LogError($"{x} is not a valid address");
+					_logger.Error($"{x} is not a valid address");
 				}
 			});
 
@@ -98,12 +98,12 @@ public class FrontendService : IFrontendService
 		{
 			if (IsPortValid(x))
 			{
-				_logger.LogInformation($"New port: {x}", _backendPort != string.Empty);
+				_logger.Log($"New port: {x}", _backendPort != string.Empty);
 				_backendPort = x;
 			}
 			else
 			{
-				_logger.LogError($"{x} is not a valid port");
+				_logger.Error($"{x} is not a valid port");
 			}
 		});
 
@@ -128,14 +128,14 @@ public class FrontendService : IFrontendService
 
 					if (_requestTimeout <= 0)
 					{
-						_logger.LogError("Request timeout not valid. Please enter a positive integer");
+						_logger.Error("Request timeout not valid. Please enter a positive integer");
 
 						_requestTimeout = 600;
 					}
 				}
 				catch (Exception)
 				{
-					_logger.LogError("Request timeout not valid. Please enter a positive integer");
+					_logger.Error("Request timeout not valid. Please enter a positive integer");
 
 					_requestTimeout = 600;
 				}
@@ -153,13 +153,13 @@ public class FrontendService : IFrontendService
 
 					if (_entityLabelFontSize <= 0)
 					{
-						_logger.LogError("Entity label font size not valid. Please enter a positive integer");
+						_logger.Error("Entity label font size not valid. Please enter a positive integer");
 						_entityLabelFontSize = 25;
 					}
 				}
 				catch (Exception)
 				{
-					_logger.LogError("Entity label font size not valid. Please enter a positive integer");
+					_logger.Error("Entity label font size not valid. Please enter a positive integer");
 
 					_entityLabelFontSize = 25;
 				}
@@ -174,14 +174,14 @@ public class FrontendService : IFrontendService
 
 					if (_cellLabelFontSize <= 0)
 					{
-						_logger.LogError("Cell label font size not valid. Please enter a positive integer");
+						_logger.Error("Cell label font size not valid. Please enter a positive integer");
 
 						_cellLabelFontSize = 15;
 					}
 				}
 				catch (Exception)
 				{
-					_logger.LogError("Cell label font size not valid. Please enter a positive integer");
+					_logger.Error("Cell label font size not valid. Please enter a positive integer");
 
 					_cellLabelFontSize = 15;
 				}
@@ -196,14 +196,14 @@ public class FrontendService : IFrontendService
 
 					if (_edgeLabelFontSize <= 0)
 					{
-						_logger.LogError("Edge label font size not valid. Please enter a positive integer");
+						_logger.Error("Edge label font size not valid. Please enter a positive integer");
 
 						_edgeLabelFontSize = 10;
 					}
 				}
 				catch (Exception)
 				{
-					_logger.LogError("Edge label font size not valid. Please enter a positive integer");
+					_logger.Error("Edge label font size not valid. Please enter a positive integer");
 
 					_edgeLabelFontSize = 10;
 				}
@@ -218,14 +218,14 @@ public class FrontendService : IFrontendService
 
 					if (_portLabelFontSize <= 0)
 					{
-						_logger.LogError("Port label font size not valid. Please enter a positive integer");
+						_logger.Error("Port label font size not valid. Please enter a positive integer");
 
 						_portLabelFontSize = 10;
 					}
 				}
 				catch (Exception)
 				{
-					_logger.LogError("Port label font size not valid. Please enter a positive integer");
+					_logger.Error("Port label font size not valid. Please enter a positive integer");
 
 					_portLabelFontSize = 10;
 				}
@@ -278,7 +278,7 @@ public class FrontendService : IFrontendService
 
 			if (dependencyPackage == null)
 			{
-				_logger.LogError(
+				_logger.Error(
 					$"Dependency with ID {dependencyID} is not available in the package manager. Please file a bug report if this issue persists");
 
 				globalSuccess = false;
@@ -294,7 +294,7 @@ public class FrontendService : IFrontendService
 
 				if (_settingsService.GetSettingValue<bool>(FentwumSNetlistViewerSettingsHelper.AutoDownloadBinariesKey))
 				{
-					_logger.LogInformation($"Installing \"{dependencyPackage.Name}\"...", true);
+					_logger.Log($"Installing \"{dependencyPackage.Name}\"...", true);
 
 					bool localSuccess = false;
 
@@ -312,7 +312,7 @@ public class FrontendService : IFrontendService
 
 						if (installedVersion == packageVersion)
 						{
-							_logger.LogInformation(
+							_logger.Log(
 								$"Failed to update {dependencyPackage.Name} from version {installedVersion.Version} to version {dependencyPackage.Versions!.Last()}",
 								true);
 
@@ -336,11 +336,11 @@ public class FrontendService : IFrontendService
 					{
 						if (localSuccess)
 						{
-							_logger.LogInformation($"Successfully installed \"{dependencyPackage.Name}\".", true);
+							_logger.Log($"Successfully installed \"{dependencyPackage.Name}\".", true);
 						}
 						else
 						{
-							_logger.LogError($"Failed to install \"{dependencyPackage.Name}\".");
+							_logger.Error($"Failed to install \"{dependencyPackage.Name}\".");
 						}
 					}
 				}
@@ -348,7 +348,7 @@ public class FrontendService : IFrontendService
 				{
 					// Log an error if the user has not enabled automatic binary downloads
 
-					_logger.LogError(
+					_logger.Error(
 						$"Extension \"{dependencyPackage.Name}\" is not installed. Please enable \"Automatically download Binaries\" under the \"Experimental\" settings or download the extension yourself");
 
 					globalSuccess = false;
@@ -365,12 +365,12 @@ public class FrontendService : IFrontendService
 			{
 				if (minVersion.CompareTo(Version.Parse(dependencyModel.InstalledVersion!.Version!)) <= 0)
 				{
-					_logger.LogInformation(
+					_logger.Log(
 						$"Dependency {dependencyPackage.Id} installed with version {dependencyModel.InstalledVersion.Version} greater than or equal to expected version {minVersion.ToString()}");
 				}
 				else
 				{
-					_logger.LogError(
+					_logger.Error(
 						$"Installed version {dependencyModel.InstalledVersion.Version} for {dependencyPackage.Name} is below the minimum version {minVersion.ToString()}. Please update {dependencyPackage.Name}!");
 
 					globalSuccess = false;
@@ -384,7 +384,7 @@ public class FrontendService : IFrontendService
 
 		if (globalSuccess && _restartRequired)
 		{
-			_logger.LogInformation("Dependencies were successfully installed. Please restart OneWare Studio!", true);
+			_logger.Log("Dependencies were successfully installed. Please restart OneWare Studio!", true);
 		}
 
 		_applicationStateService.RemoveState(checkProc);
@@ -412,7 +412,7 @@ public class FrontendService : IFrontendService
 		{
 			// Prompt the user to restart OneWare Studio if new binaries/plugins were previously installed
 			// TODO replace with notification when the associated service is available on nuget 
-			_logger.LogError("Please restart OneWare Studio.");
+			_logger.Error("Please restart OneWare Studio.");
 			_applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
 
 			return null;
@@ -476,7 +476,7 @@ public class FrontendService : IFrontendService
 	{
 		if (json is null)
 		{
-			_logger.LogError("No netlist was generated");
+			_logger.Error("No netlist was generated");
 			return;
 		}
 
@@ -489,7 +489,7 @@ public class FrontendService : IFrontendService
 		{
 			_applicationStateService.RemoveState(proc, "Error: No JSON netlist was found");
 
-			_logger.LogInformation(
+			_logger.Log(
 				"No json netlist was found. Aborting...");
 			return;
 		}
@@ -506,9 +506,9 @@ public class FrontendService : IFrontendService
 
 		currentNetlist = combinedHash;
 
-		_logger.LogInformation("Path hash: " + pathHash);
-		_logger.LogInformation("Full file hash is: " + contenthash);
-		_logger.LogInformation("Combined hash is: " + combinedHash);
+		_logger.Log("Path hash: " + pathHash);
+		_logger.Log("Full file hash is: " + contenthash);
+		_logger.Log("Combined hash is: " + combinedHash);
 
 		_viewportDimensionService.SetClickedElementPath(combinedHash, string.Empty);
 		_viewportDimensionService.SetCurrentElementCount(combinedHash, 0);
@@ -517,7 +517,7 @@ public class FrontendService : IFrontendService
 		FrontendViewModel vm = new FrontendViewModel();
 		vm.InitializeContent();
 		vm.Title = $"Netlist: {top}";
-		_logger.LogInformation("Selected file: " + json.FullPath);
+		_logger.Log("Selected file: " + json.FullPath);
 
 		FileStream jsonFileStream = File.Open(json.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
@@ -563,18 +563,18 @@ public class FrontendService : IFrontendService
 
 		if (File.Exists(ccVhdlFilePath))
 		{
-			_logger.LogInformation($"Found cross-compiled Verilog at {ccVhdlFilePath}");
+			_logger.Log($"Found cross-compiled Verilog at {ccVhdlFilePath}");
 			
 			bool success = await ServiceManager.GetService<ICcVhdlFileIndexService>()
 				.IndexFileAsync(ccVhdlFilePath, combinedHash);
 
 			if (success)
 			{
-				_logger.LogInformation($"Successfully indexed {top}");
+				_logger.Log($"Successfully indexed {top}");
 			}
 			else
 			{
-				_logger.LogInformation($"Failed to index {top}");
+				_logger.Log($"Failed to index {top}");
 			}
 		}
 
@@ -592,7 +592,7 @@ public class FrontendService : IFrontendService
 	{
 		ApplicationProcess expandProc = _applicationStateService.AddState("Layouting in progress", AppState.Loading);
 
-		_logger.LogInformation("Sending request to ExpandNode");
+		_logger.Log("Sending request to ExpandNode");
 
 		var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath, null);
 
@@ -605,11 +605,11 @@ public class FrontendService : IFrontendService
 
 		vm.File = await resp.Content.ReadAsStreamAsync();
 
-		_logger.LogInformation("Answer received");
+		_logger.Log("Answer received");
 
 		await vm.OpenFileImplAsync();
 
-		_logger.LogInformation("Done");
+		_logger.Log("Done");
 
 		_applicationStateService.RemoveState(expandProc);
 	}
@@ -628,7 +628,7 @@ public class FrontendService : IFrontendService
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e.Message);
+			_logger.Error(e.Message);
 
 			return false;
 		}
@@ -646,7 +646,7 @@ public class FrontendService : IFrontendService
 		}
 		catch (IOException e)
 		{
-			_logger.LogError(e.Message, false);
+			_logger.Error("Exception occured", e, false);
 
 			return false;
 		}
@@ -670,15 +670,15 @@ public class FrontendService : IFrontendService
 			{
 				if (resp.StatusCode == HttpStatusCode.NotFound)
 				{
-					_logger.LogError(
+					_logger.Error(
 						"The requested resource could not be found on the server. This could be due to a server restart. Please Re-Open your netlist.",
-						printErrors);
+						null, printErrors);
 				}
 				else
 				{
-					_logger.LogError(
+					_logger.Error(
 						"An internal server error occured. Please file a bug report if this problem persists.",
-						printErrors);
+						null, printErrors);
 				}
 
 				// return null;
@@ -688,9 +688,9 @@ public class FrontendService : IFrontendService
 		}
 		catch (InvalidOperationException)
 		{
-			_logger.LogError(
+			_logger.Error(
 				$"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
-				printErrors);
+				null, printErrors);
 			return null;
 		}
 		catch (HttpRequestException e)
@@ -698,21 +698,21 @@ public class FrontendService : IFrontendService
 			switch (e.HttpRequestError)
 			{
 				case HttpRequestError.NameResolutionError:
-					_logger.LogError(
+					_logger.Error(
 						$"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address",
-						printErrors);
+						null, printErrors);
 					break;
 
 				case HttpRequestError.ConnectionError:
-					_logger.LogError(
+					_logger.Error(
 						$"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
-						printErrors);
+						null, printErrors);
 					break;
 
 				default:
-					_logger.LogError(
+					_logger.Error(
 						"Due to an internal error, the server could not complete the request. Please file a bug report",
-						printErrors);
+						null, printErrors);
 					break;
 			}
 
@@ -720,16 +720,16 @@ public class FrontendService : IFrontendService
 		}
 		catch (TaskCanceledException)
 		{
-			_logger.LogError(
+			_logger.Error(
 				"The request has timed out. Please increase the request timeout time in the settings menu and try again",
-				printErrors);
+				null, printErrors);
 			return null;
 		}
 		catch (UriFormatException)
 		{
-			_logger.LogError(
+			_logger.Error(
 				$"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address",
-				printErrors);
+				null, printErrors);
 			return null;
 		}
 	}
@@ -753,7 +753,7 @@ public class FrontendService : IFrontendService
 		try
 		{
 			var res = await client.GetAsync("/server-active");
-			_logger.LogInformation("Server already started", true);
+			_logger.Log("Server already started", true);
 
 			return true;
 		}
@@ -764,16 +764,16 @@ public class FrontendService : IFrontendService
 
 		if (!_useLocalBackend)
 		{
-			_logger.LogError(
+			_logger.Error(
 				"The remote server could not be reached. Make sure the server is started and reachable or switch to the local server");
 			return false;
 		}
 
-		_logger.LogInformation("Server not started. Looking for server jar...", true);
+		_logger.Log("Server not started. Looking for server jar...", true);
 
 		if (!Directory.Exists(_backendJarFolder))
 		{
-			_logger.LogError(
+			_logger.Error(
 				"The directory containing the server jar could not be found. Please make sure that you have installed the \"FEntwumS NetlistViewer Backend\" binary using the extension manager and set the correct path to the server jar");
 
 			return false;
@@ -791,17 +791,17 @@ public class FrontendService : IFrontendService
 		var enumeratedResults = serverJar.ToList();
 		if (enumeratedResults.Count == 0)
 		{
-			_logger.LogError(
+			_logger.Error(
 				"No jar found. Please make sure that you have installed the \"FEntwumS NetlistViewer Backend\" binary using the extension manager");
 
 			return false;
 		}
 
-		_logger.LogInformation("Found server jar. Looking for java binary...", true);
+		_logger.Log("Found server jar. Looking for java binary...", true);
 
 		if (!Directory.Exists(_javaBinaryFolder))
 		{
-			_logger.LogError(
+			_logger.Error(
 				"The directory containing the java executable could not be found. Please make sure you have installed the \"OpenJDK JDK\" binary using the extension manager");
 
 			return false;
@@ -812,7 +812,7 @@ public class FrontendService : IFrontendService
 
 		if (PlatformHelper.Platform is PlatformId.Unknown or PlatformId.Wasm)
 		{
-			_logger.LogError("Your platform is currently not supported");
+			_logger.Error("Your platform is currently not supported");
 
 			return false;
 		}
@@ -823,7 +823,7 @@ public class FrontendService : IFrontendService
 
 			if (dir.Count() == 0)
 			{
-				_logger.LogError(
+				_logger.Error(
 					"No directory found. Please make sure that you have installed the \"Eclipse Adoptium OpenJDK\" binary using the extension manager");
 
 				return false;
@@ -853,7 +853,7 @@ public class FrontendService : IFrontendService
 				_extraJarArgs.Split(' ').Concat(["-jar", serverJarFile]).ToArray(),
 				Path.GetDirectoryName(serverJarFile));
 
-		_logger.LogInformation("Server started", true);
+		_logger.Log("Server started", true);
 
 		return true;
 	}
@@ -881,14 +881,14 @@ public class FrontendService : IFrontendService
 			try
 			{
 				var res = await client.GetAsync("/server-active");
-				_logger.LogInformation("Server is awaiting requests");
+				_logger.Log("Server is awaiting requests");
 				done = true;
 			}
 			catch (Exception)
 			{
 				if (!_useLocalBackend)
 				{
-					_logger.LogError(
+					_logger.Error(
 						"The remote server could not be reached. Make sure the server is started and reachable or switch to the local server");
 
 
@@ -897,17 +897,17 @@ public class FrontendService : IFrontendService
 					return false;
 				}
 
-				_logger.LogInformation($"No response. Trying again in {timeBetweenRetriesMS} ms");
+				_logger.Log($"No response. Trying again in {timeBetweenRetriesMS} ms");
 				failures++;
 				await Task.Delay(timeBetweenRetriesMS);
 
 				if (failures % retriesPerSecond == 0)
 				{
-					_logger.LogInformation("The backend could not be reached. Retrying...", true);
+					_logger.Log("The backend could not be reached. Retrying...", true);
 				}
 				else if (failures > 10 * retriesPerSecond)
 				{
-					_logger.LogInformation("The backend could not be reached. Aborting...", true);
+					_logger.Log("The backend could not be reached. Aborting...", true);
 
 					_applicationStateService.RemoveState(liveProc, "Error: The backend could not be reached");
 
@@ -958,7 +958,7 @@ public class FrontendService : IFrontendService
 		{
 			_applicationStateService.RemoveState(proc, "Error: No JSON netlist was found");
 
-			_logger.LogInformation(
+			_logger.Log(
 				"No json netlist was found. Aborting...");
 			return false;
 		}
@@ -975,9 +975,9 @@ public class FrontendService : IFrontendService
 
 		currentNetlist = combinedHash;
 
-		_logger.LogInformation("Path hash: " + pathHash);
-		_logger.LogInformation("Full file hash is: " + contenthash);
-		_logger.LogInformation("Combined hash is: " + combinedHash);
+		_logger.Log("Path hash: " + pathHash);
+		_logger.Log("Full file hash is: " + contenthash);
+		_logger.Log("Combined hash is: " + combinedHash);
 
 		_viewportDimensionService.SetClickedElementPath(combinedHash, string.Empty);
 		_viewportDimensionService.SetCurrentElementCount(combinedHash, 0);
@@ -1001,8 +1001,8 @@ public class FrontendService : IFrontendService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError("An error occured trying to connect to the server");
-			_logger.LogInformation(ex.Message);
+			_logger.Error("An error occured trying to connect to the server");
+			_logger.Log(ex.Message);
 			_applicationStateService.RemoveState(waitForBackendProc);
 			_applicationStateService.RemoveState(proc, "Error: The backend could not be reached");
 			return false;

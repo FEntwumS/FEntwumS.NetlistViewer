@@ -30,7 +30,7 @@ public class HierarchyJsonParser : IHierarchyJsonParser
 
 		if (rootNode == null)
 		{
-			_logger.LogError("Failed to parse hierarchy JSON");
+			_logger.Error("Failed to parse hierarchy JSON");
 
 			return (null, null);
 		}

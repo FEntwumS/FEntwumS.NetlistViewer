@@ -3,6 +3,7 @@ using Avalonia;
 using FEntwumS.NetlistViewer.Types;
 using FEntwumS.NetlistViewer.ViewModels;
 using Microsoft.Extensions.Logging;
+using OneWare.Essentials.Services;
 
 namespace FEntwumS.NetlistViewer.Services;
 
@@ -75,8 +76,8 @@ public class JsonLoader : IJsonLoader
 			ClickedElementParentPath = string.Join(" ", clickedElementPathSplit, 0, clickedElementPathSplit.Length - 1);
 		}
 
-		_logger.LogInformation("Start loading elements");
-		_logger.LogInformation("====");
+		_logger.Log("Start loading elements");
+		_logger.Log("====");
 
 		NodeCnt = 0;
 		LabelCnt = 0;
@@ -121,9 +122,9 @@ public class JsonLoader : IJsonLoader
 		_viewportDimensionService.SetMaxWidth(netlistId, MaxWidth);
 
 
-		_logger.LogInformation("====");
-		_logger.LogInformation("All elements loaded");
-		_logger.LogInformation("Statistics:");
+		_logger.Log("====");
+		_logger.Log("All elements loaded");
+		_logger.Log("Statistics:");
 
 		// Dispose of the JSON document, as we dont need to keep it around
 		RootNode = new JsonObject();
@@ -132,16 +133,16 @@ public class JsonLoader : IJsonLoader
 		// If the GC isn't called explicitly, the dead objects of the JSON file will just stay in the Gen 2 Heap
 		GC.Collect();
 
-		_logger.LogInformation("Number of Objects: " + items.Count);
-		_logger.LogInformation("Number of nodes: " + NodeCnt);
-		_logger.LogInformation("Number of ports: " + PortCnt);
-		_logger.LogInformation("Number of edges: " + EdgeCnt);
-		_logger.LogInformation("Average number of bendpoints per edge: " + ((float)BendCnt / (float)EdgeCnt));
-		_logger.LogInformation("Number of junctions: " + JunctionCnt);
-		_logger.LogInformation("Number of labels: " + LabelCnt);
-		_logger.LogInformation("Average number of characters per label: " + ((float)CharCnt / (float)LabelCnt));
-		_logger.LogInformation("Max width: " + MaxWidth);
-		_logger.LogInformation("Max height: " + MaxHeight);
+		_logger.Log("Number of Objects: " + items.Count);
+		_logger.Log("Number of nodes: " + NodeCnt);
+		_logger.Log("Number of ports: " + PortCnt);
+		_logger.Log("Number of edges: " + EdgeCnt);
+		_logger.Log("Average number of bendpoints per edge: " + ((float)BendCnt / (float)EdgeCnt));
+		_logger.Log("Number of junctions: " + JunctionCnt);
+		_logger.Log("Number of labels: " + LabelCnt);
+		_logger.Log("Average number of characters per label: " + ((float)CharCnt / (float)LabelCnt));
+		_logger.Log("Max width: " + MaxWidth);
+		_logger.Log("Max height: " + MaxHeight);
 
 
 		//mw.UpdateScaleImpl();
@@ -646,13 +647,13 @@ public class JsonLoader : IJsonLoader
 
 	public double GetMaxWidth()
 	{
-		_logger.LogInformation("Maxwidth: " + MaxWidth);
+		_logger.Log("Maxwidth: " + MaxWidth);
 		return MaxWidth;
 	}
 
 	public double GetMaxHeight()
 	{
-		_logger.LogInformation("Maxheight: " + MaxHeight);
+		_logger.Log("Maxheight: " + MaxHeight);
 		return MaxHeight;
 	}
 }

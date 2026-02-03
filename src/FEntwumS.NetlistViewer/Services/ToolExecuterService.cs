@@ -29,7 +29,7 @@ public class ToolExecuterService : IToolExecuterService
 			{
 				stdout.AppendLine(x);
 
-				_logger.LogInformation(x);
+				_logger.Log(x);
 				return true;
 			}, x =>
 			{
@@ -40,7 +40,7 @@ public class ToolExecuterService : IToolExecuterService
 
 				stderr.AppendLine(x);
 
-				_logger.LogError(x);
+				_logger.Error(x);
 				return true;
 			});
 

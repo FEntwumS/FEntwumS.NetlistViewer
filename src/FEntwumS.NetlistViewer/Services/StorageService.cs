@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using FEntwumS.NetlistViewer.Helpers;
 using Microsoft.Extensions.Logging;
+using OneWare.Essentials.Services;
 
 namespace FEntwumS.NetlistViewer.Services;
 
@@ -45,7 +46,7 @@ public class StorageService : IStorageService
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e.Message);
+			_logger.Error("Exception occured during saving", e);
 		}
 	}
 
@@ -57,7 +58,7 @@ public class StorageService : IStorageService
 		{
 			if (!File.Exists(path))
 			{
-				_logger.LogInformation("Storage file not found: " + path);
+				_logger.Log("Storage file not found: " + path);
 				return;
 			}
 
@@ -83,7 +84,7 @@ public class StorageService : IStorageService
 		}
 		catch (Exception e)
 		{
-			_logger.LogInformation(e.Message);
+			_logger.Log(e.Message);
 		}
 	}
 

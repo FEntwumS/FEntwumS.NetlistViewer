@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Helpers;
+using OneWare.Essentials.Services;
 
 namespace FEntwumS.NetlistViewer.Services;
 
@@ -21,7 +22,7 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
 	{
 		if (!File.Exists(filePath))
 		{
-			_logger.LogError($"File {filePath} does not exist...");
+			_logger.Error($"File {filePath} does not exist...");
 
 			return false;
 		}

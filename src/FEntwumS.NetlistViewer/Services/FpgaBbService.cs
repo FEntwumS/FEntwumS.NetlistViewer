@@ -31,8 +31,8 @@ public class FpgaBbService : IFpgaBbService
 				_currentManufacturer = x;
 				UpdateBbCommand(_currentManufacturer, _currentDeviceFamily);
 
-				_logger.LogInformation($"Manufacturer: {_currentManufacturer}");
-				_logger.LogInformation($"Command: {_currentBbCommand}");
+				_logger.Log($"Manufacturer: {_currentManufacturer}");
+				_logger.Log($"Command: {_currentBbCommand}");
 			});
 		_settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.FpgaDeviceFamilyKey)
 			.Subscribe(x =>
@@ -40,8 +40,8 @@ public class FpgaBbService : IFpgaBbService
 				_currentDeviceFamily = x;
 				UpdateBbCommand(_currentManufacturer, _currentDeviceFamily);
 
-				_logger.LogInformation($"DeviceFamily: {_currentDeviceFamily}");
-				_logger.LogInformation($"Command: {_currentBbCommand}");
+				_logger.Log($"DeviceFamily: {_currentDeviceFamily}");
+				_logger.Log($"Command: {_currentBbCommand}");
 			});
 	}
 
@@ -109,7 +109,7 @@ public class FpgaBbService : IFpgaBbService
 						$"read_verilog -specify -lib +/gowin/cells_xtra_{deviceFamily}.v;";
 				}
 
-				_logger.LogError(
+				_logger.Error(
 					"The current combination of device manufacturer and device family is not valid. Valid device family options are: gw1n, gw2a or gw5a");
 
 				break;
@@ -140,7 +140,7 @@ public class FpgaBbService : IFpgaBbService
 						"read_verilog -lib +/intel_alm/common/megafunction_bb.v;";
 				}
 
-				_logger.LogError(
+				_logger.Error(
 					"The current combination of device manufacturer and device family is not valid. Valid device family options are: cyclonev");
 
 				break;
@@ -165,7 +165,7 @@ public class FpgaBbService : IFpgaBbService
 						$"read_verilog -lib -specify +/quicklogic/common/cells_sim.v +/quicklogic/{deviceFamily}/cells_sim.v;";
 				}
 
-				_logger.LogError(
+				_logger.Error(
 					"The current combination of device manufacturer and device family is not valid. Valid device family options are: pp3 or qlf_k6n10f");
 				break;
 
@@ -177,7 +177,7 @@ public class FpgaBbService : IFpgaBbService
 				       "read_verilog -lib +/xilinx/cells_xtra.v;";
 
 			default:
-				_logger.LogError("Unknown device manufacturer");
+				_logger.Error("Unknown device manufacturer");
 				break;
 		}
 

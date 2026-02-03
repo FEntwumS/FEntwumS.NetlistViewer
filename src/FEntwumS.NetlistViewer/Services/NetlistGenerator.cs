@@ -123,7 +123,7 @@ public class NetlistGenerator : INetlistGenerator
 
 		if (!File.Exists(netlistPath))
 		{
-			_logger.LogError($"Netlist file not found: {netlistPath}");
+			_logger.Error($"Netlist file not found: {netlistPath}");
 
 			return (null, false);
 		}
@@ -228,10 +228,10 @@ public class NetlistGenerator : INetlistGenerator
 
 				watcher.Error += (sender, args) =>
 				{
-					_logger.LogError("Error in watcher");
+					_logger.Error("Error in watcher");
 					if (sender is FileSystemWatcher watcher)
 					{
-						_logger.LogError($"Watcher: {watcher.Path}");
+						_logger.Error($"Watcher: {watcher.Path}");
 					}
 				};
 
@@ -265,7 +265,7 @@ public class NetlistGenerator : INetlistGenerator
 
 			if (projectCandidate is null)
 			{
-				_logger.LogError($"Project {e.FullPath} was not found");
+				_logger.Error($"Project {e.FullPath} was not found");
 			}
 			else
 			{
