@@ -1199,7 +1199,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
     private void NetlistControl_OnElementClicked(object sender, ElementClickedEventArgs e)
     {
-        ServiceManager.GetService<ILogger>().LogInformation($"Toggling entity at {e.NodePath}", false);
+        ServiceManager.GetService<ILogger>().Log($"Toggling entity at {e.NodePath}", false);
     }
 
     #endregion
