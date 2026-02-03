@@ -3,17 +3,19 @@ using Avalonia;
 using Avalonia.Media;
 using FEntwumS.NetlistViewer.Assets;
 using FEntwumS.NetlistViewer.Types.HierarchyView;
+using Microsoft.Extensions.Logging;
+using OneWare.Essentials.Services;
 
 namespace FEntwumS.NetlistViewer.Services;
 
 public class HierarchyJsonParser : IHierarchyJsonParser
 {
-	private readonly ICustomLogger _logger;
+	private readonly ILogger _logger;
 	private readonly IHierarchyInformationService _hierarchyInformationService;
 
 	public HierarchyJsonParser()
 	{
-		_logger = ServiceManager.GetService<ICustomLogger>();
+		_logger = ServiceManager.GetService<ILogger>();
 		_hierarchyInformationService = ServiceManager.GetService<IHierarchyInformationService>();
 	}
 

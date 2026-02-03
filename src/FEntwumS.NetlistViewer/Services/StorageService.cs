@@ -1,17 +1,19 @@
 ﻿using System.Text.Json;
 using FEntwumS.NetlistViewer.Helpers;
+using Microsoft.Extensions.Logging;
+using OneWare.Essentials.Services;
 
 namespace FEntwumS.NetlistViewer.Services;
 
 public class StorageService : IStorageService
 {
 	private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-	private ICustomLogger _logger;
+	private ILogger _logger;
 
 	public StorageService()
 	{
 		_ = LoadAsync();
-		_logger = ServiceManager.GetService<ICustomLogger>();
+		_logger = ServiceManager.GetService<ILogger>();
 	}
 
 	private static Dictionary<string, string> _storage = new Dictionary<string, string>();
@@ -44,7 +46,7 @@ public class StorageService : IStorageService
 		}
 		catch (Exception e)
 		{
-			_logger.Error(e.Message);
+			_logger.Error("Exception occured during saving", e);
 		}
 	}
 
@@ -56,7 +58,7 @@ public class StorageService : IStorageService
 		{
 			if (!File.Exists(path))
 			{
-				ServiceManager.GetCustomLogger().Log("Storage file not found: " + path);
+				_logger.Log("Storage file not found: " + path);
 				return;
 			}
 

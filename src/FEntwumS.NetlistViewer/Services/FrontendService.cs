@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using Asmichi.ProcessManagement;
+using Avalonia.Collections;
 using FEntwumS.NetlistViewer.Helpers;
 using FEntwumS.NetlistViewer.Types.HierarchyView;
 using FEntwumS.NetlistViewer.Types;
@@ -11,6 +12,7 @@ using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using FEntwumS.NetlistViewer.ViewModels;
+using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.PackageManager;
 using StreamContent = System.Net.Http.StreamContent;
@@ -19,9 +21,9 @@ namespace FEntwumS.NetlistViewer.Services;
 
 public class FrontendService : IFrontendService
 {
-	private static readonly ICustomLogger _logger;
+	private static readonly ILogger _logger;
 	private static readonly IApplicationStateService _applicationStateService;
-	private static readonly IDockService _dockService;
+	private static readonly IMainDockService _dockService;
 	private static readonly ISettingsService _settingsService;
 	private static readonly IPackageService _packageService;
 	private static readonly IHierarchyJsonParser _hierarchyJsonParser;
@@ -66,9 +68,9 @@ public class FrontendService : IFrontendService
 
 	static FrontendService()
 	{
-		_logger = ServiceManager.GetCustomLogger();
+		_logger = ServiceManager.GetService<ILogger>();
 		_applicationStateService = ServiceManager.GetService<IApplicationStateService>();
-		_dockService = ServiceManager.GetService<IDockService>();
+		_dockService = ServiceManager.GetService<IMainDockService>();
 		_settingsService = ServiceManager.GetService<ISettingsService>();
 		_packageService = ServiceManager.GetService<IPackageService>();
 		_hierarchyJsonParser = ServiceManager.GetService<IHierarchyJsonParser>();
@@ -644,7 +646,7 @@ public class FrontendService : IFrontendService
 		}
 		catch (IOException e)
 		{
-			_logger.Error(e.Message, false);
+			_logger.Error("Exception occured", e, false);
 
 			return false;
 		}
@@ -670,13 +672,13 @@ public class FrontendService : IFrontendService
 				{
 					_logger.Error(
 						"The requested resource could not be found on the server. This could be due to a server restart. Please Re-Open your netlist.",
-						printErrors);
+						null, printErrors);
 				}
 				else
 				{
 					_logger.Error(
 						"An internal server error occured. Please file a bug report if this problem persists.",
-						printErrors);
+						null, printErrors);
 				}
 
 				// return null;
@@ -688,7 +690,7 @@ public class FrontendService : IFrontendService
 		{
 			_logger.Error(
 				$"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
-				printErrors);
+				null, printErrors);
 			return null;
 		}
 		catch (HttpRequestException e)
@@ -698,19 +700,19 @@ public class FrontendService : IFrontendService
 				case HttpRequestError.NameResolutionError:
 					_logger.Error(
 						$"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address",
-						printErrors);
+						null, printErrors);
 					break;
 
 				case HttpRequestError.ConnectionError:
 					_logger.Error(
 						$"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
-						printErrors);
+						null, printErrors);
 					break;
 
 				default:
 					_logger.Error(
 						"Due to an internal error, the server could not complete the request. Please file a bug report",
-						printErrors);
+						null, printErrors);
 					break;
 			}
 
@@ -720,14 +722,14 @@ public class FrontendService : IFrontendService
 		{
 			_logger.Error(
 				"The request has timed out. Please increase the request timeout time in the settings menu and try again",
-				printErrors);
+				null, printErrors);
 			return null;
 		}
 		catch (UriFormatException)
 		{
 			_logger.Error(
 				$"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address",
-				printErrors);
+				null, printErrors);
 			return null;
 		}
 	}
@@ -1049,7 +1051,7 @@ public class FrontendService : IFrontendService
 		hierarchyVM.NetlistId = combinedHash;
 		hierarchyVM.OffsetX = -ServiceManager.GetService<IHierarchyInformationService>().getTopX(combinedHash);
 		hierarchyVM.OffsetY = -ServiceManager.GetService<IHierarchyInformationService>().getTopY(combinedHash);
-		ObservableCollection<HierarchyViewElement> obsElements = new ObservableCollection<HierarchyViewElement>();
+		AvaloniaList<HierarchyViewElement> obsElements = new AvaloniaList<HierarchyViewElement>();
 		obsElements.AddRange(elements);
 		hierarchyVM.Items = obsElements;
 

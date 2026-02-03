@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using FEntwumS.NetlistViewer.Controls;
 using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.Types;
+using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Enums;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
@@ -142,7 +143,7 @@ public class FrontendViewModel : ExtendedTool
 	}
 
 
-	private ICustomLogger _logger { get; set; }
+	private ILogger _logger { get; set; }
 	private readonly IApplicationStateService _applicationStateService;
 
 	private FrontendService _frontendService { get; set; }
@@ -154,7 +155,7 @@ public class FrontendViewModel : ExtendedTool
 
 		FitToZoom = false;
 
-		_logger = ServiceManager.GetCustomLogger();
+		_logger = ServiceManager.GetService<ILogger>();
 		_applicationStateService = ServiceManager.GetService<IApplicationStateService>();
 
 		// OneWare uses the Community MVVM Toolkit. If ReactiveUI is used in an extension, any access to a bound property

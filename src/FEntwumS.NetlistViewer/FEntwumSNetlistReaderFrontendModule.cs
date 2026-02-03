@@ -12,12 +12,12 @@ using OneWare.Essentials.Models;
 using OneWare.Essentials.PackageManager;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
-using Prism.Ioc;
-using Prism.Modularity;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FEntwumS.NetlistViewer;
 
-public class FEntwumSNetlistReaderFrontendModule : IModule
+public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 {
 	public static readonly Package NetlistViewerBackendPackage = new()
 	{
@@ -373,35 +373,33 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
 	private static bool EnableHierarchyView = false;
 
-	public void RegisterTypes(IContainerRegistry containerRegistry)
+	public override void RegisterServices(IServiceCollection containerRegistry)
 	{
-		containerRegistry.RegisterSingleton<IViewportDimensionService, ViewportDimensionService>();
-		containerRegistry.RegisterSingleton<IJsonLoader, JsonLoader>();
-		containerRegistry.RegisterSingleton<ICustomLogger, CustomLogger>();
-		containerRegistry.RegisterSingleton<IHashService, OAATHashService>();
-		containerRegistry.RegisterSingleton<IYosysService, YosysService>();
-		containerRegistry.RegisterSingleton<IToolExecuterService, ToolExecuterService>();
-		containerRegistry.RegisterSingleton<IFpgaBbService, FpgaBbService>();
-		containerRegistry.RegisterSingleton<ICcVhdlFileIndexService, CcVhdlFileIndexService>();
-		containerRegistry.RegisterSingleton<IFrontendService, FrontendService>();
-		containerRegistry.RegisterSingleton<INetlistGenerator, NetlistGenerator>();
-		containerRegistry.Register<FrontendViewModel>();
-		containerRegistry.RegisterSingleton<IHierarchyJsonParser, HierarchyJsonParser>();
-		containerRegistry.RegisterSingleton<IHierarchyInformationService, HierarchyInformationService>();
-		containerRegistry.RegisterSingleton<IStorageService, StorageService>();
+		containerRegistry.AddSingleton<IViewportDimensionService, ViewportDimensionService>();
+		containerRegistry.AddSingleton<IJsonLoader, JsonLoader>();
+		containerRegistry.AddSingleton<IHashService, OAATHashService>();
+		containerRegistry.AddSingleton<IYosysService, YosysService>();
+		containerRegistry.AddSingleton<IToolExecuterService, ToolExecuterService>();
+		containerRegistry.AddSingleton<IFpgaBbService, FpgaBbService>();
+		containerRegistry.AddSingleton<ICcVhdlFileIndexService, CcVhdlFileIndexService>();
+		containerRegistry.AddSingleton<IFrontendService, FrontendService>();
+		containerRegistry.AddSingleton<INetlistGenerator, NetlistGenerator>();
+		containerRegistry.AddSingleton<IHierarchyJsonParser, HierarchyJsonParser>();
+		containerRegistry.AddSingleton<IHierarchyInformationService, HierarchyInformationService>();
+		containerRegistry.AddSingleton<IStorageService, StorageService>();
 	}
 
-	public void OnInitialized(IContainerProvider? containerProvider)
+	public override void Initialize(IServiceProvider containerProvider)
 	{
 		ILogger logger = ServiceManager.GetService<ILogger>();
 
 		// Log some debug information
-		ServiceManager.GetCustomLogger().Log($"Platform: {PlatformHelper.Platform}");
+		ServiceManager.GetService<ILogger>().Log($"Platform: {PlatformHelper.Platform}");
 
 		ServiceManager.GetService<IPackageService>().RegisterPackage(NetlistViewerBackendPackage);
 		ServiceManager.GetService<IPackageService>().RegisterPackage(JREPackage);
 
-		ServiceManager.GetCustomLogger().Log("Registered Packages");
+		ServiceManager.GetService<ILogger>().Log("Registered Packages");
 
 		var resourceInclude = new ResourceInclude(new Uri("avares://FEntwumS.NetlistViewer/Styles/Icons.axaml"))
 			{ Source = new Uri("avares://FEntwumS.NetlistViewer/Styles/Icons.axaml") };
@@ -410,11 +408,11 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 
 		ISettingsService settingsService = ServiceManager.GetService<ISettingsService>();
 
-		ServiceManager.GetService<IDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
-		ServiceManager.GetService<IDockService>()
+		ServiceManager.GetService<IMainDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
+		ServiceManager.GetService<IMainDockService>()
 			.RegisterLayoutExtension<HierarchySidebarViewModel>(DockShowLocation.Left);
 
-		ServiceManager.GetCustomLogger().Log("Registered FrontendViewModel as Document in dock system");
+		ServiceManager.GetService<ILogger>().Log("Registered FrontendViewModel as Document in dock system");
 		
 		RegisterContextMenus();
 		RegisterSettings();
@@ -431,7 +429,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 		// Upgrade settings, if necessary
 		if (SettingsUpgrader.NeedsUpgrade())
 		{
-			ServiceManager.GetCustomLogger().Log("Upgrading settings");
+			ServiceManager.GetService<ILogger>().Log("Upgrading settings");
 			_ = SettingsUpgrader.UpgradeSettingsIfNecessaryAsync();
 		}
 	}
@@ -514,7 +512,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 			}
 		});
 
-		ServiceManager.GetCustomLogger().Log("Registered custom context menu entries");
+		ServiceManager.GetService<ILogger>().Log("Registered custom context menu entries");
 	}
 	
 	private void RegisterSettings()
@@ -607,8 +605,8 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
 			FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey,
 			new SliderSetting("Automatic netlist generation interval (s)", 60.0d, 15.0d, 3600.0d, 5.0d));
-
-		ServiceManager.GetCustomLogger().Log("Registered custom settings");
+		
+		ServiceManager.GetService<ILogger>().Log("Registered custom settings");
 	}
 
 	private void RegisterProjectSettings()
@@ -634,7 +632,7 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 			.WithSetting(new TextBoxSetting("Device family", "", null))
 		.Build());
 
-		ServiceManager.GetCustomLogger().Log("Added project-specific settings");
+		ServiceManager.GetService<ILogger>().Log("Added project-specific settings");
 	}
 
 	/// <summary>
@@ -659,17 +657,17 @@ public class FEntwumSNetlistReaderFrontendModule : IModule
 					{
 						(ContainerLocator.Current.Resolve(type) as ISettingsSubscriber)?.SubscribeToSettings();
 						
-						ServiceManager.GetCustomLogger().Log($"Subscribed {type.FullName} to settings");
+						ServiceManager.GetService<ILogger>().Log($"Subscribed {type.FullName} to settings");
 					}
 				}
 			}
 			catch (ReflectionTypeLoadException ex)
 			{
-				ServiceManager.GetCustomLogger().Error($"An issue occured during settings subscription: {ex.Message}\n\n{ex.StackTrace}\n\nPlease file a bug report!");
+				ServiceManager.GetService<ILogger>().Error("An issue occured during settings subscription\n\nPlease file a bug report!", ex);
 			}
 		}
 
-		ServiceManager.GetCustomLogger().Log("FEntwumS.NetlistViewer: Subscribed services to the settings relevant to them");
+		ServiceManager.GetService<ILogger>().Log("FEntwumS.NetlistViewer: Subscribed services to the settings relevant to them");
 	}
 
 	private void RegisterShutdownActions()

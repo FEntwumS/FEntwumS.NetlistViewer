@@ -3,6 +3,7 @@ using Avalonia.Threading;
 using DynamicData.Binding;
 using FEntwumS.NetlistViewer.Helpers;
 using FEntwumS.NetlistViewer.Types;
+using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.ProjectSystem.Models;
@@ -12,7 +13,7 @@ namespace FEntwumS.NetlistViewer.Services;
 
 public class NetlistGenerator : INetlistGenerator
 {
-	private readonly ICustomLogger _logger;
+	private readonly ILogger _logger;
 	private readonly ISettingsService _settingsService;
 	private readonly IProjectExplorerService _projectExplorerService;
 	private readonly IStorageService _storageService;
@@ -30,7 +31,7 @@ public class NetlistGenerator : INetlistGenerator
 
 	public NetlistGenerator()
 	{
-		_logger = ServiceManager.GetCustomLogger();
+		_logger = ServiceManager.GetService<ILogger>();
 		_settingsService = ServiceManager.GetService<ISettingsService>();
 		_projectExplorerService = ServiceManager.GetService<IProjectExplorerService>();
 		_storageService = ServiceManager.GetService<IStorageService>();

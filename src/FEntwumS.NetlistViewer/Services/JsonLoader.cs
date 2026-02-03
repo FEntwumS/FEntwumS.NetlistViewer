@@ -2,6 +2,8 @@
 using Avalonia;
 using FEntwumS.NetlistViewer.Types;
 using FEntwumS.NetlistViewer.ViewModels;
+using Microsoft.Extensions.Logging;
+using OneWare.Essentials.Services;
 
 namespace FEntwumS.NetlistViewer.Services;
 
@@ -21,7 +23,7 @@ public class JsonLoader : IJsonLoader
 	private long PortCnt { get; set; }
 	private long BendCnt { get; set; }
 	private long CharCnt { get; set; }
-	private readonly ICustomLogger _logger;
+	private readonly ILogger _logger;
 
 	private string? ClickedElementPath { get; set; }
 	private string? ClickedElementParentPath { get; set; }
@@ -32,7 +34,7 @@ public class JsonLoader : IJsonLoader
 	public JsonLoader()
 	{
 		_viewportDimensionService = ServiceManager.GetViewportDimensionService();
-		_logger = ServiceManager.GetCustomLogger();
+		_logger = ServiceManager.GetService<ILogger>();
 	}
 
 	public async Task OpenJsonAsync(Stream netlist, UInt64 netlistId)

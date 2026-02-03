@@ -1,4 +1,5 @@
 ﻿using FEntwumS.NetlistViewer.Helpers;
+using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.UniversalFpgaProjectSystem.Models;
@@ -13,12 +14,12 @@ public class FpgaBbService : IFpgaBbService
 	private string _currentDeviceFamily = "";
 
 	private readonly ISettingsService _settingsService;
-	private readonly ICustomLogger _logger;
+	private readonly ILogger _logger;
 
 	public FpgaBbService()
 	{
 		_settingsService = ServiceManager.GetService<ISettingsService>();
-		_logger = ServiceManager.GetService<ICustomLogger>();
+		_logger = ServiceManager.GetService<ILogger>();
 	}
 
 
@@ -56,7 +57,7 @@ public class FpgaBbService : IFpgaBbService
 
 		if (file is null || file.Root is not UniversalFpgaProjectRoot root)
 		{
-			_logger.Log($"{file?.Name} is not associated with an FPGA project. Falling back to global settings");
+			_logger.Warning($"{file?.Name} is not associated with an FPGA project. Falling back to global settings");
 		}
 		else
 		{

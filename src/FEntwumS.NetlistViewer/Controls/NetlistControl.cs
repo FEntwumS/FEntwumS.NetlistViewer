@@ -13,6 +13,7 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.Types;
+using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
@@ -1155,7 +1156,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             line = vhdlLine;
         }
 
-        var ds = ServiceManager.GetService<IDockService>();
+        var ds = ServiceManager.GetService<IMainDockService>();
 
         var document = await ds.OpenFileAsync(new ExternalFile(filename));
 
@@ -1198,7 +1199,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
     private void NetlistControl_OnElementClicked(object sender, ElementClickedEventArgs e)
     {
-        ServiceManager.GetCustomLogger().Log($"Toggling entity at {e.NodePath}", false);
+        ServiceManager.GetService<ILogger>().Log($"Toggling entity at {e.NodePath}", false);
     }
 
     #endregion

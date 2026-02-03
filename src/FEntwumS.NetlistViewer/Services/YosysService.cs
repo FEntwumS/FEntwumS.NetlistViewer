@@ -1,4 +1,5 @@
 ﻿using FEntwumS.NetlistViewer.Helpers;
+using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.UniversalFpgaProjectSystem.Models;
@@ -8,7 +9,6 @@ namespace FEntwumS.NetlistViewer.Services;
 public class YosysService : IYosysService
 {
 	private ISettingsService _settingsService;
-	private ICustomLogger _logger;
 	private IToolExecuterService _toolExecuterService;
 	private IFpgaBbService _fpgaBbService;
 	private bool _useHierarchicalBackend;
@@ -18,7 +18,6 @@ public class YosysService : IYosysService
 	public YosysService()
 	{
 		_settingsService = ServiceManager.GetService<ISettingsService>();
-		_logger = ServiceManager.GetCustomLogger();
 		_toolExecuterService = ServiceManager.GetService<IToolExecuterService>();
 		_fpgaBbService = ServiceManager.GetService<IFpgaBbService>();
 	}
