@@ -57,7 +57,7 @@ public class FpgaBbService : IFpgaBbService
 
 		if (file is null || file.Root is not UniversalFpgaProjectRoot root)
 		{
-			_logger.LogWarning($"{file?.Name} is not associated with an FPGA project. Falling back to global settings");
+			_logger.Warning($"{file?.Name} is not associated with an FPGA project. Falling back to global settings");
 		}
 		else
 		{

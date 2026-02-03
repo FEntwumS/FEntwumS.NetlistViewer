@@ -197,17 +197,17 @@ public class FrontendViewModel : ExtendedTool
 			{
 				ApplicationProcess readProc = _applicationStateService.AddState("Reading response", AppState.Loading);
 
-				_logger.LogInformation("Opening file...");
+				_logger.Log("Opening file...");
 
 				//var file = fileOpener.OpenFileAsync();
 
 				if (File is null)
 				{
-					_logger.LogError("File is empty.");
+					_logger.Error("File is empty.");
 					return;
 				}
 
-				_logger.LogInformation("File loaded");
+				_logger.Log("File loaded");
 
 				_applicationStateService.RemoveState(readProc);
 
@@ -230,7 +230,7 @@ public class FrontendViewModel : ExtendedTool
 
 				FileLoaded = true;
 
-				_logger.LogInformation("JSON read");
+				_logger.Log("JSON read");
 			}
 			catch (Exception e)
 			{
