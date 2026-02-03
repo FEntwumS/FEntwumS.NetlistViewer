@@ -355,6 +355,11 @@ public class FrontendService : IFrontendService
 						_logger.Error(
 							$"Extension \"{dependencyPackage.Name}\" is required for the correct functioning of the FEntwumS Netlist Viewer. Please install it manually or enable \"Automatically download Binaries\" under the \"Experimental\" settings.");
 
+						await ServiceManager.GetService<IWindowService>().ShowMessageAsync(
+							"Error during dependency installation",
+							$"Extension \"{dependencyPackage.Name}\" is required for the correct functioning of the FEntwumS Netlist Viewer. Please install it manually or enable \"Automatically download Binaries\" under the \"Experimental\" settings.",
+							MessageBoxIcon.Error, null);
+
 						globalSuccess = false;
 					}
 					else
@@ -394,6 +399,29 @@ public class FrontendService : IFrontendService
 		if (globalSuccess && _restartRequired)
 		{
 			_logger.Log("Dependencies were successfully installed. Please restart OneWare Studio!", true);
+
+			MessageBoxStatus selectedOption = await ServiceManager.GetService<IWindowService>().ShowYesNoAsync(
+				"Restart OneWare Studio",
+				"The required dependencies were successfully installed. Do you want to restart OneWare Studio? You will have the option to save any unfinished work",
+				MessageBoxIcon.Info, null);
+
+			if (selectedOption == MessageBoxStatus.Yes)
+			{
+				bool shutdownsuccess = await ServiceManager.GetService<IApplicationStateService>().TryRestartAsync();
+
+				if (!shutdownsuccess)
+				{
+					await ServiceManager.GetService<IWindowService>().ShowMessageAsync("An error occured",
+						"OneWare Studio could not be restarted. Please restart OneWare Studio manually",
+						MessageBoxIcon.Error, null);
+				}
+			}
+			else
+			{
+				await ServiceManager.GetService<IWindowService>().ShowMessageAsync("Please restart OneWare Studio",
+					"OneWare Studio needs to be restarted before the FEntwumS Netlist Viewer can work. Please restart OneWare Studio",
+					MessageBoxIcon.Warning, null);
+			}
 		}
 
 		_applicationStateService.RemoveState(checkProc);
@@ -419,9 +447,6 @@ public class FrontendService : IFrontendService
 
 		if (needsRestart)
 		{
-			// Prompt the user to restart OneWare Studio if new binaries/plugins were previously installed
-			// TODO replace with notification when the associated service is available on nuget 
-			_logger.Error("Please restart OneWare Studio.");
 			_applicationStateService.RemoveState(proc, "Please restart OneWare Studio!");
 
 			return null;
