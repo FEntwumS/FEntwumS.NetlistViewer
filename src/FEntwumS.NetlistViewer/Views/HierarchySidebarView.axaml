@@ -27,23 +27,23 @@
     -->
     <Grid ColumnDefinitions="*"
           RowDefinitions="5*,2*">
-        <TreeView ScrollViewer.VerticalScrollBarVisibility="Auto"
-                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                  ItemsSource="{Binding Elements}"
-                  SelectedItem="{Binding SelectedElement}"
-                  VerticalAlignment="Top"
-                  Grid.Row="0">
-            <TreeView.Styles>
+        <TreeDataGrid ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                      Source="{Binding Elements}"
+                      SelectedItem="{Binding SelectedElement}"
+                      VerticalAlignment="Top"
+                      Grid.Row="0">
+            <TreeDataGrid.Styles>
                 <Style Selector="TreeViewItem" x:DataType="hierarchicaltypes:HierarchySideBarElement">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded}"/>
                 </Style>
-            </TreeView.Styles>
-            <TreeView.DataTemplates>
+            </TreeDataGrid.Styles>
+            <TreeDataGrid.DataTemplates>
                 <TreeDataTemplate DataType="hierarchicaltypes:HierarchySideBarElement" ItemsSource="{Binding Children}">
                     <TextBlock FontSize="13" Text="{Binding Name}"></TextBlock>
                 </TreeDataTemplate>
-            </TreeView.DataTemplates>
-        </TreeView>
+            </TreeDataGrid.DataTemplates>
+        </TreeDataGrid>
         <Border Grid.Row="1"
                 BorderThickness="0 1 0 1"
                 BorderBrush="{DynamicResource ThemeBorderLowBrush}"> 
