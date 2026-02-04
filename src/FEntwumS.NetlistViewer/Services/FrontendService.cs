@@ -1074,7 +1074,6 @@ public class FrontendService : IFrontendService
 		sidebarelements.Add(elem!.Children[0]);
 		sidebarVM.Elements = sidebarelements;
 		
-		sidebarVM.InitializeContent();
 		_dockService.Show(sidebarVM, DockShowLocation.Left);
 		
 
