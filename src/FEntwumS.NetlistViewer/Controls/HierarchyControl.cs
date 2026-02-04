@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
 using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
@@ -23,16 +24,16 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
 {
     #region Properties
 
-    private ObservableCollection<HierarchyViewElement> _items = new();
+    private AvaloniaList<HierarchyViewElement> _items = new();
 
-    public ObservableCollection<HierarchyViewElement> Items
+    public AvaloniaList<HierarchyViewElement> Items
     {
-        get => _items ??= new ObservableCollection<HierarchyViewElement>();
+        get => _items ??= new AvaloniaList<HierarchyViewElement>();
         set => SetAndRaise(ItemsProperty, ref _items, value);
     }
 
-    public static readonly DirectProperty<HierarchyControl, ObservableCollection<HierarchyViewElement>> ItemsProperty =
-        AvaloniaProperty.RegisterDirect<HierarchyControl, ObservableCollection<HierarchyViewElement>>(nameof(Items),
+    public static readonly DirectProperty<HierarchyControl, AvaloniaList<HierarchyViewElement>> ItemsProperty =
+        AvaloniaProperty.RegisterDirect<HierarchyControl, AvaloniaList<HierarchyViewElement>>(nameof(Items),
             control => control.Items, (control, items) => control.Items = items,
             defaultBindingMode: BindingMode.TwoWay);
 

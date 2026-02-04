@@ -28,11 +28,11 @@
     <Grid ColumnDefinitions="*"
           RowDefinitions="5*,2*">
         <TreeView ScrollViewer.VerticalScrollBarVisibility="Auto"
-                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                  ItemsSource="{Binding Elements}"
-                  SelectedItem="{Binding SelectedElement}"
-                  VerticalAlignment="Top"
-                  Grid.Row="0">
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                      ItemsSource="{Binding Elements}"
+                      SelectedItem="{Binding SelectedElement}"
+                      VerticalAlignment="Top"
+                      Grid.Row="0">
             <TreeView.Styles>
                 <Style Selector="TreeViewItem" x:DataType="hierarchicaltypes:HierarchySideBarElement">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded}"/>
@@ -53,7 +53,7 @@
                         BorderBrush="{DynamicResource ThemeBorderLowBrush}">
                     <StackPanel>
                         <TextBlock Text="Type: " FontSize="13"></TextBlock>
-                        <TextBlock FontSize="13" Text="{Binding SelectedElementType}"></TextBlock>
+                        <TextBlock FontSize="13" Text="{Binding SelectedElement.Type}"></TextBlock>
                     </StackPanel>
                 </Border>
                 <Border BorderThickness="0 1"
