@@ -30,6 +30,7 @@
         <TreeView ScrollViewer.VerticalScrollBarVisibility="Auto"
                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
                       ItemsSource="{Binding Elements}"
+                      SelectedItem="{Binding SelectedElement}"
                       VerticalAlignment="Top"
                       Grid.Row="0">
             <TreeView.Styles>
@@ -52,7 +53,7 @@
                         BorderBrush="{DynamicResource ThemeBorderLowBrush}">
                     <StackPanel>
                         <TextBlock Text="Type: " FontSize="13"></TextBlock>
-                        <TextBlock FontSize="13" Text="{Binding SelectedElementType}"></TextBlock>
+                        <TextBlock FontSize="13" Text="{Binding SelectedElement.Type}"></TextBlock>
                     </StackPanel>
                 </Border>
                 <Border BorderThickness="0 1"

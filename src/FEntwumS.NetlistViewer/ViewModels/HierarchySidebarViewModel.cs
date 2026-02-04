@@ -30,19 +30,6 @@ public class HierarchySidebarViewModel : ExtendedTool
 		set
 		{
 			this._selectedElement = value;
-			updateType();
-			OnPropertyChanged();
-		}
-	}
-
-	private string? _selectedElementType;
-
-	public string SelectedElementType
-	{
-		get => this._selectedElementType ?? string.Empty;
-		set
-		{
-			this._selectedElementType = value;
 			OnPropertyChanged();
 		}
 	}
@@ -51,11 +38,5 @@ public class HierarchySidebarViewModel : ExtendedTool
 	{
 		_elements = new AvaloniaList<HierarchySideBarElement>();
 		Elements = new AvaloniaList<HierarchySideBarElement>();
-		SelectedElementType = "";
-	}
-
-	void updateType()
-	{
-		SelectedElementType = SelectedElement.Type ?? "";
 	}
 }
