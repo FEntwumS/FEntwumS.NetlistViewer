@@ -1075,7 +1075,8 @@ public class FrontendService : IFrontendService
 		sidebarVM.Elements = sidebarelements;
 		
 		_dockService.Show(sidebarVM, DockShowLocation.Left);
-		
+		// Uncomment the line below to reproduce the crash
+		// _dockService.InitializeContent();
 
 		HierarchyViewModel hierarchyVM = new HierarchyViewModel();
 		hierarchyVM.InitializeContent();
