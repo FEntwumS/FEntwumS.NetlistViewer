@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Markup.Xaml.Styling;
 using CommunityToolkit.Mvvm.Input;
 using FEntwumS.NetlistViewer.Helpers;
+using FEntwumS.NetlistViewer.Helpers.Validators;
 using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.ViewModels;
 using OneWare.Essentials.Enums;
@@ -556,12 +557,22 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
 			FentwumSNetlistViewerSettingsHelper.BackendAddressKey,
-			new TextBoxSetting("Server address", "127.0.0.1", null));
+			new TextBoxSetting("Server address", "127.0.0.1", null)
+			{
+				Validator = new BackendAddressValidator()
+			});
+		
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", FentwumSNetlistViewerSettingsHelper.BackendPortKey,
-			new TextBoxSetting("Port", "8080", null));
+			new TextBoxSetting("Port", "8080", null)
+			{
+				Validator = new BackendPortValidator()
+			});
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
 			FentwumSNetlistViewerSettingsHelper.BackendRequestTimeoutKey,
-			new TextBoxSetting("Request Timeout (in seconds)", "8000", null));
+			new TextBoxSetting("Request Timeout (in seconds)", "8000", null)
+			{
+				Validator = new RequestTimeoutValidator()
+			});
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
 			FentwumSNetlistViewerSettingsHelper.BackendUseLocalKey,
 			new CheckBoxSetting("Use local backend server", true));
@@ -570,16 +581,28 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Font sizes",
 			FentwumSNetlistViewerSettingsHelper.EntityFontSizeKey,
-			new TextBoxSetting("Entity Label Font Size", "25", null));
+			new TextBoxSetting("Entity Label Font Size", "25", null)
+			{
+				Validator = new FontSizeValidator()
+			});
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Font sizes",
 			FentwumSNetlistViewerSettingsHelper.CellFontSizeKey,
-			new TextBoxSetting("Cell Label Font Size", "15", null));
+			new TextBoxSetting("Cell Label Font Size", "15", null)
+			{
+				Validator = new FontSizeValidator()
+			});
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Font sizes",
 			FentwumSNetlistViewerSettingsHelper.EdgeFontSizeKey,
-			new TextBoxSetting("Edge Label Font Size", "10", null));
+			new TextBoxSetting("Edge Label Font Size", "10", null)
+			{
+				Validator = new FontSizeValidator()
+			});
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Font sizes",
 			FentwumSNetlistViewerSettingsHelper.PortFontSizeKey,
-			new TextBoxSetting("Port Font Size", "10", null));
+			new TextBoxSetting("Port Font Size", "10", null)
+			{
+				Validator = new FontSizeValidator()
+			});
 
 		ServiceManager.GetService<ISettingsService>().RegisterSettingSubCategory("Netlist Viewer", "Experimental");
 
