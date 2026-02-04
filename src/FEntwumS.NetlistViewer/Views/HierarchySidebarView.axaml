@@ -30,7 +30,6 @@
         <TreeDataGrid ScrollViewer.VerticalScrollBarVisibility="Auto"
                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
                       Source="{Binding Elements}"
-                      SelectedItem="{Binding SelectedElement}"
                       VerticalAlignment="Top"
                       Grid.Row="0">
             <TreeDataGrid.Styles>
