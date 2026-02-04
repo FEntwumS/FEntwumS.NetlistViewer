@@ -27,22 +27,22 @@
     -->
     <Grid ColumnDefinitions="*"
           RowDefinitions="5*,2*">
-        <TreeDataGrid ScrollViewer.VerticalScrollBarVisibility="Auto"
+        <TreeView ScrollViewer.VerticalScrollBarVisibility="Auto"
                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                      Source="{Binding Elements}"
+                      ItemsSource="{Binding Elements}"
                       VerticalAlignment="Top"
                       Grid.Row="0">
-            <TreeDataGrid.Styles>
+            <TreeView.Styles>
                 <Style Selector="TreeViewItem" x:DataType="hierarchicaltypes:HierarchySideBarElement">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded}"/>
                 </Style>
-            </TreeDataGrid.Styles>
-            <TreeDataGrid.DataTemplates>
+            </TreeView.Styles>
+            <TreeView.DataTemplates>
                 <TreeDataTemplate DataType="hierarchicaltypes:HierarchySideBarElement" ItemsSource="{Binding Children}">
                     <TextBlock FontSize="13" Text="{Binding Name}"></TextBlock>
                 </TreeDataTemplate>
-            </TreeDataGrid.DataTemplates>
-        </TreeDataGrid>
+            </TreeView.DataTemplates>
+        </TreeView>
         <Border Grid.Row="1"
                 BorderThickness="0 1 0 1"
                 BorderBrush="{DynamicResource ThemeBorderLowBrush}"> 
