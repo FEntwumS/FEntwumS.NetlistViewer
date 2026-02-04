@@ -1075,7 +1075,6 @@ public class FrontendService : IFrontendService
 		sidebarVM.Elements = sidebarelements;
 		
 		_dockService.Show(sidebarVM, DockShowLocation.Left);
-		
 
 		HierarchyViewModel hierarchyVM = new HierarchyViewModel();
 		hierarchyVM.InitializeContent();
@@ -1088,10 +1087,6 @@ public class FrontendService : IFrontendService
 		hierarchyVM.Items = obsElements;
 
 		_dockService.Show(hierarchyVM, DockShowLocation.Document);
-		_dockService.InitializeContent();
-		
-		// Calling IMainDockService.InitializeContent() twice in quick succession results in an application crash as of 
-		// OneWare Studio 0.99.4
 
 		return true;
 	}
