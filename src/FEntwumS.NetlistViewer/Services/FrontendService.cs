@@ -1065,19 +1065,18 @@ public class FrontendService : IFrontendService
 
 
 		_applicationStateService.RemoveState(proc);
-
-		// Disabled due to stack overflow when setting the SelectedItems Property in the TreeView control. Cause unknown
 		
-		// HierarchySidebarViewModel sidebarVM = new HierarchySidebarViewModel();
-		// sidebarVM.InitializeContent();
-		// sidebarVM.Title = "Design hierarchy";
-		// ObservableCollection<HierarchySideBarElement> sidebarelements =
-		// 	new ObservableCollection<HierarchySideBarElement>();
-		// sidebarelements.Add(elem!.Children[0]);
-		// sidebarVM.Elements = sidebarelements;
-		//
-		// _dockService.Show(sidebarVM, DockShowLocation.Left);
-		// _dockService.InitializeContent();
+		HierarchySidebarViewModel sidebarVM = new HierarchySidebarViewModel();
+		sidebarVM.InitializeContent();
+		sidebarVM.Title = "Design hierarchy";
+		AvaloniaList<HierarchySideBarElement> sidebarelements =
+			new AvaloniaList<HierarchySideBarElement>();
+		sidebarelements.Add(elem!.Children[0]);
+		sidebarVM.Elements = sidebarelements;
+		
+		sidebarVM.InitializeContent();
+		_dockService.Show(sidebarVM, DockShowLocation.Left);
+		
 
 		HierarchyViewModel hierarchyVM = new HierarchyViewModel();
 		hierarchyVM.InitializeContent();
@@ -1091,6 +1090,9 @@ public class FrontendService : IFrontendService
 
 		_dockService.Show(hierarchyVM, DockShowLocation.Document);
 		_dockService.InitializeContent();
+		
+		// Calling IMainDockService.InitializeContent() twice in quick succession results in an application crash as of 
+		// OneWare Studio 0.99.4
 
 		return true;
 	}
