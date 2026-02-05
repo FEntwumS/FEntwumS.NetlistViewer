@@ -543,11 +543,14 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "FPGA",
 			FentwumSNetlistViewerSettingsHelper.FpgaManufacturerKey,
 			new ComboBoxSetting("FPGA manufacturer", "gatemate",
-				FentwumSNetlistViewerSettingsHelper.fpgaManufacturers.ToArray<object>()));
+				FentwumSNetlistViewerSettingsHelper.FpgaManufacturers.ToArray<object>()));
 
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "FPGA",
 			FentwumSNetlistViewerSettingsHelper.FpgaDeviceFamilyKey,
-			new TextBoxSetting("Device family", "", null));
+			new TextBoxSetting("Device family", "", null)
+			{
+				Validator = new GlobalFpgaDeviceFamilyValidator()
+			});
 
 		ServiceManager.GetService<ISettingsService>().RegisterSettingSubCategory("Netlist Viewer", "Backend");
 
@@ -637,7 +640,10 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			.WithDisplayOrder(1000)
 			.WithSetting(new ComboBoxSetting("FPGA Manufacturer",
 				"gatemate",
-				FentwumSNetlistViewerSettingsHelper.fpgaManufacturers.ToArray<object>()))
+				FentwumSNetlistViewerSettingsHelper.FpgaManufacturers.ToArray<object>())
+			{
+				Validator = new ProjectFpgaDeviceFamilyValidator()
+			})
 			.Build());
 		
 		projectSettingsService.AddProjectSetting(new ProjectSettingBuilder()

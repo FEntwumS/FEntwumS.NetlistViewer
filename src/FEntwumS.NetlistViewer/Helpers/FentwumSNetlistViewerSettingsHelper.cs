@@ -109,7 +109,11 @@ public class FentwumSNetlistViewerSettingsHelper
 
 	#endregion
 
-	public static readonly List<string> fpgaManufacturers = new List<string>() { "achronix", "anlogic", "coolrunner2",
+	public static readonly List<string> FpgaManufacturers = new List<string>() { "achronix", "anlogic", "coolrunner2",
 		"ecp5", "efinix", "fabulous", "gatemate", "gowin", "greenpak4", "ice40", "intel", "intel_alm", "lattice",
 		"microchip", "nanoxplore", "nexus", "quicklogic", "sf2", "xilinx"};
+
+	public static readonly List<string> GowinFamilies = new List<string>() { "gw1n", "gw2a", "gw5a" };
+	public static readonly List<string> IntelAlmFamilies = new List<string>() { "cyclonev" };
+	public static readonly List<string> QuickLogicFamilies = new List<string>() { "pp3", "qlf_k6n10f" };
 }
