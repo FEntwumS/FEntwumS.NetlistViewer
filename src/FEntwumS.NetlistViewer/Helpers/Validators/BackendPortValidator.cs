@@ -8,7 +8,7 @@ public class BackendPortValidator : ISettingValidation
 	{
 		warningMessage = "Invalid Port";
 
-		if (value is int and >= 1024 and <= 65535)
+		if (Int64.TryParse((string?) value, null, out var portValue) && portValue is >= 1024 and <= 65535)
 		{
 			warningMessage = null;
 			return true;

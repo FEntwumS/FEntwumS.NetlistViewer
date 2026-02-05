@@ -8,7 +8,7 @@ public class RequestTimeoutValidator : ISettingValidation
 	{
 		warningMessage = "Timeout must be a positive integer";
 
-		if (value is int timeoutValue && timeoutValue > 0)
+		if (Int64.TryParse((string?) value, null, out var timeoutValue) && timeoutValue > 0)
 		{
 			warningMessage = null;
 			

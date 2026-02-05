@@ -8,7 +8,7 @@ public class FontSizeValidator : ISettingValidation
 	{
 		warningMessage = "Font size must be a positive integer";
 
-		if (value is int and > 0)
+		if (Int64.TryParse((string?) value, null, out var fontsizeValue) && fontsizeValue > 0)
 		{
 			warningMessage = null;
 			
