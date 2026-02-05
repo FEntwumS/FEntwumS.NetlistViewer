@@ -108,4 +108,8 @@ public class FentwumSNetlistViewerSettingsHelper
 	}
 
 	#endregion
+
+	public static readonly List<string> fpgaManufacturers = new List<string>() { "achronix", "anlogic", "coolrunner2",
+		"ecp5", "efinix", "fabulous", "gatemate", "gowin", "greenpak4", "ice40", "intel", "intel_alm", "lattice",
+		"microchip", "nanoxplore", "nexus", "quicklogic", "sf2", "xilinx"};
 }

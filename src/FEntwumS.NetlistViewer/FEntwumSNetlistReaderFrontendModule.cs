@@ -543,11 +543,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "FPGA",
 			FentwumSNetlistViewerSettingsHelper.FpgaManufacturerKey,
 			new ComboBoxSetting("FPGA manufacturer", "gatemate",
-			[
-				"achronix", "anlogic", "coolrunner2", "ecp5", "efinix", "fabulous", "gatemate", "gowin", "greenpak4",
-				"ice40", "intel", "intel_alm", "lattice", "microchip", "nanoxplore", "nexus", "quicklogic", "sf2",
-				"xilinx"
-			]));
+				FentwumSNetlistViewerSettingsHelper.fpgaManufacturers.ToArray<object>()));
 
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "FPGA",
 			FentwumSNetlistViewerSettingsHelper.FpgaDeviceFamilyKey,
@@ -641,12 +637,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			.WithDisplayOrder(1000)
 			.WithSetting(new ComboBoxSetting("FPGA Manufacturer",
 				"gatemate",
-				[
-					"achronix", "anlogic", "coolrunner2", "ecp5", "efinix", "fabulous", "gatemate", "gowin",
-					"greenpak4",
-					"ice40", "intel", "intel_alm", "lattice", "microchip", "nanoxplore", "nexus", "quicklogic", "sf2",
-					"xilinx"
-				]))
+				FentwumSNetlistViewerSettingsHelper.fpgaManufacturers.ToArray<object>()))
 			.Build());
 		
 		projectSettingsService.AddProjectSetting(new ProjectSettingBuilder()
