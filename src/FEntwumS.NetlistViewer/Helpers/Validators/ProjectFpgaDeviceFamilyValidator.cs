@@ -18,8 +18,17 @@ public class ProjectFpgaDeviceFamilyValidator : ISettingValidation
 			warningMessage = "Invalid device family";
 			return false;
 		}
+
+		var setting = ServiceManager.GetService<IProjectSettingsService>().GetProjectSettingsList().Find(p =>
+			p.Key == FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey);
+
+		if (setting is null)
+		{
+			warningMessage = "Invalid device family";
+			return false;
+		}
 		
-		string? currentManufacturer = root.GetProjectProperty(FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey);
+		string? currentManufacturer = (string?)setting.Setting.Value;
 
 		if (currentManufacturer is null)
 		{
