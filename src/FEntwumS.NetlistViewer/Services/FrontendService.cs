@@ -15,6 +15,7 @@ using FEntwumS.NetlistViewer.ViewModels;
 using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.PackageManager;
+using OneWare.Essentials.PackageManager.Compatibility;
 using StreamContent = System.Net.Http.StreamContent;
 
 namespace FEntwumS.NetlistViewer.Services;
@@ -273,8 +274,8 @@ public class FrontendService : IFrontendService
 
 		foreach ((string dependencyID, Version minVersion) in dependencyIDs)
 		{
-			PackageModel? dependencyModel = _packageService.Packages.GetValueOrDefault(dependencyID);
-			Package? dependencyPackage = dependencyModel?.Package;
+			IPackageState? dependencyPackageState = _packageService.Packages.GetValueOrDefault(dependencyID);
+			Package? dependencyPackage = dependencyPackageState?.Package;
 
 			if (dependencyPackage == null)
 			{
@@ -303,12 +304,12 @@ public class FrontendService : IFrontendService
 					foreach (PackageVersion packageVersion in dependencyPackage.Versions!.Reverse())
 					{
 						// Skip incompatible versions
-						if (!(await dependencyModel!.CheckCompatibilityAsync(packageVersion)).IsCompatible)
+						if (!(await _packageService.CheckCompatibilityAsync(dependencyID, packageVersion)).IsCompatible)
 						{
 							continue;
 						}
 
-						PackageVersion? installedVersion = dependencyModel.InstalledVersion;
+						PackageVersion? installedVersion = dependencyPackageState.InstalledVersion;
 
 						if (installedVersion == packageVersion)
 						{
@@ -321,7 +322,9 @@ public class FrontendService : IFrontendService
 							break;
 						}
 
-						localSuccess = await dependencyModel!.DownloadAsync(packageVersion);
+						localSuccess =
+							(await _packageService.InstallAsync(dependencyID, packageVersion)).Status is
+							PackageInstallResultReason.Installed or PackageInstallResultReason.AlreadyInstalled;
 
 						// Stop trying, if install has been successful
 						if (localSuccess)
@@ -375,22 +378,22 @@ public class FrontendService : IFrontendService
 			}
 
 			// Check whether now the correct version is installed
-			if (dependencyModel!.Status is PackageStatus.Installed or PackageStatus.UpdateAvailable)
+			if (dependencyPackageState!.Status is PackageStatus.Installed or PackageStatus.UpdateAvailable)
 			{
-				if (minVersion.CompareTo(Version.Parse(dependencyModel.InstalledVersion!.Version!)) <= 0)
+				if (minVersion.CompareTo(Version.Parse(dependencyPackageState.InstalledVersion!.Version!)) <= 0)
 				{
 					_logger.Log(
-						$"Dependency {dependencyPackage.Id} installed with version {dependencyModel.InstalledVersion.Version} greater than or equal to expected version {minVersion.ToString()}");
+						$"Dependency {dependencyPackage.Id} installed with version {dependencyPackageState.InstalledVersion.Version} greater than or equal to expected version {minVersion.ToString()}");
 				}
 				else
 				{
 					_logger.Error(
-						$"Installed version {dependencyModel.InstalledVersion.Version} for {dependencyPackage.Name} is below the minimum version {minVersion.ToString()}. Please update {dependencyPackage.Name}!");
+						$"Installed version {dependencyPackageState.InstalledVersion.Version} for {dependencyPackage.Name} is below the minimum version {minVersion.ToString()}. Please update {dependencyPackage.Name}!");
 
 					globalSuccess = false;
 				}
 			}
-			else if (dependencyModel!.Status is PackageStatus.NeedRestart)
+			else if (dependencyPackageState!.Status is PackageStatus.NeedRestart)
 			{
 				_restartRequired = true;
 			}
@@ -813,10 +816,10 @@ public class FrontendService : IFrontendService
 			return false;
 		}
 
-		PackageModel? dependencyModel =
+		IPackageState? dependencyPackageState =
 			_packageService.Packages!.GetValueOrDefault(FEntwumSNetlistReaderFrontendModule.NetlistViewerBackendPackage
 				.Id);
-		string? installedVersion = (dependencyModel?.InstalledVersion!).Version;
+		string? installedVersion = (dependencyPackageState?.InstalledVersion!).Version;
 
 		var serverJar = Directory.GetFiles(_backendJarFolder).Where(x =>
 			Regex.Match(x, @$".*fentwums-netlist-reader-server-{installedVersion}-exec\.jar").Success);
