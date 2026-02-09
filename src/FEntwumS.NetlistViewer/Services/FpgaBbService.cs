@@ -57,7 +57,7 @@ public class FpgaBbService : IFpgaBbService
 
 		if (file is null || file.Root is not UniversalFpgaProjectRoot root)
 		{
-			_logger.Warning($"{file?.Name} is not associated with an FPGA project. Falling back to global settings");
+			_logger.Warning($"{file?.Name} is not associated with an FPGA project. Falling back to global settings", null, false);
 		}
 		else
 		{
@@ -110,7 +110,7 @@ public class FpgaBbService : IFpgaBbService
 				}
 
 				_logger.Error(
-					"The current combination of device manufacturer and device family is not valid. Valid device family options are: gw1n, gw2a or gw5a");
+					"The current combination of device manufacturer and device family is not valid. Valid device family options are: gw1n, gw2a or gw5a", null, false);
 
 				break;
 
