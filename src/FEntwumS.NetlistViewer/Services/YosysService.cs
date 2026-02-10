@@ -63,15 +63,13 @@ public class YosysService : IYosysService
 		else
 		{
 			if (file.Root is not UniversalFpgaProjectRoot root) return false;
-			IEnumerable<string> verilogFiles = root.GetFiles()
+			IEnumerable<string> verilogFiles = root.GetFiles("*.v")
 				.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
-				.Where(x => Path.GetExtension(x) is ".v") // Include only Verilog files
 				.Where(x => !root.IsTestBench(x)) // Exclude testbenches
 				.Select(x => x);
 
-			IEnumerable<string> systemVerilogFiles = root.GetFiles()
+			IEnumerable<string> systemVerilogFiles = root.GetFiles("*.sv")
 				.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
-				.Where(x => Path.GetExtension(x) is ".sv") // Include only SystemVerilog files
 				.Where(x => !root.IsTestBench(x)) // Exclude testbenches
 				.Select(x => x);
 
@@ -128,9 +126,8 @@ public class YosysService : IYosysService
 		string top = Path.GetFileNameWithoutExtension(file.FullPath);
 
 		if (file.Root is not UniversalFpgaProjectRoot root) return false;
-		IEnumerable<string> files = root.GetFiles()
+		IEnumerable<string> files = root.GetFiles("*.sv")
 			.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
-			.Where(x => Path.GetExtension(x) is ".sv") // Include only SystemVerilog files
 			.Where(x => !root.IsTestBench(x)) // Exclude testbenches
 			.Select(x => x);
 		// TODO
