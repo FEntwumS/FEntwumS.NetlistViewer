@@ -683,7 +683,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			}
 			catch (ReflectionTypeLoadException ex)
 			{
-				ServiceManager.GetService<ILogger>().Error("An issue occured during settings subscription\n\nPlease file a bug report!", ex);
+				ServiceManager.GetService<ILogger>().Error("[FEntwumS.NetlistViewer]: An issue occured during settings subscription\n\nPlease file a bug report!", ex);
 			}
 		}
 
