@@ -63,17 +63,17 @@ public class YosysService : IYosysService
 		else
 		{
 			if (file.Root is not UniversalFpgaProjectRoot root) return false;
-			IEnumerable<string> verilogFiles = root.Files
-				.Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
-				.Where(x => x.Extension is ".v") // Include only Verilog files
-				.Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
-				.Select(x => x.FullPath);
+			IEnumerable<string> verilogFiles = root.GetFiles()
+				.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
+				.Where(x => Path.GetExtension(x) is ".v") // Include only Verilog files
+				.Where(x => !root.IsTestBench(x)) // Exclude testbenches
+				.Select(x => x);
 
-			IEnumerable<string> systemVerilogFiles = root.Files
-				.Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
-				.Where(x => x.Extension is ".sv") // Include only SystemVerilog files
-				.Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
-				.Select(x => x.FullPath);
+			IEnumerable<string> systemVerilogFiles = root.GetFiles()
+				.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
+				.Where(x => Path.GetExtension(x) is ".sv") // Include only SystemVerilog files
+				.Where(x => !root.IsTestBench(x)) // Exclude testbenches
+				.Select(x => x);
 
 			verilogFileList.AddRange(verilogFiles);
 			systemVerilogFileList.AddRange(systemVerilogFiles);
@@ -128,11 +128,11 @@ public class YosysService : IYosysService
 		string top = Path.GetFileNameWithoutExtension(file.FullPath);
 
 		if (file.Root is not UniversalFpgaProjectRoot root) return false;
-		IEnumerable<string> files = root.Files
-			.Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
-			.Where(x => x.Extension is ".sv") // Include only SystemVerilog files
-			.Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
-			.Select(x => x.FullPath);
+		IEnumerable<string> files = root.GetFiles()
+			.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
+			.Where(x => Path.GetExtension(x) is ".sv") // Include only SystemVerilog files
+			.Where(x => !root.IsTestBench(x)) // Exclude testbenches
+			.Select(x => x);
 		// TODO
 		// get verilog files
 

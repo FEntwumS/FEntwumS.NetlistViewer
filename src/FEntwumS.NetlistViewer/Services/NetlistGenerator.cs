@@ -147,11 +147,11 @@ public class NetlistGenerator : INetlistGenerator
 		FileInfo netlistFile = new FileInfo(netlistPath);
 		bool newNetlistNecessary = false;
 
-		foreach (string file in root.Files
-			         .Where(x => !root.CompileExcluded.Contains(x))
-			         .Where(x => x.Extension is ".v" or ".sv" or ".vhdl" or ".vhd")
-			         .Where(x => !root.TestBenches.Contains(x))
-			         .Select(x => x.FullPath))
+		foreach (string file in root.GetFiles()
+			         .Where(x => !root.IsCompileExcluded(x))
+			         .Where(x => Path.GetExtension(x) is ".v" or ".sv" or ".vhdl" or ".vhd")
+			         .Where(x => !root.IsTestBench(x))
+			         .Select(x => x))
 		{
 			FileInfo srcFileInfo = new FileInfo(file);
 
@@ -270,7 +270,7 @@ public class NetlistGenerator : INetlistGenerator
 			else
 			{
 				// Don't add the project to the regeneration queue if the changed file is the intermediate verilog file generated for VHDL designs
-				if (projectCandidate.Files.All(x => x.FullPath != e.FullPath))
+				if (projectCandidate.GetFiles().All(x => x != e.FullPath))
 				{
 					return;
 				}
@@ -302,11 +302,11 @@ public class NetlistGenerator : INetlistGenerator
 		{
 			NetlistLanguage netlistLanguage = NetlistLanguage.Verilog;
 
-			if (projectRoot.Files.Any(x => x.Extension is ".vhdl" or ".vhd"))
+			if (projectRoot.GetFiles().Any(x => Path.GetExtension(x) is ".vhdl" or ".vhd"))
 			{
 				netlistLanguage = NetlistLanguage.VHDL;
 			}
-			else if (projectRoot.Files.Any(x => x.Extension is ".sv"))
+			else if (projectRoot.GetFiles().Any(x => Path.GetExtension(x) is ".sv"))
 			{
 				netlistLanguage = NetlistLanguage.System_Verilog;
 			}
@@ -315,7 +315,7 @@ public class NetlistGenerator : INetlistGenerator
 			// DockService.Show inside the GhdlService
 			await Dispatcher.UIThread.InvokeAsync(async () =>
 			{
-				await GenerateNetlistAsync((IProjectFile?)projectRoot.TopEntity, netlistLanguage, NetlistType.Hier);
+				await GenerateNetlistAsync(new ProjectFile(projectRoot.TopEntity!, projectRoot.TopFolder!), netlistLanguage, NetlistType.Hier);
 			});
 
 			lock (_lock)
