@@ -35,7 +35,7 @@ public class HierarchyControl : TemplatedControl, ICustomHitTest
     public static readonly DirectProperty<HierarchyControl, AvaloniaList<HierarchyViewElement>> ItemsProperty =
         AvaloniaProperty.RegisterDirect<HierarchyControl, AvaloniaList<HierarchyViewElement>>(nameof(Items),
             control => control.Items, (control, items) => control.Items = items,
-            defaultBindingMode: BindingMode.TwoWay);
+            defaultBindingMode: BindingMode.OneWay);
 
     public ulong NetlistId
     {

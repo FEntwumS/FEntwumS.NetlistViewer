@@ -14,8 +14,7 @@ public class HierarchySidebarViewModel : ExtendedTool
 		get => this._elements;
 		set
 		{
-			this._elements.Clear();
-			this._elements.AddRange(value);
+			_elements = value;
 			OnPropertyChanged();
 		}
 	}
@@ -24,13 +23,17 @@ public class HierarchySidebarViewModel : ExtendedTool
 
 	private HierarchySideBarElement? _selectedElement;
 
-	public HierarchySideBarElement SelectedElement
+	public HierarchySideBarElement? SelectedElement
 	{
-		get => this._selectedElement ?? new HierarchySideBarElement();
+		get => this._selectedElement;
 		set
 		{
-			this._selectedElement = value;
-			OnPropertyChanged();
+			if (value is not null)
+			{
+				this._selectedElement = value;
+				OnPropertyChanged();
+			}
+				
 		}
 	}
 
