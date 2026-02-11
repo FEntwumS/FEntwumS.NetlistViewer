@@ -54,7 +54,7 @@ public class NetlistGenerator : INetlistGenerator
 			Directory.CreateDirectory(outputDir);
 		}
 
-		return await ghdlService.SynthAsync(vhdlProject, "verilog", outputDir);
+		return await ghdlService.SynthAsync(vhdlProject.FullPath, "verilog", outputDir);
 	}
 
 	public async Task<bool> GenerateVerilogNetlistAsync(IProjectFile verilogProject)
