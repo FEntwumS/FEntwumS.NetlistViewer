@@ -15,6 +15,7 @@ using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using OneWare.UniversalFpgaProjectSystem.Services;
 
 namespace FEntwumS.NetlistViewer;
 
@@ -42,7 +43,8 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			new PackageTab()
 			{
 				Title = "README",
-				ContentUrl = "https://raw.githubusercontent.com/FEntwumS/NetlistReaderBackend/refs/heads/master/README.md"
+				ContentUrl =
+					"https://raw.githubusercontent.com/FEntwumS/NetlistReaderBackend/refs/heads/master/README.md"
 			},
 			new PackageTab()
 			{
@@ -409,21 +411,23 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 
 		ISettingsService settingsService = ServiceManager.GetService<ISettingsService>();
 
-		ServiceManager.GetService<IMainDockService>().RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
+		ServiceManager.GetService<IMainDockService>()
+			.RegisterLayoutExtension<FrontendViewModel>(DockShowLocation.Document);
 		ServiceManager.GetService<IMainDockService>()
 			.RegisterLayoutExtension<HierarchySidebarViewModel>(DockShowLocation.Left);
 
 		ServiceManager.GetService<ILogger>().Log("Registered FrontendViewModel as Document in dock system");
-		
+
 		RegisterContextMenus();
 		RegisterSettings();
 		RegisterProjectSettings();
+		RegisterMigrations();
 		SubscribeToSettings();
 		RegisterShutdownActions();
-		
+
 		// Subscribe to the setting that enables/disables the hierarchy viewer. The value is used to determine whether
 		// the context menu option for the hierarchy viewer is to be shown to the user 
-		
+
 		settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.EnableHierarchyViewKey)
 			.Subscribe(x => EnableHierarchyView = x);
 
@@ -441,13 +445,14 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		{
 			// JSON netlists can be directly passed to the ShowViewer() function. The backend determines whether it is a
 			// flattened or a hierarchical netlist. For the supported HDLs, the netlist is first retrieved or generated 
-			
+
 			if (selected is [IProjectFile { Extension: ".json" } jsonFile])
 			{
 				menuItems.Add(new MenuItemModel("NetlistViewer")
 				{
 					Header = $"View netlist {jsonFile.Header}",
-					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().ShowViewerAsync(jsonFile))
+					Command = new AsyncRelayCommand(() =>
+						ServiceManager.GetService<FrontendService>().ShowViewerAsync(jsonFile))
 				});
 			}
 			else if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
@@ -455,7 +460,8 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 				menuItems.Add(new MenuItemModel("NetlistViewer_CreateNetlist")
 				{
 					Header = $"View netlist for {vhdlFile.Header}",
-					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVhdlNetlistAsync(vhdlFile))
+					Command = new AsyncRelayCommand(() =>
+						ServiceManager.GetService<FrontendService>().CreateVhdlNetlistAsync(vhdlFile))
 				});
 			}
 			else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
@@ -463,7 +469,8 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 				menuItems.Add(new MenuItemModel("NetlistViewer_CreateVerilogNetlist")
 				{
 					Header = $"View netlist for {verilogFile.Header}",
-					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVerilogNetlistAsync(verilogFile))
+					Command = new AsyncRelayCommand(() =>
+						ServiceManager.GetService<FrontendService>().CreateVerilogNetlistAsync(verilogFile))
 				});
 			}
 			else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
@@ -480,7 +487,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		ServiceManager.GetService<IProjectExplorerService>().RegisterConstructContextMenu((selected, menuItems) =>
 		{
 			// Add no context menu entry for the hierarchy viewer if it has been disabled
-			
+
 			if (!EnableHierarchyView)
 			{
 				return;
@@ -491,7 +498,8 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 				menuItems.Add(new MenuItemModel("NetlistViewer_VHDLHierarchy")
 				{
 					Header = $"View design hierarchy for {vhdlFile.Header}",
-					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVhdlHierarchyAsync(vhdlFile))
+					Command = new AsyncRelayCommand(() =>
+						ServiceManager.GetService<FrontendService>().CreateVhdlHierarchyAsync(vhdlFile))
 				});
 			}
 			else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
@@ -499,7 +507,8 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 				menuItems.Add(new MenuItemModel("NetlistViewer_VerilogHierarchy")
 				{
 					Header = $"View design hierarchy for {verilogFile.Header}",
-					Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVerilogHierarchyAsync(verilogFile))
+					Command = new AsyncRelayCommand(() =>
+						ServiceManager.GetService<FrontendService>().CreateVerilogHierarchyAsync(verilogFile))
 				});
 			}
 			else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
@@ -508,20 +517,21 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 				{
 					Header = $"View design hierarchy for {systemVerilogFile.Header}",
 					Command = new AsyncRelayCommand(() =>
-						ServiceManager.GetService<FrontendService>().CreateSystemVerilogHierarchyAsync(systemVerilogFile))
+						ServiceManager.GetService<FrontendService>()
+							.CreateSystemVerilogHierarchyAsync(systemVerilogFile))
 				});
 			}
 		});
 
 		ServiceManager.GetService<ILogger>().Log("Registered custom context menu entries");
 	}
-	
+
 	private void RegisterSettings()
 	{
 		ServiceManager.GetService<ISettingsService>().RegisterSettingCategory("Netlist Viewer", 100, "netlistIcon");
-		
+
 		ServiceManager.GetService<ISettingsService>().RegisterSettingSubCategory("Netlist Viewer", "Backend");
-		
+
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
 			FentwumSNetlistViewerSettingsHelper.NetlistPathSettingKey,
 			new FolderPathSetting("Path to folder containing server jar", "fentwums-netlist-reader", "",
@@ -560,8 +570,9 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			{
 				Validator = new BackendAddressValidator()
 			});
-		
-		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend", FentwumSNetlistViewerSettingsHelper.BackendPortKey,
+
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Backend",
+			FentwumSNetlistViewerSettingsHelper.BackendPortKey,
 			new TextBoxSetting("Port", "8080", null)
 			{
 				Validator = new BackendPortValidator()
@@ -627,7 +638,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
 			FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey,
 			new SliderSetting("Automatic netlist generation interval (s)", 60.0d, 15.0d, 3600.0d, 5.0d));
-		
+
 		ServiceManager.GetService<ILogger>().Log("Registered custom settings");
 	}
 
@@ -642,7 +653,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 				"gatemate",
 				FentwumSNetlistViewerSettingsHelper.FpgaManufacturers.ToArray<object>()))
 			.Build());
-		
+
 		projectSettingsService.AddProjectSetting(new ProjectSettingBuilder()
 			.WithKey(FentwumSNetlistViewerSettingsHelper.ProjectFpgaDeviceFamilyKey)
 			.WithDisplayOrder(1001)
@@ -650,7 +661,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			{
 				Validator = new ProjectFpgaDeviceFamilyValidator()
 			})
-		.Build());
+			.Build());
 
 		ServiceManager.GetService<ILogger>().Log("Added project-specific settings");
 	}
@@ -664,7 +675,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 	private void SubscribeToSettings()
 	{
 		// Inspired by: https://stackoverflow.com/a/26745
-		
+
 		Type settingsSubscriberType = typeof(ISettingsSubscriber);
 
 		foreach (Assembly asmbly in AppDomain.CurrentDomain.GetAssemblies())
@@ -673,21 +684,26 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			{
 				foreach (Type type in asmbly.GetTypes())
 				{
-					if (settingsSubscriberType.IsAssignableFrom(type) && type is { IsInterface: true } && settingsSubscriberType != type)
+					if (settingsSubscriberType.IsAssignableFrom(type) && type is { IsInterface: true } &&
+					    settingsSubscriberType != type)
 					{
 						(ContainerLocator.Current.Resolve(type) as ISettingsSubscriber)?.SubscribeToSettings();
-						
+
 						ServiceManager.GetService<ILogger>().Log($"Subscribed {type.FullName} to settings");
 					}
 				}
 			}
 			catch (ReflectionTypeLoadException ex)
 			{
-				ServiceManager.GetService<ILogger>().Error("[FEntwumS.NetlistViewer]: An issue occured during settings subscription\n\nPlease file a bug report!", ex);
+				ServiceManager.GetService<ILogger>()
+					.Error(
+						"[FEntwumS.NetlistViewer]: An issue occured during settings subscription\n\nPlease file a bug report!",
+						ex);
 			}
 		}
 
-		ServiceManager.GetService<ILogger>().Log("FEntwumS.NetlistViewer: Subscribed services to the settings relevant to them");
+		ServiceManager.GetService<ILogger>()
+			.Log("FEntwumS.NetlistViewer: Subscribed services to the settings relevant to them");
 	}
 
 	private void RegisterShutdownActions()
@@ -696,7 +712,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		// registered. It sends an explicit request to shut down the server. The result and any errors are deliberately
 		// ignored. This request is only sent if a local backend is used to not inconvenience users of a shared
 		// remote backend 
-		
+
 		ServiceManager.GetService<IApplicationStateService>().RegisterShutdownAction(() =>
 		{
 			try
@@ -720,5 +736,13 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 				// ignored
 			}
 		});
+	}
+
+	private void RegisterMigrations()
+	{
+		ServiceManager.GetService<FpgaService>().RegisterProjectPropertyMigration(
+			FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey, "FEntwumS_FPGA_Manufacturer");
+		ServiceManager.GetService<FpgaService>().RegisterProjectPropertyMigration(
+			FentwumSNetlistViewerSettingsHelper.ProjectFpgaDeviceFamilyKey, "FEntwumS_FPGA_DeviceFamily");
 	}
 }
