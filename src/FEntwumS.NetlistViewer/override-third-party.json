@@ -11,7 +11,7 @@
   },
   {
     "Id": "Avalonia.Controls.TreeDataGrid",
-    "Version": "11.0.10",
+    "Version": "11.1.1",
     "ProjectUrl": "https://github.com/AvaloniaUI/Avalonia.Controls.TreeDataGrid",
     "Copyright": "Copyright \u00A9 AvaloniaUI 2023",
     "Authors": "Steven Kirk",
@@ -299,12 +299,22 @@
   },
   {
     "Id": "OneWare.GhdlExtension",
-    "Version": "0.11.1",
+    "Version": "1.0.0",
     "ProjectUrl": "https://github.com/one-ware/OneWare.GhdlExtension",
     "Copyright": "Protop Solutions UG",
     "Authors": "Hendrik Mennen",
     "License": "GPL-2.0-only",
     "LicenseUrl": "https://raw.githubusercontent.com/one-ware/OneWare.GhdlExtension/refs/heads/master/License.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "Microsoft.ML.OnnxRuntime.Managed",
+    "Version": "1.23.2",
+    "ProjectUrl": "https://github.com/microsoft/onnxruntime",
+    "Copyright": "© Microsoft Corporation. All rights reserved.",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://raw.githubusercontent.com/microsoft/onnxruntime/refs/heads/main/LICENSE",
     "LicenseInformationOrigin": 1
   }
 ]
