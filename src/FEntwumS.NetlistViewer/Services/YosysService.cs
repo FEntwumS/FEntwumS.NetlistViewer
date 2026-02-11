@@ -66,12 +66,12 @@ public class YosysService : IYosysService
 			IEnumerable<string> verilogFiles = root.GetFiles("*.v")
 				.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
 				.Where(x => !root.IsTestBench(x)) // Exclude testbenches
-				.Select(x => x);
-
+				.Select(x => Path.Combine(root.TopFolder.FullPath, x));
+			
 			IEnumerable<string> systemVerilogFiles = root.GetFiles("*.sv")
 				.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
 				.Where(x => !root.IsTestBench(x)) // Exclude testbenches
-				.Select(x => x);
+				.Select(x => Path.Combine(root.TopFolder.FullPath, x));
 
 			verilogFileList.AddRange(verilogFiles);
 			systemVerilogFileList.AddRange(systemVerilogFiles);
@@ -88,7 +88,7 @@ public class YosysService : IYosysService
 			+ "memory -nomap; " // Converts memories into simple blocks instead of basic cells
 			+ "select *; " // Remove unnecessary library elements from the netlist
 			+ $"write_json -compat-int {top}-hier.json; " // Write hierarchical JSON netlist to disk
-			+ "scratchpad -set flatten.separator \";\"; "
+			+ "scratchpad -set flatten.separator \';\'; "
 			+ "flatten -scopename; " // Flatten the netlist
 			+ "select *; "
 			+ "clean; "
