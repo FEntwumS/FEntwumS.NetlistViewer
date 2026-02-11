@@ -63,17 +63,15 @@ public class YosysService : IYosysService
 		else
 		{
 			if (file.Root is not UniversalFpgaProjectRoot root) return false;
-			IEnumerable<string> verilogFiles = root.Files
-				.Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
-				.Where(x => x.Extension is ".v") // Include only Verilog files
-				.Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
-				.Select(x => x.FullPath);
-
-			IEnumerable<string> systemVerilogFiles = root.Files
-				.Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
-				.Where(x => x.Extension is ".sv") // Include only SystemVerilog files
-				.Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
-				.Select(x => x.FullPath);
+			IEnumerable<string> verilogFiles = root.GetFiles("*.v")
+				.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
+				.Where(x => !root.IsTestBench(x)) // Exclude testbenches
+				.Select(x => Path.Combine(root.TopFolder.FullPath, x));
+			
+			IEnumerable<string> systemVerilogFiles = root.GetFiles("*.sv")
+				.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
+				.Where(x => !root.IsTestBench(x)) // Exclude testbenches
+				.Select(x => Path.Combine(root.TopFolder.FullPath, x));
 
 			verilogFileList.AddRange(verilogFiles);
 			systemVerilogFileList.AddRange(systemVerilogFiles);
@@ -90,7 +88,7 @@ public class YosysService : IYosysService
 			+ "memory -nomap; " // Converts memories into simple blocks instead of basic cells
 			+ "select *; " // Remove unnecessary library elements from the netlist
 			+ $"write_json -compat-int {top}-hier.json; " // Write hierarchical JSON netlist to disk
-			+ "scratchpad -set flatten.separator \";\"; "
+			+ "scratchpad -set flatten.separator \';\'; "
 			+ "flatten -scopename; " // Flatten the netlist
 			+ "select *; "
 			+ "clean; "
@@ -128,11 +126,10 @@ public class YosysService : IYosysService
 		string top = Path.GetFileNameWithoutExtension(file.FullPath);
 
 		if (file.Root is not UniversalFpgaProjectRoot root) return false;
-		IEnumerable<string> files = root.Files
-			.Where(x => !root.CompileExcluded.Contains(x)) // Exclude excluded files
-			.Where(x => x.Extension is ".sv") // Include only SystemVerilog files
-			.Where(x => !root.TestBenches.Contains(x)) // Exclude testbenches
-			.Select(x => x.FullPath);
+		IEnumerable<string> files = root.GetFiles("*.sv")
+			.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
+			.Where(x => !root.IsTestBench(x)) // Exclude testbenches
+			.Select(x => x);
 		// TODO
 		// get verilog files
 

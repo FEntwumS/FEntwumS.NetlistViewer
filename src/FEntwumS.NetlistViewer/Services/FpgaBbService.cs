@@ -61,20 +61,20 @@ public class FpgaBbService : IFpgaBbService
 		}
 		else
 		{
-			manufacturer = root.GetProjectProperty(FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey);
+			manufacturer = root.Properties.GetString(FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey);
 
 			if (manufacturer is null)
 			{
 				manufacturer = _currentManufacturer;
-				root.SetProjectProperty(FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey, manufacturer);
+				root.Properties.SetString(FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey, manufacturer);
 			}
 
-			deviceFamily = root.GetProjectProperty(FentwumSNetlistViewerSettingsHelper.ProjectFpgaDeviceFamilyKey);
+			deviceFamily = root.Properties.GetString(FentwumSNetlistViewerSettingsHelper.ProjectFpgaDeviceFamilyKey);
 
 			if (deviceFamily is null)
 			{
 				deviceFamily = _currentDeviceFamily;
-				root.SetProjectProperty(FentwumSNetlistViewerSettingsHelper.ProjectFpgaDeviceFamilyKey, deviceFamily);
+				root.Properties.SetString(FentwumSNetlistViewerSettingsHelper.ProjectFpgaDeviceFamilyKey, deviceFamily);
 			}
 		}
 

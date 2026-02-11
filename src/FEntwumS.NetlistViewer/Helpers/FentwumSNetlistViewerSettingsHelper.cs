@@ -59,8 +59,8 @@ public class FentwumSNetlistViewerSettingsHelper
 
 	#region Project settings keys
 
-	public static readonly string ProjectFpgaManufacturerKey = "FEntwumS_FPGA_Manufacturer";
-	public static readonly string ProjectFpgaDeviceFamilyKey = "FEntwumS_FPGA_DeviceFamily";
+	public static readonly string ProjectFpgaManufacturerKey = "FEntwumS/FPGA/manufacturer";
+	public static readonly string ProjectFpgaDeviceFamilyKey = "FEntwumS/FPGA/deviceFamily";
 
 	#endregion
 

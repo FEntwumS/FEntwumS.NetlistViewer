@@ -1158,7 +1158,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
         var ds = ServiceManager.GetService<IMainDockService>();
 
-        var document = await ds.OpenFileAsync(new ExternalFile(filename));
+        var document = await ds.OpenFileAsync(filename);
 
         (document as IEditor)?.JumpToLine((int)line);
     }
