@@ -263,7 +263,7 @@ public class FrontendService : IFrontendService
 		(string id, Version minversion)[] dependencyIDs = new (string, Version)
 			[]
 			{
-				("OneWare.GhdlExtension", new Version(0, 10, 7)),
+				("OneWare.GhdlExtension", new Version(1, 0, 0)),
 				("osscadsuite", new Version(2025, 01, 21)),
 				("ghdl", new Version(5, 0, 1)),
 				(FEntwumSNetlistReaderFrontendModule.NetlistViewerBackendPackage.Id!, new Version(0, 11, 2)),
@@ -364,6 +364,7 @@ public class FrontendService : IFrontendService
 							MessageBoxIcon.Error, null);
 
 						globalSuccess = false;
+						break;
 					}
 					else
 					{
