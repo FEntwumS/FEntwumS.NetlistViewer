@@ -136,16 +136,23 @@ public class NetlistGenerator : INetlistGenerator
 	public (IProjectFile? netlistFile, bool success) GetExistingNetlist(IProjectFile projectFile,
 		NetlistType netlistType)
 	{
+		bool newNetlistNecessary = false;
+		
 		if (projectFile.Root is not UniversalFpgaProjectRoot root)
 		{
 			return (null, false);
 		}
 
-		string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
 		string netlistPath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(projectFile, netlistType);
 
 		FileInfo netlistFile = new FileInfo(netlistPath);
-		bool newNetlistNecessary = false;
+
+		newNetlistNecessary = !netlistFile.Exists;
+
+		if (newNetlistNecessary)
+		{
+			return (null, false);
+		}
 
 		foreach (string file in root.GetFiles()
 			         .Where(x => !root.IsCompileExcluded(x))

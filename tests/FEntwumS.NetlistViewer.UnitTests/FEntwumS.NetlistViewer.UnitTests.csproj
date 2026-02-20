@@ -15,9 +15,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="OneWare.Essentials" Version="1.0.0" />
+      <PackageReference Include="OneWare.Essentials" Version="1.0.3" />
       <PackageReference Include="OneWare.GhdlExtension" Version="1.0.0" />
-      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="1.0.0" />
+      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="1.0.3" />
     </ItemGroup>
 
 </Project>
