@@ -80,7 +80,7 @@ public class YosysService : IYosysService
 		List<string> yosysArgs =
 		[
 			"-p",
-			$"read_verilog -sv -nooverwrite \"{string.Join("\" \"", verilogFileList)}\" {(systemVerilogFileList.Count > 0 ? "\"" + string.Join("\" \"", systemVerilogFileList) + "\"" : "")}; "
+			$"read_verilog -sv -nooverwrite {(verilogFileList.Count > 0 ? "\"" + string.Join("\" \"", verilogFileList) + "\"" : "")} {(systemVerilogFileList.Count > 0 ? "\"" + string.Join("\" \"", systemVerilogFileList) + "\"" : "")}; "
 			+ "scratchpad -set flatten.separator \";\"; " // Use the semicolon as hierarchy separator; See https://yosyshq.readthedocs.io/projects/yosys/en/v0.55/cmd/flatten.html
 			+ $"{_fpgaBbService.getBbCommand(file)} "
 			+ $"hierarchy -check -purge_lib -top {top}; "	// Check and build the design hierarchy. Unused modules and blackboxes are discarded
