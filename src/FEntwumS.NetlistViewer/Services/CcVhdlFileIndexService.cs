@@ -49,7 +49,14 @@ public class CcVhdlFileIndexService : ICcVhdlFileIndexService
 				// Trim whitespace
 				formattedLine = line.Trim();
 				// Remove block comment (first and last three characters)
-				formattedLine = formattedLine.Substring(3, formattedLine.Length - 6);
+				if (formattedLine[2] == '#')
+				{
+					formattedLine = formattedLine.Substring(4, formattedLine.Length - 7);
+				}
+				else
+				{
+					formattedLine = formattedLine.Substring(3, formattedLine.Length - 6);
+				}
 
 				// Absolute paths are presumed to have a leading / (Linux and OSX) or a single drive letter, followed by
 				// a colon (Windows)
