@@ -260,19 +260,18 @@ public class FrontendService : IFrontendService
 
 		bool globalSuccess = true;
 
-		(string id, Version minversion)[] dependencyIDs = new (string, Version)
-			[]
-			{
-				("OneWare.GhdlExtension", new Version(1, 0, 0)),
-				("osscadsuite", new Version(2025, 01, 21)),
-				("ghdl", new Version(5, 0, 1)),
-				(FEntwumSNetlistReaderFrontendModule.NetlistViewerBackendPackage.Id!, new Version(0, 11, 2)),
-				(FEntwumSNetlistReaderFrontendModule.JREPackage.Id!, new Version(21, 0, 6))
-			};
+		(string id, Version minversion, List<Version> excludedVersions)[] dependencyIDs =
+		[
+			("OneWare.GhdlExtension", new Version(1, 0, 0), []),
+				("osscadsuite", new Version(2025, 01, 21), []),
+				("ghdl", new Version(5, 0, 1), [new Version(5, 1, 1)]),
+				(FEntwumSNetlistReaderFrontendModule.NetlistViewerBackendPackage.Id!, new Version(0, 11, 2), []),
+				(FEntwumSNetlistReaderFrontendModule.JREPackage.Id!, new Version(21, 0, 6), [])
+		];
 
 		// Install osscadsuite binary between GHDL plugin and ghdl binary to allow for the addition of the ghdl binary to the store
 
-		foreach ((string dependencyID, Version minVersion) in dependencyIDs)
+		foreach ((string dependencyID, Version minVersion, List<Version> excludedVersions) in dependencyIDs)
 		{
 			IPackageState? dependencyPackageState = _packageService.Packages.GetValueOrDefault(dependencyID);
 			Package? dependencyPackage = dependencyPackageState?.Package;
@@ -391,6 +390,13 @@ public class FrontendService : IFrontendService
 					_logger.Error(
 						$"Installed version {dependencyPackageState.InstalledVersion.Version} for {dependencyPackage.Name} is below the minimum version {minVersion.ToString()}. Please update {dependencyPackage.Name}!");
 
+					globalSuccess = false;
+				}
+				
+				if (excludedVersions.Contains(Version.Parse(dependencyPackageState.InstalledVersion.Version!)))
+				{
+					_logger.Error($"Installed version {dependencyPackageState.InstalledVersion.Version} for {dependencyPackage.Name} is not supported by the FEntwumS Netlist Viewer.");
+					
 					globalSuccess = false;
 				}
 			}
