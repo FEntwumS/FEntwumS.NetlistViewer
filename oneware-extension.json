@@ -590,6 +590,15 @@
           "target": "all"
         }
       ]
+    },
+    {
+      "version": "0.16.7",
+      "minStudioVersion": "1.0.10.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
     }
   ]
 }
