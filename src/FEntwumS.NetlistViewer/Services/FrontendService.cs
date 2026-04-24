@@ -638,7 +638,7 @@ public class FrontendService : IFrontendService
 
 		_logger.Log("Sending request to ExpandNode");
 
-		var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + nodePath, null);
+		var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + Uri.EscapeDataString(nodePath), null);
 
 		if (resp is not { IsSuccessStatusCode: true })
 		{
@@ -772,7 +772,7 @@ public class FrontendService : IFrontendService
 		catch (UriFormatException)
 		{
 			_logger.Error(
-				$"The provided server address ${_backendAddress} is not a valid address. Please enter a correct IP address",
+				$"The provided server address {_backendAddress} is not a valid address. Please enter a correct IP address",
 				null, printErrors);
 			return null;
 		}
