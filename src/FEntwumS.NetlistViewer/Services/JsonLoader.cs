@@ -164,6 +164,10 @@ public class JsonLoader : IJsonLoader
 		string path = "";
 		string src = "";
 
+		bool isScaffolding = false;
+
+		ushort newDepth = (ushort) (depth + 1);
+
 		JsonNode? layoutOptions = node["layoutOptions"] as JsonNode;
 
 		if (node.AsObject().ContainsKey("x"))
@@ -207,6 +211,11 @@ public class JsonLoader : IJsonLoader
 			{
 				src = layoutOptions["src-location"]!.GetValue<string>();
 			}
+
+			if (layoutOptions.AsObject().ContainsKey("scaffolding-element"))
+			{
+				isScaffolding = layoutOptions["scaffolding-element"]!.GetValue<string>() == "true";
+			}
 		}
 
 		if (path != string.Empty)
@@ -236,7 +245,7 @@ public class JsonLoader : IJsonLoader
 			MaxHeight = yRef + (y + nHeight) * Scale;
 		}
 
-		if (!(string.Equals((string)node["id"]!, "root", StringComparison.Ordinal)))
+		if (!string.Equals((string)node["id"]!, "root", StringComparison.Ordinal))
 		{
 			items.Add(new NetlistElement()
 			{
@@ -249,9 +258,9 @@ public class JsonLoader : IJsonLoader
 				Celltype = celltype,
 				Cellname = cellname,
 				SrcLocation = src,
-				Path = path
+				Path = path,
+				IsScaffolding = isScaffolding
 			});
-
 			NodeCnt++;
 		}
 
@@ -259,21 +268,21 @@ public class JsonLoader : IJsonLoader
 
 		if (labels != null)
 		{
-			CreateLabels(labels, items, xRef + x * Scale, yRef + y * Scale, (ushort)(depth + 1));
+			CreateLabels(labels, items, xRef + x * Scale, yRef + y * Scale, newDepth);
 		}
 
 		JsonArray? ports = node["ports"] as JsonArray;
 
 		if (ports != null)
 		{
-			CreatePorts(ports, items, xRef + x * Scale, yRef + y * Scale, (ushort)(depth + 1));
+			CreatePorts(ports, items, xRef + x * Scale, yRef + y * Scale, newDepth);
 		}
 
 		JsonArray? edges = node["edges"] as JsonArray;
 
 		if (edges != null)
 		{
-			CreateEdges(edges, items, xRef + x * Scale, yRef + y * Scale, (ushort)(depth + 1));
+			CreateEdges(edges, items, xRef + x * Scale, yRef + y * Scale, newDepth);
 		}
 
 		if (children == null) return;
@@ -281,7 +290,7 @@ public class JsonLoader : IJsonLoader
 		{
 			if (child is not null)
 			{
-				CreateNode(child, items, xRef + x * Scale, yRef + y * Scale, (ushort)(depth + 1));
+				CreateNode(child, items, xRef + x * Scale, yRef + y * Scale, newDepth);
 			}
 		}
 	}
@@ -362,6 +371,7 @@ public class JsonLoader : IJsonLoader
 		double x = 0;
 		double y = 0;
 		bool notConnected = false;
+		bool isScaffolding = false;
 
 		foreach (JsonNode? port in ports)
 		{
@@ -370,6 +380,8 @@ public class JsonLoader : IJsonLoader
 			x = 0;
 			y = 0;
 			notConnected = false;
+			isScaffolding = false;
+			
 			JsonArray? labels = port["labels"] as JsonArray;
 			JsonNode? layoutOptions = port["layoutOptions"] as JsonNode;
 
@@ -388,9 +400,17 @@ public class JsonLoader : IJsonLoader
 				CreateLabels(labels, items, xRef + x * Scale, yRef + y * Scale, (ushort)(depth + 1));
 			}
 
-			if (layoutOptions is not null && layoutOptions.AsObject().ContainsKey("not-connected"))
+			if (layoutOptions is not null)
 			{
-				notConnected = layoutOptions["not-connected"]!.GetValue<string>() == "true";
+				if (layoutOptions.AsObject().ContainsKey("scaffolding-element"))
+				{
+					isScaffolding = layoutOptions["scaffolding-element"]!.GetValue<string>() == "true";
+				}
+				
+				if (layoutOptions.AsObject().ContainsKey("not-connected"))
+				{
+					notConnected = layoutOptions["not-connected"]!.GetValue<string>() == "true";
+				}
 			}
 
 			items.Add(new NetlistElement()
@@ -399,7 +419,8 @@ public class JsonLoader : IJsonLoader
 				yPos = yRef + y * Scale,
 				Type = 5,
 				ZIndex = depth,
-				NotConnected = notConnected
+				NotConnected = notConnected,
+				IsScaffolding = isScaffolding
 			});
 
 			PortCnt++;
@@ -423,6 +444,8 @@ public class JsonLoader : IJsonLoader
 		string signalname;
 		int indexInSignal;
 		string signaltype;
+		bool noTip = false;
+		bool useSquareJunctions = false;
 
 		foreach (JsonNode? edge in edges)
 		{
@@ -433,6 +456,8 @@ public class JsonLoader : IJsonLoader
 			signalname = "";
 			indexInSignal = 0;
 			signaltype = "";
+			noTip = false;
+			useSquareJunctions = false;
 
 			sections = edge["sections"] as JsonArray;
 
@@ -450,6 +475,46 @@ public class JsonLoader : IJsonLoader
 				bendpoints = section["bendPoints"] as JsonArray;
 				List<Point> pointList = new List<Point>();
 				layoutOptions = edge["layoutOptions"] as JsonNode;
+				
+				if (layoutOptions is not null)
+				{
+					if (layoutOptions.AsObject().ContainsKey("src-location"))
+					{
+						src = layoutOptions["src-location"]!.GetValue<string>();
+					}
+
+					if (layoutOptions.AsObject().ContainsKey("location-path"))
+					{
+						locationpath = layoutOptions["location-path"]!.GetValue<string>();
+					}
+
+					if (layoutOptions.AsObject().ContainsKey("signalname"))
+					{
+						signalname = layoutOptions["signalname"]!.GetValue<string>();
+					}
+
+					if (layoutOptions.AsObject().ContainsKey("index-in-signal"))
+					{
+						// GetValue<int>() somehow does not (always?) work with negative integers
+						// Therefore this construct is used
+						indexInSignal = Convert.ToInt32(layoutOptions["index-in-signal"]!.GetValue<string>());
+					}
+
+					if (layoutOptions.AsObject().ContainsKey("signaltype"))
+					{
+						signaltype = layoutOptions["signaltype"]!.GetValue<string>();
+					}
+
+					if (layoutOptions.AsObject().ContainsKey("no-tip"))
+					{
+						noTip = layoutOptions["no-tip"]!.GetValue<string>() == "true";
+					}
+
+					if (layoutOptions.AsObject().ContainsKey("use-square-junctions"))
+					{
+						useSquareJunctions = layoutOptions["use-square-junctions"]!.GetValue<string>() == "true";
+					}
+				}
 
 				// Move to start
 				if (start != null)
@@ -518,61 +583,34 @@ public class JsonLoader : IJsonLoader
 					pointList.Add(ePoint);
 				}
 
-				// Create arrow tip
-				double xDir = cPoint.X - ePoint.X;
-				double yDir = cPoint.Y - ePoint.Y;
-
-				double mag = Math.Sqrt(xDir * xDir + yDir * yDir);
-
-				xDir /= mag;
-				yDir /= mag;
-
-				xDir *= 7 * Scale;
-				yDir *= 7 * Scale;
-
-				// Angle of 30 degrees
-				double xUp = 0.86 * xDir - (0.5) * yDir;
-				double yUp = (0.5) * xDir + 0.86 * yDir;
-				double xDown = (-0.86) * xDir - (0.5) * yDir;
-				double yDown = (0.5) * xDir + (-0.86) * yDir;
-
-				Point upPoint = new Point(ePoint.X + xUp, ePoint.Y + yUp);
-				Point downPoint = new Point(ePoint.X - xDown, ePoint.Y - yDown);
-
-				pointList.Add(upPoint);
-				pointList.Add(ePoint);
-				pointList.Add(downPoint);
-
-				BendCnt += 3;
-
-				if (layoutOptions is not null)
+				if (!noTip)
 				{
-					if (layoutOptions.AsObject().ContainsKey("src-location"))
-					{
-						src = layoutOptions["src-location"]!.GetValue<string>();
-					}
+					// Create arrow tip
+					double xDir = cPoint.X - ePoint.X;
+					double yDir = cPoint.Y - ePoint.Y;
 
-					if (layoutOptions.AsObject().ContainsKey("location-path"))
-					{
-						locationpath = layoutOptions["location-path"]!.GetValue<string>();
-					}
+					double mag = Math.Sqrt(xDir * xDir + yDir * yDir);
 
-					if (layoutOptions.AsObject().ContainsKey("signalname"))
-					{
-						signalname = layoutOptions["signalname"]!.GetValue<string>();
-					}
+					xDir /= mag;
+					yDir /= mag;
 
-					if (layoutOptions.AsObject().ContainsKey("index-in-signal"))
-					{
-						// GetValue<int>() somehow does not (always?) work with negative integers
-						// Therefore this construct is used
-						indexInSignal = Convert.ToInt32(layoutOptions["index-in-signal"]!.GetValue<string>());
-					}
+					xDir *= 7 * Scale;
+					yDir *= 7 * Scale;
 
-					if (layoutOptions.AsObject().ContainsKey("signaltype"))
-					{
-						signaltype = layoutOptions["signaltype"]!.GetValue<string>();
-					}
+					// Angle of 30 degrees
+					double xUp = 0.86 * xDir - (0.5) * yDir;
+					double yUp = (0.5) * xDir + 0.86 * yDir;
+					double xDown = (-0.86) * xDir - (0.5) * yDir;
+					double yDown = (0.5) * xDir + (-0.86) * yDir;
+
+					Point upPoint = new Point(ePoint.X + xUp, ePoint.Y + yUp);
+					Point downPoint = new Point(ePoint.X - xDown, ePoint.Y - yDown);
+
+					pointList.Add(upPoint);
+					pointList.Add(ePoint);
+					pointList.Add(downPoint);
+
+					BendCnt += 3;
 				}
 
 				items.Add(new NetlistElement()
@@ -601,13 +639,13 @@ public class JsonLoader : IJsonLoader
 
 			if (junctionPoints is not null)
 			{
-				CreateJunctionPoints(junctionPoints, items, xRef, yRef, (ushort)(depth + 1));
+				CreateJunctionPoints(junctionPoints, items, xRef, yRef, (ushort)(depth + 1), useSquareJunctions);
 			}
 		}
 	}
 
 	public void CreateJunctionPoints(JsonArray junctionPoints, List<NetlistElement> items,
-		double xRef, double yRef, ushort depth)
+		double xRef, double yRef, ushort depth, bool useSquareJunctions)
 	{
 		double x = 0;
 		double y = 0;
@@ -638,7 +676,8 @@ public class JsonLoader : IJsonLoader
 				xPos = xRef + x * Scale,
 				yPos = yRef + y * Scale,
 				Type = 4,
-				ZIndex = depth
+				ZIndex = depth,
+				IsSquareJunction = useSquareJunctions
 			});
 
 			JunctionCnt++;

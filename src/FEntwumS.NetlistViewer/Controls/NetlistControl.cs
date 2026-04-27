@@ -394,7 +394,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
         Brush rectFillBrush =
             Application.Current!.FindResource(theme, "ThemeControlHighlightMidBrush") as SolidColorBrush ??
             new SolidColorBrush(Colors.LightBlue);
-        Brush ellipseFillBrush =
+        Brush junctionFillBrush =
             Application.Current!.FindResource(theme, "ThemeAccentBrush") as SolidColorBrush ??
             new SolidColorBrush(Colors.Black);
         Brush textBrush = new SolidColorBrush(Application.Current!.FindResource(theme, "ThemeAccentColor") is Color
@@ -481,22 +481,25 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 				        if ((height >= NodeScaleClip && width >= NodeScaleClip) &&
 				            (containsBounds(hitboxRect) || intersectsBounds(hitboxRect)))
 				        {
-					        context.DrawRectangle(rectFillBrush, borderPen, drawnRect);
+					        if (!element.IsScaffolding)
+					        {
+						        context.DrawRectangle(rectFillBrush, borderPen, drawnRect);
 
-					        _renderedNodeList.Add(new DRect(x, y, width, height, element.ZIndex, element));
+						        _renderedNodeList.Add(new DRect(x, y, width, height, element.ZIndex, element));
 
-					        // Dropshadow
+						        // Dropshadow
 
-					        // border width + drop shadow width / 2
-					        x += 2d * CurrentScale;
-					        y += 2d * CurrentScale;
+						        // border width + drop shadow width / 2
+						        x += 2d * CurrentScale;
+						        y += 2d * CurrentScale;
 
-					        start = new Point(x, y + height);
-					        bend = new Point(x + width, y + height);
-					        end = new Point(x + width, y);
+						        start = new Point(x, y + height);
+						        bend = new Point(x + width, y + height);
+						        end = new Point(x + width, y);
 
-					        context.DrawLine(dropShadowPen, start, bend);
-					        context.DrawLine(dropShadowPen, bend, end);
+						        context.DrawLine(dropShadowPen, start, bend);
+						        context.DrawLine(dropShadowPen, bend, end);
+					        }
 
 					        previousNodeInView = true;
 
@@ -628,7 +631,16 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
 				        if (radius * 2 >= JunctionScaleClip && isInBounds(center))
 				        {
-					        context.DrawEllipse(ellipseFillBrush, null, center, radius, radius);
+					        if (!element.IsSquareJunction)
+					        {
+						        context.DrawEllipse(junctionFillBrush, null, center, radius, radius);
+					        }
+					        else
+					        {
+						        drawnRect = new Rect(x - radius, y - radius, radius * 2, radius * 2);
+						        
+						        context.DrawRectangle(junctionFillBrush, null, drawnRect);
+					        }
 
 					        _renderedJunctionList.Add(new DCircle(x, y, radius, element.ZIndex, element));
 				        }
@@ -657,7 +669,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 				        drawnRect = new Rect(x - edgeLength / 2, y - edgeLength / 2, edgeLength, edgeLength);
 				        hitboxRect = drawnRect;
 
-				        if (edgeLength >= PortScaleClip && (intersectsBounds(hitboxRect) || containsBounds(hitboxRect)))
+				        if (!element.IsScaffolding && edgeLength >= PortScaleClip && (intersectsBounds(hitboxRect) || containsBounds(hitboxRect)))
 				        {
 					        context.DrawRectangle(rectFillBrush, borderPen, drawnRect);
 
