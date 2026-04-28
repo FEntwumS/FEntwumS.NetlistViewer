@@ -28,7 +28,7 @@ public class NetlistElement
 	private double fontSize { get; set; }
 	private bool notConnected { get; set; }
 	private bool isScaffolding { get; set; }
-	private bool isSquareJunction { get; set; }
+	private JunctionShape junctionShape { get; set; }
 
 	public double xPos
 	{
@@ -162,9 +162,9 @@ public class NetlistElement
 		set { this.isScaffolding = value; }
 	}
 
-	public bool IsSquareJunction
+	public JunctionShape JunctionShape
 	{
-		get => this.isSquareJunction;
-		set { this.isSquareJunction = value; }
+		get => this.junctionShape;
+		set { this.junctionShape = value; }
 	}
 }

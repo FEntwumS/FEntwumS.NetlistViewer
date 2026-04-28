@@ -445,7 +445,7 @@ public class JsonLoader : IJsonLoader
 		int indexInSignal;
 		string signaltype;
 		bool noTip = false;
-		bool useSquareJunctions = false;
+		JunctionShape junctionShape = JunctionShape.Circle;
 
 		foreach (JsonNode? edge in edges)
 		{
@@ -457,7 +457,7 @@ public class JsonLoader : IJsonLoader
 			indexInSignal = 0;
 			signaltype = "";
 			noTip = false;
-			useSquareJunctions = false;
+			junctionShape = JunctionShape.Circle;
 
 			sections = edge["sections"] as JsonArray;
 
@@ -510,9 +510,26 @@ public class JsonLoader : IJsonLoader
 						noTip = layoutOptions["no-tip"]!.GetValue<string>() == "true";
 					}
 
-					if (layoutOptions.AsObject().ContainsKey("use-square-junctions"))
+					if (layoutOptions.AsObject().ContainsKey("junction-shape"))
 					{
-						useSquareJunctions = layoutOptions["use-square-junctions"]!.GetValue<string>() == "true";
+						string shapeString = layoutOptions["junction-shape"]!.GetValue<string>();
+
+						if (shapeString == "CIRCLE")
+						{
+							junctionShape = JunctionShape.Circle;
+						} else if (shapeString == "SQUARE")
+						{
+							junctionShape = JunctionShape.Square;
+						}  else if (shapeString == "DIAMOND")
+						{
+							junctionShape = JunctionShape.Diamond;
+						} else if (shapeString == "TRIANGLE_LEFT")
+						{
+							junctionShape = JunctionShape.TriangleLeft;
+						} else if (shapeString == "TRIANGLE_RIGHT")
+						{
+							junctionShape = JunctionShape.TriangleRight;
+						}
 					}
 				}
 
@@ -639,13 +656,13 @@ public class JsonLoader : IJsonLoader
 
 			if (junctionPoints is not null)
 			{
-				CreateJunctionPoints(junctionPoints, items, xRef, yRef, (ushort)(depth + 1), useSquareJunctions);
+				CreateJunctionPoints(junctionPoints, items, xRef, yRef, (ushort)(depth + 1), junctionShape);
 			}
 		}
 	}
 
 	public void CreateJunctionPoints(JsonArray junctionPoints, List<NetlistElement> items,
-		double xRef, double yRef, ushort depth, bool useSquareJunctions)
+		double xRef, double yRef, ushort depth, JunctionShape junctionShape)
 	{
 		double x = 0;
 		double y = 0;
@@ -677,7 +694,7 @@ public class JsonLoader : IJsonLoader
 				yPos = yRef + y * Scale,
 				Type = 4,
 				ZIndex = depth,
-				IsSquareJunction = useSquareJunctions
+				JunctionShape = junctionShape
 			});
 
 			JunctionCnt++;
