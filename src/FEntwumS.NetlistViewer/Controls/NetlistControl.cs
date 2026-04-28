@@ -387,10 +387,10 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                 dropshadowThickness, null, PenLineCap.Square);
         Pen edgePen = new Pen(
             Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? new SolidColorBrush(Colors.Black),
-            1.2 * CurrentScale, null, PenLineCap.Square);
+            1.2 * CurrentScale, null, PenLineCap.Round);
         Pen bundledEdgePen = new Pen(
             Application.Current.FindResource(theme, "ThemeAccentBrush") as IBrush ?? new SolidColorBrush(Colors.Black),
-            2.8 * CurrentScale, null, PenLineCap.Square);
+            2.8 * CurrentScale, null, PenLineCap.Round);
         Brush rectFillBrush =
             Application.Current!.FindResource(theme, "ThemeControlHighlightMidBrush") as SolidColorBrush ??
             new SolidColorBrush(Colors.LightBlue);
@@ -631,15 +631,37 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
 				        if (radius * 2 >= JunctionScaleClip && isInBounds(center))
 				        {
-					        if (!element.IsSquareJunction)
+					        double bbEdgeLength = radius * 1.4d;
+					        
+					        switch (element.JunctionShape)
 					        {
-						        context.DrawEllipse(junctionFillBrush, null, center, radius, radius);
-					        }
-					        else
-					        {
-						        drawnRect = new Rect(x - radius, y - radius, radius * 2, radius * 2);
+						        case JunctionShape.Circle:
+							        context.DrawEllipse(junctionFillBrush, null, center, radius, radius);
+							        break;
 						        
-						        context.DrawRectangle(junctionFillBrush, null, drawnRect);
+						        case JunctionShape.Square:
+							        drawnRect = new Rect(x - radius, y - radius, radius * 2, radius * 2);
+							        context.DrawRectangle(junctionFillBrush, null, drawnRect);
+							        break;
+						        
+						        case JunctionShape.Diamond:
+							        Geometry diamondGeometry =
+								        new PolylineGeometry([new Point(x, y + bbEdgeLength), new Point(x + bbEdgeLength, y), new Point(x, y - bbEdgeLength), new Point(x - bbEdgeLength, y)], true);
+							        context.DrawGeometry(junctionFillBrush, null, diamondGeometry);
+							        break;
+						        
+						        case JunctionShape.TriangleLeft:
+							        Geometry triangleLeftGeometry = new PolylineGeometry([
+								        new Point(x, y + bbEdgeLength), new Point(x, y - bbEdgeLength), new Point(x - bbEdgeLength, y)],
+								        true);
+							        context.DrawGeometry(junctionFillBrush, null, triangleLeftGeometry);
+							        break;
+						        case JunctionShape.TriangleRight:
+							        Geometry triangleRightGeometry = new PolylineGeometry([
+									        new Point(x, y + bbEdgeLength), new Point(x + bbEdgeLength, y), new Point(x, y - bbEdgeLength)],
+								        true);
+							        context.DrawGeometry(junctionFillBrush, null, triangleRightGeometry);
+							        break;
 					        }
 
 					        _renderedJunctionList.Add(new DCircle(x, y, radius, element.ZIndex, element));
