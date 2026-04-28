@@ -45,6 +45,7 @@ public class FrontendService : IFrontendService
 	private static bool _continueOnBinaryInstallError = false;
 	private static string _performanceTarget = string.Empty;
 	private static bool _useHierarchicalBackend = true;
+	private static string _junctionShape = "Circle";
 
 	private static NetlistType netlistType
 	{
@@ -252,6 +253,9 @@ public class FrontendService : IFrontendService
 
 		_settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.UseHierarchicalBackendKey)
 			.Subscribe(x => _useHierarchicalBackend = x);
+		
+		_settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.JunctionShapeKey)
+			.Subscribe(x => _junctionShape = x);
 	}
 
 	private async Task<(bool success, bool needsRestart)> InstallDependenciesAsync()
@@ -574,10 +578,11 @@ public class FrontendService : IFrontendService
 			_applicationStateService.AddState("Layouting in progress", AppState.Loading);
 
 		resp = await PostAsync(
-			"/graphRemoteFile" + $"?hash={combinedHash}" + $"&entityLabelFontSize={_entityLabelFontSize}" +
-			$"&cellLabelFontSize={_cellLabelFontSize}" + $"&edgeLabelFontSize={_edgeLabelFontSize}" +
-			$"&portLabelFontSize={_portLabelFontSize}" +
-			(_useHierarchicalBackend ? $"&performance-target={_performanceTarget}" : ""),
+			"/graphRemoteFile" + $"?hash={combinedHash}" + $"&entityLabelFontSize={_entityLabelFontSize}"
+			+ $"&cellLabelFontSize={_cellLabelFontSize}" + $"&edgeLabelFontSize={_edgeLabelFontSize}"
+			+ $"&portLabelFontSize={_portLabelFontSize}"
+			+ (_useHierarchicalBackend ? $"&performance-target={_performanceTarget}" : "")
+			+ $"&junctionShape={_junctionShape.ToUpperInvariant()}",
 			formDataContent);
 
 		jsonFileStream.Close();
