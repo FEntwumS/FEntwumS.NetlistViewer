@@ -51,6 +51,7 @@ public class FentwumSNetlistViewerSettingsHelper
 	public static readonly string AlwaysRegenerateNetlistsKey = "NetlistViewer_AlwaysRegenerateNetlists";
 	public static readonly string EnableHierarchyViewKey = "NetlistViewer_EnableHierarchyView";
 	public static readonly string AutomaticNetlistGenerationKey = "NetlistViewer_AutomaticNetlistGeneration";
+	public static readonly string JunctionShapeKey = "NetlistViewer_JunctionShape";
 
 	public static readonly string AutomaticNetlistGenerationIntervalKey =
 		"NetlistViewer_AutomaticNetlistGenerationInterval";
