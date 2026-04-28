@@ -701,6 +701,9 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
 			FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey,
 			new SliderSetting("Automatic netlist generation interval (s)", 60.0d, 15.0d, 3600.0d, 5.0d));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.JunctionShapeKey, new ComboBoxSetting("Junction Shape", "Circle",
+				[ "Circle", "Square", "Diamond", "Triangle", "Line" ]));
 		
 		// These settings are not displayed to the user; They store internal extension state
 		ServiceManager.GetService<ISettingsService>().Register(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey, -1);
