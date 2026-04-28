@@ -26,7 +26,7 @@ public interface IJsonLoader
 		double yRef, ushort depth);
 
 	public void CreateJunctionPoints(JsonArray junctionPoints, List<NetlistElement> items,
-		double xRef, double yRef, ushort depth, bool useSquareJunctions);
+		double xRef, double yRef, ushort depth, JunctionShape junctionShape);
 
 	public double GetMaxWidth();
 	public double GetMaxHeight();
