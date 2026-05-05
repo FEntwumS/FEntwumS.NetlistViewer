@@ -514,7 +514,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 
 			        // Edge
 			        case 2:
-				        if (element.Points == null || !previousNodeInView || element.ZIndex > lastVisibleNodeZIndex + 1)
+				        if (element.Points == null || !previousNodeInView || element.ZIndex > lastVisibleNodeZIndex + 1 || element.IsScaffolding)
 				        {
 					        continue;
 				        }
