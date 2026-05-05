@@ -349,6 +349,11 @@ public class JsonLoader : IJsonLoader
 					System.Globalization.CultureInfo.InvariantCulture);
 			}
 
+			if (h < 2.0d)
+			{
+				h = 10.0d;
+			}
+
 			items.Add(new NetlistElement()
 			{
 				LabelText = text,
@@ -446,6 +451,7 @@ public class JsonLoader : IJsonLoader
 		string signaltype;
 		bool noTip = false;
 		JunctionShape junctionShape = JunctionShape.Circle;
+		bool isScaffolding = false;
 
 		foreach (JsonNode? edge in edges)
 		{
@@ -458,6 +464,7 @@ public class JsonLoader : IJsonLoader
 			signaltype = "";
 			noTip = false;
 			junctionShape = JunctionShape.Circle;
+			isScaffolding = false;
 
 			sections = edge["sections"] as JsonArray;
 
@@ -508,6 +515,11 @@ public class JsonLoader : IJsonLoader
 					if (layoutOptions.AsObject().ContainsKey("no-tip"))
 					{
 						noTip = layoutOptions["no-tip"]!.GetValue<string>() == "true";
+					}
+					
+					if (layoutOptions.AsObject().ContainsKey("scaffolding-element"))
+					{
+						isScaffolding = layoutOptions["scaffolding-element"]!.GetValue<string>() == "true";
 					}
 
 					if (layoutOptions.AsObject().ContainsKey("junction-shape"))
@@ -641,7 +653,8 @@ public class JsonLoader : IJsonLoader
 					Path = locationpath,
 					Signalname = signalname,
 					IndexInSignal = indexInSignal,
-					SignalType = signaltype
+					SignalType = signaltype,
+					IsScaffolding = isScaffolding
 				});
 
 				EdgeCnt++;
