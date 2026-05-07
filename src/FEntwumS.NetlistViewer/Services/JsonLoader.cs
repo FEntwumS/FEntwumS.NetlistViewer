@@ -375,6 +375,8 @@ public class JsonLoader : IJsonLoader
 	{
 		double x = 0;
 		double y = 0;
+		double w = 0;
+		double h = 0;
 		bool notConnected = false;
 		bool isScaffolding = false;
 		PortShape portShape = PortShape.Square;
@@ -385,6 +387,8 @@ public class JsonLoader : IJsonLoader
 
 			x = 0;
 			y = 0;
+			w = 0;
+			h = 0;
 			notConnected = false;
 			isScaffolding = false;
 			portShape = PortShape.Square;
@@ -400,6 +404,16 @@ public class JsonLoader : IJsonLoader
 			if (port.AsObject().ContainsKey("y"))
 			{
 				y = port["y"]!.GetValue<double>();
+			}
+
+			if (port.AsObject().ContainsKey("width"))
+			{
+				w = port["width"]!.GetValue<double>();
+			}
+
+			if (port.AsObject().ContainsKey("height"))
+			{
+				h = port["height"]!.GetValue<double>();
 			}
 
 			if (labels is not null)
@@ -433,10 +447,17 @@ public class JsonLoader : IJsonLoader
 				}
 			}
 
+			if (h < 1.0d)
+			{
+				h  = 10.0d;
+			}
+
 			items.Add(new NetlistElement()
 			{
 				xPos = xRef + x * Scale,
 				yPos = yRef + y * Scale,
+				Width = w,
+				Height = h,
 				Type = 5,
 				ZIndex = depth,
 				NotConnected = notConnected,
