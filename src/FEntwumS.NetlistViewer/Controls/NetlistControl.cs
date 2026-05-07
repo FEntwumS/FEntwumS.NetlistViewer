@@ -677,23 +677,44 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 				        }
 
 				        edgeLength = 10.0d * CurrentScale;
-				        x = (element.xPos + 5.0d) * CurrentScale;
-				        y = (element.yPos + 5.0d) * CurrentScale;
+				        x = element.xPos * CurrentScale;
+				        y = element.yPos * CurrentScale;
 
 				        x += OffsetX;
 				        y += OffsetY;
+				        
+				        double scaledWidth = element.Width * CurrentScale;
+				        double scaledHeight = element.Height * CurrentScale;
 
-				        double lx = x - edgeLength / 2;
-				        double ty = y - edgeLength / 2;
-				        double rx = lx + edgeLength;
-				        double by = ty + edgeLength;
+				        double lx = x;
+				        double ty = y;
+				        double rx = lx + scaledWidth;
+				        double by = ty + scaledHeight;
 
-				        drawnRect = new Rect(x - edgeLength / 2, y - edgeLength / 2, edgeLength, edgeLength);
+				        drawnRect = new Rect(lx, ty, scaledWidth, scaledHeight);
 				        hitboxRect = drawnRect;
 
 				        if (!element.IsScaffolding && edgeLength >= PortScaleClip && (intersectsBounds(hitboxRect) || containsBounds(hitboxRect)))
 				        {
-					        context.DrawRectangle(rectFillBrush, borderPen, drawnRect);
+					        switch (element.PortShape)
+					        {
+								case PortShape.Square:
+									context.DrawRectangle(rectFillBrush, borderPen, drawnRect);
+									break;
+								case PortShape.Tag:
+									double x_i = lx + (10 * CurrentScale);
+									double y_i = ty + (5 * CurrentScale);
+									
+									Geometry tagGeometry = new PolylineGeometry([
+										new Point(lx, ty),
+										new Point(x_i, ty),
+										new Point(rx, y_i),
+										new Point(x_i, by),
+										new Point(lx, by)
+									], true);
+									context.DrawGeometry(rectFillBrush, borderPen, tagGeometry);
+									break;
+					        }
 
 					        if (element.NotConnected)
 					        {

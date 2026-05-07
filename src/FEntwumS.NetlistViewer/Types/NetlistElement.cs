@@ -29,6 +29,7 @@ public class NetlistElement
 	private bool notConnected { get; set; }
 	private bool isScaffolding { get; set; }
 	private JunctionShape junctionShape { get; set; }
+	private PortShape portShape { get; set; }
 
 	public double xPos
 	{
@@ -166,5 +167,11 @@ public class NetlistElement
 	{
 		get => this.junctionShape;
 		set { this.junctionShape = value; }
+	}
+
+	public PortShape PortShape
+	{
+		get => this.portShape;
+		set { this.portShape = value; }
 	}
 }
