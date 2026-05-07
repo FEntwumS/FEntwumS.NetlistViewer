@@ -377,6 +377,7 @@ public class JsonLoader : IJsonLoader
 		double y = 0;
 		bool notConnected = false;
 		bool isScaffolding = false;
+		PortShape portShape = PortShape.Square;
 
 		foreach (JsonNode? port in ports)
 		{
@@ -386,6 +387,7 @@ public class JsonLoader : IJsonLoader
 			y = 0;
 			notConnected = false;
 			isScaffolding = false;
+			portShape = PortShape.Square;
 			
 			JsonArray? labels = port["labels"] as JsonArray;
 			JsonNode? layoutOptions = port["layoutOptions"] as JsonNode;
@@ -416,6 +418,19 @@ public class JsonLoader : IJsonLoader
 				{
 					notConnected = layoutOptions["not-connected"]!.GetValue<string>() == "true";
 				}
+
+				if (layoutOptions.AsObject().ContainsKey("port-shape"))
+				{
+					string shapeString = layoutOptions["port-shape"]!.GetValue<string>();
+
+					if (shapeString == "SQUARE")
+					{
+						portShape = PortShape.Square;
+					} else if (shapeString == "TAG")
+					{
+						portShape = PortShape.Tag;
+					}
+				}
 			}
 
 			items.Add(new NetlistElement()
@@ -425,7 +440,8 @@ public class JsonLoader : IJsonLoader
 				Type = 5,
 				ZIndex = depth,
 				NotConnected = notConnected,
-				IsScaffolding = isScaffolding
+				IsScaffolding = isScaffolding,
+				PortShape = portShape
 			});
 
 			PortCnt++;
