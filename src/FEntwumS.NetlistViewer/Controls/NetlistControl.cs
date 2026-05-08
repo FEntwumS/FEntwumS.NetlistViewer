@@ -702,7 +702,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
 									context.DrawRectangle(rectFillBrush, borderPen, drawnRect);
 									break;
 								case PortShape.Tag:
-									double x_i = lx + (10 * CurrentScale);
+									double x_i = rx - (5 * CurrentScale);
 									double y_i = ty + (5 * CurrentScale);
 									
 									Geometry tagGeometry = new PolylineGeometry([
