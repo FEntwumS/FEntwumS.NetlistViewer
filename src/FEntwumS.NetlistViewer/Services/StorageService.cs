@@ -18,6 +18,7 @@ public class StorageService : IStorageService
 
 	private static Dictionary<string, string> _storage = new Dictionary<string, string>();
 
+	[Obsolete("Deprecated")]
 	public async Task SaveAsync()
 	{
 		string path = FentwumSNetlistViewerSettingsHelper.DataFilePath;
@@ -50,6 +51,7 @@ public class StorageService : IStorageService
 		}
 	}
 
+	[Obsolete("Deprecated")]
 	public async Task LoadAsync()
 	{
 		string path = FentwumSNetlistViewerSettingsHelper.DataFilePath;
@@ -88,16 +90,19 @@ public class StorageService : IStorageService
 		}
 	}
 
+	[Obsolete("Deprecated")]
 	public void RegisterKeyValuePair(string key, string value)
 	{
 		_storage.TryAdd(key, value);
 	}
 
+	[Obsolete("Deprecated")]
 	public void RemoveKeyValuePair(string key)
 	{
 		_storage.Remove(key);
 	}
 
+	[Obsolete("Deprecated")]
 	public void SetKeyValuePairValue(string key, string value)
 	{
 		if (!_storage.ContainsKey(key))
@@ -110,11 +115,13 @@ public class StorageService : IStorageService
 		}
 	}
 
+	[Obsolete("Deprecated")]
 	public string? GetKeyValuePairValue(string key)
 	{
 		return _storage.TryGetValue(key, out var value) ? value : null;
 	}
 
+	[Obsolete("Deprecated")]
 	public bool KeyExists(string key)
 	{
 		return _storage.ContainsKey(key);
