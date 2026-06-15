@@ -177,20 +177,28 @@ public class NetlistGenerator : INetlistGenerator
 			}
 		}
 
-		string? storedSettingsChangedTime = _storageService.GetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper
-			.NetlistGenerationSettingsChangedKey);
+		string storedSettingsChangedTime = _settingsService.GetSettingValue<string>(FentwumSNetlistViewerSettingsHelper.NetlistGenerationSettingsChangedKey);
 
-		// Date format "R" is the RFC1123 pattern
-		DateTime settingsChangedTime = DateTime.ParseExact(
-			storedSettingsChangedTime ?? DateTime.Now.ToString("R"), "R", new DateTimeFormatInfo());
-
-		if (storedSettingsChangedTime is null)
+		if (storedSettingsChangedTime.Length == 0)
 		{
-			_storageService.SetKeyValuePairValue(
-				FentwumSNetlistViewerSettingsHelper.NetlistGenerationSettingsChangedKey, DateTime.Now.ToString("R"));
-			_ = _storageService.SaveAsync();
+			storedSettingsChangedTime = DateTime.Now.ToUniversalTime().ToString("R");
+			_settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.NetlistGenerationSettingsChangedKey, storedSettingsChangedTime);
 		}
-		else if (netlistFile.LastWriteTimeUtc.CompareTo(settingsChangedTime.ToUniversalTime()) <= 0)
+
+		DateTime settingsChangedTime;
+		// Date format "R" is the RFC1123 pattern
+		try
+		{
+			settingsChangedTime = DateTime.ParseExact(
+				storedSettingsChangedTime, "R", new DateTimeFormatInfo());
+		}
+		catch (Exception e)
+		{
+			// Assume the netlist is outdated if an exception occurs
+			return (null, false);
+		}
+
+		if (netlistFile.LastWriteTimeUtc.CompareTo(settingsChangedTime.ToUniversalTime()) <= 0)
 		{
 			newNetlistNecessary = true;
 		}
