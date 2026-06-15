@@ -299,7 +299,7 @@
   },
   {
     "Id": "OneWare.GhdlExtension",
-    "Version": "1.0.0",
+    "Version": "1.0.4",
     "ProjectUrl": "https://github.com/one-ware/OneWare.GhdlExtension",
     "Copyright": "Protop Solutions UG",
     "Authors": "Hendrik Mennen",
