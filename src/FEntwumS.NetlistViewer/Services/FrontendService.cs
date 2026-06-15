@@ -273,6 +273,16 @@ public class FrontendService : IFrontendService
 				(FEntwumSNetlistReaderFrontendModule.JREPackage.Id!, new Version(21, 0, 6), [])
 		];
 
+		// If the package service is not finished loading, wait until the refresh is done
+		// This prevents issues when not all packages have yet been registered
+		if (!_packageService.IsLoaded)
+		{
+			if (!await _packageService.RefreshAsync())
+			{
+				return (false, false);
+			}
+		}
+
 		// Install osscadsuite binary between GHDL plugin and ghdl binary to allow for the addition of the ghdl binary to the store
 
 		foreach ((string dependencyID, Version minVersion, List<Version> excludedVersions) in dependencyIDs)
