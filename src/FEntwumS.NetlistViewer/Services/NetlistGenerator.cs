@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.ProjectSystem.Models;
+using OneWare.UniversalFpgaProjectSystem;
 using OneWare.UniversalFpgaProjectSystem.Models;
 
 namespace FEntwumS.NetlistViewer.Services;
@@ -54,7 +55,14 @@ public class NetlistGenerator : INetlistGenerator
 			Directory.CreateDirectory(outputDir);
 		}
 
-		return await ghdlService.SynthAsync(vhdlProject.FullPath, "verilog", outputDir);
+		if (vhdlProject.Root is UniversalFpgaProjectRoot root)
+		{
+			return await ghdlService.SynthAsync(root, "verilog", outputDir);
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	public async Task<bool> GenerateVerilogNetlistAsync(IProjectFile verilogProject)
