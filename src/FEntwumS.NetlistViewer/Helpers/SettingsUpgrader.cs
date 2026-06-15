@@ -8,10 +8,19 @@ public class SettingsUpgrader
 	public static bool NeedsUpgrade()
 	{
 		IStorageService storageService = ServiceManager.GetService<IStorageService>();
-		string currentSettingsVersion =
-			storageService.GetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey) ?? "0";
+		ISettingsService settingsService = ServiceManager.GetService<ISettingsService>();
+		int legacySettingsVersion =
+			int.Parse(storageService.GetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey) ?? "-1");
 
-		return currentSettingsVersion != FentwumSNetlistViewerSettingsHelper.ExpectedSettingsVersion;
+		if (settingsService.GetSettingValue<int>(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey) == -1)
+		{
+			settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey, legacySettingsVersion);
+		}
+
+		int currentSettingVersion =
+			settingsService.GetSettingValue<int>(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey);
+
+		return currentSettingVersion != FentwumSNetlistViewerSettingsHelper.ExpectedSettingsVersion;
 	}
 
 	public static async Task UpgradeSettingsIfNecessaryAsync()
@@ -21,9 +30,7 @@ public class SettingsUpgrader
 		IPaths paths = ServiceManager.GetService<IPaths>();
 		IProjectExplorerService projectExplorerService = ServiceManager.GetService<IProjectExplorerService>();
 		int currentSettingsVersion =
-			Convert.ToInt32(
-				storageService.GetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey) ??
-				"0");
+			settingsService.GetSettingValue<int>(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey);
 
 
 		if (currentSettingsVersion <= 0)
@@ -50,8 +57,11 @@ public class SettingsUpgrader
 			settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.AlwaysRegenerateNetlistsKey, false);
 		}
 
-		storageService.SetKeyValuePairValue(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey,
-			FentwumSNetlistViewerSettingsHelper.ExpectedSettingsVersion);
-		await storageService.SaveAsync();
+		if (currentSettingsVersion <= 3)
+		{
+			settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.AlwaysRegenerateNetlistsKey, true);
+		}
+
+		settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey, FentwumSNetlistViewerSettingsHelper.ExpectedSettingsVersion);
 	}
 }
