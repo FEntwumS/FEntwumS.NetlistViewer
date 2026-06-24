@@ -222,6 +222,27 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 						]
 					}
 				]
+			},
+			new PackageVersion()
+			{
+				Version = "0.12.0",
+				Targets =
+				[
+					new PackageTarget()
+					{
+						Target = "all",
+						Url =
+							"https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.12.0/fentwums-netlist-reader-server-v0.12.0.tar.gz",
+						AutoSetting =
+						[
+							new PackageAutoSetting()
+							{
+								RelativePath = "fentwums-netlist-reader",
+								SettingKey = FentwumSNetlistViewerSettingsHelper.NetlistPathSettingKey,
+							}
+						]
+					}
+				]
 			}
 		]
 	};
