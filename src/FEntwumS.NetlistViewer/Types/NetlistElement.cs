@@ -26,8 +26,10 @@ public class NetlistElement
 	private string? signaltype { get; set; }
 	private bool isHighlighted { get; set; }
 	private double fontSize { get; set; }
-
 	private bool notConnected { get; set; }
+	private bool isScaffolding { get; set; }
+	private JunctionShape junctionShape { get; set; }
+	private PortShape portShape { get; set; }
 
 	public double xPos
 	{
@@ -153,5 +155,23 @@ public class NetlistElement
 	{
 		get => this.notConnected;
 		set { this.notConnected = value; }
+	}
+
+	public bool IsScaffolding
+	{
+		get => this.isScaffolding;
+		set { this.isScaffolding = value; }
+	}
+
+	public JunctionShape JunctionShape
+	{
+		get => this.junctionShape;
+		set { this.junctionShape = value; }
+	}
+
+	public PortShape PortShape
+	{
+		get => this.portShape;
+		set { this.portShape = value; }
 	}
 }
