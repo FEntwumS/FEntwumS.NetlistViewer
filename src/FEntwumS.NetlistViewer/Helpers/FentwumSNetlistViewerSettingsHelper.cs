@@ -1,6 +1,7 @@
 ﻿using FEntwumS.NetlistViewer.Types;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
+using OneWare.UniversalFpgaProjectSystem.Models;
 
 namespace FEntwumS.NetlistViewer.Helpers;
 
@@ -83,16 +84,16 @@ public class FentwumSNetlistViewerSettingsHelper
 		return top;
 	}
 
-	public static string GetCcVhdlFilePath(IProjectFile projectFile)
+	public static string GetCcVhdlFilePath(UniversalFpgaProjectRoot root)
 	{
-		string top = GetTopNameFromJsonPath(projectFile);
+		string top = root.TopEntity;
 
-		return Path.Combine(GetBuildDirectory(projectFile), $"{top}.v");
+		return Path.Combine(GetBuildDirectory(root), $"{top}.v");
 	}
 
-	public static string GetBuildDirectory(IProjectFile projectFile)
+	public static string GetBuildDirectory(IProjectRoot root)
 	{
-		return Path.Combine(projectFile.Root.FullPath, "build", "netlist");
+		return Path.Combine(root.FullPath, "build", "netlist");
 	}
 
 	public static string GetNetlistFilePath(IProjectFile json, NetlistType netlistType)
@@ -105,7 +106,7 @@ public class FentwumSNetlistViewerSettingsHelper
 			_ => "hier"
 		};
 
-		return Path.Combine(GetBuildDirectory(json), $"{top}-{suffix}.json");
+		return Path.Combine(GetBuildDirectory(json.Root), $"{top}-{suffix}.json");
 	}
 
 	#endregion

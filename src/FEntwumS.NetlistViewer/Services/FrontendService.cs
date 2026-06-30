@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.PackageManager;
 using OneWare.Essentials.PackageManager.Compatibility;
+using OneWare.UniversalFpgaProjectSystem.Models;
 using StreamContent = System.Net.Http.StreamContent;
 
 namespace FEntwumS.NetlistViewer.Services;
@@ -537,6 +538,11 @@ public class FrontendService : IFrontendService
 			_logger.Error("No netlist was generated");
 			return;
 		}
+		
+		if (json.Root is not UniversalFpgaProjectRoot root)
+		{
+			return;
+		}
 
 		ApplicationProcess proc = _applicationStateService.AddState("Starting viewer", AppState.Loading);
 
@@ -617,8 +623,10 @@ public class FrontendService : IFrontendService
 
 		ApplicationProcess indexProc = _applicationStateService.AddState("Indexing", AppState.Loading);
 
+		
+
 		// create code index for cross-compiled VHDL
-		string ccVhdlFilePath = FentwumSNetlistViewerSettingsHelper.GetCcVhdlFilePath(json);
+		string ccVhdlFilePath = FentwumSNetlistViewerSettingsHelper.GetCcVhdlFilePath(root);
 
 		if (File.Exists(ccVhdlFilePath))
 		{

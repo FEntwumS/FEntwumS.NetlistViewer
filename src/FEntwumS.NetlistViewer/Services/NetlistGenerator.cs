@@ -48,7 +48,7 @@ public class NetlistGenerator : INetlistGenerator
 		OneWare.GhdlExtension.Services.GhdlService ghdlService =
 			ServiceManager.GetService<OneWare.GhdlExtension.Services.GhdlService>();
 
-		string outputDir = FentwumSNetlistViewerSettingsHelper.GetBuildDirectory(vhdlProject);
+		string outputDir = FentwumSNetlistViewerSettingsHelper.GetBuildDirectory(vhdlProject.Root);
 
 		if (!Directory.Exists(outputDir))
 		{

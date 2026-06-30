@@ -40,7 +40,12 @@ public class YosysService : IYosysService
 
 	public async Task<bool> LoadVerilogAsync(IProjectFile file)
 	{
-		string workingDirectory = FentwumSNetlistViewerSettingsHelper.GetBuildDirectory(file);
+		if (file.Root is not UniversalFpgaProjectRoot root)
+		{
+			return false;
+		}
+		
+		string workingDirectory = FentwumSNetlistViewerSettingsHelper.GetBuildDirectory(file.Root);
 
 		if (!Directory.Exists(workingDirectory))
 		{
@@ -53,7 +58,7 @@ public class YosysService : IYosysService
 
 		List<string> systemVerilogFileList = new List<string>();
 
-		string ccVerilogFilePath = FentwumSNetlistViewerSettingsHelper.GetCcVhdlFilePath(file);
+		string ccVerilogFilePath = FentwumSNetlistViewerSettingsHelper.GetCcVhdlFilePath(root);
 
 		// If cross-compiled VHDL exists, only the cross-compiled code will be included in the yosys command.
 		if (File.Exists(ccVerilogFilePath))
@@ -62,7 +67,6 @@ public class YosysService : IYosysService
 		}
 		else
 		{
-			if (file.Root is not UniversalFpgaProjectRoot root) return false;
 			IEnumerable<string> verilogFiles = root.GetFiles("*.v")
 				.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
 				.Where(x => !root.IsTestBench(x)) // Exclude testbenches
@@ -116,7 +120,7 @@ public class YosysService : IYosysService
 		// LoadVerilogAsync() even for designs containing SystemVerilog source code, since yosys' limited SV support is
 		// enabled
 
-		string workingDirectory = FentwumSNetlistViewerSettingsHelper.GetBuildDirectory(file);
+		string workingDirectory = FentwumSNetlistViewerSettingsHelper.GetBuildDirectory(file.Root);
 
 		if (!Directory.Exists(workingDirectory))
 		{
