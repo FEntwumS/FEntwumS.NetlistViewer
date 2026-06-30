@@ -768,7 +768,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			FentwumSNetlistViewerSettingsHelper.JunctionShapeKey, new ComboBoxSetting("Junction Shape", "Circle",
 				[ "Circle", "Square", "Diamond", "Triangle", "Line" ]));
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
-			FentwumSNetlistViewerSettingsHelper.LayoutEffortKey, new SliderSetting("Layouting effort", 7.0d, 1.0d, 25.0d, 1.0d));
+			FentwumSNetlistViewerSettingsHelper.LayoutEffortKey, new SliderSetting("Layouting effort", 25.0d, 1.0d, 100.0d, 1.0d));
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
 			FentwumSNetlistViewerSettingsHelper.ShowUnconnectedPortsKey, new CheckBoxSetting("Show unconnected ports", false));
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",

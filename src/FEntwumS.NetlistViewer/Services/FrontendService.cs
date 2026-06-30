@@ -46,7 +46,7 @@ public class FrontendService : IFrontendService
 	private static string _performanceTarget = string.Empty;
 	private static bool _useHierarchicalBackend = true;
 	private static string _junctionShape = "Circle";
-	private static int _layoutEffort = 7;
+	private static int _layoutEffort = 25;
 	private static bool _showUnconnectedPorts = false;
 	private static bool _onlyShowUserGeneratedSignalNames = false;
 
