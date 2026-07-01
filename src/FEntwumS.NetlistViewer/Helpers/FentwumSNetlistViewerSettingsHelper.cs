@@ -52,6 +52,9 @@ public class FentwumSNetlistViewerSettingsHelper
 	public static readonly string EnableHierarchyViewKey = "NetlistViewer_EnableHierarchyView";
 	public static readonly string AutomaticNetlistGenerationKey = "NetlistViewer_AutomaticNetlistGeneration";
 	public static readonly string JunctionShapeKey = "NetlistViewer_JunctionShape";
+	public static readonly string LayoutEffortKey = "NetlistViewer_LayoutEffort";
+	public static readonly string ShowUnconnectedPortsKey = "NetlistViewer_ShowUnconnectedPorts";
+	public static readonly string OnlyShowUserGeneratedSignalNamesKey = "NetlistViewer_OnlyShowUserGeneratedSignalNames";
 
 	public static readonly string AutomaticNetlistGenerationIntervalKey =
 		"NetlistViewer_AutomaticNetlistGenerationInterval";

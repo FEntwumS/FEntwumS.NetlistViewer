@@ -285,6 +285,27 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 						]
 					}
 				]
+			},
+			new PackageVersion()
+			{
+				Version = "0.12.3",
+				Targets =
+				[
+					new PackageTarget()
+					{
+						Target = "all",
+						Url =
+							"https://github.com/FEntwumS/NetlistReaderBackend/releases/download/v0.12.3/fentwums-netlist-reader-server-v0.12.3.tar.gz",
+						AutoSetting =
+						[
+							new PackageAutoSetting()
+							{
+								RelativePath = "fentwums-netlist-reader",
+								SettingKey = FentwumSNetlistViewerSettingsHelper.NetlistPathSettingKey,
+							}
+						]
+					}
+				]
 			}
 		]
 	};
@@ -767,6 +788,12 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
 			FentwumSNetlistViewerSettingsHelper.JunctionShapeKey, new ComboBoxSetting("Junction Shape", "Circle",
 				[ "Circle", "Square", "Diamond", "Triangle", "Line" ]));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.LayoutEffortKey, new SliderSetting("Layouting effort", 25.0d, 1.0d, 100.0d, 1.0d));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.ShowUnconnectedPortsKey, new CheckBoxSetting("Show unconnected ports", false));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.OnlyShowUserGeneratedSignalNamesKey, new CheckBoxSetting("Only show user generated signals", false));
 		
 		// These settings are not displayed to the user; They store internal extension state
 		ServiceManager.GetService<ISettingsService>().Register(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey, -1);

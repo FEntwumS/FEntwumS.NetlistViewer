@@ -46,6 +46,9 @@ public class FrontendService : IFrontendService
 	private static string _performanceTarget = string.Empty;
 	private static bool _useHierarchicalBackend = true;
 	private static string _junctionShape = "Circle";
+	private static int _layoutEffort = 25;
+	private static bool _showUnconnectedPorts = false;
+	private static bool _onlyShowUserGeneratedSignalNames = false;
 
 	private static NetlistType netlistType
 	{
@@ -256,6 +259,14 @@ public class FrontendService : IFrontendService
 		
 		_settingsService.GetSettingObservable<string>(FentwumSNetlistViewerSettingsHelper.JunctionShapeKey)
 			.Subscribe(x => _junctionShape = x);
+		
+		_settingsService.GetSettingObservable<double>(FentwumSNetlistViewerSettingsHelper.LayoutEffortKey)
+			.Subscribe(x => _layoutEffort = (int) x);
+		
+		_settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.ShowUnconnectedPortsKey)
+			.Subscribe(x => _showUnconnectedPorts = x);
+		_settingsService.GetSettingObservable<bool>(FentwumSNetlistViewerSettingsHelper.OnlyShowUserGeneratedSignalNamesKey)
+			.Subscribe(x => _onlyShowUserGeneratedSignalNames = x);
 	}
 
 	private async Task<(bool success, bool needsRestart)> InstallDependenciesAsync()
@@ -592,7 +603,10 @@ public class FrontendService : IFrontendService
 			+ $"&cellLabelFontSize={_cellLabelFontSize}" + $"&edgeLabelFontSize={_edgeLabelFontSize}"
 			+ $"&portLabelFontSize={_portLabelFontSize}"
 			+ (_useHierarchicalBackend ? $"&performance-target={_performanceTarget}" : "")
-			+ $"&junctionShape={_junctionShape.ToUpperInvariant()}",
+			+ $"&junctionShape={_junctionShape.ToUpperInvariant()}"
+			+ $"&layoutEffort={_layoutEffort}"
+			+ $"&showUnconnectedPorts={_showUnconnectedPorts}"
+			+ $"&onlyShowUserGeneratedSignalNames={_onlyShowUserGeneratedSignalNames}",
 			formDataContent);
 
 		jsonFileStream.Close();
