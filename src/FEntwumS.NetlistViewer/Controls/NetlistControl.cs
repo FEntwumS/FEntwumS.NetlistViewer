@@ -372,7 +372,7 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
                 : Colors.LightGray);
         Pen highlightPen = new Pen(new SolidColorBrush(Colors.Yellow, 0.5d), 5.5 * CurrentScale, null, PenLineCap.Round,
             PenLineJoin.Miter, 10d);
-        Pen notConnectedPen = new Pen(new SolidColorBrush(Colors.Red), 2 * CurrentScale, null, PenLineCap.Round);
+        Pen notConnectedPen = new Pen(new SolidColorBrush(Colors.DarkGray), 2 * CurrentScale, null, PenLineCap.Round);
 
         Pen borderPen = new Pen(
             Application.Current!.FindResource(theme, "ThemeBorderMidBrush") as IBrush ??
