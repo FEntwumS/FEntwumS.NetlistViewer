@@ -594,6 +594,13 @@ public class FrontendService : IFrontendService
 		{
 			{ new StreamContent(jsonFileStream), "file", json.Name }
 		};
+		
+		bool success = await StartBackendIfNotStartedAsync() && await ServerStartedAsync();
+
+		if (!success)
+		{
+			return;
+		}
 
 		ApplicationProcess waitForBackendProc =
 			_applicationStateService.AddState("Layouting in progress", AppState.Loading);
@@ -638,7 +645,7 @@ public class FrontendService : IFrontendService
 		{
 			_logger.Log($"Found cross-compiled Verilog at {ccVhdlFilePath}");
 			
-			bool success = await ServiceManager.GetService<ICcVhdlFileIndexService>()
+			success = await ServiceManager.GetService<ICcVhdlFileIndexService>()
 				.IndexFileAsync(ccVhdlFilePath, combinedHash);
 
 			if (success)
