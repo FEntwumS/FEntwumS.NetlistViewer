@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.PackageManager;
 using OneWare.Essentials.PackageManager.Compatibility;
+using OneWare.UniversalFpgaProjectSystem.Models;
 using StreamContent = System.Net.Http.StreamContent;
 
 namespace FEntwumS.NetlistViewer.Services;
@@ -640,6 +641,14 @@ public class FrontendService : IFrontendService
 
 		// create code index for cross-compiled VHDL
 		string ccVhdlFilePath = FentwumSNetlistViewerSettingsHelper.GetCcVhdlFilePath(json);
+
+		if (Path.GetFileName(json.Name) == "synth.json")
+		{
+			if (json.Root is UniversalFpgaProjectRoot root)
+			{
+				ccVhdlFilePath = Path.Combine(root.RootFolderPath, "build", "gen_verilog", root.TopEntity! + ".v");
+			}
+		}
 
 		if (File.Exists(ccVhdlFilePath))
 		{
