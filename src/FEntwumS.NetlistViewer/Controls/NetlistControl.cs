@@ -219,6 +219,15 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
     public static readonly StyledProperty<bool> FileLoadedProperty =
         AvaloniaProperty.Register<NetlistControl, bool>(nameof(FileLoaded));
 
+    public string ProjectRootFolder
+    {
+	    get => GetValue(ProjectRootFolderProperty);
+	    set => SetValue(ProjectRootFolderProperty, value);
+    }
+    
+    public static readonly  StyledProperty<string> ProjectRootFolderProperty =
+	    AvaloniaProperty.Register<NetlistControl, string>(nameof(ProjectRootFolder));
+
     #endregion
 
     public event ElementClickedEventHandler ElementClicked;
@@ -1211,11 +1220,19 @@ public class NetlistControl : TemplatedControl, ICustomHitTest
             line = vhdlLine;
         }
 
-        var ds = ServiceManager.GetService<IMainDockService>();
+        if (filename[0] != '/' && filename.Substring(1, 2) != ":\\")
+        {
+	        filename = Path.Combine(ProjectRootFolder, filename);
+        }
 
-        var document = await ds.OpenFileAsync(filename);
+        if (File.Exists(filename))
+        {
+	        var ds = ServiceManager.GetService<IMainDockService>();
 
-        (document as IEditor)?.JumpToLine((int)line);
+	        var document = await ds.OpenFileAsync(filename);
+
+	        (document as IEditor)?.JumpToLine((int)line);
+        }
     }
 
     private void NetlistControl_PointerMoved(object? sender, PointerEventArgs e)

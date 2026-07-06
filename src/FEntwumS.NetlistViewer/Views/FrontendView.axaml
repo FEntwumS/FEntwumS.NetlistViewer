@@ -39,7 +39,8 @@
                                      ClickedElementPath="{Binding ClickedElementPath}" NetlistID="{Binding NetlistId}"
                                      FileLoaded="{Binding FileLoaded}"
                                      x:Name="NetlistView"
-                                     FontFamily="{StaticResource MartianMono}">
+                                     FontFamily="{StaticResource MartianMono}"
+                                     ProjectRootFolder="{Binding ProjectRootFolder}">
             </controls:NetlistControl>
             
             <Button Background="{DynamicResource ThemeBackgroundBrush}" Padding="5" CornerRadius="3"

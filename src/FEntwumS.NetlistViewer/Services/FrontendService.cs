@@ -671,6 +671,7 @@ public class FrontendService : IFrontendService
 
 		_dockService.Show(vm, DockShowLocation.Document);
 		_dockService.InitializeContent();
+		vm.ProjectRootFolder = json.Root.RootFolderPath;
 		vm.NetlistId = currentNetlist;
 		await vm.OpenFileImplAsync();
 
