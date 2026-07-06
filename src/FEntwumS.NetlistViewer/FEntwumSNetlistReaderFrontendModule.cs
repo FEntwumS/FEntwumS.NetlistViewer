@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using OneWare.ProjectSystem.Models;
 using OneWare.UniversalFpgaProjectSystem.Services;
+using OneWare.UniversalFpgaProjectSystem.Models;
 
 namespace FEntwumS.NetlistViewer;
 
@@ -606,23 +607,27 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			else if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
 			{
 				string synthFilePath = Path.Combine(vhdlFile.Root.FullPath, "build", "synth.json");
-				
-				menuItems.Add(new MenuItemModel("NetlistViewer_CreateNetlist")
-				{
-					Header = $"View RTL for {vhdlFile.Header}",
-					Command = new AsyncRelayCommand(() =>
-						ServiceManager.GetService<FrontendService>().CreateVhdlNetlistAsync(vhdlFile))
-				});
 
-				if (File.Exists(synthFilePath))
+				if (vhdlFile is { Root: UniversalFpgaProjectRoot root, Icon.Overlays.Length: > 0 } && !root.IsTestBench(vhdlFile.FullPath))
 				{
-					menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
+					
+					menuItems.Add(new MenuItemModel("NetlistViewer_CreateNetlist")
 					{
-						Header = $"View Post-Synthesis Netlist for {vhdlFile.Header}",
+						Header = $"View RTL for {vhdlFile.Header}",
 						Command = new AsyncRelayCommand(() =>
-							ServiceManager.GetService<FrontendService>().ShowViewerAsync(
-								new ProjectFile($"{synthFilePath}", vhdlFile.TopFolder!)))
+							ServiceManager.GetService<FrontendService>().CreateVhdlNetlistAsync(vhdlFile))
 					});
+					
+					if (File.Exists(synthFilePath))
+					{
+						menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
+						{
+							Header = $"View Post-Synthesis Netlist for {vhdlFile.Header}",
+							Command = new AsyncRelayCommand(() =>
+								ServiceManager.GetService<FrontendService>().ShowViewerAsync(
+									new ProjectFile($"{synthFilePath}", vhdlFile.TopFolder!)))
+						});
+					}
 				}
 			}
 			else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
@@ -631,12 +636,12 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 				
 				menuItems.Add(new MenuItemModel("NetlistViewer_CreateVerilogNetlist")
 				{
-					Header = $"View netlist for {verilogFile.Header}",
+					Header = $"View RTL for {verilogFile.Header}",
 					Command = new AsyncRelayCommand(() =>
 						ServiceManager.GetService<FrontendService>().CreateVerilogNetlistAsync(verilogFile))
 				});
 
-				if (File.Exists(synthFilePath))
+				if (verilogFile is { Root: UniversalFpgaProjectRoot root, Icon.Overlays.Length: > 0 } && !root.IsTestBench(verilogFile.FullPath) && File.Exists(synthFilePath))
 				{
 					menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
 					{
@@ -654,12 +659,12 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 				
 				menuItems.Add(new MenuItemModel("NetlistViewer_CreateSystemVerilogNetlist")
 				{
-					Header = $"View netlist for {systemVerilogFile.Header}",
+					Header = $"View RTL for {systemVerilogFile.Header}",
 					Command = new AsyncRelayCommand(() =>
 						ServiceManager.GetService<FrontendService>().CreateSystemVerilogNetlistAsync(systemVerilogFile))
 				});
 
-				if (File.Exists(synthFilePath))
+				if (systemVerilogFile is { Root: UniversalFpgaProjectRoot root, Icon.Overlays.Length: > 0 } && !root.IsTestBench(systemVerilogFile.FullPath) && File.Exists(synthFilePath))
 				{
 					menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
 					{
