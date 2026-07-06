@@ -1,4 +1,5 @@
-﻿using FEntwumS.NetlistViewer.Helpers;
+﻿using Avalonia.Media;
+using FEntwumS.NetlistViewer.Helpers;
 using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
@@ -75,6 +76,13 @@ public class YosysService : IYosysService
 
 			verilogFileList.AddRange(verilogFiles);
 			systemVerilogFileList.AddRange(systemVerilogFiles);
+		}
+
+		if (verilogFileList.Count == 0 && systemVerilogFileList.Count == 0)
+		{
+			verilogFileList.Add(file.FullPath);
+			ServiceManager.GetService<ILogger>().Warning("No files where included for netlist generation. This is due to all files being either marked as testbenches or as excluded from compilation", null, true);
+			ServiceManager.GetService<ILogger>().Log("Including the selected file and proceeding", true, Brushes.White);
 		}
 
 		List<string> yosysArgs =
