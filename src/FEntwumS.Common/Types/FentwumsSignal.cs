@@ -1,4 +1,3 @@
-using DynamicData;
 using OneWare.Vcd.Parser.Data;
 
 // ReSharper disable once CheckNamespace

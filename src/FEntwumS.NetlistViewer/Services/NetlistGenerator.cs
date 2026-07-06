@@ -1,13 +1,13 @@
 ﻿using System.Globalization;
 using Avalonia.Threading;
-using DynamicData.Binding;
+using FEntwumS.Common.Interfaces;
+using FEntwumS.Common.Services;
+using FEntwumS.Common.Types;
 using FEntwumS.NetlistViewer.Helpers;
-using FEntwumS.NetlistViewer.Types;
 using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.ProjectSystem.Models;
-using OneWare.UniversalFpgaProjectSystem;
 using OneWare.UniversalFpgaProjectSystem.Models;
 
 namespace FEntwumS.NetlistViewer.Services;

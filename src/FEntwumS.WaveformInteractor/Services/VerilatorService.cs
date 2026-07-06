@@ -1,9 +1,10 @@
 using System.Diagnostics;
+using FEntwumS.Common.Interfaces;
 using FEntwumS.Common.Services;
+using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
 using OneWare.UniversalFpgaProjectSystem.Models;
-using Prism.Ioc;
 
 namespace FEntwumS.WaveformInteractor.Services;
 
@@ -16,18 +17,18 @@ public class VerilatorService : IVerilatorService
 
     private string _verilator = string.Empty;
 
-    private ICustomLogger _logger;
+    private ILogger _logger;
 
-    public VerilatorService(IContainerProvider containerProvider)
+    public VerilatorService()
     {
-        _settingsService = containerProvider.Resolve<ISettingsService>();
-        _childProcessService = containerProvider.Resolve<IChildProcessService>();
-        _projectExplorerService = containerProvider.Resolve<IProjectExplorerService>();
-        _yosysService = containerProvider.Resolve<IYosysService>();
+        _settingsService = ServiceManager.GetService<ISettingsService>();
+        _childProcessService = ServiceManager.GetService<IChildProcessService>();
+        _projectExplorerService = ServiceManager.GetService<IProjectExplorerService>();
+        _yosysService = ServiceManager.GetService<IYosysService>();
         _settingsService.GetSettingObservable<string>("OssCadSuite_Path")
             .Subscribe(x => _verilator = Path.Combine(x, "bin", "verilator"));
 
-        _logger = containerProvider.Resolve<ICustomLogger>();
+        _logger = ServiceManager.GetService<ILogger>();
     }
 
     // Verilates Preprocessed file
@@ -66,7 +67,7 @@ public class VerilatorService : IVerilatorService
         var output = string.Empty;
 
         (success, output) = await ExecuteVerilatorCommandAsync(verilatorArgs, workingDirectory);
-        _logger.Log(output, true);
+        _logger.Log(output);
         return success;
     }
 
@@ -92,7 +93,7 @@ public class VerilatorService : IVerilatorService
         process.OutputDataReceived += (sender, e) =>
         {
             if (!string.IsNullOrEmpty(e.Data))
-                _logger.Log(e.Data, true);
+                _logger.Log(e.Data);
         };
 
         process.ErrorDataReceived += (sender, e) =>
@@ -131,7 +132,7 @@ public class VerilatorService : IVerilatorService
         process.OutputDataReceived += (sender, e) =>
         {
             if (!string.IsNullOrEmpty(e.Data))
-                _logger.Log(e.Data, true);
+                _logger.Log(e.Data);
         };
 
         process.ErrorDataReceived += (sender, e) =>
@@ -236,8 +237,8 @@ public class VerilatorService : IVerilatorService
             return;
         }
         
-        var path = projectRoot.TopEntity!.FullPath;
-        var topFile = projectRoot.Files.FirstOrDefault(file => file.FullPath == path);
+        var path = projectRoot.TopEntity!.RelativePath;
+        var topFile = projectRoot.GetFile(path);
 
         if (topFile != null && Testbench != null)
         {

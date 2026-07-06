@@ -1,4 +1,4 @@
-using FEntwumS.Common.Services;
+using FEntwumS.Common.Interfaces;
 using OneWare.Vcd.Viewer.Models;
 
 // namespace Fentwums.Common;

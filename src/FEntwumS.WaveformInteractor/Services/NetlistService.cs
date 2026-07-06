@@ -1,9 +1,10 @@
 using System.Text;
+using FEntwumS.Common.Interfaces;
 using FEntwumS.Common.Services;
 using FEntwumS.Common.Types;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OneWare.Essentials.Services;
-using Prism.Ioc;
 
 
 namespace FEntwumS.WaveformInteractor.Services;
@@ -11,7 +12,7 @@ namespace FEntwumS.WaveformInteractor.Services;
 public class NetlistService : INetlistService
 {
     private readonly HttpClient _httpClient;
-    private readonly ICustomLogger _logger;
+    private readonly ILogger _logger;
     
     public string BackendAddress { get; set; } = "http://localhost";
     public string BackendPort { get; set; } = ":8080";
@@ -20,10 +21,10 @@ public class NetlistService : INetlistService
     private IProjectExplorerService _projectExplorerService;
     private IVcdService _vcdService;
 
-    public NetlistService(IContainerProvider containerProvider)
+    public NetlistService()
     {
         _httpClient = new HttpClient();
-        _logger = ServiceManager.GetCustomLogger();
+        _logger = ServiceManager.GetService<ILogger>();
         _signalBitIndexService = ServiceManager.GetService<SignalBitIndexService>();
         _projectExplorerService = ServiceManager.GetService<IProjectExplorerService>();
         _vcdService = ServiceManager.GetService<IVcdService>();
@@ -48,9 +49,9 @@ public class NetlistService : INetlistService
 
         UInt64 combinedHash = ((UInt64)pathHash) << 32 | contenthash;
 
-        ServiceManager.GetCustomLogger().Log("Path hash: " + pathHash);
-        ServiceManager.GetCustomLogger().Log("Full file hash is: " + contenthash);
-        ServiceManager.GetCustomLogger().Log("Combined hash is: " + combinedHash);
+        _logger.Log("Path hash: " + pathHash);
+        _logger.Log("Full file hash is: " + contenthash);
+        _logger.Log("Combined hash is: " + combinedHash);
 
         await using FileStream jsonFileStream = File.Open(jsonpath, FileMode.Open, FileAccess.Read);
 
@@ -70,7 +71,7 @@ public class NetlistService : INetlistService
                 response = await _httpClient.GetAsync($"{BackendAddress}{BackendPort}/actuator/health");
                 if (response.IsSuccessStatusCode)
                 {
-                    _logger?.Log("Server is healthy and ready.", true);
+                    _logger?.Log("Server is healthy and ready.");
                     break; // Exit loop if server is healthy
                 }
                 else 
@@ -92,7 +93,7 @@ public class NetlistService : INetlistService
         
         if (!response.IsSuccessStatusCode)
         {
-            _logger?.Log($"Request failed: {response.StatusCode} {await response.Content.ReadAsStringAsync()}", true);
+            _logger?.Error($"Request failed: {response.StatusCode} {await response.Content.ReadAsStringAsync()}");
         }
     }
      
@@ -120,7 +121,7 @@ public class NetlistService : INetlistService
 
         var netHash = ((ulong)hashPath << 32) | hashContent;
 
-        _logger.Log("Get netlist information from backend to populate Signals with bit-indices and hdlname/scope", true);
+        _logger.Log("Get netlist information from backend to populate Signals with bit-indices and hdlname/scope");
         var url = $"{BackendAddress}{BackendPort}/get-net-information";
         try
         {

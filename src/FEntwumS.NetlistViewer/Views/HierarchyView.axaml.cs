@@ -1,7 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
-using FEntwumS.NetlistViewer.Types;
 using FEntwumS.NetlistViewer.ViewModels;
 
 namespace FEntwumS.NetlistViewer.Views;

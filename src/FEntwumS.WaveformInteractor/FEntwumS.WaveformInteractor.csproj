@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <Version>0.1</Version>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <EnableDynamicLoading>true</EnableDynamicLoading>
@@ -24,11 +24,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="OneWare.Essentials" Version="0.11.3" Private="false" ExcludeAssets="runtime;Native"/>
-        <PackageReference Include="OneWare.ProjectSystem" Version="0.31.4" Private="false" ExcludeAssets="runtime;Native"/>
+        <PackageReference Include="OneWare.Essentials" Version="1.0.19" Private="false" ExcludeAssets="runtime;Native" />
+        <PackageReference Include="OneWare.ProjectSystem" Version="1.0.19" Private="false" ExcludeAssets="runtime;Native" />
         <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" Private="false" ExcludeAssets="runtime;Native"/>
-        <PackageReference Include="OneWare.Vcd.Viewer" Private="false" Version="0.31.4" ExcludeAssets="runtime;Native"/>
-        <PackageReference Include="System.IO.Hashing" Private="true" Version="9.0.3" CopyLocalLockFileAssemblies="true"/>
+        <PackageReference Include="OneWare.Vcd.Viewer" Private="false" Version="1.0.19" ExcludeAssets="runtime;Native" />
+        <PackageReference Include="System.IO.Hashing" Private="true" Version="10.0.9" CopyLocalLockFileAssemblies="true" />
     
     </ItemGroup>
 

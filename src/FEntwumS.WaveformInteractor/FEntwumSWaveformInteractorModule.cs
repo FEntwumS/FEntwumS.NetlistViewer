@@ -3,23 +3,22 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform;
 using CommunityToolkit.Mvvm.Input;
+using Dock.Model.Core;
+using FEntwumS.Common.Interfaces;
 using FEntwumS.Common.Services;
 using FEntwumS.WaveformInteractor.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.Services;
-using OneWare.Essentials.ViewModels;
 using OneWare.UniversalFpgaProjectSystem.Models;
 using OneWare.Vcd.Viewer.ViewModels;
 using OneWare.WaveFormViewer.ViewModels;
-using Prism.Ioc;
-using Prism.Modularity;
-using ILogger = OneWare.Essentials.Services.ILogger;
-using IYosysService = FEntwumS.Common.Services.IYosysService;
 
 namespace FEntwumS.WaveformInteractor;
 
-public class FEntwumSWaveformInteractorModule : IModule
+public class FEntwumSWaveformInteractorModule : OneWareModuleBase
 {
     private ILogger? _logger;
 
@@ -31,17 +30,17 @@ public class FEntwumSWaveformInteractorModule : IModule
     private INetlistService? _netlistService;
     private IVcdService? _vcdService;
 
-    public void RegisterTypes(IContainerRegistry containerRegistry)
+    public void RegisterServices(IServiceCollection containerRegistry)
     {
-        // containerRegistry.RegisterSingleton<IYosysService, YosysSimService>();
-        containerRegistry.RegisterSingleton<IVerilatorService, VerilatorService>();
-        containerRegistry.RegisterSingleton<SignalBitIndexService>();
-        containerRegistry.RegisterSingleton<INetlistService, NetlistService>();
-        containerRegistry.RegisterSingleton<IVcdService, VcdService>();
-        containerRegistry.Register<IWaveformInteractorService, WaveformInteractorService>();
+        // containerRegistry.AddSingleton<IYosysService, YosysSimService>();
+        containerRegistry.AddSingleton<IVerilatorService, VerilatorService>();
+        containerRegistry.AddSingleton<SignalBitIndexService>();
+        containerRegistry.AddSingleton<INetlistService, NetlistService>();
+        containerRegistry.AddSingleton<IVcdService, VcdService>();
+        containerRegistry.AddSingleton<IWaveformInteractorService, WaveformInteractorService>();
     }
 
-    public void OnInitialized(IContainerProvider containerProvider)
+    public void OnInitialized(IServiceProvider containerProvider)
     {
         // TODO: Cross platform on Windows working?
 
@@ -60,12 +59,12 @@ public class FEntwumSWaveformInteractorModule : IModule
 
         // for now register Menu which handles functionality
         _windowService.RegisterMenuItem("MainWindow_MainMenu/Verilator",
-            new MenuItemViewModel("Create_Verilator_Binary")
+            new MenuItemModel("Create_Verilator_Binary")
             {
                 Header = "Create Verilator Binary",
                 Command = new AsyncRelayCommand(_verilatorService.CreateVerilatorBinaryAllStepsAsync),
             },
-            new MenuItemViewModel("Run_Verilator_Binary")
+            new MenuItemModel("Run_Verilator_Binary")
             {
                 Header = "Run Verilator Binary",
                 Command = new AsyncRelayCommand(RunVerilatorExecutableFromToplevelAsync),
@@ -80,25 +79,25 @@ public class FEntwumSWaveformInteractorModule : IModule
                 var testbenchpath = testbench != null ? testbench.FullPath : string.Empty;
 
                 if (string.Equals(filepath, testbenchpath) == false)
-                    menuItems.Add(new MenuItemViewModel("Set as Verilator testbench")
+                    menuItems.Add(new MenuItemModel("Set as Verilator testbench")
                     {
                         Header = "Set as Verilator testbench",
                         Command = new RelayCommand(() => _verilatorService.RegisterTestbench(cppFile)),
-                        IconObservable = Application.Current!.GetResourceObservable("VSImageLib.AddTest_16x")
+                        //IconObservable = Application.Current!.GetResourceObservable("VSImageLib.AddTest_16x")
                     });
                 else
-                    menuItems.Add(new MenuItemViewModel("Unset Verilator testbench")
+                    menuItems.Add(new MenuItemModel("Unset Verilator testbench")
                     {
                         Header = "Unset Verilator testbench",
                         Command = new RelayCommand(() => _verilatorService.UnregisterTestbench(cppFile)),
-                        IconObservable =
-                            Application.Current!.GetResourceObservable("VSImageLib.RemoveSingleDriverTest_16x")
+                        /*IconObservable =
+                            Application.Current!.GetResourceObservable("VSImageLib.RemoveSingleDriverTest_16x")*/
                     });
             }
 
             if (selected is [IProjectFile { Extension: ".vcd" } vcdFile])
             {
-                menuItems.Add(new MenuItemViewModel("Recreate Hierarchy from Signalnames")
+                menuItems.Add(new MenuItemModel("Recreate Hierarchy from Signalnames")
                 {
                     Header = "Recreate Hierarchy from Signalnames",
                     Command = new RelayCommand(() => _ = recreateHirAndWriteVcdAsync(vcdFile))
@@ -106,21 +105,21 @@ public class FEntwumSWaveformInteractorModule : IModule
             }
         });
 
-        dockService.PropertyChanged += (o, args) =>
-        {
-            if (args.PropertyName != nameof(dockService.CurrentDocument)) return;
-            var currentDocument = dockService.CurrentDocument;
-
-            if (currentDocument is VcdViewModel vcdViewModel)
-            {
-                vcdViewModel.PropertyChanged -= VcdViewModel_PropertyChanged;
-                vcdViewModel.PropertyChanged += VcdViewModel_PropertyChanged;
-
-                // vcdViewModel.WaveFormViewer.PropertyChanged -= WaveFormViewer_PropertyChanged;
-                vcdViewModel.WaveFormViewer.PropertyChanged += (sender, args) =>
-                    WaveFormViewer_PropertyChanged(sender, args, vcdViewModel);
-            }
-        };
+        // dockService.PropertyChanged += (o, args) =>
+        // {
+        //     if (args.PropertyName != nameof(dockService.CurrentDocument)) return;
+        //     var currentDocument = dockService.CurrentDocument;
+        //
+        //     if (currentDocument is VcdViewModel vcdViewModel)
+        //     {
+        //         vcdViewModel.PropertyChanged -= VcdViewModel_PropertyChanged;
+        //         vcdViewModel.PropertyChanged += VcdViewModel_PropertyChanged;
+        //
+        //         // vcdViewModel.WaveFormViewer.PropertyChanged -= WaveFormViewer_PropertyChanged;
+        //         vcdViewModel.WaveFormViewer.PropertyChanged += (sender, args) =>
+        //             WaveFormViewer_PropertyChanged(sender, args, vcdViewModel);
+        //     }
+        // };
 
         // wait until project launches and active project may be fetched
         _projectExplorerService.PropertyChanged += (sender, args) =>
@@ -244,7 +243,7 @@ public class FEntwumSWaveformInteractorModule : IModule
             var vcdBodyHash = _vcdService!.LoadVcdAndHashBody(vcdViewModel.FullPath);
             if (_signalBitIndexService!.GetMapping(vcdBodyHash) != null)
             {
-                _logger!.Log("Using bitmapping of previously loaded VCD. ", ConsoleColor.White);
+                _logger!.Log("Using bitmapping of previously loaded VCD. ");
                 return;
             }
 
@@ -289,8 +288,8 @@ public class FEntwumSWaveformInteractorModule : IModule
                 return;
             }
 
-            var path = projectRoot.TopEntity.FullPath;
-            var topFile = projectRoot.Files.FirstOrDefault(file => file.FullPath == path);
+            var path = projectRoot.TopEntity.RelativePath;
+            var topFile = projectRoot.GetFile(path);
 
             await _verilatorService!.RunExecutableAsync(topFile!);
         }

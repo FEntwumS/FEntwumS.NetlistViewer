@@ -1,6 +1,6 @@
 using System.IO.Hashing;
 using System.Text;
-using FEntwumS.Common.Services;
+using FEntwumS.Common.Interfaces;
 using FEntwumS.Common.Types;
 
 namespace FEntwumS.WaveformInteractor.Services;

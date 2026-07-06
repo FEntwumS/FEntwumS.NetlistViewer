@@ -2,7 +2,10 @@
 
 public class ElementClickedEventArgs : EventArgs
 {
-    public string? NodePath { get; }
-    
-    public ElementClickedEventArgs(string? nodePath) { NodePath = nodePath; }
+	public string? NodePath { get; }
+
+	public ElementClickedEventArgs(string? nodePath)
+	{
+		NodePath = nodePath;
+	}
 }

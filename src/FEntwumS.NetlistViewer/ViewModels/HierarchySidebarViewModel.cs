@@ -1,8 +1,5 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows.Input;
-using Avalonia.Collections;
-using CommunityToolkit.Mvvm.Input;
-using FEntwumS.NetlistViewer.Types.HierarchyView;
+﻿using Avalonia.Collections;
+using FEntwumS.Common.Types.HierarchyView;
 using OneWare.Essentials.ViewModels;
 
 namespace FEntwumS.NetlistViewer.ViewModels;
