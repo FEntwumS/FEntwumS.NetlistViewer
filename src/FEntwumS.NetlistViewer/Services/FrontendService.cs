@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.PackageManager;
 using OneWare.Essentials.PackageManager.Compatibility;
+using OneWare.UniversalFpgaProjectSystem.Models;
 using StreamContent = System.Net.Http.StreamContent;
 
 namespace FEntwumS.NetlistViewer.Services;
@@ -594,6 +595,13 @@ public class FrontendService : IFrontendService
 		{
 			{ new StreamContent(jsonFileStream), "file", json.Name }
 		};
+		
+		bool success = await StartBackendIfNotStartedAsync() && await ServerStartedAsync();
+
+		if (!success)
+		{
+			return;
+		}
 
 		ApplicationProcess waitForBackendProc =
 			_applicationStateService.AddState("Layouting in progress", AppState.Loading);
@@ -634,11 +642,19 @@ public class FrontendService : IFrontendService
 		// create code index for cross-compiled VHDL
 		string ccVhdlFilePath = FentwumSNetlistViewerSettingsHelper.GetCcVhdlFilePath(json);
 
+		if (Path.GetFileName(json.Name) == "synth.json")
+		{
+			if (json.Root is UniversalFpgaProjectRoot root)
+			{
+				ccVhdlFilePath = Path.Combine(root.RootFolderPath, "build", "gen_verilog", root.TopEntity! + ".v");
+			}
+		}
+
 		if (File.Exists(ccVhdlFilePath))
 		{
 			_logger.Log($"Found cross-compiled Verilog at {ccVhdlFilePath}");
 			
-			bool success = await ServiceManager.GetService<ICcVhdlFileIndexService>()
+			success = await ServiceManager.GetService<ICcVhdlFileIndexService>()
 				.IndexFileAsync(ccVhdlFilePath, combinedHash);
 
 			if (success)
@@ -655,6 +671,7 @@ public class FrontendService : IFrontendService
 
 		_dockService.Show(vm, DockShowLocation.Document);
 		_dockService.InitializeContent();
+		vm.ProjectRootFolder = json.Root.RootFolderPath;
 		vm.NetlistId = currentNetlist;
 		await vm.OpenFileImplAsync();
 

@@ -126,8 +126,20 @@ public class FrontendViewModel : ExtendedTool
 			OnPropertyChanged();
 		}
 	}
-
+	
 	[DataMember] private UInt64 netlistId { get; set; }
+
+	public string ProjectRootFolder
+	{
+		get => projectRootFolder;
+		set
+		{
+			projectRootFolder = value;
+			OnPropertyChanged();
+		}
+	}
+	
+	[DataMember] private string projectRootFolder { get; set; }
 
 	private bool fileLoaded { get; set; }
 

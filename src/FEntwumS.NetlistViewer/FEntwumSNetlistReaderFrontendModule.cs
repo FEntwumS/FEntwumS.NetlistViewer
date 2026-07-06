@@ -15,6 +15,7 @@ using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using OneWare.ProjectSystem.Models;
 using OneWare.UniversalFpgaProjectSystem.Services;
 
 namespace FEntwumS.NetlistViewer;
@@ -604,30 +605,71 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			}
 			else if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
 			{
+				string synthFilePath = Path.Combine(vhdlFile.Root.FullPath, "build", "synth.json");
+				
 				menuItems.Add(new MenuItemModel("NetlistViewer_CreateNetlist")
 				{
-					Header = $"View netlist for {vhdlFile.Header}",
+					Header = $"View RTL for {vhdlFile.Header}",
 					Command = new AsyncRelayCommand(() =>
 						ServiceManager.GetService<FrontendService>().CreateVhdlNetlistAsync(vhdlFile))
 				});
+
+				if (File.Exists(synthFilePath))
+				{
+					menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
+					{
+						Header = $"View Post-Synthesis Netlist for {vhdlFile.Header}",
+						Command = new AsyncRelayCommand(() =>
+							ServiceManager.GetService<FrontendService>().ShowViewerAsync(
+								new ProjectFile($"{synthFilePath}", vhdlFile.TopFolder!)))
+					});
+				}
 			}
 			else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
 			{
+				string synthFilePath = Path.Combine(verilogFile.Root.FullPath, "build", "synth.json");
+				
 				menuItems.Add(new MenuItemModel("NetlistViewer_CreateVerilogNetlist")
 				{
 					Header = $"View netlist for {verilogFile.Header}",
 					Command = new AsyncRelayCommand(() =>
 						ServiceManager.GetService<FrontendService>().CreateVerilogNetlistAsync(verilogFile))
 				});
+
+				if (File.Exists(synthFilePath))
+				{
+					menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
+					{
+						Header = $"View Post-Synthesis Netlist for {verilogFile.Header}",
+						Command = new AsyncRelayCommand(() =>
+							ServiceManager.GetService<FrontendService>().ShowViewerAsync(
+								new ProjectFile($"{verilogFile.Root.FullPath}/build/synth.json",
+									verilogFile.TopFolder!)))
+					});
+				}
 			}
 			else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
 			{
+				string synthFilePath = Path.Combine(systemVerilogFile.Root.FullPath, "build", "synth.json");
+				
 				menuItems.Add(new MenuItemModel("NetlistViewer_CreateSystemVerilogNetlist")
 				{
 					Header = $"View netlist for {systemVerilogFile.Header}",
 					Command = new AsyncRelayCommand(() =>
 						ServiceManager.GetService<FrontendService>().CreateSystemVerilogNetlistAsync(systemVerilogFile))
 				});
+
+				if (File.Exists(synthFilePath))
+				{
+					menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
+					{
+						Header = $"View Post-Synthesis Netlist for {systemVerilogFile.Header}",
+						Command = new AsyncRelayCommand(() =>
+							ServiceManager.GetService<FrontendService>().ShowViewerAsync(
+								new ProjectFile($"{systemVerilogFile.Root.FullPath}/build/synth.json",
+									systemVerilogFile.TopFolder!)))
+					});
+				}
 			}
 		});
 
