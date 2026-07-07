@@ -648,7 +648,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 						Header = $"View Post-Synthesis Netlist for {verilogFile.Header}",
 						Command = new AsyncRelayCommand(() =>
 							ServiceManager.GetService<FrontendService>().ShowViewerAsync(
-								new ProjectFile($"{verilogFile.Root.FullPath}/build/synth.json",
+								new ProjectFile($"{synthFilePath}",
 									verilogFile.TopFolder!)))
 					});
 				}
@@ -671,7 +671,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 						Header = $"View Post-Synthesis Netlist for {systemVerilogFile.Header}",
 						Command = new AsyncRelayCommand(() =>
 							ServiceManager.GetService<FrontendService>().ShowViewerAsync(
-								new ProjectFile($"{systemVerilogFile.Root.FullPath}/build/synth.json",
+								new ProjectFile($"{synthFilePath}",
 									systemVerilogFile.TopFolder!)))
 					});
 				}
