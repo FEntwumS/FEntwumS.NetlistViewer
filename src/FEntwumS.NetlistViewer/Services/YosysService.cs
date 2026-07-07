@@ -12,6 +12,7 @@ public class YosysService : IYosysService
 	private ISettingsService _settingsService;
 	private IToolExecuterService _toolExecuterService;
 	private IFpgaBbService _fpgaBbService;
+	private ILogger _logger;
 	private bool _useHierarchicalBackend;
 
 	private string _yosysPath = string.Empty;
@@ -21,6 +22,7 @@ public class YosysService : IYosysService
 		_settingsService = ServiceManager.GetService<ISettingsService>();
 		_toolExecuterService = ServiceManager.GetService<IToolExecuterService>();
 		_fpgaBbService = ServiceManager.GetService<IFpgaBbService>();
+		_logger = ServiceManager.GetService<ILogger>();
 	}
 
 	public void SubscribeToSettings()
@@ -85,36 +87,56 @@ public class YosysService : IYosysService
 			ServiceManager.GetService<ILogger>().Log("Including the selected file and proceeding", true, Brushes.White);
 		}
 
-		List<string> yosysArgs =
-		[
-			"-p",
-			$"read_verilog -sv -nooverwrite {(verilogFileList.Count > 0 ? "\"" + string.Join("\" \"", verilogFileList) + "\"" : "")} {(systemVerilogFileList.Count > 0 ? "\"" + string.Join("\" \"", systemVerilogFileList) + "\"" : "")}; "
-			+ "scratchpad -set flatten.separator \";\"; " // Use the semicolon as hierarchy separator; See https://yosyshq.readthedocs.io/projects/yosys/en/v0.55/cmd/flatten.html
-			+ $"{_fpgaBbService.getBbCommand(file)} "
-			+ $"hierarchy -check -purge_lib -top {top}; "	// Check and build the design hierarchy. Unused modules and blackboxes are discarded
-			+ "proc; " // proc needs to run because JSON netlists produced by yosys may not contain RTLIL processes
-			+ "memory -nomap; " // Converts memories into simple blocks instead of basic cells
-			+ "select *; " // Remove unnecessary library elements from the netlist
-			+ $"write_json -compat-int {top}-hier.json; " // Write hierarchical JSON netlist to disk
-			+ "scratchpad -set flatten.separator \';\'; "
-			+ "flatten -scopename; " // Flatten the netlist
-			+ "select *; "
-			+ "clean; "
-			+ $"write_json -compat-int {top}-flat.json" // Write flattened JSON netlist to disk
-		];
+		bool noErrors = true;
 
-		// Load the yosys_slang plugin if the design contains SystemVerilog files
-		// The plugin is currently not used by the generated yosys command
-		if (systemVerilogFileList.Count > 0)
-		{
-			yosysArgs.Insert(0, "-m");
-			yosysArgs.Insert(1, "slang");
-		}
+		var yosysCommand = ServiceManager.GetService<IToolExecutionDispatcherService>()
+			.CreateToolCommandBuilder("yosys")
+			.WithStatus("Executing yosys")
+			.WithTimer(true)
+			.WithWorkingDirectory(workingDirectory)
+			.WithOutputHandler(x =>
+			{
+				_logger.Log(x);
+				return true;
+			})
+			.WithErrorHandler(x =>
+			{
+				if (x.Contains("ERROR:") || x.Contains("error:"))
+				{
+					noErrors = false;
+				}
 
-		(bool success, _, _) =
-			await _toolExecuterService.ExecuteToolAsync(_yosysPath, yosysArgs, workingDirectory);
+				_logger.Error(x);
+				return true;
+			})
+			.Add("-m")
+			.Add("slang")
+			.Add("-p")
+			.AddScript("read_verilog -sv -nooverwrite {verilogFiles} {systemVerilogFiles}; "
+			           + "scratchpad -set flatten.separator \";\"; " // Use the semicolon as hierarchy separator; See https://yosyshq.readthedocs.io/projects/yosys/en/v0.55/cmd/flatten.html
+			           + "{blackBoxLoadingCommand} "
+			           + "hierarchy -check -purge_lib -top {topEntityName}; " // Check and build the design hierarchy. Unused modules and blackboxes are discarded
+			           + "proc; " // proc needs to run because JSON netlists produced by yosys may not contain RTLIL processes
+			           + "memory -nomap; " // Converts memories into simple blocks instead of basic cells
+			           + "select *; " // Remove unnecessary library elements from the netlist
+			           + "write_json -compat-int {topEntityName}-hier.json; " // Write hierarchical JSON netlist to disk
+			           + "scratchpad -set flatten.separator \';\'; "
+			           + "flatten -scopename; " // Flatten the netlist
+			           + "select *; "
+			           + "clean; "
+			           + "write_json -compat-int {topEntityName}-flat.json", // Write flattened JSON netlist to disk
+				("{verilogFiles}",
+					$"{(verilogFileList.Count > 0 ? "\"" + string.Join("\" \"", verilogFileList) + "\"" : "")}"),
+				("{systemVerilogFiles}",
+					$"{(systemVerilogFileList.Count > 0 ? "\"" + string.Join("\" \"", systemVerilogFileList) + "\"" : "")}"),
+				("{blackBoxLoadingCommand}", $"{_fpgaBbService.getBbCommand(file)}"),
+				("{topEntityName}", $"{top}"))
+			.Build();
 
-		return success;
+		(bool success, _) =
+			await ServiceManager.GetService<IToolExecutionDispatcherService>().ExecuteAsync(yosysCommand);
+
+		return success && noErrors;
 	}
 
 	public async Task<bool> LoadSystemVerilogAsync(IProjectFile file)
