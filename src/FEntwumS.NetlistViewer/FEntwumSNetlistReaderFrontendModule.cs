@@ -947,9 +947,9 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 
 	private void RegisterMigrations()
 	{
-		ServiceManager.GetService<FpgaService>().RegisterProjectPropertyMigration(
-			FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey, "FEntwumS_FPGA_Manufacturer");
-		ServiceManager.GetService<FpgaService>().RegisterProjectPropertyMigration(
-			FentwumSNetlistViewerSettingsHelper.ProjectFpgaDeviceFamilyKey, "FEntwumS_FPGA_DeviceFamily");
+		ServiceManager.GetService<FpgaService>().RegisterProjectPropertyMigration("FEntwumS_FPGA_Manufacturer",
+			FentwumSNetlistViewerSettingsHelper.ProjectFpgaManufacturerKey);
+		ServiceManager.GetService<FpgaService>().RegisterProjectPropertyMigration("FEntwumS_FPGA_DeviceFamily",
+			FentwumSNetlistViewerSettingsHelper.ProjectFpgaDeviceFamilyKey);
 	}
 }
