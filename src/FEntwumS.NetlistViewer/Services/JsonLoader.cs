@@ -1,7 +1,9 @@
 ﻿using System.Text.Json.Nodes;
 using Avalonia;
-using FEntwumS.NetlistViewer.Types;
-using FEntwumS.NetlistViewer.ViewModels;
+using FEntwumS.Common.Interfaces;
+using FEntwumS.Common.Services;
+using FEntwumS.Common.Types;
+using FEntwumS.Common.ViewModels;
 using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Services;
 

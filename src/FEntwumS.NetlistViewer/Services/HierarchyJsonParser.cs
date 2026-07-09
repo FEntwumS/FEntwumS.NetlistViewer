@@ -1,8 +1,10 @@
 using System.Text.Json.Nodes;
 using Avalonia;
 using Avalonia.Media;
+using FEntwumS.Common.Interfaces;
+using FEntwumS.Common.Services;
+using FEntwumS.Common.Types.HierarchyView;
 using FEntwumS.NetlistViewer.Assets;
-using FEntwumS.NetlistViewer.Types.HierarchyView;
 using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Services;
 

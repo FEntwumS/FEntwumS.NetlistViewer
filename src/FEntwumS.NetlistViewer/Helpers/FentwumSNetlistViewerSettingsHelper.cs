@@ -1,4 +1,4 @@
-﻿using FEntwumS.NetlistViewer.Types;
+﻿using FEntwumS.Common.Types;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
 

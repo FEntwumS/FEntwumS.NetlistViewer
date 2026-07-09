@@ -1,4 +1,6 @@
-﻿using FEntwumS.NetlistViewer.Services;
+﻿using FEntwumS.Common.Interfaces;
+using FEntwumS.Common.Services;
+using FEntwumS.NetlistViewer.Services;
 using OneWare.Essentials.Services;
 
 namespace FEntwumS.NetlistViewer.Helpers;

@@ -18,6 +18,7 @@
     <ItemGroup>
       <Folder Include="Assets\Fonts\" />
       <Folder Include="Styles\" />
+      <Folder Include="Types\" />
     </ItemGroup>
     
     <ItemGroup>
@@ -36,6 +37,10 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>compile; build; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\FEntwumS.Common\FEntwumS.Common.csproj" ExcludeAssets="runtime;Native"/>
     </ItemGroup>
 
     <Target Name="GenerateCompatibilityFile" AfterTargets="Build">

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
-using FEntwumS.NetlistViewer.Types;
+using FEntwumS.Common.Interfaces;
+using FEntwumS.Common.Types;
 
 namespace FEntwumS.NetlistViewer.Services;
 

@@ -1,11 +1,10 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using Avalonia.Collections;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using FEntwumS.Common.Messages;
+using FEntwumS.Common.Types.HierarchyView;
 using FEntwumS.NetlistViewer.Helpers;
-using FEntwumS.NetlistViewer.Types.HierarchyView;
-using FEntwumS.NetlistViewer.Types.Messages;
 using OneWare.Essentials.ViewModels;
 
 namespace FEntwumS.NetlistViewer.ViewModels;

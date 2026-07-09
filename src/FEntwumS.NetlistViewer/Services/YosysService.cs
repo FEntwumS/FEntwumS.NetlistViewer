@@ -1,4 +1,6 @@
 ﻿using Avalonia.Media;
+using FEntwumS.Common.Interfaces;
+using FEntwumS.Common.Services;
 using FEntwumS.NetlistViewer.Helpers;
 using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Models;
