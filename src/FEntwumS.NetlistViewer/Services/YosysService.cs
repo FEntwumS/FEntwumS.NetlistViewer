@@ -35,7 +35,7 @@ public class YosysService : IYosysService
 			.Subscribe(x => _useHierarchicalBackend = x);
 	}
 
-	public Task<bool> LoadVhdlAsync(IProjectFile file)
+	public Task<bool> LoadVhdlAsync(IProjectFile file, string topEntityName)
 	{
 		// This method has not been implemented due to the Windows version of the oss cad suite not including the
 		// ghdl-yosys plugin
@@ -43,7 +43,7 @@ public class YosysService : IYosysService
 		throw new NotImplementedException();
 	}
 
-	public async Task<bool> LoadVerilogAsync(IProjectFile file)
+	public async Task<bool> LoadVerilogAsync(IProjectFile file, string topEntityName)
 	{
 		string workingDirectory = FentwumSNetlistViewerSettingsHelper.GetBuildDirectory(file);
 
@@ -141,7 +141,7 @@ public class YosysService : IYosysService
 		return success && noErrors;
 	}
 
-	public async Task<bool> LoadSystemVerilogAsync(IProjectFile file)
+	public async Task<bool> LoadSystemVerilogAsync(IProjectFile file, string topEntityName)
 	{
 		// This method works essentially like LoadVerilogAsync(), but it uses the yosys_slang plugin as frontend for
 		// loading the HDL sources. This did not work when last tested (March 2025). It is therefore recommended to use
