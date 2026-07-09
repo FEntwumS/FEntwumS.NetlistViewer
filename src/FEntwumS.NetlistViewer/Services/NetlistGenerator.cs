@@ -127,7 +127,7 @@ public class NetlistGenerator : INetlistGenerator
 		}
 
 		string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
-		string netlistPath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(projectFile, netlistType);
+		string netlistPath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(projectFile, netlistType, topEntityName);
 
 		if (!File.Exists(netlistPath))
 		{
