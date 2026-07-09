@@ -52,8 +52,6 @@ public class YosysService : IYosysService
 			Directory.CreateDirectory(workingDirectory);
 		}
 
-		string top = Path.GetFileNameWithoutExtension(file.FullPath);
-
 		List<string> verilogFileList = new List<string>();
 
 		List<string> systemVerilogFileList = new List<string>();
@@ -132,7 +130,7 @@ public class YosysService : IYosysService
 				("{systemVerilogFiles}",
 					$"{(systemVerilogFileList.Count > 0 ? "\"" + string.Join("\" \"", systemVerilogFileList) + "\"" : "")}"),
 				("{blackBoxLoadingCommand}", $"{_fpgaBbService.getBbCommand(file)}"),
-				("{topEntityName}", $"{top}"))
+				("{topEntityName}", $"{topEntityName}"))
 			.Build();
 
 		(bool success, _) =
