@@ -64,6 +64,11 @@ public class SettingsUpgrader
 			settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.AlwaysRegenerateNetlistsKey, true);
 		}
 
+		if (currentSettingsVersion <= 4)
+		{
+			settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.JunctionShapeKey, "Line");
+		}
+
 		settingsService.SetSettingValue(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey, FentwumSNetlistViewerSettingsHelper.ExpectedSettingsVersion);
 	}
 }

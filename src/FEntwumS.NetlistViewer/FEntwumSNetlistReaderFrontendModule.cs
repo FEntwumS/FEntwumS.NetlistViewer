@@ -835,7 +835,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			FentwumSNetlistViewerSettingsHelper.AutomaticNetlistGenerationIntervalKey,
 			new SliderSetting("Automatic netlist generation interval (s)", 60.0d, 15.0d, 3600.0d, 5.0d));
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
-			FentwumSNetlistViewerSettingsHelper.JunctionShapeKey, new ComboBoxSetting("Junction Shape", "Circle",
+			FentwumSNetlistViewerSettingsHelper.JunctionShapeKey, new ComboBoxSetting("Junction Shape", "Line",
 				[ "Circle", "Square", "Diamond", "Triangle", "Line" ]));
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
 			FentwumSNetlistViewerSettingsHelper.LayoutEffortKey, new SliderSetting("Layouting effort", 25.0d, 1.0d, 100.0d, 1.0d));

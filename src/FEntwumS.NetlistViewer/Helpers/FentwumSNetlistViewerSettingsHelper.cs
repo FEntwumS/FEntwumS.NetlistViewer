@@ -14,7 +14,7 @@ public class FentwumSNetlistViewerSettingsHelper
 
 	#endregion
 
-	public static readonly int ExpectedSettingsVersion = 4;
+	public static readonly int ExpectedSettingsVersion = 5;
 
 	public static readonly string DataDirectory = Path.Combine(
 		Environment.GetFolderPath(
