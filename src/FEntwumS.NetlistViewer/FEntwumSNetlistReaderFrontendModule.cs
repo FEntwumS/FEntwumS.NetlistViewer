@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Net.Http.Headers;
 using System.Reflection;
 using Avalonia;
@@ -617,7 +618,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 					{
 						Header = $"View RTL for {vhdlFile.Header}",
 						Command = new AsyncRelayCommand(() =>
-							ServiceManager.GetService<FrontendService>().CreateVhdlNetlistAsync(vhdlFile))
+							ServiceManager.GetService<FrontendService>().CreateVhdlNetlistAsync(vhdlFile, Path.GetFileNameWithoutExtension(vhdlFile.FullPath)))
 					});
 					
 					if (File.Exists(synthFilePath))
@@ -636,12 +637,41 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			{
 				string synthFilePath = Path.Combine(verilogFile.Root.FullPath, "build", "synth.json");
 				
-				menuItems.Add(new MenuItemModel("NetlistViewer_CreateVerilogNetlist")
+				var verilogNodeProvider = ServiceManager.GetService<FpgaService>().GetNodeProviderByExtension(verilogFile.Extension);
+
+				if (verilogNodeProvider is null)
 				{
-					Header = $"View RTL for {verilogFile.Header}",
-					Command = new AsyncRelayCommand(() =>
-						ServiceManager.GetService<FrontendService>().CreateVerilogNetlistAsync(verilogFile))
-				});
+					menuItems.Add(new MenuItemModel("NetlistViewer_CreateVerilogNetlist")
+					{
+						Header = $"View RTL for {verilogFile.Header}",
+						Command = new AsyncRelayCommand(() =>
+							ServiceManager.GetService<FrontendService>().CreateVerilogNetlistAsync(verilogFile, Path.GetFileNameWithoutExtension(verilogFile.FullPath)))
+					});
+				}
+				else
+				{
+					var entities = verilogNodeProvider.ExtractTopEntitiesAsync(verilogFile).Result;
+
+					var entityMenuEntries = new ObservableCollection<MenuItemModel>();
+
+					foreach (var entity in entities)
+					{
+						entityMenuEntries.Add(new MenuItemModel($"NetlistViewer_ViewRTLFor{entity}")
+						{
+							Header = $"{entity}",
+							Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVerilogNetlistAsync(verilogFile, entity))
+						});
+					}
+
+					if (entityMenuEntries.Count > 0)
+					{
+						menuItems.Add(new MenuItemModel("NetlistViewer_ViewRTLForEntity")
+						{
+							Header = "View RTL for",
+							Items = entityMenuEntries
+						});
+					}
+				}
 
 				if (verilogFile is { Root: UniversalFpgaProjectRoot root, Icon.Overlays.Length: > 0 } && !root.IsTestBench(verilogFile.FullPath) && File.Exists(synthFilePath))
 				{
@@ -659,12 +689,41 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			{
 				string synthFilePath = Path.Combine(systemVerilogFile.Root.FullPath, "build", "synth.json");
 				
-				menuItems.Add(new MenuItemModel("NetlistViewer_CreateSystemVerilogNetlist")
+				var verilogNodeProvider = ServiceManager.GetService<FpgaService>().GetNodeProviderByExtension(systemVerilogFile.Extension);
+
+				if (verilogNodeProvider is null)
 				{
-					Header = $"View RTL for {systemVerilogFile.Header}",
-					Command = new AsyncRelayCommand(() =>
-						ServiceManager.GetService<FrontendService>().CreateSystemVerilogNetlistAsync(systemVerilogFile))
-				});
+					menuItems.Add(new MenuItemModel("NetlistViewer_CreateVerilogNetlist")
+					{
+						Header = $"View RTL for {systemVerilogFile.Header}",
+						Command = new AsyncRelayCommand(() =>
+							ServiceManager.GetService<FrontendService>().CreateVerilogNetlistAsync(systemVerilogFile, Path.GetFileNameWithoutExtension(systemVerilogFile.FullPath)))
+					});
+				}
+				else
+				{
+					var entities = verilogNodeProvider.ExtractTopEntitiesAsync(systemVerilogFile).Result;
+
+					var entityMenuEntries = new ObservableCollection<MenuItemModel>();
+
+					foreach (var entity in entities)
+					{
+						entityMenuEntries.Add(new MenuItemModel($"NetlistViewer_ViewRTLFor{entity}")
+						{
+							Header = $"{entity}",
+							Command = new AsyncRelayCommand(() => ServiceManager.GetService<FrontendService>().CreateVerilogNetlistAsync(systemVerilogFile, entity))
+						});
+					}
+
+					if (entityMenuEntries.Count > 0)
+					{
+						menuItems.Add(new MenuItemModel("NetlistViewer_ViewRTLForEntity")
+						{
+							Header = "View RTL for",
+							Items = entityMenuEntries
+						});
+					}
+				}
 
 				if (systemVerilogFile is { Root: UniversalFpgaProjectRoot root, Icon.Overlays.Length: > 0 } && !root.IsTestBench(systemVerilogFile.FullPath) && File.Exists(synthFilePath))
 				{

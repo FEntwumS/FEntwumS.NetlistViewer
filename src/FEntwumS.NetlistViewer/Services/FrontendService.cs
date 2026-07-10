@@ -468,7 +468,7 @@ public class FrontendService : IFrontendService
 	}
 
 	private async Task<IProjectFile?> GenerateNetlistAsync(IProjectFile projectFile, NetlistLanguage netlistLanguage,
-		NetlistType netlistType)
+		NetlistType netlistType, string topEntityName)
 	{
 		string netlistLanguageString = netlistLanguage switch
 		{
@@ -506,7 +506,7 @@ public class FrontendService : IFrontendService
 		}
 
 		(IProjectFile? netlistFile, success) =
-			await _netlistGenerator.GenerateNetlistAsync(projectFile, netlistLanguage, netlistType);
+			await _netlistGenerator.GenerateNetlistAsync(projectFile, netlistLanguage, netlistType, topEntityName);
 
 		if (!success)
 		{
@@ -529,19 +529,19 @@ public class FrontendService : IFrontendService
 		return netlistFile;
 	}
 
-	public async Task CreateVhdlNetlistAsync(IProjectFile vhdl)
+	public async Task CreateVhdlNetlistAsync(IProjectFile vhdl, string topEntityName)
 	{
-		await ShowViewerAsync(await GenerateNetlistAsync(vhdl, NetlistLanguage.VHDL, netlistType));
+		await ShowViewerAsync(await GenerateNetlistAsync(vhdl, NetlistLanguage.VHDL, netlistType, topEntityName));
 	}
 
-	public async Task CreateVerilogNetlistAsync(IProjectFile verilog)
+	public async Task CreateVerilogNetlistAsync(IProjectFile verilog, string topEntityName)
 	{
-		await ShowViewerAsync(await GenerateNetlistAsync(verilog, NetlistLanguage.Verilog, netlistType));
+		await ShowViewerAsync(await GenerateNetlistAsync(verilog, NetlistLanguage.Verilog, netlistType, topEntityName));
 	}
 
-	public async Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog)
+	public async Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog, string topEntityName)
 	{
-		await ShowViewerAsync(await GenerateNetlistAsync(sVerilog, NetlistLanguage.System_Verilog, netlistType));
+		await ShowViewerAsync(await GenerateNetlistAsync(sVerilog, NetlistLanguage.System_Verilog, netlistType, topEntityName));
 	}
 
 	public async Task ShowViewerAsync(IProjectFile? json)
@@ -1020,18 +1020,18 @@ public class FrontendService : IFrontendService
 
 	public async Task CreateVhdlHierarchyAsync(IProjectFile vhdlFile)
 	{
-		await ShowHierarchyAsync((await GenerateNetlistAsync(vhdlFile, NetlistLanguage.VHDL, NetlistType.Hier))!);
+		await ShowHierarchyAsync((await GenerateNetlistAsync(vhdlFile, NetlistLanguage.VHDL, NetlistType.Hier, Path.GetFileNameWithoutExtension(vhdlFile.FullPath)))!);
 	}
 
 	public async Task CreateVerilogHierarchyAsync(IProjectFile verilogFile)
 	{
-		await ShowHierarchyAsync((await GenerateNetlistAsync(verilogFile, NetlistLanguage.Verilog, NetlistType.Hier))!);
+		await ShowHierarchyAsync((await GenerateNetlistAsync(verilogFile, NetlistLanguage.Verilog, NetlistType.Hier, Path.GetFileNameWithoutExtension(verilogFile.FullPath)))!);
 	}
 
 	public async Task CreateSystemVerilogHierarchyAsync(IProjectFile systemVerilogFile)
 	{
 		await ShowHierarchyAsync((await GenerateNetlistAsync(systemVerilogFile, NetlistLanguage.System_Verilog,
-			NetlistType.Hier))!);
+			NetlistType.Hier, Path.GetFileNameWithoutExtension(systemVerilogFile.FullPath)))!);
 	}
 
 	private async Task<bool> ShowHierarchyAsync(IProjectFile netlistFile)

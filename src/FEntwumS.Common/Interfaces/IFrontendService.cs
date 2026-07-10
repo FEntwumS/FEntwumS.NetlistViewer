@@ -5,11 +5,11 @@ namespace FEntwumS.Common.Interfaces;
 
 public interface IFrontendService : ISettingsSubscriber
 {
-	public Task CreateVhdlNetlistAsync(IProjectFile vhdl);
+	public Task CreateVhdlNetlistAsync(IProjectFile vhdl, string topEntityName);
 
-	public Task CreateVerilogNetlistAsync(IProjectFile verilog);
+	public Task CreateVerilogNetlistAsync(IProjectFile verilog, string topEntityName);
 
-	public Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog);
+	public Task CreateSystemVerilogNetlistAsync(IProjectFile sVerilog, string topEntityName);
 
 	public Task ShowViewerAsync(IProjectFile json);
 

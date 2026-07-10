@@ -43,7 +43,7 @@ public class NetlistGenerator : INetlistGenerator
 		_timer.Interval = TimeSpan.FromSeconds(_generationInterval);
 	}
 
-	public async Task<bool> GenerateVhdlNetlistAsync(IProjectFile vhdlProject)
+	public async Task<bool> GenerateVhdlNetlistAsync(IProjectFile vhdlProject, string topEntityName)
 	{
 		OneWare.GhdlExtension.Services.GhdlService ghdlService =
 			ServiceManager.GetService<OneWare.GhdlExtension.Services.GhdlService>();
@@ -65,24 +65,24 @@ public class NetlistGenerator : INetlistGenerator
 		}
 	}
 
-	public async Task<bool> GenerateVerilogNetlistAsync(IProjectFile verilogProject)
+	public async Task<bool> GenerateVerilogNetlistAsync(IProjectFile verilogProject, string topEntityName)
 	{
 		IYosysService yosysService = ServiceManager.GetService<IYosysService>();
 		bool success;
 
-		success = await yosysService.LoadVerilogAsync(verilogProject);
+		success = await yosysService.LoadVerilogAsync(verilogProject, topEntityName);
 
 		return success;
 	}
 
-	public async Task<bool> GenerateSystemVerilogNetlistAsync(IProjectFile systemVerilogProject)
+	public async Task<bool> GenerateSystemVerilogNetlistAsync(IProjectFile systemVerilogProject, string topEntityName)
 	{
 		// TODO update with implementation using yosys_slang plugin
-		return await GenerateVerilogNetlistAsync(systemVerilogProject);
+		return await GenerateVerilogNetlistAsync(systemVerilogProject, topEntityName);
 	}
 
 	public async Task<(IProjectFile? netlistFile, bool success)> GenerateNetlistAsync(IProjectFile? projectFile,
-		NetlistLanguage netlistLanguage, NetlistType netlistType)
+		NetlistLanguage netlistLanguage, NetlistType netlistType, string topEntityName)
 	{
 		if (projectFile is null)
 		{
@@ -105,15 +105,15 @@ public class NetlistGenerator : INetlistGenerator
 		switch (netlistLanguage)
 		{
 			case NetlistLanguage.VHDL:
-				success = await GenerateVhdlNetlistAsync(projectFile) && await GenerateVerilogNetlistAsync(projectFile);
+				success = await GenerateVhdlNetlistAsync(projectFile, topEntityName) && await GenerateVerilogNetlistAsync(projectFile, topEntityName);
 				break;
 
 			case NetlistLanguage.Verilog:
-				success = await GenerateVerilogNetlistAsync(projectFile);
+				success = await GenerateVerilogNetlistAsync(projectFile, topEntityName);
 				break;
 
 			case NetlistLanguage.System_Verilog:
-				success = await GenerateSystemVerilogNetlistAsync(projectFile);
+				success = await GenerateSystemVerilogNetlistAsync(projectFile, topEntityName);
 				break;
 
 			default:
@@ -127,7 +127,7 @@ public class NetlistGenerator : INetlistGenerator
 		}
 
 		string top = Path.GetFileNameWithoutExtension(projectFile.FullPath);
-		string netlistPath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(projectFile, netlistType);
+		string netlistPath = FentwumSNetlistViewerSettingsHelper.GetNetlistFilePath(projectFile, netlistType, topEntityName);
 
 		if (!File.Exists(netlistPath))
 		{
@@ -338,7 +338,7 @@ public class NetlistGenerator : INetlistGenerator
 			// DockService.Show inside the GhdlService
 			await Dispatcher.UIThread.InvokeAsync(async () =>
 			{
-				await GenerateNetlistAsync(new ProjectFile(projectRoot.TopEntity!, projectRoot.TopFolder!), netlistLanguage, NetlistType.Hier);
+				await GenerateNetlistAsync(new ProjectFile(projectRoot.TopEntity!, projectRoot.TopFolder!), netlistLanguage, NetlistType.Hier, Path.GetFileNameWithoutExtension(projectRoot.TopEntity!));
 			});
 
 			lock (_lock)

@@ -98,9 +98,9 @@ public class FentwumSNetlistViewerSettingsHelper
 		return Path.Combine(projectFile.Root.FullPath, "build", "netlist");
 	}
 
-	public static string GetNetlistFilePath(IProjectFile json, NetlistType netlistType)
+	public static string GetNetlistFilePath(IProjectFile json, NetlistType netlistType, string topEntityName = "")
 	{
-		string top = Path.GetFileNameWithoutExtension(json.FullPath);
+		string top = topEntityName != "" ? topEntityName : Path.GetFileNameWithoutExtension(json.FullPath);
 		string suffix = netlistType switch
 		{
 			NetlistType.Flat => "flat",
