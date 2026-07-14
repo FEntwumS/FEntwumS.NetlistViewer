@@ -12,7 +12,7 @@ public class PositionableSubControl : Control
 {
     #region Properties
 
-    private double X { get; set; }
+    public double X { get; set; }
 
     /// <summary>
     /// The x-coordinate of the top-left corner relative to the parent element
@@ -22,7 +22,7 @@ public class PositionableSubControl : Control
             defaultBindingMode: BindingMode.TwoWay,
             defaultValue: 0.0d);
 
-    private double Y { get; set; }
+    public double Y { get; set; }
 
     /// <summary>
     /// The y-coordinate of the top-left corner relative to the parent element
@@ -32,7 +32,7 @@ public class PositionableSubControl : Control
             defaultBindingMode: BindingMode.TwoWay,
             defaultValue: 0.0d);
     
-    private double Scale { get; set; }
+    public double Scale { get; set; }
     
     /// <summary>
     /// The scale of the element. Since the scale is inherited, it only needs to be set on the root element
