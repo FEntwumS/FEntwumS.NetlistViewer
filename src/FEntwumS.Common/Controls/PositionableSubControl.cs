@@ -68,11 +68,6 @@ public class PositionableSubControl : Control
     {
 	    return base.ArrangeOverride(finalSize);
     }
-    
-    public override void Render(DrawingContext context)
-    {
-	    base.Render(context);
-    }
 
     #endregion
     
