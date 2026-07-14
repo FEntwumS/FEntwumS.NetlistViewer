@@ -1,6 +1,12 @@
-﻿namespace FEntwumS.Common.Controls;
+﻿using Avalonia;
+using Avalonia.Rendering;
 
-public class GraphEdgeControl : GenericGraphElementControl
+namespace FEntwumS.Common.Controls;
+
+public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 {
-    
+    public bool HitTest(Point point)
+    {
+        throw new NotImplementedException();
+    }
 }
