@@ -54,4 +54,13 @@ public class GraphLabelControl : GenericGraphElementControl
     }
 
     #endregion
+    
+    #region Rendering
+
+    public override void Render(DrawingContext context)
+    {
+	    base.Render(context);
+    }
+
+    #endregion
 }

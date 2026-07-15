@@ -45,13 +45,13 @@ public class PositionableSubControl : Control
 		    validate: d => d > 0.0d,
 		    inherits: true);
 
-    private IEnumerable<PositionableSubControl> _items = new AvaloniaList<PositionableSubControl>();
+    private AvaloniaList<PositionableSubControl> _items = new AvaloniaList<PositionableSubControl>();
 
     /// <summary>
     /// The items displayed within
     /// </summary>
-    public static readonly DirectProperty<PositionableSubControl, IEnumerable<PositionableSubControl>> ItemsProperty =
-        AvaloniaProperty.RegisterDirect<PositionableSubControl, IEnumerable<PositionableSubControl>>(nameof(_items),
+    public static readonly DirectProperty<PositionableSubControl, AvaloniaList<PositionableSubControl>> ItemsProperty =
+        AvaloniaProperty.RegisterDirect<PositionableSubControl, AvaloniaList<PositionableSubControl>>(nameof(_items),
             control => control._items,
             (control, children) => control._items = children);
 
