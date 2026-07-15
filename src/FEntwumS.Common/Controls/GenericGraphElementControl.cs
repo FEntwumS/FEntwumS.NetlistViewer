@@ -14,5 +14,12 @@ public class GenericGraphElementControl : PositionableSubControl
 		AvaloniaProperty.Register<GenericGraphElementControl, NetlistTheme>(nameof(NetlistTheme),
 			defaultBindingMode: BindingMode.TwoWay);
 	
+	public string srcLocation { get; set; } = "";
+
+	public static readonly StyledProperty<string> SrcLocationProperty =
+		AvaloniaProperty.Register<GenericGraphElementControl, string>(nameof(srcLocation),
+			defaultBindingMode: BindingMode.TwoWay,
+			defaultValue: "");
+	
 	#endregion
 }
