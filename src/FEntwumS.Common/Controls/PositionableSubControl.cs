@@ -54,6 +54,21 @@ public class PositionableSubControl : Control
     #endregion
     
     #region Event handling
-    
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
+    {
+	    if (e.Property == ScaleProperty)
+	    {
+		    double scaleDifference = 1.0d + ((double) e.NewValue!) - ((double) e.OldValue!);
+		    
+		    this.Width *=  scaleDifference;
+		    this.Height *=  scaleDifference;
+		    this.X *= scaleDifference;
+		    this.Y *= scaleDifference;
+	    }
+	    
+	    base.OnPropertyChanged(e);
+    }
+
     #endregion
 }
