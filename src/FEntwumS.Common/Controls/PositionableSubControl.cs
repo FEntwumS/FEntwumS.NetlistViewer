@@ -45,29 +45,11 @@ public class PositionableSubControl : Control
 		    validate: d => d > 0.0d,
 		    inherits: true);
 
-    private AvaloniaList<PositionableSubControl> _items = new AvaloniaList<PositionableSubControl>();
-
-    /// <summary>
-    /// The items displayed within
-    /// </summary>
-    public static readonly DirectProperty<PositionableSubControl, AvaloniaList<PositionableSubControl>> ItemsProperty =
-        AvaloniaProperty.RegisterDirect<PositionableSubControl, AvaloniaList<PositionableSubControl>>(nameof(_items),
-            control => control._items,
-            (control, children) => control._items = children);
-
     #endregion
     
     #region Rendering
 
-    protected override Size MeasureOverride(Size availableSize)
-    {
-	    return base.MeasureOverride(availableSize);
-    }
-
-    protected override Size ArrangeOverride(Size finalSize)
-    {
-	    return base.ArrangeOverride(finalSize);
-    }
+    
 
     #endregion
     
