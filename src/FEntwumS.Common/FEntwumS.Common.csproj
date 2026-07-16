@@ -25,8 +25,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" ExcludeAssets="runtime;Native" />
-      <PackageReference Include="OneWare.Vcd.Viewer" Version="1.0.19" ExcludeAssets="runtime;Native" />
+      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="1.0.22" ExcludeAssets="runtime;Native" />
+      <PackageReference Include="OneWare.Vcd.Viewer" Version="1.0.22" ExcludeAssets="runtime;Native" />
     </ItemGroup>
 
     <ItemGroup>
