@@ -59,7 +59,7 @@ public class GraphLabelControl : GenericGraphElementControl
 
     public override void Render(DrawingContext context)
     {
-	    base.Render(context);
+	    context.DrawText(_formattedContent, new Point(X, Y));
     }
 
     #endregion
