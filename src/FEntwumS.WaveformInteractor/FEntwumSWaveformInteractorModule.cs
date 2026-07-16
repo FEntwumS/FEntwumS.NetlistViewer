@@ -131,7 +131,7 @@ public class FEntwumSWaveformInteractorModule : OneWareModuleBase
             {
                 // set first testbench from OneWare Project as _verilatorTestbench
                 var project = _projectExplorerService.ActiveProject?.Root as UniversalFpgaProjectRoot;
-                _verilatorService.RegisterTestbench(project?.TestBenches.FirstOrDefault());
+                //_verilatorService.RegisterTestbench(project?.TestBenches.FirstOrDefault());
 
                 // read in build/simulation/bitmapping.json
                 var projectPath = _projectExplorerService.ActiveProject?.FullPath;
@@ -212,7 +212,7 @@ public class FEntwumSWaveformInteractorModule : OneWareModuleBase
                     return;
                 }
 
-                var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity.FullPath);
+                var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity);
                 var netlistPath = Path.Combine(_projectExplorerService.ActiveProject.RootFolderPath, "build", "netlist",
                     $"{topEntity}.json");
 
@@ -257,7 +257,7 @@ public class FEntwumSWaveformInteractorModule : OneWareModuleBase
                 return;
             }
 
-            var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity!.FullPath);
+            var topEntity = Path.GetFileNameWithoutExtension(projectRoot.TopEntity);
             var netlistPath = Path.Combine(_projectExplorerService.ActiveProject.RootFolderPath, "build", "netlist",
                 $"{topEntity}.json");
 
@@ -288,7 +288,7 @@ public class FEntwumSWaveformInteractorModule : OneWareModuleBase
                 return;
             }
 
-            var path = projectRoot.TopEntity.RelativePath;
+            var path = projectRoot.TopEntity;
             var topFile = projectRoot.GetFile(path);
 
             await _verilatorService!.RunExecutableAsync(topFile!);

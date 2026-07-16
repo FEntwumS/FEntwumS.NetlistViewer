@@ -24,10 +24,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="OneWare.Essentials" Version="1.0.19" Private="false" ExcludeAssets="runtime;Native" />
-        <PackageReference Include="OneWare.ProjectSystem" Version="1.0.19" Private="false" ExcludeAssets="runtime;Native" />
-        <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" Private="false" ExcludeAssets="runtime;Native"/>
-        <PackageReference Include="OneWare.Vcd.Viewer" Private="false" Version="1.0.19" ExcludeAssets="runtime;Native" />
+        <PackageReference Include="OneWare.Essentials" Version="1.0.22" Private="false" ExcludeAssets="runtime;Native" />
+        <PackageReference Include="OneWare.ProjectSystem" Version="1.0.22" Private="false" ExcludeAssets="runtime;Native" />
+        <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="1.0.22" Private="false" ExcludeAssets="runtime;Native" />
+        <PackageReference Include="OneWare.Vcd.Viewer" Private="false" Version="1.0.22" ExcludeAssets="runtime;Native" />
         <PackageReference Include="System.IO.Hashing" Private="true" Version="10.0.9" CopyLocalLockFileAssemblies="true" />
     
     </ItemGroup>
