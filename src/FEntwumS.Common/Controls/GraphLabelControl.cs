@@ -9,7 +9,7 @@ public class GraphLabelControl : GenericGraphElementControl
 {
     #region Properties
 
-    public string Content { get; set; }
+    public string? Content { get; set; }
     
     public static readonly StyledProperty<string> ContentProperty =
         AvaloniaProperty.Register<GraphLabelControl, string>(nameof(Content),
@@ -28,8 +28,12 @@ public class GraphLabelControl : GenericGraphElementControl
 
     #region Variables
 
-    private FormattedText _formattedContent;
-    private Brush textBrush;
+    private FormattedText _formattedContent = new FormattedText("",
+        CultureInfo.InvariantCulture,
+        FlowDirection.LeftToRight,
+        new Typeface(FontFamily.Default),
+        10,
+        null);
 
     #endregion
 
@@ -46,7 +50,7 @@ public class GraphLabelControl : GenericGraphElementControl
                     FlowDirection.LeftToRight,
                     NetlistTheme.Typeface,
                     Fontsize * Scale,
-                    textBrush);
+                    NetlistTheme.TextBrush);
             }
         }
         
