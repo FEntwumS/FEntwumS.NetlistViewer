@@ -32,7 +32,7 @@ public class PanningControl : Control
 		    defaultBindingMode: BindingMode.TwoWay,
 		    defaultValue: 0.0d);
 
-    private PositionableSubControl? Child
+    public PositionableSubControl? Child
     {
 	    get => GetValue(ChildProperty);
 	    set => SetValue(ChildProperty, value);
@@ -98,6 +98,8 @@ public class PanningControl : Control
 	    OffsetX += pointer.X - pointer.X * deltaScaleToApply;
 	    OffsetY *= deltaScaleToApply;
 	    OffsetY += pointer.Y - pointer.Y * deltaScaleToApply;
+	    
+	    e.Handled = true;
     }
     
     #endregion
