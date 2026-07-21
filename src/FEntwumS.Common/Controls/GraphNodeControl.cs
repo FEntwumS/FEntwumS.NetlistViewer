@@ -53,14 +53,24 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 
 	#region Variables
 
-	
+	private Rect contentRect = new Rect(0, 0, 100, 100);
+	private Point dsp1 = new Point(0, 0);
+	private Point dsp2 = new Point(0, 0);
+	private Point dsp3 = new Point(0, 0);
 
 	#endregion
 
 	#region Event handling
-	
 
-	
+	protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
+	{
+		if (e.Property == NetlistThemeProperty)
+		{
+			RegenerateDrawnElements();
+		}
+		
+		base.OnPropertyChanged(e);
+	}
 
 	#endregion
 
@@ -140,7 +150,29 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 	
 	public override void Render(DrawingContext context)
 	{
+		// Draw rect
+		context.DrawRectangle(NetlistTheme.FillBrush, NetlistTheme.BorderPen, contentRect);
+		
+		// Draw dropshadow
+		context.DrawLine(NetlistTheme.DropShadowPen, dsp1, dsp2);
+		context.DrawLine(NetlistTheme.DropShadowPen, dsp2, dsp3);
+		
 		base.Render(context);
+	}
+
+	private void RegenerateDrawnElements()
+	{
+		// Update the main rectangle
+		contentRect = new Rect(X * Scale, Y * Scale, Width * Scale, Height * Scale);
+		
+		// Update the points ofr the dropshadow
+		double l = (X + (NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
+		double r = l + Width * Scale;
+		double t = (Y + (NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
+		double b = t + Height * Scale;
+		dsp1 = new Point(l, b);
+		dsp2 = new Point(r, b);
+		dsp3 = new Point(r, t);
 	}
 
 	#endregion
