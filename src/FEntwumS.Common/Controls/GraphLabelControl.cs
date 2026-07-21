@@ -52,6 +52,14 @@ public class GraphLabelControl : GenericGraphElementControl
                     Fontsize * Scale,
                     NetlistTheme.TextBrush);
             }
+        } else if (e.Property == NetlistThemeProperty)
+        {
+	        _formattedContent = new FormattedText(Content ?? "",
+		        CultureInfo.InvariantCulture,
+		        FlowDirection.LeftToRight,
+		        NetlistTheme.Typeface,
+		        Fontsize * Scale,
+		        NetlistTheme.TextBrush);
         }
         
         base.OnPropertyChanged(e);
@@ -63,7 +71,7 @@ public class GraphLabelControl : GenericGraphElementControl
 
     public override void Render(DrawingContext context)
     {
-	    context.DrawText(_formattedContent, new Point(X, Y));
+	    context.DrawText(_formattedContent, new Point(X * Scale, Y * Scale));
     }
 
     #endregion
