@@ -165,7 +165,7 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 		// Update the main rectangle
 		contentRect = new Rect(X * Scale, Y * Scale, Width * Scale, Height * Scale);
 		
-		// Update the points ofr the dropshadow
+		// Update the points of the dropshadow
 		double l = (X + (NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
 		double r = l + Width * Scale;
 		double t = (Y + (NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
