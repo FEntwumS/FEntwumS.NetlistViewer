@@ -54,6 +54,23 @@ public class PanningControl : Control
 		    defaultValue: 1.1d,
 		    enableDataValidation: true,
 		    validate: d => d > 1.0d);
+
+    public Rect? ZoomBounds
+    {
+	    get => GetValue(ZoomBoundsProperty);
+	    set => SetValue(ZoomBoundsProperty, value);
+    }
+
+    public static readonly StyledProperty<Rect?> ZoomBoundsProperty =
+	    AvaloniaProperty.Register<PanningControl, Rect?>(nameof(ZoomBounds),
+		    defaultBindingMode: BindingMode.TwoWay);
+    
+    #endregion
+    
+    #region Variables
+
+    private bool _pointerPressed = false;
+    private Point _pointerPosition = new Point(0, 0);
     
     #endregion
     
@@ -102,11 +119,105 @@ public class PanningControl : Control
 	    e.Handled = true;
     }
     
+    private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+	    PointerPoint currentPoint = e.GetCurrentPoint(this);
+
+	    _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
+
+	    _pointerPosition = currentPoint.Position;
+    }
+
+    private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+	    PointerPoint currentPoint = e.GetCurrentPoint(this);
+
+	    _pointerPressed = currentPoint.Properties.IsLeftButtonPressed;
+
+	    _pointerPosition = currentPoint.Position;
+    }
+
+    private void OnPointerMoved(object? sender, PointerEventArgs e)
+    {
+	    var pointerPoints = e.GetIntermediatePoints(this);
+	    Point currentPointerPosition = e.GetPosition(this);
+
+	    if (pointerPoints.First().Properties.IsLeftButtonPressed || _pointerPressed)
+	    {
+		    OffsetX += currentPointerPosition.X - _pointerPosition.X;
+		    OffsetY += currentPointerPosition.Y - _pointerPosition.Y;
+	    }
+	    
+	    _pointerPosition = currentPointerPosition;
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
+    {
+	    if (e.Property == ZoomBoundsProperty)
+	    {
+		    if (e.NewValue is Rect newZoomBounds)
+		    {
+			    ZoomToRect(newZoomBounds);
+			    ZoomBounds = null;
+		    }
+	    }
+	    
+	    base.OnPropertyChanged(e);
+    }
+
+    #endregion
+    
+    #region Utility methods
+
+    public void ZoomToFit()
+    {
+	    if (Child is not null)
+	    {
+		    ZoomToRect(Child.Bounds);
+	    }
+    }
+
+    private void ZoomToRect(Rect shownBounds)
+    {
+	    if (Child is null)
+	    {
+		    return;
+	    }
+	    
+	    if (shownBounds.Width == 0 || shownBounds.Height == 0)
+	    {
+		    return;
+	    }
+	    
+	    double scaleX = Bounds.Width / shownBounds.Width;
+	    double scaleY = Bounds.Height / shownBounds.Height;
+
+	    if (scaleX < scaleY) // Bounds to be shown are relatively wider than the viewport area
+	    {
+		    // Set the new scale
+		    Child.Scale = scaleX;
+		    
+		    // Set the correct offset to vertically center the child
+		    OffsetX = shownBounds.X * -scaleX;
+		    OffsetY = ((shownBounds.Y + (shownBounds.Height / 2.0d)) * -scaleX) + (Bounds.Height / 2.0d);
+	    }
+	    else
+	    {
+		    Child.Scale = scaleY;
+		    
+		    OffsetX = ((shownBounds.X + (shownBounds.Width / 2.0d)) * -scaleY)  + (Bounds.Width / 2.0d);
+		    OffsetY = shownBounds.Y * -scaleY;
+	    }
+    }
+    
     #endregion
 
     public PanningControl()
     {
 	    // Subscribe to events
 	    PointerWheelChanged += OnPointerWheelChanged;
+	    PointerMoved += OnPointerMoved;
+	    PointerPressed += OnPointerPressed;
+	    PointerReleased += OnPointerReleased;
     }
 }
