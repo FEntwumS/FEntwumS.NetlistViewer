@@ -1,0 +1,48 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        x:Class="FEntwumS.Common.Views.NetlistView"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:DataType="vm1:NetlistViewModel"
+        x:CompileBindings="True"
+        xmlns:controls="clr-namespace:FEntwumS.Common.Controls"
+        xmlns:vm1="clr-namespace:FEntwumS.Common.ViewModels;assembly=FEntwumS.Common">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm1:NetlistViewModel />
+    </Design.DataContext>
+
+    <Panel ClipToBounds="True">
+        <Panel.Resources>
+            <!--<ResourceDictionary>
+                <ResourceDictionary.MergedDictionaries>
+                    <MergeResourceInclude Source="avares://FEntwumS.NetlistViewer/Styles/Icons.axaml"></MergeResourceInclude>
+                </ResourceDictionary.MergedDictionaries>
+            </ResourceDictionary>-->
+            <FontFamily x:Key="MartianMono">avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg</FontFamily>
+        </Panel.Resources>
+
+        <Panel ClipToBounds="True" Background="{DynamicResource ThemeControlLowBrush}">
+            
+            <controls:PanningControl
+                x:Name="PanningControl">
+            </controls:PanningControl>
+            
+            <Button x:Name="ZoomToFitButton"
+                    Background="{DynamicResource ThemeBackgroundBrush}"
+                    Padding="5"
+                    CornerRadius="3"
+                    BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+                    BorderThickness="1"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Right"
+                    Margin="5"
+                    Click="ZoomToFitButton_OnClick">
+                <Image Source="{DynamicResource FluentIconsFilled.FullScreenZoomFilled}" Height="16"/>
+            </Button>
+        </Panel>
+    </Panel>
+</Window>
