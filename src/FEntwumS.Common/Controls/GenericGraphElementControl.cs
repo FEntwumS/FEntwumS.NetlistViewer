@@ -7,14 +7,22 @@ namespace FEntwumS.Common.Controls;
 public class GenericGraphElementControl : PositionableSubControl
 {
 	#region Properties
-	
-	public NetlistTheme NetlistTheme { get; set; }
+
+	public NetlistTheme NetlistTheme
+	{
+		get => GetValue(NetlistThemeProperty);
+		set => SetValue(NetlistThemeProperty, value);
+	}
 	
 	public static readonly StyledProperty<NetlistTheme> NetlistThemeProperty =
 		AvaloniaProperty.Register<GenericGraphElementControl, NetlistTheme>(nameof(NetlistTheme),
 			defaultBindingMode: BindingMode.TwoWay);
-	
-	public string srcLocation { get; set; } = "";
+
+	public string srcLocation
+	{
+		get => GetValue(SrcLocationProperty);
+		set => SetValue(SrcLocationProperty, value);
+	}
 
 	public static readonly StyledProperty<string> SrcLocationProperty =
 		AvaloniaProperty.Register<GenericGraphElementControl, string>(nameof(srcLocation),

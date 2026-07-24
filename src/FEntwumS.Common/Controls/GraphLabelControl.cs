@@ -9,13 +9,21 @@ public class GraphLabelControl : GenericGraphElementControl
 {
     #region Properties
 
-    public string? Content { get; set; }
+    public string? Content
+    {
+        get => GetValue(ContentProperty);
+        set => SetValue(ContentProperty, value ?? "");
+    }
     
     public static readonly StyledProperty<string> ContentProperty =
         AvaloniaProperty.Register<GraphLabelControl, string>(nameof(Content),
             defaultBindingMode: BindingMode.TwoWay);
-    
-    public double Fontsize { get; set; }
+
+    public double Fontsize
+    {
+        get => GetValue(FontSizeProperty);
+        set => SetValue(FontSizeProperty, value);
+    }
     
     public static readonly StyledProperty<double> FontSizeProperty =
         AvaloniaProperty.Register<GraphLabelControl, double>(nameof(Fontsize),
@@ -33,7 +41,7 @@ public class GraphLabelControl : GenericGraphElementControl
         FlowDirection.LeftToRight,
         new Typeface(FontFamily.Default),
         10,
-        null);
+        Brushes.Black);
 
     #endregion
 

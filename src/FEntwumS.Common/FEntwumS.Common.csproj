@@ -34,8 +34,8 @@
         <DependentUpon>FrontendView.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
-      <Compile Update="Views\NetlistView.cs">
-        <DependentUpon>NetlistView.axaml</DependentUpon>
+      <Compile Update="Views\NetlistView.axaml.cs">
+        <DependentUpon>NetlistView.axaml.axaml</DependentUpon>
       </Compile>
     </ItemGroup>
 

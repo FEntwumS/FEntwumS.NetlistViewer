@@ -12,15 +12,23 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 {
 	#region Properties
 
-	private string CellName { get; set; } = "";
+	private string CellName
+	{
+		get => GetValue(CellNameProperty);
+		set => SetValue(CellNameProperty, value);
+	}
 	
 	public static readonly StyledProperty<string> CellNameProperty =
 		AvaloniaProperty.Register<GraphNodeControl, string>(nameof(CellName),
 			defaultBindingMode: BindingMode.TwoWay,
 			defaultValue: "");
-	
-	private string CellType { get; set; } = "";
-	
+
+	private string CellType
+	{
+		get => GetValue(CellTypeProperty);
+		set => SetValue(CellTypeProperty, value);
+	}
+
 	public static readonly StyledProperty<string> CellTypeProperty =
 		AvaloniaProperty.Register<GraphNodeControl, string>(nameof(CellType),
 			defaultBindingMode: BindingMode.TwoWay,
