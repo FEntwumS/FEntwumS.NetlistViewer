@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Metadata;
 
 namespace FEntwumS.Common.Controls;
 
@@ -32,6 +33,7 @@ public class PanningControl : Control
 		    defaultBindingMode: BindingMode.TwoWay,
 		    defaultValue: 0.0d);
 
+    [Content]
     public PositionableSubControl? Child
     {
 	    get => GetValue(ChildProperty);
@@ -78,16 +80,41 @@ public class PanningControl : Control
     
     protected override Size MeasureOverride(Size availableSize)
     {
-	    return base.MeasureOverride(availableSize);
+	    if (Child is not null)
+	    {
+		    Child.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+	    }
+
+	    return new Size();
     }
 
     protected override Size ArrangeOverride(Size finalSize)
     {
+	    double x = OffsetX,
+		    y = OffsetY;
+
+	    if (Child is not null)
+	    {
+		    if (!double.IsNaN(Child.X))
+		    {
+			    x += Child.X;
+		    }
+
+		    if (!double.IsNaN(Child.Y))
+		    {
+			    y += Child.Y;
+		    }
+		    
+		    Child.Arrange(new Rect(new Point(x, y), Child.DesiredSize));
+	    }
+	    
 	    return base.ArrangeOverride(finalSize);
     }
 
     public override void Render(DrawingContext context)
     {
+	    
+	    
 	    base.Render(context);
     }
 
@@ -171,10 +198,7 @@ public class PanningControl : Control
 
     public void ZoomToFit()
     {
-	    if (Child is not null)
-	    {
-		    ZoomToRect(Child.Bounds);
-	    }
+	    ZoomToRect(Bounds);
     }
 
     private void ZoomToRect(Rect shownBounds)

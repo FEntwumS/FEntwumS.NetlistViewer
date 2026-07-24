@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Asmichi.ProcessManagement;
 using Avalonia.Collections;
+using FEntwumS.Common.Controls;
 using FEntwumS.Common.Interfaces;
 using FEntwumS.Common.Services;
 using FEntwumS.Common.Types;
@@ -643,8 +644,22 @@ public class FrontendService : IFrontendService
 		}
 
 		_applicationStateService.RemoveState(indexProc);
+		var nvm = new NetlistViewModel();
+		nvm.InitializeContent();
+		nvm.Title = $"Netlist: {top} test";
 
-		_dockService.Show(vm, DockShowLocation.Document);
+		var t = new GraphLabelControl
+		{
+			Content = "test",
+			Fontsize = 10.0d,
+			Width = 100.0d,
+			Height = 100.0d,
+			NetlistTheme = new NetlistTheme()
+		};
+
+		nvm.RootNode = t;
+
+		_dockService.Show(nvm, DockShowLocation.Document);
 		_dockService.InitializeContent();
 		vm.ProjectRootFolder = json.Root.RootFolderPath;
 		vm.NetlistId = currentNetlist;

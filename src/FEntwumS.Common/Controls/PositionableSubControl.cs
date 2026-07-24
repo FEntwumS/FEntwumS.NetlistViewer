@@ -12,7 +12,11 @@ public class PositionableSubControl : Control
 {
     #region Properties
 
-    public double X { get; set; }
+    public double X
+    {
+	    get => GetValue(XProperty);
+	    set => SetValue(XProperty, value);
+    }
 
     /// <summary>
     /// The x-coordinate of the top-left corner relative to the parent element
@@ -22,7 +26,11 @@ public class PositionableSubControl : Control
             defaultBindingMode: BindingMode.TwoWay,
             defaultValue: 0.0d);
 
-    public double Y { get; set; }
+    public double Y
+    {
+	    get => GetValue(YProperty);
+	    set => SetValue(YProperty, value);
+    }
 
     /// <summary>
     /// The y-coordinate of the top-left corner relative to the parent element
@@ -31,8 +39,12 @@ public class PositionableSubControl : Control
         AvaloniaProperty.Register<PositionableSubControl, double>(nameof(Y),
             defaultBindingMode: BindingMode.TwoWay,
             defaultValue: 0.0d);
-    
-    public double Scale { get; set; }
+
+    public double Scale
+    {
+	    get => GetValue(ScaleProperty);
+	    set => SetValue(ScaleProperty, value);
+    }
     
     /// <summary>
     /// The scale of the element. Since the scale is inherited, it only needs to be set on the root element

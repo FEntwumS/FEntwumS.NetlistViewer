@@ -27,9 +27,13 @@
 
         <Panel ClipToBounds="True" Background="{DynamicResource ThemeControlLowBrush}">
             
-            <controls:PanningControl
-                x:Name="PanningControl">
-            </controls:PanningControl>
+            <controls:PanningNetlistControl
+                x:Name="PanningNetlistControl"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                NetlistId="{Binding NetlistId}"
+                Child="{Binding RootNode}">
+            </controls:PanningNetlistControl>
             
             <Button x:Name="ZoomToFitButton"
                     Background="{DynamicResource ThemeBackgroundBrush}"
