@@ -39,7 +39,7 @@ public class GraphLabelControl : GenericGraphElementControl
     private FormattedText _formattedContent = new FormattedText("",
         CultureInfo.InvariantCulture,
         FlowDirection.LeftToRight,
-        new Typeface(FontFamily.Default),
+        new Typeface(new FontFamily("avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg")),
         10,
         Brushes.Black);
 

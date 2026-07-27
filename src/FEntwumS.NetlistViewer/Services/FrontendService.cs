@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Asmichi.ProcessManagement;
 using Avalonia.Collections;
+using Avalonia.Media;
 using FEntwumS.Common.Controls;
 using FEntwumS.Common.Interfaces;
 using FEntwumS.Common.Services;
@@ -645,7 +646,6 @@ public class FrontendService : IFrontendService
 
 		_applicationStateService.RemoveState(indexProc);
 		var nvm = new NetlistViewModel();
-		nvm.InitializeContent();
 		nvm.Title = $"Netlist: {top} test";
 
 		var t = new GraphLabelControl
@@ -655,9 +655,14 @@ public class FrontendService : IFrontendService
 			Width = 100.0d,
 			Height = 100.0d,
 			NetlistTheme = new NetlistTheme()
+			{
+				Typeface = new Typeface(new FontFamily("avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg"))
+			}
 		};
-
+		
 		nvm.RootNode = t;
+		nvm.InitializeContent();
+
 
 		_dockService.Show(nvm, DockShowLocation.Document);
 		_dockService.InitializeContent();

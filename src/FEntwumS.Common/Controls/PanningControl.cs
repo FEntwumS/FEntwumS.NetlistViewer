@@ -7,7 +7,7 @@ using Avalonia.Metadata;
 
 namespace FEntwumS.Common.Controls;
 
-public class PanningControl : Control
+public class PanningControl : UserControl
 {
     #region Properties
 
@@ -144,6 +144,8 @@ public class PanningControl : Control
 	    OffsetY += pointer.Y - pointer.Y * deltaScaleToApply;
 	    
 	    e.Handled = true;
+	    
+	    InvalidateVisual();
     }
     
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -173,6 +175,8 @@ public class PanningControl : Control
 	    {
 		    OffsetX += currentPointerPosition.X - _pointerPosition.X;
 		    OffsetY += currentPointerPosition.Y - _pointerPosition.Y;
+		    
+		    InvalidateArrange();
 	    }
 	    
 	    _pointerPosition = currentPointerPosition;
@@ -187,6 +191,11 @@ public class PanningControl : Control
 			    ZoomToRect(newZoomBounds);
 			    ZoomBounds = null;
 		    }
+	    }
+
+	    if (e.Property == ChildProperty)
+	    {
+		    Content = e.NewValue;
 	    }
 	    
 	    base.OnPropertyChanged(e);
