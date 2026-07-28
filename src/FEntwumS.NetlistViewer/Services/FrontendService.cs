@@ -652,8 +652,8 @@ public class FrontendService : IFrontendService
 		{
 			Content = "test",
 			Fontsize = 10.0d,
-			Width = 100.0d,
-			Height = 100.0d,
+			Width = 28.0d,
+			Height = 11.0d,
 			NetlistTheme = new NetlistTheme()
 			{
 				Typeface = new Typeface(new FontFamily("avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg"))
