@@ -210,7 +210,17 @@ public class PanningControl : UserControl
 
     public void ZoomToFit()
     {
-	    ZoomToRect(Bounds);
+	    if (Child is not null)
+	    {
+		    var cb = Child.Bounds;
+		    double invariantScaleFactor = 1.0d / Child.Scale;
+
+		    var invariantBounds = new Rect(cb.X * invariantScaleFactor,
+			    cb.Y * invariantScaleFactor,
+			    cb.Width * invariantScaleFactor,
+			    cb.Height * invariantScaleFactor);
+		    ZoomToRect(invariantBounds);
+	    }
     }
 
     private void ZoomToRect(Rect shownBounds)
