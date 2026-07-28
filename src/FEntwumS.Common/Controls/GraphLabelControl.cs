@@ -69,6 +69,16 @@ public class GraphLabelControl : GenericGraphElementControl
 		        Fontsize * Scale,
 		        NetlistTheme.TextBrush);
         }
+
+        if (e.Property == ScaleProperty)
+        {
+	        _formattedContent = new FormattedText(Content ?? "",
+		        CultureInfo.InvariantCulture,
+		        FlowDirection.LeftToRight,
+		        NetlistTheme.Typeface,
+		        Fontsize * Scale,
+		        NetlistTheme.TextBrush);
+        }
         
         base.OnPropertyChanged(e);
     }
