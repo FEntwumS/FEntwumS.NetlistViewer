@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Metadata;
 
@@ -107,8 +108,8 @@ public class PanningControl : UserControl
 		    
 		    Child.Arrange(new Rect(new Point(x, y), Child.DesiredSize));
 	    }
-	    
-	    return base.ArrangeOverride(finalSize);
+
+	    return finalSize;
     }
 
     public override void Render(DrawingContext context)
@@ -129,7 +130,7 @@ public class PanningControl : UserControl
 	    var pointer = e.GetPosition(this);
 	    
 	    // Compute the total scale difference
-	    double deltaScaleToApply = Math.Pow(ZoomStepSize, Math.Abs(verticalDelta));
+	    double deltaScaleToApply = Math.Pow(ZoomStepSize, verticalDelta);
 	    
 	    // Update the scale
 	    if (Child is not null)
@@ -145,7 +146,7 @@ public class PanningControl : UserControl
 	    
 	    e.Handled = true;
 	    
-	    InvalidateVisual();
+	    InvalidateArrange();
     }
     
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -192,13 +193,15 @@ public class PanningControl : UserControl
 			    ZoomBounds = null;
 		    }
 	    }
-
-	    if (e.Property == ChildProperty)
-	    {
-		    Content = e.NewValue;
-	    }
 	    
 	    base.OnPropertyChanged(e);
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+	    Content = Child;
+	    
+	    base.OnLoaded(e);
     }
 
     #endregion
@@ -241,6 +244,8 @@ public class PanningControl : UserControl
 		    OffsetX = ((shownBounds.X + (shownBounds.Width / 2.0d)) * -scaleY)  + (Bounds.Width / 2.0d);
 		    OffsetY = shownBounds.Y * -scaleY;
 	    }
+	    
+	    InvalidateArrange();
     }
     
     #endregion
