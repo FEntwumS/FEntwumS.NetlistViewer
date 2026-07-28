@@ -67,7 +67,7 @@ public class PositionableSubControl : UserControl
     {
 	    if (e.Property == ScaleProperty)
 	    {
-		    double scaleDifference = 1.0d + ((double) e.NewValue!) - ((double) e.OldValue!);
+		    double scaleDifference = ((double)e.NewValue!) / ((double)e.OldValue!);
 		    
 		    this.Width *=  scaleDifference;
 		    this.Height *=  scaleDifference;
