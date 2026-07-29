@@ -212,13 +212,12 @@ public class PanningControl : UserControl
     {
 	    if (Child is not null)
 	    {
-		    var cb = Child.Bounds;
 		    double invariantScaleFactor = 1.0d / Child.Scale;
 
-		    var invariantBounds = new Rect(cb.X * invariantScaleFactor,
-			    cb.Y * invariantScaleFactor,
-			    cb.Width * invariantScaleFactor,
-			    cb.Height * invariantScaleFactor);
+		    var invariantBounds = new Rect(Child.X * invariantScaleFactor,
+			    Child.Y * invariantScaleFactor,
+			    Child.Width * invariantScaleFactor,
+			    Child.Height * invariantScaleFactor);
 		    ZoomToRect(invariantBounds);
 	    }
     }
