@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System.Windows.Input;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
@@ -68,6 +69,15 @@ public class PanningControl : UserControl
 	    AvaloniaProperty.Register<PanningControl, Rect?>(nameof(ZoomBounds),
 		    defaultBindingMode: BindingMode.TwoWay);
     
+    public ICommand? ScaleChangedCommand
+    {
+	    get => GetValue(ScaleChangedCommandProperty);
+	    set => SetValue(ScaleChangedCommandProperty, value);
+    }
+    
+    public static readonly StyledProperty<ICommand?> ScaleChangedCommandProperty =
+	    AvaloniaProperty.Register<Button, ICommand?>(nameof(ScaleChangedCommand), enableDataValidation: true);
+    
     #endregion
     
     #region Variables
@@ -131,11 +141,13 @@ public class PanningControl : UserControl
 	    
 	    // Compute the total scale difference
 	    double deltaScaleToApply = Math.Pow(ZoomStepSize, verticalDelta);
+	    double newScale = 1.0d;
 	    
 	    // Update the scale
 	    if (Child is not null)
 	    {
 		    Child.Scale *= deltaScaleToApply;
+		    newScale = Child.Scale;
 	    }
 
 	    // Update the offset in the root to visually zoom towards / away from the cursor
@@ -145,6 +157,8 @@ public class PanningControl : UserControl
 	    OffsetY += pointer.Y - pointer.Y * deltaScaleToApply;
 	    
 	    e.Handled = true;
+	    
+	    ScaleChangedCommand?.Execute(newScale);
 	    
 	    InvalidateArrange();
     }
@@ -199,9 +213,20 @@ public class PanningControl : UserControl
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
-	    Content = Child;
-	    
+	    //Content = Child;
+	    if (Child is not null)
+	    {
+		    LogicalChildren.Add(Child);
+		    VisualChildren.Add(Child);
+	    }
+
 	    base.OnLoaded(e);
+    }
+
+    protected override void OnUnloaded(RoutedEventArgs e)
+    {
+	    LogicalChildren.Clear();
+	    VisualChildren.Clear();
     }
 
     #endregion

@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System.Collections.Specialized;
+using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Data;
@@ -47,15 +48,15 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 				control._interactionControls = interactionControls;
 			});
 	
-	private AvaloniaList<PositionableSubControl> _items = new AvaloniaList<PositionableSubControl>();
+	public AvaloniaList<PositionableSubControl> Items { get; } = new AvaloniaList<PositionableSubControl>();
 
 	/// <summary>
 	/// The items displayed within
 	/// </summary>
 	public static readonly DirectProperty<GraphNodeControl, AvaloniaList<PositionableSubControl>> ItemsProperty =
-		AvaloniaProperty.RegisterDirect<GraphNodeControl, AvaloniaList<PositionableSubControl>>(nameof(_items),
-			control => control._items,
-			(control, children) => control._items = children);
+		AvaloniaProperty.RegisterDirect<GraphNodeControl, AvaloniaList<PositionableSubControl>>(nameof(Items),
+			control => control.Items,
+			(control, children) => {control.Items.Clear(); control.Items.AddRange(children); });
 
 	#endregion
 
@@ -76,8 +77,51 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 		{
 			RegenerateDrawnElements();
 		}
+
+		if (e.Property == ScaleProperty)
+		{
+			RegenerateDrawnElements();
+		}
 		
 		base.OnPropertyChanged(e);
+	}
+
+	protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+	{
+		VisualChildren.Clear();
+		VisualChildren.AddRange(Items);
+		
+		Dictionary<(HorizontalAlignment, VerticalAlignment), Control> usedPositionDict = new();
+		
+		foreach (var interactionControl in _interactionControls.Where(interactionControl => !usedPositionDict.ContainsKey((interactionControl.HorizontalAlignment,
+			         interactionControl.VerticalAlignment))))
+		{
+			usedPositionDict[(interactionControl.HorizontalAlignment, interactionControl.VerticalAlignment)] = interactionControl;
+				
+			VisualChildren.Add(interactionControl);
+		}
+		
+		base.OnAttachedToVisualTree(e);
+	}
+
+	private void ItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+	{
+		LogicalChildren.Clear();
+		VisualChildren.Clear();
+		
+		LogicalChildren.AddRange(Items);
+		VisualChildren.AddRange(Items);
+		
+		Dictionary<(HorizontalAlignment, VerticalAlignment), Control> usedPositionDict = new();
+
+		foreach (var interactionControl in _interactionControls.Where(interactionControl => !usedPositionDict.ContainsKey((interactionControl.HorizontalAlignment,
+			         interactionControl.VerticalAlignment))))
+		{
+			usedPositionDict[(interactionControl.HorizontalAlignment, interactionControl.VerticalAlignment)] = interactionControl;
+				
+			LogicalChildren.Add(interactionControl);
+			VisualChildren.Add(interactionControl);
+		}
 	}
 
 	#endregion
@@ -88,7 +132,7 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 	{
 		availableSize = new Size(double.PositiveInfinity, double.PositiveInfinity);
 
-		foreach (PositionableSubControl child in _items)
+		foreach (PositionableSubControl child in Items)
 		{
 			child.Measure(availableSize);
 		}
@@ -135,7 +179,7 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 
 	protected override Size ArrangeOverride(Size finalSize)
 	{
-		foreach (PositionableSubControl child in _items)
+		foreach (PositionableSubControl child in Items)
 		{
 			ArrangeSubControl(child, finalSize);
 		}
@@ -164,20 +208,18 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 		// Draw dropshadow
 		context.DrawLine(NetlistTheme.DropShadowPen, dsp1, dsp2);
 		context.DrawLine(NetlistTheme.DropShadowPen, dsp2, dsp3);
-		
-		base.Render(context);
 	}
 
 	private void RegenerateDrawnElements()
 	{
 		// Update the main rectangle
-		contentRect = new Rect(X * Scale, Y * Scale, Width * Scale, Height * Scale);
+		contentRect = new Rect(0.0d, 0.0d, Width, Height);
 		
 		// Update the points of the dropshadow
-		double l = (X + (NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
-		double r = l + Width * Scale;
-		double t = (Y + (NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
-		double b = t + Height * Scale;
+		double l = ((NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
+		double r = l + Width;
+		double t = ((NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
+		double b = t + Height;
 		dsp1 = new Point(l, b);
 		dsp2 = new Point(r, b);
 		dsp3 = new Point(r, t);
@@ -189,8 +231,15 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 
 	public bool HitTest(Point point)
 	{
+		return true;
 		throw new NotImplementedException();
 	}
 
 	#endregion
+
+	public GraphNodeControl()
+	{
+		Items.CollectionChanged += ItemsChanged;
+		_interactionControls.CollectionChanged += ItemsChanged;
+	}
 }

@@ -49,6 +49,7 @@ public partial class NetlistView : UserControl
 	private void Initialize(NetlistViewModel vm)
 	{
 		_vm = vm;
+		PanningNetlistControl.Child = _vm.RootNode;
 	}
 	
 	// For compiled bindings in code see: https://docs.avaloniaui.net/docs/fundamentals/coded-ui#compiled-bindings

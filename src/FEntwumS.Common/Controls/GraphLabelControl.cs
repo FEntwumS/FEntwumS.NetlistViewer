@@ -51,7 +51,7 @@ public class GraphLabelControl : GenericGraphElementControl
     {
         if (e.Property == ContentProperty)
         {
-            if (e.NewValue is string newContent)
+            if (e.NewValue is string newContent && NetlistTheme is not null)
             {
                 _formattedContent = new FormattedText(newContent,
                     CultureInfo.InvariantCulture,
@@ -89,7 +89,7 @@ public class GraphLabelControl : GenericGraphElementControl
 
     public override void Render(DrawingContext context)
     {
-	    context.DrawText(_formattedContent, new Point(X * Scale, Y * Scale));
+	    context.DrawText(_formattedContent, new Point(0, 0));
     }
 
     #endregion

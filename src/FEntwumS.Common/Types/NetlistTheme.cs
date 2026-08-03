@@ -1,8 +1,10 @@
-﻿using Avalonia.Media;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using Avalonia.Media;
 
 namespace FEntwumS.Common.Types;
 
-public struct NetlistTheme
+public class NetlistTheme : INotifyPropertyChanged
 {
     public Typeface Typeface { get; set; } = default;
 
@@ -79,6 +81,21 @@ public struct NetlistTheme
         NotConnectedPen = new Pen(NotConnectedBrush, NotConnectedThickness * scale);
         HighLightPen = new Pen(HighlightBrush, HighlightThickness * scale);
         
+        OnPropertyChanged();
     }
-    
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+	    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+	    if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+	    field = value;
+	    OnPropertyChanged(propertyName);
+	    return true;
+    }
 }

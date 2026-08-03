@@ -16,7 +16,8 @@ public class GenericGraphElementControl : PositionableSubControl
 	
 	public static readonly StyledProperty<NetlistTheme> NetlistThemeProperty =
 		AvaloniaProperty.Register<GenericGraphElementControl, NetlistTheme>(nameof(NetlistTheme),
-			defaultBindingMode: BindingMode.TwoWay);
+			defaultBindingMode: BindingMode.TwoWay,
+			inherits: true);
 
 	public string srcLocation
 	{
@@ -35,11 +36,6 @@ public class GenericGraphElementControl : PositionableSubControl
 
 	protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
 	{
-		if (e.Property == ScaleProperty)
-		{
-			NetlistTheme.RegenerateBrushesAndPens();
-		}
-
 		if (e.Property == ParentProperty)
 		{
 			var newParent = e.NewValue;
@@ -47,9 +43,9 @@ public class GenericGraphElementControl : PositionableSubControl
 			if (newParent is PanningControl { Child: GenericGraphElementControl childControl })
 				childControl.PropertyChanged += (sender, args) =>
 				{
-					if (args.Property == ScaleProperty)
+					if (args.Property == ScaleProperty && args.NewValue is double newScale)
 					{
-						childControl.NetlistTheme.RegenerateBrushesAndPens();
+						childControl.NetlistTheme.RegenerateBrushesAndPens(newScale);
 					}
 				};
 		}

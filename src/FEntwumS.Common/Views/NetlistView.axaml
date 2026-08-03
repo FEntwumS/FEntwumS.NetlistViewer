@@ -32,8 +32,11 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 NetlistId="{Binding NetlistId}"
+                FontFamily="{StaticResource MartianMono}"
                 Child="{Binding RootNode}"
-                FontFamily="{StaticResource MartianMono}">
+                ScaleChangedCommand="{Binding ScaleChangedCommand}"
+                >
+                
             </controls:PanningNetlistControl>
             
             <Button x:Name="ZoomToFitButton"

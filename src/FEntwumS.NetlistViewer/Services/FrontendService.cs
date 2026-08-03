@@ -648,22 +648,31 @@ public class FrontendService : IFrontendService
 		var nvm = new NetlistViewModel();
 		nvm.Title = $"Netlist: {top} test";
 
-		var t = new GraphLabelControl
+		var c = new GraphNodeControl()
 		{
-			Content = "test",
-			Fontsize = 10.0d,
-			Width = 28.0d,
-			Height = 11.0d,
-			NetlistTheme = new NetlistTheme()
-			{
-				Typeface = new Typeface(new FontFamily("avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg"))
-			}
+			X = 0.0d,
+			Y = 0.0d,
+			Width = 1000.0d,
+			Height = 1000.0d
 		};
+
+		c.Items.Add(new GraphLabelControl
+			{
+				X = 10.0d,
+				Y = 10.0d,
+				Content = "test",
+				Fontsize = 10.0d,
+				Width = 28.0d,
+				Height = 11.0d
+			});
+		nvm.NetlistTheme = new NetlistTheme()
+		{
+			Typeface = new Typeface(new FontFamily("avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg"))
+		};
+		nvm.RootNode = c;
 		
-		nvm.RootNode = t;
 		nvm.InitializeContent();
-
-
+		
 		_dockService.Show(nvm, DockShowLocation.Document);
 		_dockService.InitializeContent();
 		vm.ProjectRootFolder = json.Root.RootFolderPath;
