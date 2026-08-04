@@ -13,7 +13,7 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 {
 	#region Properties
 
-	private string CellName
+	public string CellName
 	{
 		get => GetValue(CellNameProperty);
 		set => SetValue(CellNameProperty, value);
@@ -24,7 +24,7 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 			defaultBindingMode: BindingMode.TwoWay,
 			defaultValue: "");
 
-	private string CellType
+	public string CellType
 	{
 		get => GetValue(CellTypeProperty);
 		set => SetValue(CellTypeProperty, value);
@@ -35,7 +35,7 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 			defaultBindingMode: BindingMode.TwoWay,
 			defaultValue: "");
 	
-	private AvaloniaList<Control> _interactionControls = new AvaloniaList<Control>();
+	public AvaloniaList<Control> _interactionControls = new AvaloniaList<Control>();
 	
 	/// <summary>
 	/// The buttons displayed on the node

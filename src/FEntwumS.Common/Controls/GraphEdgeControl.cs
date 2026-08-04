@@ -10,7 +10,7 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 {
 	#region Properties
 
-	private AvaloniaList<Point> _points = new AvaloniaList<Point>();
+	public AvaloniaList<Point> _points = new AvaloniaList<Point>();
 	
 	/// <summary>
 	/// The points defining the path of the edge, from source to sink
@@ -20,7 +20,7 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 			o => o._points,
 			(o, v) => o._points = v);
 
-	private bool _isThick
+	public bool _isThick
 	{
 		get => GetValue(IsThickProperty);
 		set => SetValue(IsThickProperty, value);
@@ -81,6 +81,7 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 
 	public bool HitTest(Point point)
 	{
+		return true;
 		throw new NotImplementedException();
 	}
 

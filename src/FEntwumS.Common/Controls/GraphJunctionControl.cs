@@ -10,7 +10,7 @@ public class GraphJunctionControl : GenericGraphElementControl, ICustomHitTest
 {
 	#region Properties
 
-	private JunctionShape _junctionShape
+	public JunctionShape _junctionShape
 	{
 		get => GetValue(JunctionShapeProperty);
 		set => SetValue(JunctionShapeProperty, value);

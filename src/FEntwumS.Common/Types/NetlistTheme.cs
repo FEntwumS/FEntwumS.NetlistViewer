@@ -81,7 +81,7 @@ public class NetlistTheme : INotifyPropertyChanged
         NotConnectedPen = new Pen(NotConnectedBrush, NotConnectedThickness * scale);
         HighLightPen = new Pen(HighlightBrush, HighlightThickness * scale);
         
-        OnPropertyChanged();
+        OnPropertyChanged(nameof(NetlistTheme));
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

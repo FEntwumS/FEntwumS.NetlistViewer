@@ -9,7 +9,7 @@ public class GraphPortControl : GenericGraphElementControl
 {
 	#region Properties
 
-	private PortShape _portShape
+	public PortShape _portShape
 	{
 		get => GetValue(PortShapeProperty);
 		set => SetValue(PortShapeProperty, value);
