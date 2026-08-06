@@ -60,7 +60,7 @@ public class GraphLabelControl : GenericGraphElementControl
                     Fontsize * Scale,
                     NetlistTheme.TextBrush);
             }
-        } else if (e.Property == NetlistThemeProperty)
+        } else if (e.Property == NetlistThemeProperty && e.NewValue is not null)
         {
 	        _formattedContent = new FormattedText(Content ?? "",
 		        CultureInfo.InvariantCulture,
@@ -70,7 +70,7 @@ public class GraphLabelControl : GenericGraphElementControl
 		        NetlistTheme.TextBrush);
         }
 
-        if (e.Property == ScaleProperty)
+        if (e.Property == ScaleProperty && NetlistTheme is not null)
         {
 	        _formattedContent = new FormattedText(Content ?? "",
 		        CultureInfo.InvariantCulture,

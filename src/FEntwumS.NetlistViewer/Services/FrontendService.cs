@@ -612,7 +612,7 @@ public class FrontendService : IFrontendService
 			return;
 		}
 		
-		vm.File = await resp.Content.ReadAsStreamAsync();
+		//vm.File = await resp.Content.ReadAsStreamAsync();
 
 		ApplicationProcess indexProc = _applicationStateService.AddState("Indexing", AppState.Loading);
 
@@ -648,6 +648,10 @@ public class FrontendService : IFrontendService
 		var nvm = new NetlistViewModel();
 		nvm.Title = $"Netlist: {top} test";
 
+		await ServiceManager.GetService<IJsonLoader>().OpenJsonAsync(await resp.Content.ReadAsStreamAsync(), currentNetlist);
+
+		var r = await ServiceManager.GetService<IJsonLoader>().ParseJsonAsync(0, 0, vm, currentNetlist);
+
 		var c = new GraphNodeControl()
 		{
 			X = 0.0d,
@@ -669,7 +673,11 @@ public class FrontendService : IFrontendService
 		{
 			Typeface = new Typeface(new FontFamily("avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg"))
 		};
-		nvm.RootNode = c;
+		r.NetlistTheme = new NetlistTheme()
+		{
+			Typeface = new Typeface(new FontFamily("avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg"))
+		};
+		nvm.RootNode = r;
 		
 		nvm.InitializeContent();
 		

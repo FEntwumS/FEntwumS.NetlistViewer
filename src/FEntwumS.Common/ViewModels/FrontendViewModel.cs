@@ -235,7 +235,7 @@ public class FrontendViewModel : ExtendedTool
 
 				Items.Clear();
 
-				Items.AddRange(jsonLoader.ParseJsonAsync(0, 0, this, netlistId).Result);
+				//Items.AddRange(jsonLoader.ParseJsonAsync(0, 0, this, netlistId).Result);
 
 				UpdateScaleImpl();
 

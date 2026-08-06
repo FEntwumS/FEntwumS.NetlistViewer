@@ -30,6 +30,17 @@ public class GraphEdgeBuilder : GenericGraphElementBuilder<GraphEdgeControl>
 		return this;
 	}
 
+	public GraphEdgeBuilder WithPoints(List<Point> points)
+	{
+		if (_points is null)
+		{
+			_points = new List<Point>();
+		}
+		
+		this._points.AddRange(points);
+		return this;
+	}
+
 	public GraphEdgeControl Build()
 	{
 		var c = base.Build();

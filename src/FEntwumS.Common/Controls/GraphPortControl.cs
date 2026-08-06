@@ -32,11 +32,11 @@ public class GraphPortControl : GenericGraphElementControl
 
 	protected override void OnInitialized()
 	{
-		double lx = X,
-			rx = X + Width,
+		double lx = 0.0d,
+			rx = 0.0d + Width,
 			mx = rx - 5.0d,
-			ty = Y,
-			by = Y + Height,
+			ty = 0.0d,
+			by = 0.0d + Height,
 			my = by - (Height / 2.0d);
 		
 		_contentGeometry = _portShape switch
@@ -64,6 +64,11 @@ public class GraphPortControl : GenericGraphElementControl
 	protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
 	{
 		if (e.Property == NetlistThemeProperty)
+		{
+			RegenerateDrawnElements();
+		}
+		
+		if (e.Property == ScaleProperty && NetlistTheme is not null)
 		{
 			RegenerateDrawnElements();
 		}

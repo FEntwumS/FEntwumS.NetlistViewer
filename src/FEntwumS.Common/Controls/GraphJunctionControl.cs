@@ -45,32 +45,32 @@ public class GraphJunctionControl : GenericGraphElementControl, ICustomHitTest
 		double orh = ow / 2.0d,
 			orv = oh / 2.0d;
 
-		double ilx = X - rh,
-			irx = X + rh,
-			ity = Y - rv,
-			iby = Y + rv;
+		double ilx = -rh,
+			irx = rh,
+			ity = -rv,
+			iby = rv;
 
-		double olx = X - orh,
-			orx = X + orh,
-			oty = Y - orv,
-			oby = Y + orv;
+		double olx = -orh,
+			orx = orh,
+			oty = -orv,
+			oby = orv;
 		_contentGeometry = _junctionShape switch
 		{
 			JunctionShape.Circle => new EllipseGeometry(new Rect(ilx, ity, Width, Height)),
 			JunctionShape.Square => new RectangleGeometry(new Rect(ilx, ity, Width, Height)),
 			JunctionShape.Diamond => new PolylineGeometry([
-				new Point(X, oty),
-				new Point(orx, Y),
-				new Point(X, oby),
-				new Point(olx, Y)], true),
+				new Point(0.0d, oty),
+				new Point(orx, 0.0d),
+				new Point(0.0d, oby),
+				new Point(olx, 0.0d)], true),
 			JunctionShape.TriangleLeft => new PolylineGeometry([
-				new Point(X, oty),
-				new Point(orx, Y),
-				new Point(X, oby)], true),
+				new Point(0.0d, oty),
+				new Point(orx, 0.0d),
+				new Point(0.0d, oby)], true),
 			JunctionShape.TriangleRight => new PolylineGeometry([
-				new Point(X, oty),
-				new Point(X, oby),
-				new Point(olx, Y)], true),
+				new Point(0.0d, oty),
+				new Point(0.0d, oby),
+				new Point(olx, 0.0d)], true),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 		
@@ -81,7 +81,12 @@ public class GraphJunctionControl : GenericGraphElementControl, ICustomHitTest
 	{
 		if (e.Property == NetlistThemeProperty)
 		{
-			
+			RegenerateDrawnElements();
+		}
+		
+		if (e.Property == ScaleProperty && NetlistTheme is not null)
+		{
+			RegenerateDrawnElements();
 		}
 		
 		base.OnPropertyChanged(e);
@@ -109,6 +114,7 @@ public class GraphJunctionControl : GenericGraphElementControl, ICustomHitTest
 
 	public bool HitTest(Point point)
 	{
+		return true;
 		throw new NotImplementedException();
 	}
 

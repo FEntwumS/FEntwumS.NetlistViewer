@@ -54,6 +54,11 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 		{
 			RegenerateDrawnElements();
 		}
+
+		if (e.Property == ScaleProperty && NetlistTheme is not null)
+		{
+			RegenerateDrawnElements();
+		}
 		
 		base.OnPropertyChanged(e);
 	}
@@ -66,8 +71,6 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 	{
 		Pen linePen = _isThick ? NetlistTheme.BundledEdgePen : NetlistTheme.EdgePen;
 		context.DrawGeometry(null, linePen, _contentGeometry);
-		
-		base.Render(context);
 	}
 
 	private void RegenerateDrawnElements()

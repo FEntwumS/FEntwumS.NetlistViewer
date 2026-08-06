@@ -9,8 +9,9 @@ public class GenericGraphElementBuilder<T> where T: GenericGraphElementControl, 
 	private double _y;
 	private	double _width;
 	private	double _height;
-	private NetlistTheme _netlistTheme;
+	private NetlistTheme? _netlistTheme;
 	private string _srclocation = "";
+	private int _zIndex;
 
 	public static GenericGraphElementBuilder<T> Create()
 	{
@@ -53,16 +54,31 @@ public class GenericGraphElementBuilder<T> where T: GenericGraphElementControl, 
 		return this;
 	}
 
+	public GenericGraphElementBuilder<T> WithZIndex(int zIndex)
+	{
+		this._zIndex = zIndex;
+		return this;
+	}
+
 	public T Build()
 	{
-		return new T()
+		var n = new T()
 		{
 			X = this._x,
 			Y = this._y,
 			Width = this._width,
 			Height = this._height,
-			NetlistTheme = this._netlistTheme,
-			srcLocation = this._srclocation
+			srcLocation = this._srclocation,
+			ZIndex = _zIndex,
+			ClipToBounds = false,
+			IsHitTestVisible = false
 		};
+
+		if (this._netlistTheme is not null)
+		{
+			n.NetlistTheme = this._netlistTheme;
+		}
+
+		return n;
 	}
 }

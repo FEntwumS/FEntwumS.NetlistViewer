@@ -11,7 +11,10 @@ public class GenericGraphElementControl : PositionableSubControl
 	public NetlistTheme NetlistTheme
 	{
 		get => GetValue(NetlistThemeProperty);
-		set => SetValue(NetlistThemeProperty, value);
+		set
+		{
+			SetValue(NetlistThemeProperty, value);
+		}
 	}
 	
 	public static readonly StyledProperty<NetlistTheme> NetlistThemeProperty =

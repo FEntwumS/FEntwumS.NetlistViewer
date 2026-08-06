@@ -73,12 +73,12 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 
 	protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
 	{
-		if (e.Property == NetlistThemeProperty)
+		if (e.Property == NetlistThemeProperty && e.NewValue is not null)
 		{
 			RegenerateDrawnElements();
 		}
 
-		if (e.Property == ScaleProperty)
+		if (e.Property == ScaleProperty && NetlistTheme is not null)
 		{
 			RegenerateDrawnElements();
 		}
