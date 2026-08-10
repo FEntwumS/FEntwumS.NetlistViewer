@@ -84,8 +84,13 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 
 	public bool HitTest(Point point)
 	{
-		return true;
-		throw new NotImplementedException();
+		if (NetlistTheme is null)
+		{
+			return false;
+		}
+		
+		Pen linePen = _isThick ? NetlistTheme.BundledEdgePen : NetlistTheme.EdgePen;
+		return _contentGeometry.StrokeContains(linePen, point);
 	}
 
 	#endregion

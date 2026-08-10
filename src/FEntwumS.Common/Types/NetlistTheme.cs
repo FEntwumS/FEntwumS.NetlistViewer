@@ -38,7 +38,7 @@ public class NetlistTheme : INotifyPropertyChanged
     public Color BorderColor { get; set; } = Color.FromRgb(0, 0, 0);
     public Color DropShadowColor { get; set; } = Color.FromRgb(128, 128, 128);
     public Color EdgeColor { get; set; } = Color.FromRgb(0, 0, 0);
-    public Color FillColor { get; set; } = Color.FromArgb(200, 226, 226, 226);
+    public Color FillColor { get; set; } = Color.FromArgb(100, 128, 128, 128);
     public Color TextColor { get; set; } = Color.FromRgb(0, 0, 0);
     public Color HighlightColor { get; set; } = Color.FromRgb(255, 255, 0);
     public Color NotConnectedColor { get; set; } = Color.FromRgb(80, 80, 80);

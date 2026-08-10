@@ -57,5 +57,19 @@ public class GenericGraphElementControl : PositionableSubControl
 	}
 
 	#endregion
+	
+	#region Rendering
+
+	protected override Size MeasureCore(Size availableSize)
+	{
+		return Double.IsNaN(Width) || Double.IsNaN(Height) ? new Size(100, 100) : new Size(Width, Height);
+	}
+
+	protected override void ArrangeCore(Rect finalRect)
+	{
+		Bounds = finalRect;
+	}
+
+	#endregion
 
 }

@@ -280,20 +280,23 @@ public class JsonLoader : IJsonLoader
 
 		if (!string.Equals((string)node["id"]!, "root", StringComparison.Ordinal))
 		{
-			parent = (GraphNodeBuilder.Create()
-					.WithCellName(cellname)
-					.WithCellType(celltype)
-					.WithX(xRef + x)
-					.WithY(yRef + y)
-					.WithWidth(nWidth)
-					.WithHeight(nHeight)
-					.WithSrclocation(src)
-					.WithZIndex(depth) as GraphNodeBuilder)
-				.Build();
-			
-			prevParent.Items.Add(parent);
-			
-			NodeCnt++;
+			if (!isScaffolding)
+			{
+				parent = (GraphNodeBuilder.Create()
+						.WithCellName(cellname)
+						.WithCellType(celltype)
+						.WithX(xRef + x)
+						.WithY(yRef + y)
+						.WithWidth(nWidth)
+						.WithHeight(nHeight)
+						.WithSrclocation(src)
+						.WithZIndex(depth) as GraphNodeBuilder)
+					.Build();
+
+				prevParent.Items.Add(parent);
+
+				NodeCnt++;
+			}
 		}
 
 		JsonArray? labels = node["labels"] as JsonArray;
@@ -314,7 +317,14 @@ public class JsonLoader : IJsonLoader
 
 		if (edges != null)
 		{
-			CreateEdges(edges, parent, 0, 0, newDepth);
+			if (!isScaffolding)
+			{
+				CreateEdges(edges, parent, 0, 0, newDepth);
+			}
+			else
+			{
+				CreateEdges(edges, parent, x, y, newDepth);
+			}
 		}
 
 		if (children == null) return;
@@ -393,6 +403,7 @@ public class JsonLoader : IJsonLoader
 
 			parent.Items.Add((GraphLabelBuilder.Create()
 				.WithContent(text)
+				.WithFontSize(fontSize)
 				.WithX(xRef + x)
 				.WithY(yRef + y)
 				.WithWidth(w)
@@ -486,17 +497,19 @@ public class JsonLoader : IJsonLoader
 				h  = 10.0d;
 			}
 
-			parent.Items.Add((GraphPortBuilder.Create()
-				.WithPortShape(portShape)
-				.WithX(xRef + x)
-				.WithY(yRef + y)
-				.WithWidth(w)
-				.WithHeight(h)
-				.WithZIndex(depth) as GraphPortBuilder)
-			.Build()
-				);
+			if (!isScaffolding)
+			{
+				parent.Items.Add((GraphPortBuilder.Create()
+						.WithPortShape(portShape)
+						.WithX(xRef + x)
+						.WithY(yRef + y)
+						.WithWidth(w)
+						.WithHeight(h)
+						.WithZIndex(depth) as GraphPortBuilder)
+					.Build());
 
-			PortCnt++;
+				PortCnt++;
+			}
 		}
 	}
 
@@ -710,18 +723,20 @@ public class JsonLoader : IJsonLoader
 					BendCnt += 3;
 				}
 
-				parent.Items.Add((GraphEdgeBuilder.Create()
-					.WithIsThick(false)
-					.WithPoints(pointList)
-					.WithX(0.0d)
-					.WithY(0.0d)
-					.WithWidth(1000)
-					.WithHeight(1000)
-					.WithZIndex(depth) as GraphEdgeBuilder)
-					.Build()
-					);
+				if (!isScaffolding)
+				{
+					parent.Items.Add((GraphEdgeBuilder.Create()
+							.WithIsThick(false)
+							.WithPoints(pointList)
+							.WithX(xRef)
+							.WithY(yRef)
+							.WithWidth(1000)
+							.WithHeight(1000)
+							.WithZIndex(depth) as GraphEdgeBuilder)
+						.Build());
 
-				EdgeCnt++;
+					EdgeCnt++;
+				}
 			}
 
 			if (edge["labels"] is JsonArray labels)

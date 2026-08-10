@@ -5,6 +5,7 @@ namespace FEntwumS.Common.Builders;
 public class GraphLabelBuilder : GenericGraphElementBuilder<GraphLabelControl>
 {
 	private string _content;
+	private double _fontSize = 10.0d;
 
 	public new static GraphLabelBuilder Create()
 	{
@@ -17,10 +18,17 @@ public class GraphLabelBuilder : GenericGraphElementBuilder<GraphLabelControl>
 		return this;
 	}
 
+	public GraphLabelBuilder WithFontSize(double fontSize)
+	{
+		this._fontSize = fontSize;
+		return this;
+	}
+
 	public GraphLabelControl Build()
 	{
 		var c = base.Build();
 		c.Content = this._content;
+		c.Fontsize = this._fontSize;
 		return c;
 	}
 }

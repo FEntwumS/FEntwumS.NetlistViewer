@@ -62,14 +62,45 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 
 	#region Variables
 
-	private Rect contentRect = new Rect(0, 0, 100, 100);
-	private Point dsp1 = new Point(0, 0);
-	private Point dsp2 = new Point(0, 0);
-	private Point dsp3 = new Point(0, 0);
+	private GeometryGroup _contentGeometry = new GeometryGroup()
+	{
+		Children = new GeometryCollection([new RectangleGeometry(new Rect(0, 0, 100, 100))])
+	};
 
 	#endregion
 
 	#region Event handling
+
+	protected override void OnInitialized()
+	{
+		var contentRect = new Rect(0.0d, 0.0d, Width, Height);
+		
+		// double l = ((NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
+		// double r = l + Width;
+		// double t = ((NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
+		// double b = t + Height;
+		// var dsp1 = new Point(l, b);
+		// var dsp2 = new Point(r, b);
+		// var dsp3 = new Point(r, t);
+
+		_contentGeometry.Children =
+		[
+			new RectangleGeometry(contentRect)/*,
+			new PolylineGeometry([
+				dsp1,
+				dsp2,
+				dsp3
+			], false)*/
+		];
+		
+		// Todo: Better solution
+		ItemsChanged(null, null);
+		
+		Items.CollectionChanged += ItemsChanged;
+		_interactionControls.CollectionChanged += ItemsChanged;
+		
+		base.OnInitialized();
+	}
 
 	protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
 	{
@@ -128,6 +159,15 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 
 	#region Rendering
 
+	protected override Size MeasureCore(Size availableSize)
+	{
+		var requiredSize = base.MeasureCore(availableSize);
+		
+		MeasureOverride(requiredSize);
+
+		return requiredSize;
+	}
+
 	protected override Size MeasureOverride(Size availableSize)
 	{
 		availableSize = new Size(double.PositiveInfinity, double.PositiveInfinity);
@@ -177,6 +217,13 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 		interactionControl.Arrange(new Rect(x, y, interactionControl.DesiredSize.Width, interactionControl.DesiredSize.Height));
 	}
 
+	protected override void ArrangeCore(Rect finalRect)
+	{
+		ArrangeOverride(finalRect.Size);
+		
+		base.ArrangeCore(finalRect);
+	}
+
 	protected override Size ArrangeOverride(Size finalSize)
 	{
 		foreach (PositionableSubControl child in Items)
@@ -202,27 +249,12 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 	
 	public override void Render(DrawingContext context)
 	{
-		// Draw rect
-		context.DrawRectangle(NetlistTheme.FillBrush, NetlistTheme.BorderPen, contentRect);
-		
-		// Draw dropshadow
-		context.DrawLine(NetlistTheme.DropShadowPen, dsp1, dsp2);
-		context.DrawLine(NetlistTheme.DropShadowPen, dsp2, dsp3);
+		context.DrawGeometry(NetlistTheme.FillBrush, NetlistTheme.BorderPen, _contentGeometry);
 	}
 
 	private void RegenerateDrawnElements()
 	{
-		// Update the main rectangle
-		contentRect = new Rect(0.0d, 0.0d, Width, Height);
-		
-		// Update the points of the dropshadow
-		double l = ((NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
-		double r = l + Width;
-		double t = ((NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
-		double b = t + Height;
-		dsp1 = new Point(l, b);
-		dsp2 = new Point(r, b);
-		dsp3 = new Point(r, t);
+		_contentGeometry.Transform = new ScaleTransform(Scale, Scale);
 	}
 
 	#endregion
@@ -236,10 +268,4 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 	}
 
 	#endregion
-
-	public GraphNodeControl()
-	{
-		Items.CollectionChanged += ItemsChanged;
-		_interactionControls.CollectionChanged += ItemsChanged;
-	}
 }
