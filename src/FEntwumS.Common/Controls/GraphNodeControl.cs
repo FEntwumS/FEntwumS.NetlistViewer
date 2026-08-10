@@ -93,8 +93,10 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 			], false)*/
 		];
 		
-		// Todo: Better solution
-		ItemsChanged(null, null);
+		// Add the child elements to the visual tree. This is deferred to initialization to prevent excessive visual
+		// tree recalculations and property propagations
+		AddChildrenToVisualTree();
+		
 		
 		Items.CollectionChanged += ItemsChanged;
 		_interactionControls.CollectionChanged += ItemsChanged;
@@ -137,22 +139,7 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 
 	private void ItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
 	{
-		LogicalChildren.Clear();
-		VisualChildren.Clear();
-		
-		LogicalChildren.AddRange(Items);
-		VisualChildren.AddRange(Items);
-		
-		Dictionary<(HorizontalAlignment, VerticalAlignment), Control> usedPositionDict = new();
-
-		foreach (var interactionControl in _interactionControls.Where(interactionControl => !usedPositionDict.ContainsKey((interactionControl.HorizontalAlignment,
-			         interactionControl.VerticalAlignment))))
-		{
-			usedPositionDict[(interactionControl.HorizontalAlignment, interactionControl.VerticalAlignment)] = interactionControl;
-				
-			LogicalChildren.Add(interactionControl);
-			VisualChildren.Add(interactionControl);
-		}
+		AddChildrenToVisualTree();
 	}
 
 	#endregion
@@ -268,4 +255,24 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 	}
 
 	#endregion
+
+	private void AddChildrenToVisualTree()
+	{
+		LogicalChildren.Clear();
+		VisualChildren.Clear();
+		
+		LogicalChildren.AddRange(Items);
+		VisualChildren.AddRange(Items);
+		
+		Dictionary<(HorizontalAlignment, VerticalAlignment), Control> usedPositionDict = new();
+
+		foreach (var interactionControl in _interactionControls.Where(interactionControl => !usedPositionDict.ContainsKey((interactionControl.HorizontalAlignment,
+			         interactionControl.VerticalAlignment))))
+		{
+			usedPositionDict[(interactionControl.HorizontalAlignment, interactionControl.VerticalAlignment)] = interactionControl;
+				
+			LogicalChildren.Add(interactionControl);
+			VisualChildren.Add(interactionControl);
+		}
+	}
 }
