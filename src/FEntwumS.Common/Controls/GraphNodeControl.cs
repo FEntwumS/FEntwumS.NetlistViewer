@@ -58,6 +58,16 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 			control => control.Items,
 			(control, children) => {control.Items.Clear(); control.Items.AddRange(children); });
 
+	public string? LocationPath
+	{
+		get => GetValue(LocationPathProperty);
+		set => SetValue(LocationPathProperty, value);
+	}
+
+	public static readonly StyledProperty<string?> LocationPathProperty =
+		AvaloniaProperty.Register<GraphNodeControl, string?>(nameof(LocationPath),
+			defaultBindingMode: BindingMode.TwoWay);
+
 	#endregion
 
 	#region Variables
