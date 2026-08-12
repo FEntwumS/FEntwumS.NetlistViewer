@@ -285,6 +285,7 @@ public class JsonLoader : IJsonLoader
 				parent = (GraphNodeBuilder.Create()
 						.WithCellName(cellname)
 						.WithCellType(celltype)
+						.WithJumpToSourceInteractionControl()
 						.WithX(xRef + x)
 						.WithY(yRef + y)
 						.WithWidth(nWidth)

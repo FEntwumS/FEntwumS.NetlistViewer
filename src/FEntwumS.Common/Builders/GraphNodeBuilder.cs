@@ -1,5 +1,9 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
+using CommunityToolkit.Mvvm.Input;
 using FEntwumS.Common.Controls;
 
 namespace FEntwumS.Common.Builders;
@@ -40,13 +44,14 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 
 	public GraphNodeBuilder WithTopLeftInteractionControl(Button button)
 	{
-		if (_topLeftInteractionControls is null)
+		_topLeftInteractionControls ??= new StackPanel()
 		{
-			_topLeftInteractionControls = new StackPanel();
-			_topLeftInteractionControls.Spacing = 10.0d;
-			_topLeftInteractionControls.HorizontalAlignment = HorizontalAlignment.Left;
-			_topLeftInteractionControls.VerticalAlignment = VerticalAlignment.Top;
-		}
+			Spacing = 10.0d,
+			HorizontalAlignment = HorizontalAlignment.Left,
+			VerticalAlignment = VerticalAlignment.Top,
+			Orientation = Orientation.Vertical,
+			IsHitTestVisible = false
+		};
 		
 		_topLeftInteractionControls.Children.Add(button);
 		return this;
@@ -54,13 +59,14 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 
 	public GraphNodeBuilder WithTopRightInteractionControl(Button button)
 	{
-		if (_topRightInteractionControls is null)
+		_topRightInteractionControls ??= new StackPanel()
 		{
-			_topRightInteractionControls = new StackPanel();
-			_topRightInteractionControls.Spacing = 10.0d;
-			_topRightInteractionControls.HorizontalAlignment = HorizontalAlignment.Right;
-			_topRightInteractionControls.VerticalAlignment = VerticalAlignment.Top;
-		}
+			Spacing = 10.0d,
+			HorizontalAlignment = HorizontalAlignment.Right,
+			VerticalAlignment = VerticalAlignment.Top,
+			Orientation = Orientation.Vertical,
+			IsHitTestVisible = false
+		};
 		
 		_topRightInteractionControls.Children.Add(button);
 		return this;
@@ -68,14 +74,14 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 
 	public GraphNodeBuilder WithTopCenterInteractionControl(Button button)
 	{
-		if (_topCenterInteractionControls is null)
+		_topCenterInteractionControls ??= new StackPanel()
 		{
-			_topCenterInteractionControls = new StackPanel();
-			_topCenterInteractionControls.Spacing = 10.0d;
-			_topCenterInteractionControls.HorizontalAlignment = HorizontalAlignment.Center;
-			_topCenterInteractionControls.VerticalAlignment = VerticalAlignment.Top;
-			_topCenterInteractionControls.Orientation = Orientation.Horizontal;
-		}
+			Spacing = 10.0d,
+			HorizontalAlignment = HorizontalAlignment.Center,
+			VerticalAlignment = VerticalAlignment.Top,
+			Orientation = Orientation.Horizontal,
+			IsHitTestVisible = false
+		};
 		
 		_topCenterInteractionControls.Children.Add(button);
 		return this;
@@ -83,13 +89,14 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 	
 	public GraphNodeBuilder WithCenterLeftInteractionControl(Button button)
 	{
-		if (_centerLeftInteractionControls is null)
+		_centerLeftInteractionControls ??= new StackPanel()
 		{
-			_centerLeftInteractionControls = new StackPanel();
-			_centerLeftInteractionControls.Spacing = 10.0d;
-			_centerLeftInteractionControls.HorizontalAlignment = HorizontalAlignment.Left;
-			_centerLeftInteractionControls.VerticalAlignment = VerticalAlignment.Top;
-		}
+			Spacing = 10.0d,
+			HorizontalAlignment = HorizontalAlignment.Left,
+			VerticalAlignment = VerticalAlignment.Center,
+			Orientation = Orientation.Vertical,
+			IsHitTestVisible = false
+		};
 		
 		_centerLeftInteractionControls.Children.Add(button);
 		return this;
@@ -97,13 +104,14 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 
 	public GraphNodeBuilder WithCenterRightInteractionControl(Button button)
 	{
-		if (_centerRightInteractionControls is null)
+		_centerRightInteractionControls ??= new StackPanel()
 		{
-			_centerRightInteractionControls = new StackPanel();
-			_centerRightInteractionControls.Spacing = 10.0d;
-			_centerRightInteractionControls.HorizontalAlignment = HorizontalAlignment.Right;
-			_centerRightInteractionControls.VerticalAlignment = VerticalAlignment.Top;
-		}
+			Spacing = 10.0d,
+			HorizontalAlignment = HorizontalAlignment.Right,
+			VerticalAlignment = VerticalAlignment.Center,
+			Orientation = Orientation.Vertical,
+			IsHitTestVisible = false
+		};
 		
 		_centerRightInteractionControls.Children.Add(button);
 		return this;
@@ -111,14 +119,14 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 
 	public GraphNodeBuilder WithCenterCenterInteractionControl(Button button)
 	{
-		if (_centerCenterInteractionControls is null)
+		_centerCenterInteractionControls ??= new StackPanel()
 		{
-			_centerCenterInteractionControls = new StackPanel();
-			_centerCenterInteractionControls.Spacing = 10.0d;
-			_centerCenterInteractionControls.HorizontalAlignment = HorizontalAlignment.Center;
-			_centerCenterInteractionControls.VerticalAlignment = VerticalAlignment.Top;
-			_centerCenterInteractionControls.Orientation = Orientation.Horizontal;
-		}
+			Spacing = 10.0d,
+			HorizontalAlignment = HorizontalAlignment.Center,
+			VerticalAlignment = VerticalAlignment.Center,
+			Orientation = Orientation.Horizontal,
+			IsHitTestVisible = false
+		};
 
 		_centerCenterInteractionControls.Children.Add(button);
 		return this;
@@ -126,13 +134,14 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 	
 	public GraphNodeBuilder WithBottomLeftInteractionControl(Button button)
 	{
-		if (_bottomLeftInteractionControls is null)
+		_bottomLeftInteractionControls ??= new StackPanel()
 		{
-			_bottomLeftInteractionControls = new StackPanel();
-			_bottomLeftInteractionControls.Spacing = 10.0d;
-			_bottomLeftInteractionControls.HorizontalAlignment = HorizontalAlignment.Left;
-			_bottomLeftInteractionControls.VerticalAlignment = VerticalAlignment.Top;
-		}
+			Spacing = 10.0d,
+			HorizontalAlignment = HorizontalAlignment.Left,
+			VerticalAlignment = VerticalAlignment.Bottom,
+			Orientation = Orientation.Vertical,
+			IsHitTestVisible = false
+		};
 		
 		_bottomLeftInteractionControls.Children.Add(button);
 		return this;
@@ -140,13 +149,14 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 
 	public GraphNodeBuilder WithBottomRightInteractionControl(Button button)
 	{
-		if (_bottomRightInteractionControls is null)
+		_bottomRightInteractionControls ??= new StackPanel()
 		{
-			_bottomRightInteractionControls = new StackPanel();
-			_bottomRightInteractionControls.Spacing = 10.0d;
-			_bottomRightInteractionControls.HorizontalAlignment = HorizontalAlignment.Right;
-			_bottomRightInteractionControls.VerticalAlignment = VerticalAlignment.Top;
-		}
+			Spacing = 10.0d,
+			HorizontalAlignment = HorizontalAlignment.Right,
+			VerticalAlignment = VerticalAlignment.Bottom,
+			Orientation = Orientation.Vertical,
+			IsHitTestVisible = false
+		};
 		
 		_bottomRightInteractionControls.Children.Add(button);
 		return this;
@@ -154,14 +164,14 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 
 	public GraphNodeBuilder WithBottomCenterInteractionControl(Button button)
 	{
-		if (_bottomCenterInteractionControls is null)
+		_bottomCenterInteractionControls ??= new StackPanel()
 		{
-			_bottomCenterInteractionControls = new StackPanel();
-			_bottomCenterInteractionControls.Spacing = 10.0d;
-			_bottomCenterInteractionControls.HorizontalAlignment = HorizontalAlignment.Center;
-			_bottomCenterInteractionControls.VerticalAlignment = VerticalAlignment.Top;
-			_bottomCenterInteractionControls.Orientation = Orientation.Horizontal;
-		}
+			Spacing = 10.0d,
+			HorizontalAlignment = HorizontalAlignment.Center,
+			VerticalAlignment = VerticalAlignment.Bottom,
+			Orientation = Orientation.Horizontal,
+			IsHitTestVisible = false
+		};
 
 		_bottomCenterInteractionControls.Children.Add(button);
 		return this;
@@ -237,6 +247,75 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 		// add to relevant interaction control panel
 		//What to do on error? Nothing???
 
+		Button jumpToSourceButton = new Button()
+		{
+			Padding = new Thickness(5.0d),
+			CornerRadius = new CornerRadius(3.0d),
+			BorderThickness = new Thickness(1.0d),
+			VerticalAlignment = VerticalAlignment.Top,
+			HorizontalAlignment = HorizontalAlignment.Center,
+			Margin = new Thickness(5.0d)
+		};
+
+		jumpToSourceButton.Initialized += (sender, args) =>
+		{
+			bool found = jumpToSourceButton.TryGetResource("FluentIconsFilled.FullScreenZoomFilled",
+				jumpToSourceButton.ActualThemeVariant, out var contentImage);
+
+			int i = 0;
+		};
+
+		jumpToSourceButton.ActualThemeVariantChanged += (sender, args) =>
+		{
+			bool found = jumpToSourceButton.TryFindResource("FluentIconsFilled.FullScreenZoomFilled",
+				jumpToSourceButton.ActualThemeVariant, out var contentImage);
+			jumpToSourceButton.TryFindResource("ThemeBackgroundBrush",
+				jumpToSourceButton.ActualThemeVariant, out var bgbrush);
+			jumpToSourceButton.TryFindResource("ThemeBorderLowBrush",
+				jumpToSourceButton.ActualThemeVariant, out var bobrush);
+
+			if (found)
+			{
+				jumpToSourceButton.Content = new Image()
+				{
+					Source = (DrawingImage)contentImage!,
+					Height = 16.0d
+				};
+
+				// jumpToSourceButton.Content = "Hallo";
+				jumpToSourceButton.BorderBrush = (IBrush?)bobrush;
+				jumpToSourceButton.Background = (IBrush?)bgbrush;
+			}
+
+			int i = 0;
+		};
+
+		// jumpToSourceButton.Bind(ContentControl.ContentProperty,
+		// 	jumpToSourceButton.GetResourceObservable("FluentIconsFilled.FullScreenZoomFilled"));
+		
+		jumpToSourceButton.Click += JumpToSourceButtonOnClick;
+
+		this.WithInteractionControl(jumpToSourceButton, horizontalAlignment, verticalAlignment);
+
+		return this;
+	}
+
+	private void JumpToSourceButtonOnClick(object? sender, RoutedEventArgs e)
+	{
+		throw new NotImplementedException();
+	}
+
+	public GraphNodeBuilder WithExpandCollapseInteractionControl(
+		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
+		VerticalAlignment verticalAlignment = VerticalAlignment.Top)
+	{
+		
+		
+		// Make button
+		// Add the bindings and behavior
+		// add to relevant interaction control panel
+		//What to do on error? Nothing???
+
 		return this;
 	}
 
@@ -252,20 +331,97 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 		c.CellName = this._cellName ?? "";
 		c.CellType = this._cellType ?? "";
 		c.LocationPath =  this._locationPath;
+		
+		int interactionControlZIndex = c.ZIndex + 1;
 
 		if (_topLeftInteractionControls is not null)
 		{
+			foreach (Control child in _topLeftInteractionControls.Children)
+			{
+				child.ZIndex = interactionControlZIndex;
+			}
+			
 			c._interactionControls.Add(_topLeftInteractionControls);
 		}
 
 		if (_topRightInteractionControls is not null)
 		{
+			foreach (Control child in _topRightInteractionControls.Children)
+			{
+				child.ZIndex = interactionControlZIndex;
+			}
+			
 			c._interactionControls.Add(_topRightInteractionControls);
 		}
 
 		if (_topCenterInteractionControls is not null)
 		{
+			foreach (Control child in _topCenterInteractionControls.Children)
+			{
+				child.ZIndex = interactionControlZIndex;
+			}
+			
 			c._interactionControls.Add(_topCenterInteractionControls);
+		}
+		
+		if (_bottomLeftInteractionControls is not null)
+		{
+			foreach (Control child in _bottomLeftInteractionControls.Children)
+			{
+				child.ZIndex = interactionControlZIndex;
+			}
+			
+			c._interactionControls.Add(_bottomLeftInteractionControls);
+		}
+
+		if (_bottomRightInteractionControls is not null)
+		{
+			foreach (Control child in _bottomRightInteractionControls.Children)
+			{
+				child.ZIndex = interactionControlZIndex;
+			}
+			
+			c._interactionControls.Add(_bottomRightInteractionControls);
+		}
+
+		if (_bottomCenterInteractionControls is not null)
+		{
+			foreach (Control child in _bottomCenterInteractionControls.Children)
+			{
+				child.ZIndex = interactionControlZIndex;
+			}
+			
+			c._interactionControls.Add(_bottomCenterInteractionControls);
+		}
+		
+		if (_centerLeftInteractionControls is not null)
+		{
+			foreach (Control child in _centerLeftInteractionControls.Children)
+			{
+				child.ZIndex = interactionControlZIndex;
+			}
+			
+			c._interactionControls.Add(_centerLeftInteractionControls);
+		}
+
+		if (_centerRightInteractionControls is not null)
+		{
+			foreach (Control child in _centerRightInteractionControls.Children)
+			{
+				child.ZIndex = interactionControlZIndex;
+			}
+			
+			c._interactionControls.Add(_centerRightInteractionControls);
+		}
+
+		if (_centerCenterInteractionControls is not null)
+		{
+			foreach (Control child in _centerCenterInteractionControls.Children)
+			{
+				child.ZIndex = interactionControlZIndex;
+			}
+			
+			c._interactionControls.Add(_centerCenterInteractionControls);
 		}
 
 		return c;

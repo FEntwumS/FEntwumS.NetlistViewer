@@ -174,6 +174,11 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 			child.Measure(availableSize);
 		}
 
+		foreach (Control interaactionControl in _interactionControls)
+		{
+			interaactionControl.Measure(availableSize);
+		}
+
 		return new Size();
 	}
 
@@ -247,6 +252,11 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 	public override void Render(DrawingContext context)
 	{
 		context.DrawGeometry(NetlistTheme.FillBrush, NetlistTheme.BorderPen, _contentGeometry);
+
+		foreach (Control child in _interactionControls)
+		{
+			//child.Render(context);
+		}
 	}
 
 	private void RegenerateDrawnElements()

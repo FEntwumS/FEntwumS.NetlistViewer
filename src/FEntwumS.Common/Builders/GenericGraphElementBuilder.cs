@@ -11,7 +11,7 @@ public class GenericGraphElementBuilder<T> where T: GenericGraphElementControl, 
 	private	double _height;
 	private NetlistTheme? _netlistTheme;
 	private string _srclocation = "";
-	private int _zIndex;
+	private int _zIndex = 0;
 
 	public static GenericGraphElementBuilder<T> Create()
 	{
