@@ -80,7 +80,7 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Top,
 			Orientation = Orientation.Horizontal,
-			IsHitTestVisible = false
+			//IsHitTestVisible = false
 		};
 		
 		_topCenterInteractionControls.Children.Add(button);
@@ -281,6 +281,8 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 					Source = (DrawingImage)contentImage!,
 					Height = 16.0d
 				};
+				
+				((Visual)jumpToSourceButton.Content).ZIndex = jumpToSourceButton.ZIndex;
 
 				// jumpToSourceButton.Content = "Hallo";
 				jumpToSourceButton.BorderBrush = (IBrush?)bobrush;
@@ -302,6 +304,7 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 
 	private void JumpToSourceButtonOnClick(object? sender, RoutedEventArgs e)
 	{
+		return;
 		throw new NotImplementedException();
 	}
 
@@ -331,6 +334,7 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 		c.CellName = this._cellName ?? "";
 		c.CellType = this._cellType ?? "";
 		c.LocationPath =  this._locationPath;
+		c.IsHitTestVisible = true;
 		
 		int interactionControlZIndex = c.ZIndex + 1;
 

@@ -9,7 +9,7 @@ using Avalonia.Rendering;
 
 namespace FEntwumS.Common.Controls;
 
-public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
+public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 {
 	#region Properties
 
@@ -270,7 +270,7 @@ public class GraphNodeControl : GenericGraphElementControl, ICustomHitTest
 
 	public bool HitTest(Point point)
 	{
-		return true;
+		return Bounds.Contains(point);
 		throw new NotImplementedException();
 	}
 

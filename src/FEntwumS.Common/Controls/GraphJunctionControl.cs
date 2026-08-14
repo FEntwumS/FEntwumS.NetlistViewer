@@ -114,7 +114,7 @@ public class GraphJunctionControl : GenericGraphElementControl, ICustomHitTest
 
 	public bool HitTest(Point point)
 	{
-		return true;
+		return false;
 		throw new NotImplementedException();
 	}
 
