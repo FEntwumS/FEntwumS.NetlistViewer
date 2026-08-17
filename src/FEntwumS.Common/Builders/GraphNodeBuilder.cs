@@ -248,7 +248,7 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 		// add to relevant interaction control panel
 		//What to do on error? Nothing???
 		
-		Dispatcher.UIThread.Post(() =>
+		Dispatcher.UIThread.Invoke(() =>
 		{
 			Button jumpToSourceButton = new Button()
 			{

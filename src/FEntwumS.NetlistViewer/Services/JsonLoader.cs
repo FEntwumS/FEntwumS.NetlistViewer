@@ -17,7 +17,6 @@ public class JsonLoader : IJsonLoader
 
 	public double MaxWidth { get; set; }
 	public double MaxHeight { get; set; }
-	private double Scale { get; set; }
 
 	private long NodeCnt { get; set; }
 	private long EdgeCnt { get; set; }
@@ -242,12 +241,12 @@ public class JsonLoader : IJsonLoader
 
 		if (xRef + x + nWidth > MaxWidth)
 		{
-			MaxWidth = xRef + (x + nWidth) * Scale;
+			MaxWidth = xRef + (x + nWidth);
 		}
 
 		if (yRef + y + nHeight > MaxHeight)
 		{
-			MaxHeight = yRef + (y + nHeight) * Scale;
+			MaxHeight = yRef + (y + nHeight);
 		}
 		
 		var prevParent = parent;
@@ -438,7 +437,7 @@ public class JsonLoader : IJsonLoader
 
 			if (labels is not null)
 			{
-				CreateLabels(labels, parent, xRef + x * Scale, yRef + y * Scale, (ushort)(depth + 1));
+				CreateLabels(labels, parent, xRef + x, yRef + y, (ushort)(depth + 1));
 			}
 
 			if (layoutOptions is not null)
@@ -614,7 +613,7 @@ public class JsonLoader : IJsonLoader
 						y = start["y"]!.GetValue<double>();
 					}
 
-					cPoint = new Point(x * Scale, y * Scale);
+					cPoint = new Point(x, y);
 
 					pointList.Add(cPoint);
 				}
@@ -639,7 +638,7 @@ public class JsonLoader : IJsonLoader
 							y = bend["y"]!.GetValue<double>();
 						}
 
-						cPoint = new Point(x * Scale, y * Scale);
+						cPoint = new Point(x, y);
 
 						pointList.Add(cPoint);
 
@@ -663,7 +662,7 @@ public class JsonLoader : IJsonLoader
 						y = end["y"]!.GetValue<double>();
 					}
 
-					ePoint = new Point(x * Scale, y * Scale);
+					ePoint = new Point(x, y);
 
 					pointList.Add(ePoint);
 				}
@@ -679,8 +678,8 @@ public class JsonLoader : IJsonLoader
 					xDir /= mag;
 					yDir /= mag;
 
-					xDir *= 7 * Scale;
-					yDir *= 7 * Scale;
+					xDir *= 7;
+					yDir *= 7;
 
 					// Angle of 30 degrees
 					double xUp = 0.86 * xDir - (0.5) * yDir;
