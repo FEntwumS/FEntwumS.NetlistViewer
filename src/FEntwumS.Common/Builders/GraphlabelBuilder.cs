@@ -1,4 +1,5 @@
-﻿using FEntwumS.Common.Controls;
+﻿using Avalonia.Threading;
+using FEntwumS.Common.Controls;
 
 namespace FEntwumS.Common.Builders;
 
@@ -26,9 +27,15 @@ public class GraphLabelBuilder : GenericGraphElementBuilder<GraphLabelControl>
 
 	public GraphLabelControl Build()
 	{
-		var c = base.Build();
-		c.Content = this._content;
-		c.Fontsize = this._fontSize;
+		GraphLabelControl c = null;
+		
+		Dispatcher.UIThread.Invoke(() =>
+		{
+			c = base.Build();
+			c.Content = this._content;
+			c.Fontsize = this._fontSize;
+		});
+		
 		return c;
 	}
 }

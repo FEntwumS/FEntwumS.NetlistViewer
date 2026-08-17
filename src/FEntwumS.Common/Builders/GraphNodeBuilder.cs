@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
 using FEntwumS.Common.Controls;
 
@@ -246,58 +247,61 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 		// Add the bindings and behavior
 		// add to relevant interaction control panel
 		//What to do on error? Nothing???
-
-		Button jumpToSourceButton = new Button()
-		{
-			Padding = new Thickness(5.0d),
-			CornerRadius = new CornerRadius(3.0d),
-			BorderThickness = new Thickness(1.0d),
-			VerticalAlignment = VerticalAlignment.Top,
-			HorizontalAlignment = HorizontalAlignment.Center,
-			Margin = new Thickness(5.0d)
-		};
-
-		jumpToSourceButton.Initialized += (sender, args) =>
-		{
-			bool found = jumpToSourceButton.TryGetResource("FluentIconsFilled.FullScreenZoomFilled",
-				jumpToSourceButton.ActualThemeVariant, out var contentImage);
-
-			int i = 0;
-		};
-
-		jumpToSourceButton.ActualThemeVariantChanged += (sender, args) =>
-		{
-			bool found = jumpToSourceButton.TryFindResource("FluentIconsFilled.FullScreenZoomFilled",
-				jumpToSourceButton.ActualThemeVariant, out var contentImage);
-			jumpToSourceButton.TryFindResource("ThemeBackgroundBrush",
-				jumpToSourceButton.ActualThemeVariant, out var bgbrush);
-			jumpToSourceButton.TryFindResource("ThemeBorderLowBrush",
-				jumpToSourceButton.ActualThemeVariant, out var bobrush);
-
-			if (found)
-			{
-				jumpToSourceButton.Content = new Image()
-				{
-					Source = (DrawingImage)contentImage!,
-					Height = 16.0d
-				};
-				
-				((Visual)jumpToSourceButton.Content).ZIndex = jumpToSourceButton.ZIndex;
-
-				// jumpToSourceButton.Content = "Hallo";
-				jumpToSourceButton.BorderBrush = (IBrush?)bobrush;
-				jumpToSourceButton.Background = (IBrush?)bgbrush;
-			}
-
-			int i = 0;
-		};
-
-		// jumpToSourceButton.Bind(ContentControl.ContentProperty,
-		// 	jumpToSourceButton.GetResourceObservable("FluentIconsFilled.FullScreenZoomFilled"));
 		
-		jumpToSourceButton.Click += JumpToSourceButtonOnClick;
+		Dispatcher.UIThread.Post(() =>
+		{
+			Button jumpToSourceButton = new Button()
+			{
+				Padding = new Thickness(5.0d),
+				CornerRadius = new CornerRadius(3.0d),
+				BorderThickness = new Thickness(1.0d),
+				VerticalAlignment = VerticalAlignment.Top,
+				HorizontalAlignment = HorizontalAlignment.Center,
+				Margin = new Thickness(5.0d)
+			};
 
-		this.WithInteractionControl(jumpToSourceButton, horizontalAlignment, verticalAlignment);
+			jumpToSourceButton.Initialized += (sender, args) =>
+			{
+				bool found = jumpToSourceButton.TryGetResource("FluentIconsFilled.FullScreenZoomFilled",
+					jumpToSourceButton.ActualThemeVariant, out var contentImage);
+
+				int i = 0;
+			};
+
+			jumpToSourceButton.ActualThemeVariantChanged += (sender, args) =>
+			{
+				bool found = jumpToSourceButton.TryFindResource("FluentIconsFilled.FullScreenZoomFilled",
+					jumpToSourceButton.ActualThemeVariant, out var contentImage);
+				jumpToSourceButton.TryFindResource("ThemeBackgroundBrush",
+					jumpToSourceButton.ActualThemeVariant, out var bgbrush);
+				jumpToSourceButton.TryFindResource("ThemeBorderLowBrush",
+					jumpToSourceButton.ActualThemeVariant, out var bobrush);
+
+				if (found)
+				{
+					jumpToSourceButton.Content = new Image()
+					{
+						Source = (DrawingImage)contentImage!,
+						Height = 16.0d
+					};
+				
+					((Visual)jumpToSourceButton.Content).ZIndex = jumpToSourceButton.ZIndex;
+
+					// jumpToSourceButton.Content = "Hallo";
+					jumpToSourceButton.BorderBrush = (IBrush?)bobrush;
+					jumpToSourceButton.Background = (IBrush?)bgbrush;
+				}
+
+				int i = 0;
+			};
+
+			// jumpToSourceButton.Bind(ContentControl.ContentProperty,
+			// 	jumpToSourceButton.GetResourceObservable("FluentIconsFilled.FullScreenZoomFilled"));
+		
+			jumpToSourceButton.Click += JumpToSourceButtonOnClick;
+
+			this.WithInteractionControl(jumpToSourceButton, horizontalAlignment, verticalAlignment);
+		});
 
 		return this;
 	}
@@ -330,103 +334,107 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 
 	public GraphNodeControl Build()
 	{
-		var c = base.Build();
-		c.CellName = this._cellName ?? "";
-		c.CellType = this._cellType ?? "";
-		c.LocationPath =  this._locationPath;
-		c.IsHitTestVisible = true;
-		
-		int interactionControlZIndex = c.ZIndex + 1;
+		GraphNodeControl c = null;
+		Dispatcher.UIThread.Invoke(() =>
+		{
+			c = base.Build();
+			c.CellName = this._cellName ?? "";
+			c.CellType = this._cellType ?? "";
+			c.LocationPath =  this._locationPath;
+			c.IsHitTestVisible = true;
+			
+			int interactionControlZIndex = c.ZIndex + 1;
 
-		if (_topLeftInteractionControls is not null)
-		{
-			foreach (Control child in _topLeftInteractionControls.Children)
+			if (_topLeftInteractionControls is not null)
 			{
-				child.ZIndex = interactionControlZIndex;
+				foreach (Control child in _topLeftInteractionControls.Children)
+				{
+					child.ZIndex = interactionControlZIndex;
+				}
+				
+				c._interactionControls.Add(_topLeftInteractionControls);
 			}
-			
-			c._interactionControls.Add(_topLeftInteractionControls);
-		}
 
-		if (_topRightInteractionControls is not null)
-		{
-			foreach (Control child in _topRightInteractionControls.Children)
+			if (_topRightInteractionControls is not null)
 			{
-				child.ZIndex = interactionControlZIndex;
+				foreach (Control child in _topRightInteractionControls.Children)
+				{
+					child.ZIndex = interactionControlZIndex;
+				}
+				
+				c._interactionControls.Add(_topRightInteractionControls);
 			}
-			
-			c._interactionControls.Add(_topRightInteractionControls);
-		}
 
-		if (_topCenterInteractionControls is not null)
-		{
-			foreach (Control child in _topCenterInteractionControls.Children)
+			if (_topCenterInteractionControls is not null)
 			{
-				child.ZIndex = interactionControlZIndex;
+				foreach (Control child in _topCenterInteractionControls.Children)
+				{
+					child.ZIndex = interactionControlZIndex;
+				}
+				
+				c._interactionControls.Add(_topCenterInteractionControls);
 			}
 			
-			c._interactionControls.Add(_topCenterInteractionControls);
-		}
-		
-		if (_bottomLeftInteractionControls is not null)
-		{
-			foreach (Control child in _bottomLeftInteractionControls.Children)
+			if (_bottomLeftInteractionControls is not null)
 			{
-				child.ZIndex = interactionControlZIndex;
+				foreach (Control child in _bottomLeftInteractionControls.Children)
+				{
+					child.ZIndex = interactionControlZIndex;
+				}
+				
+				c._interactionControls.Add(_bottomLeftInteractionControls);
 			}
-			
-			c._interactionControls.Add(_bottomLeftInteractionControls);
-		}
 
-		if (_bottomRightInteractionControls is not null)
-		{
-			foreach (Control child in _bottomRightInteractionControls.Children)
+			if (_bottomRightInteractionControls is not null)
 			{
-				child.ZIndex = interactionControlZIndex;
+				foreach (Control child in _bottomRightInteractionControls.Children)
+				{
+					child.ZIndex = interactionControlZIndex;
+				}
+				
+				c._interactionControls.Add(_bottomRightInteractionControls);
 			}
-			
-			c._interactionControls.Add(_bottomRightInteractionControls);
-		}
 
-		if (_bottomCenterInteractionControls is not null)
-		{
-			foreach (Control child in _bottomCenterInteractionControls.Children)
+			if (_bottomCenterInteractionControls is not null)
 			{
-				child.ZIndex = interactionControlZIndex;
+				foreach (Control child in _bottomCenterInteractionControls.Children)
+				{
+					child.ZIndex = interactionControlZIndex;
+				}
+				
+				c._interactionControls.Add(_bottomCenterInteractionControls);
 			}
 			
-			c._interactionControls.Add(_bottomCenterInteractionControls);
-		}
-		
-		if (_centerLeftInteractionControls is not null)
-		{
-			foreach (Control child in _centerLeftInteractionControls.Children)
+			if (_centerLeftInteractionControls is not null)
 			{
-				child.ZIndex = interactionControlZIndex;
+				foreach (Control child in _centerLeftInteractionControls.Children)
+				{
+					child.ZIndex = interactionControlZIndex;
+				}
+				
+				c._interactionControls.Add(_centerLeftInteractionControls);
 			}
-			
-			c._interactionControls.Add(_centerLeftInteractionControls);
-		}
 
-		if (_centerRightInteractionControls is not null)
-		{
-			foreach (Control child in _centerRightInteractionControls.Children)
+			if (_centerRightInteractionControls is not null)
 			{
-				child.ZIndex = interactionControlZIndex;
+				foreach (Control child in _centerRightInteractionControls.Children)
+				{
+					child.ZIndex = interactionControlZIndex;
+				}
+				
+				c._interactionControls.Add(_centerRightInteractionControls);
 			}
-			
-			c._interactionControls.Add(_centerRightInteractionControls);
-		}
 
-		if (_centerCenterInteractionControls is not null)
-		{
-			foreach (Control child in _centerCenterInteractionControls.Children)
+			if (_centerCenterInteractionControls is not null)
 			{
-				child.ZIndex = interactionControlZIndex;
+				foreach (Control child in _centerCenterInteractionControls.Children)
+				{
+					child.ZIndex = interactionControlZIndex;
+				}
+				
+				c._interactionControls.Add(_centerCenterInteractionControls);
 			}
-			
-			c._interactionControls.Add(_centerCenterInteractionControls);
-		}
+		});
 
 		return c;
 	}

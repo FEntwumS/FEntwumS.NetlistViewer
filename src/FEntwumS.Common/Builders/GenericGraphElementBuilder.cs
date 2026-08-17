@@ -1,4 +1,5 @@
-﻿using FEntwumS.Common.Controls;
+﻿using Avalonia.Threading;
+using FEntwumS.Common.Controls;
 using FEntwumS.Common.Types;
 
 namespace FEntwumS.Common.Builders;
@@ -62,22 +63,26 @@ public class GenericGraphElementBuilder<T> where T: GenericGraphElementControl, 
 
 	public T Build()
 	{
-		var n = new T()
+		T n = null;
+		Dispatcher.UIThread.Invoke(() =>
 		{
-			X = this._x,
-			Y = this._y,
-			Width = this._width,
-			Height = this._height,
-			srcLocation = this._srclocation,
-			ZIndex = _zIndex,
-			ClipToBounds = false,
-			//IsHitTestVisible = false
-		};
+			n = new T()
+			{
+				X = this._x,
+				Y = this._y,
+				Width = this._width,
+				Height = this._height,
+				srcLocation = this._srclocation,
+				ZIndex = _zIndex,
+				ClipToBounds = false,
+				//IsHitTestVisible = false
+			};
 
-		if (this._netlistTheme is not null)
-		{
-			n.NetlistTheme = this._netlistTheme;
-		}
+			if (this._netlistTheme is not null)
+			{
+				n.NetlistTheme = this._netlistTheme;
+			}
+		});
 
 		return n;
 	}

@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Threading;
 using FEntwumS.Common.Controls;
 
 namespace FEntwumS.Common.Builders;
@@ -43,12 +44,18 @@ public class GraphEdgeBuilder : GenericGraphElementBuilder<GraphEdgeControl>
 
 	public GraphEdgeControl Build()
 	{
-		var c = base.Build();
-		if (_points is not null)
+		GraphEdgeControl c = null;
+		
+		Dispatcher.UIThread.Invoke(() =>
 		{
-			c._points.AddRange(_points);
-		}
-		c._isThick = this._isThick;
+			c = base.Build();
+			if (_points is not null)
+			{
+				c._points.AddRange(_points);
+			}
+			c._isThick = this._isThick;
+		});
+		
 		return c;
 	}
 }

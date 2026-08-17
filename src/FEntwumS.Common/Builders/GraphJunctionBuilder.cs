@@ -1,4 +1,5 @@
-﻿using FEntwumS.Common.Controls;
+﻿using Avalonia.Threading;
+using FEntwumS.Common.Controls;
 using FEntwumS.Common.Types;
 
 namespace FEntwumS.Common.Builders;
@@ -20,8 +21,14 @@ public class GraphJunctionBuilder : GenericGraphElementBuilder<GraphJunctionCont
 
 	public GraphJunctionControl Build()
 	{
-		var c = base.Build();
-		c._junctionShape = this._junctionShape;
+		GraphJunctionControl c = null;
+		
+		Dispatcher.UIThread.Invoke(() =>
+		{
+			c = base.Build();
+			c._junctionShape = this._junctionShape;
+		});
+		
 		return c;
 	}
 }

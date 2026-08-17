@@ -224,8 +224,8 @@ public class FrontendViewModel : ExtendedTool
 
 				ApplicationProcess loadProc = _applicationStateService.AddState("Loading JSON", AppState.Loading);
 
-				Task t = jsonLoader.OpenJsonAsync(File, netlistId);
-				t.Wait();
+				//Task t = jsonLoader.OpenJsonAsync(File, netlistId);
+				//t.Wait();
 
 				_applicationStateService.RemoveState(loadProc);
 

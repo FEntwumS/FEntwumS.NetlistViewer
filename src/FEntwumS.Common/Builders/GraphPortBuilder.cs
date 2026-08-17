@@ -1,4 +1,5 @@
-﻿using FEntwumS.Common.Controls;
+﻿using Avalonia.Threading;
+using FEntwumS.Common.Controls;
 using FEntwumS.Common.Types;
 
 namespace FEntwumS.Common.Builders;
@@ -20,8 +21,14 @@ public class GraphPortBuilder : GenericGraphElementBuilder<GraphPortControl>
 
 	public GraphPortControl Build()
 	{
-		var c = base.Build();
-		c._portShape = this._portShape;
+		GraphPortControl c = null;
+		
+		Dispatcher.UIThread.Invoke(() =>
+		{
+			c = base.Build();
+			c._portShape = this._portShape;
+		});
+		
 		return c;
 	}
 }

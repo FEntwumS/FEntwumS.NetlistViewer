@@ -7,10 +7,9 @@ namespace FEntwumS.Common.Interfaces;
 
 public interface IJsonLoader
 {
-	public Task OpenJsonAsync(Stream netlist, UInt64 netlistId);
 
-	public Task<GraphNodeControl> ParseJsonAsync(double xRef, double yRef,
-		FrontendViewModel mw, UInt64 netlistId);
+	public GraphNodeControl ParseJson(double xRef, double yRef,
+		Stream netlistStream, UInt64 netlistId);
 
 	public void CreateNode(JsonNode node, GraphNodeControl parent, double xRef, double
 		yRef, ushort depth);

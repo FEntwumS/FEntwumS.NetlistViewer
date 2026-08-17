@@ -14,8 +14,6 @@ namespace FEntwumS.NetlistViewer.Services;
 
 public class JsonLoader : IJsonLoader
 {
-	private JsonNode? RootNode { get; set; }
-	private bool IsLoading { get; set; }
 
 	public double MaxWidth { get; set; }
 	public double MaxHeight { get; set; }
@@ -42,26 +40,10 @@ public class JsonLoader : IJsonLoader
 		_logger = ServiceManager.GetService<ILogger>();
 	}
 
-	public async Task OpenJsonAsync(Stream netlist, UInt64 netlistId)
+	public GraphNodeControl ParseJson(double xRef, double yRef,
+		Stream netlistStream, UInt64 netlistId)
 	{
-		IsLoading = true;
-		RootNode = await JsonNode.ParseAsync(netlist);
-		IsLoading = false;
-		Scale = 1.0d;
-	}
-
-	private async Task LoadingDoneAsync()
-	{
-		while (IsLoading)
-		{
-			await Task.Delay(1);
-		}
-	}
-
-	public async Task<GraphNodeControl> ParseJsonAsync(double xRef, double yRef,
-		FrontendViewModel mw, UInt64 netlistId)
-	{
-		await LoadingDoneAsync();
+		JsonNode? netlistRootNode = JsonNode.Parse(netlistStream);
 
 		ClickedElementPath = _viewportDimensionService!.GetClickedElementPath(netlistId);
 
@@ -97,16 +79,16 @@ public class JsonLoader : IJsonLoader
 
 		double rootwidth = 0.0d, rootheight = 0.0d;
 
-		if (RootNode is not null)
+		if (netlistRootNode is not null)
 		{
-			if (RootNode.AsObject().ContainsKey("width"))
+			if (netlistRootNode.AsObject().ContainsKey("width"))
 			{
-				rootwidth = RootNode["width"]!.GetValue<double>();
+				rootwidth = netlistRootNode["width"]!.GetValue<double>();
 			}
 
-			if (RootNode.AsObject().ContainsKey("height"))
+			if (netlistRootNode.AsObject().ContainsKey("height"))
 			{
-				rootheight = RootNode["height"]!.GetValue<double>();
+				rootheight = netlistRootNode["height"]!.GetValue<double>();
 			}
 		}
 
@@ -115,17 +97,12 @@ public class JsonLoader : IJsonLoader
 			.WithY(0.0d)
 			.WithWidth(rootwidth)
 			.WithHeight(rootheight)
-			.WithNetlistTheme(new NetlistTheme()
-			{
-				Typeface = new Typeface(
-					new FontFamily("avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg"))
-			})
 			.WithZIndex(0)
 			.Build();
 
-		if (RootNode is null) return rootNode;
+		if (netlistRootNode is null) return rootNode;
 
-		CreateNode(RootNode, rootNode, xRef, yRef, 0);
+		CreateNode(netlistRootNode, rootNode, xRef, yRef, 0);
 
 		// check for clicked elements
 		// TODO was anything clicked????
@@ -158,7 +135,7 @@ public class JsonLoader : IJsonLoader
 		_logger.Log("Statistics:");
 
 		// Dispose of the JSON document, as we dont need to keep it around
-		RootNode = new JsonObject();
+		netlistRootNode = new JsonObject();
 
 		// Call the garbage collector to free dozens of MB of RAM
 		// If the GC isn't called explicitly, the dead objects of the JSON file will just stay in the Gen 2 Heap
@@ -174,9 +151,6 @@ public class JsonLoader : IJsonLoader
 		_logger.Log("Average number of characters per label: " + ((float)CharCnt / (float)LabelCnt));
 		_logger.Log("Max width: " + MaxWidth);
 		_logger.Log("Max height: " + MaxHeight);
-
-
-		//mw.UpdateScaleImpl();
 
 		return rootNode;
 	}

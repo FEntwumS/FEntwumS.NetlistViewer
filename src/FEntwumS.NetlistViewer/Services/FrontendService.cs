@@ -648,36 +648,20 @@ public class FrontendService : IFrontendService
 		var nvm = new NetlistViewModel();
 		nvm.Title = $"Netlist: {top} test";
 
-		await ServiceManager.GetService<IJsonLoader>().OpenJsonAsync(await resp.Content.ReadAsStreamAsync(), currentNetlist);
+		GraphNodeControl netlistRootControl = new GraphNodeControl();
 
-		var r = await ServiceManager.GetService<IJsonLoader>().ParseJsonAsync(0, 0, vm, currentNetlist);
+		await Task.Run(() => netlistRootControl = ServiceManager.GetService<IJsonLoader>()
+			.ParseJson(0, 0, resp.Content.ReadAsStream(), currentNetlist));
 
-		var c = new GraphNodeControl()
-		{
-			X = 0.0d,
-			Y = 0.0d,
-			Width = 1000.0d,
-			Height = 1000.0d
-		};
-
-		c.Items.Add(new GraphLabelControl
-			{
-				X = 10.0d,
-				Y = 10.0d,
-				Content = "test",
-				Fontsize = 10.0d,
-				Width = 28.0d,
-				Height = 11.0d
-			});
 		nvm.NetlistTheme = new NetlistTheme()
 		{
 			Typeface = new Typeface(new FontFamily("avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg"))
 		};
-		r.NetlistTheme = new NetlistTheme()
+		netlistRootControl.NetlistTheme = new NetlistTheme()
 		{
 			Typeface = new Typeface(new FontFamily("avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg"))
 		};
-		nvm.RootNode = r;
+		nvm.RootNode = netlistRootControl;
 		
 		nvm.InitializeContent();
 		
