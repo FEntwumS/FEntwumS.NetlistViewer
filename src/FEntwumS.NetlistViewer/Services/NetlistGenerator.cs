@@ -237,6 +237,12 @@ public class NetlistGenerator : INetlistGenerator
 		{
 			if (p is UniversalProjectRoot root)
 			{
+				if (!Directory.Exists(root.FullPath))
+				{
+					_logger.Warning($"Skipping netlist watcher for missing project directory: {root.FullPath}");
+					continue;
+				}
+				
 				FileSystemWatcher watcher = new FileSystemWatcher(root.FullPath)
 				{
 					EnableRaisingEvents = true,
