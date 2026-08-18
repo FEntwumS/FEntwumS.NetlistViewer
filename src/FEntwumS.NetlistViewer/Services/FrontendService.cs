@@ -93,12 +93,8 @@ public class FrontendService : IFrontendService
 			{
 				if (IsAddressValid(x))
 				{
-					_logger.Log($"New address: {x}", _backendAddress != string.Empty);
+					_logger.Log($"New address: {x}");
 					_backendAddress = x;
-				}
-				else
-				{
-					_logger.Error($"{x} is not a valid address");
 				}
 			});
 
@@ -106,12 +102,8 @@ public class FrontendService : IFrontendService
 		{
 			if (IsPortValid(x))
 			{
-				_logger.Log($"New port: {x}", _backendPort != string.Empty);
+				_logger.Log($"New port: {x}");
 				_backendPort = x;
-			}
-			else
-			{
-				_logger.Error($"{x} is not a valid port");
 			}
 		});
 
@@ -136,15 +128,11 @@ public class FrontendService : IFrontendService
 
 					if (_requestTimeout <= 0)
 					{
-						_logger.Error("Request timeout not valid. Please enter a positive integer");
-
 						_requestTimeout = 600;
 					}
 				}
 				catch (Exception)
 				{
-					_logger.Error("Request timeout not valid. Please enter a positive integer");
-
 					_requestTimeout = 600;
 				}
 			});
@@ -161,14 +149,11 @@ public class FrontendService : IFrontendService
 
 					if (_entityLabelFontSize <= 0)
 					{
-						_logger.Error("Entity label font size not valid. Please enter a positive integer");
 						_entityLabelFontSize = 25;
 					}
 				}
 				catch (Exception)
 				{
-					_logger.Error("Entity label font size not valid. Please enter a positive integer");
-
 					_entityLabelFontSize = 25;
 				}
 			});
@@ -182,15 +167,11 @@ public class FrontendService : IFrontendService
 
 					if (_cellLabelFontSize <= 0)
 					{
-						_logger.Error("Cell label font size not valid. Please enter a positive integer");
-
 						_cellLabelFontSize = 15;
 					}
 				}
 				catch (Exception)
 				{
-					_logger.Error("Cell label font size not valid. Please enter a positive integer");
-
 					_cellLabelFontSize = 15;
 				}
 			});
@@ -204,15 +185,11 @@ public class FrontendService : IFrontendService
 
 					if (_edgeLabelFontSize <= 0)
 					{
-						_logger.Error("Edge label font size not valid. Please enter a positive integer");
-
 						_edgeLabelFontSize = 10;
 					}
 				}
 				catch (Exception)
 				{
-					_logger.Error("Edge label font size not valid. Please enter a positive integer");
-
 					_edgeLabelFontSize = 10;
 				}
 			});
@@ -226,15 +203,11 @@ public class FrontendService : IFrontendService
 
 					if (_portLabelFontSize <= 0)
 					{
-						_logger.Error("Port label font size not valid. Please enter a positive integer");
-
 						_portLabelFontSize = 10;
 					}
 				}
 				catch (Exception)
 				{
-					_logger.Error("Port label font size not valid. Please enter a positive integer");
-
 					_portLabelFontSize = 10;
 				}
 			});
@@ -781,7 +754,7 @@ public class FrontendService : IFrontendService
 		catch (InvalidOperationException)
 		{
 			_logger.Error(
-				$"The server at {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
+				$"The server at {_backendAddress}:{_backendPort} could not be reached. Make sure the server is started and reachable under this address",
 				null, printErrors);
 			return null;
 		}
@@ -791,13 +764,13 @@ public class FrontendService : IFrontendService
 			{
 				case HttpRequestError.NameResolutionError:
 					_logger.Error(
-						$"The address {_backendAddress} could not be resolved. Make sure the server is started and reachable under this address",
+						$"The address {_backendAddress}:{_backendPort} could not be resolved. Make sure the server is started and reachable under this address",
 						null, printErrors);
 					break;
 
 				case HttpRequestError.ConnectionError:
 					_logger.Error(
-						$"The address {_backendAddress} could not be reached. Make sure the server is started and reachable under this address",
+						$"The address {_backendAddress}:{_backendPort} could not be reached. Make sure the server is started and reachable under this address",
 						null, printErrors);
 					break;
 
@@ -828,7 +801,7 @@ public class FrontendService : IFrontendService
 
 	public async Task<bool> StartBackendIfNotStartedAsync()
 	{
-		if (backendProcess != null)
+		if (backendProcess != null && !await backendProcess.WaitForExitAsync(TimeSpan.Zero))
 		{
 			return true;
 		}
@@ -845,9 +818,13 @@ public class FrontendService : IFrontendService
 		try
 		{
 			var res = await client.GetAsync("/server-active");
-			_logger.Log("Server already started", true);
 
-			return true;
+			if (res.IsSuccessStatusCode)
+			{
+				_logger.Log("Server already started", true);
+
+				return true;
+			}
 		}
 		catch (Exception)
 		{
@@ -942,10 +919,10 @@ public class FrontendService : IFrontendService
 		// Start server to run independently
 		backendProcess = ServiceManager.GetService<IToolExecuterService>()
 			.ExecuteBackgroundProcess(javaBinaryFile,
-				_extraJarArgs.Split(' ').Concat(["-jar", serverJarFile]).ToArray(),
+				_extraJarArgs.Split(' ').Concat(["-jar", serverJarFile, $"--server.port={_backendPort}"]).ToArray(),
 				Path.GetDirectoryName(serverJarFile));
 
-		_logger.Log("Server started", true);
+		_logger.Log($"Starting server at address {_backendAddress} on port {_backendPort}", true);
 
 		return true;
 	}
@@ -967,14 +944,20 @@ public class FrontendService : IFrontendService
 		bool done = false;
 
 		int failures = 0;
+		
 
 		while (!done)
 		{
+			HttpResponseMessage? res = null;
 			try
 			{
-				var res = await client.GetAsync("/server-active");
+				res = await client.GetAsync("/server-active");
 				_logger.Log("Server is awaiting requests");
-				done = true;
+
+				if (res.IsSuccessStatusCode)
+				{
+					done = true;
+				}
 			}
 			catch (Exception)
 			{
@@ -986,6 +969,19 @@ public class FrontendService : IFrontendService
 
 					_applicationStateService.RemoveState(liveProc, "Error: The backend could not be reached");
 
+					return false;
+				}
+			}
+
+			if (res is null || !res.IsSuccessStatusCode)
+			{
+				if (backendProcess is not null && await backendProcess.WaitForExitAsync(TimeSpan.Zero))
+				{
+					// If the local backend process exits, the backend has failed to start
+					// The most likely cause is another service listening on the specified port
+
+					_logger.Log("The local backend process has exited", true);
+					_logger.Log($"The most likely cause is another service listening on port {_backendPort}", true);
 					return false;
 				}
 
