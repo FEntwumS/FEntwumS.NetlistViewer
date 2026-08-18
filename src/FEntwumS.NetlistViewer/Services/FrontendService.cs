@@ -942,7 +942,7 @@ public class FrontendService : IFrontendService
 		// Start server to run independently
 		backendProcess = ServiceManager.GetService<IToolExecuterService>()
 			.ExecuteBackgroundProcess(javaBinaryFile,
-				_extraJarArgs.Split(' ').Concat(["-jar", serverJarFile]).ToArray(),
+				_extraJarArgs.Split(' ').Concat(["-jar", serverJarFile, $"--server.port={_backendPort}"]).ToArray(),
 				Path.GetDirectoryName(serverJarFile));
 
 		_logger.Log("Server started", true);
