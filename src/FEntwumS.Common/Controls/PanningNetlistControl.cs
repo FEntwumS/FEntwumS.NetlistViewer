@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Data;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 
 namespace FEntwumS.Common.Controls;
@@ -17,6 +18,17 @@ public class PanningNetlistControl : PanningControl
     public static readonly StyledProperty<ulong> NetlistIdProperty =
         AvaloniaProperty.Register<PanningNetlistControl, ulong>(nameof(NetlistId),
             defaultBindingMode: BindingMode.TwoWay);
+
+    #endregion
+    
+    #region Event Handling
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+	    base.OnLoaded(e);
+	    
+	    ZoomToFit();
+    }
 
     #endregion
     
