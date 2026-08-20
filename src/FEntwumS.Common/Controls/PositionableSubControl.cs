@@ -49,8 +49,6 @@ public class PositionableSubControl : UserControl
 	    AvaloniaProperty.Register<PositionableSubControl, double>(nameof(Scale),
 		    defaultBindingMode: BindingMode.TwoWay,
 		    defaultValue: 1.0d,
-		    enableDataValidation: true,
-		    validate: d => d > 0.0d,
 		    inherits: true);
 
     #endregion

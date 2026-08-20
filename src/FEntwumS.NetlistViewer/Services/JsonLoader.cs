@@ -258,7 +258,7 @@ public class JsonLoader : IJsonLoader
 				parent = (GraphNodeBuilder.Create()
 						.WithCellName(cellname)
 						.WithCellType(celltype)
-						.WithJumpToSourceInteractionControl()
+						.WithExpandCollapseInteractionControlIf(celltype == "HDL_ENTITY" && depth >= 2)
 						.WithX(xRef + x)
 						.WithY(yRef + y)
 						.WithWidth(nWidth)

@@ -5,6 +5,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
+using FEntwumS.Common.Assets;
 using FEntwumS.Common.Controls;
 
 namespace FEntwumS.Common.Builders;
@@ -312,6 +313,18 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 		throw new NotImplementedException();
 	}
 
+	public GraphNodeBuilder WithExpandCollapseInteractionControlIf(bool condition,
+		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
+		VerticalAlignment verticalAlignment = VerticalAlignment.Top)
+	{
+		if (condition)
+		{
+			return this.WithExpandCollapseInteractionControl(horizontalAlignment, verticalAlignment);
+		}
+
+		return this;
+	}
+
 	public GraphNodeBuilder WithExpandCollapseInteractionControl(
 		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
 		VerticalAlignment verticalAlignment = VerticalAlignment.Top)
@@ -323,7 +336,60 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 		// add to relevant interaction control panel
 		//What to do on error? Nothing???
 
+		Dispatcher.UIThread.Invoke(() =>
+		{
+			Button expandCollapseButton = new Button()
+			{
+				Padding = new Thickness(5.0d),
+				CornerRadius = new CornerRadius(3.0d),
+				BorderThickness = new Thickness(1.0d),
+				VerticalAlignment = VerticalAlignment.Top,
+				HorizontalAlignment = HorizontalAlignment.Center,
+				Margin = new Thickness(5.0d)
+			};
+
+			expandCollapseButton.Initialized += (sender, args) =>
+			{
+				bool found = expandCollapseButton.TryGetResource("FluentIcons.add_regular",
+					expandCollapseButton.ActualThemeVariant, out var contentImage);
+
+				int i = 0;
+			};
+
+			expandCollapseButton.ActualThemeVariantChanged += (sender, args) =>
+			{
+				expandCollapseButton.TryFindResource("ThemeBackgroundBrush",
+					expandCollapseButton.ActualThemeVariant, out var bgbrush);
+				expandCollapseButton.TryFindResource("ThemeBorderLowBrush",
+					expandCollapseButton.ActualThemeVariant, out var bobrush);
+
+				expandCollapseButton.Content = new PathIcon()
+				{
+					Data = AppIcons.PLUS,
+					 Height = 16.0d
+				};
+			
+				((Visual)expandCollapseButton.Content).ZIndex = expandCollapseButton.ZIndex;
+
+				// jumpToSourceButton.Content = "Hallo";
+				expandCollapseButton.BorderBrush = (IBrush?)bobrush;
+				expandCollapseButton.Background = (IBrush?)bgbrush;
+
+				int i = 0;
+			};
+		
+			expandCollapseButton.Click += ExpandCollapseButtonOnClick;
+
+			this.WithInteractionControl(expandCollapseButton, horizontalAlignment, verticalAlignment);
+		});
+
 		return this;
+	}
+	
+	private void ExpandCollapseButtonOnClick(object? sender, RoutedEventArgs e)
+	{
+		return;
+		throw new NotImplementedException();
 	}
 
 	public GraphNodeBuilder WithLocationPath(string locationPath)

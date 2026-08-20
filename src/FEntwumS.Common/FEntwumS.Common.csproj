@@ -39,6 +39,17 @@
       </Compile>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Assets\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AvaloniaResource Include="Assets\Fonts\MartianMono-LICENSE.txt" />
+      <AvaloniaResource Include="Assets\Fonts\MartianMono-StdRg.ttf" />
+      <AvaloniaResource Include="Assets\Icons\AppIcons.cs" />
+      <AvaloniaResource Include="Assets\Icons\fluentui-system-icons-LICENSE.txt" />
+    </ItemGroup>
+
     <!--    pushing to local nuget repo    -->
     <Target Name="PushNuGetPackage" AfterTargets="Pack">
 <!--        <Exec Command="dotnet nuget push bin/Debug/FEntwumS.Common.$(Version).nupkg &#45;&#45;source '$(SolutionDir)local-nuget'" />    -->

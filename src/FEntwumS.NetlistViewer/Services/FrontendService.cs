@@ -655,11 +655,11 @@ public class FrontendService : IFrontendService
 
 		nvm.NetlistTheme = new NetlistTheme()
 		{
-			Typeface = new Typeface(new FontFamily("avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg"))
+			Typeface = new Typeface(new FontFamily("avares://FEntwumS.Common/Assets/Fonts#Martian Mono Std Rg"))
 		};
 		netlistRootControl.NetlistTheme = new NetlistTheme()
 		{
-			Typeface = new Typeface(new FontFamily("avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg"))
+			Typeface = new Typeface(new FontFamily("avares://FEntwumS.Common/Assets/Fonts#Martian Mono Std Rg"))
 		};
 		nvm.RootNode = netlistRootControl;
 		

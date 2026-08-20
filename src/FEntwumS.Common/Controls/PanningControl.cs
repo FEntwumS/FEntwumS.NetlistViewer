@@ -254,7 +254,7 @@ public class PanningControl : UserControl
 		    return;
 	    }
 	    
-	    if (shownBounds.Width == 0 || shownBounds.Height == 0)
+	    if (shownBounds.Width == 0 || shownBounds.Height == 0 || double.IsNaN(shownBounds.Width) || double.IsNaN(shownBounds.Height))
 	    {
 		    return;
 	    }

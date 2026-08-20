@@ -26,8 +26,16 @@ public class PanningNetlistControl : PanningControl
     protected override void OnLoaded(RoutedEventArgs e)
     {
 	    base.OnLoaded(e);
-	    
-	    ZoomToFit();
+
+	    if (Child is not null && double.IsNaN(Child.Scale))
+	    {
+		    Child = null;
+	    }
+
+	    if (Child is not null)
+	    {
+		    ZoomToFit();
+	    }
     }
 
     #endregion
