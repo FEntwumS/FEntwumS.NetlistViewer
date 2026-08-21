@@ -366,6 +366,11 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 
 				if (directAncestorNode is not null)
 				{
+					if (directAncestorNode.Items.Any(g => g is not GraphLabelControl))
+					{
+						(expandCollapseButton.Content as PathIcon)?.Data = AppIcons.MINUS;
+					}
+					
 					directAncestorNode.PropertyChanged += (o, eventArgs) =>
 					{
 						if (eventArgs.Property == PositionableSubControl.ScaleProperty &&
@@ -398,8 +403,6 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 
 				expandCollapseButton.BorderBrush = (IBrush?)bobrush;
 				expandCollapseButton.Background = (IBrush?)bgbrush;
-
-				int i = 0;
 			};
 		
 			expandCollapseButton.Click += ExpandCollapseButtonOnClick;
@@ -478,8 +481,6 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 
 			_ = f.Invoke();
 		}
-	return;
-	throw new NotImplementedException();
 	}
 
 	public GraphNodeBuilder WithLocationPath(string locationPath)
