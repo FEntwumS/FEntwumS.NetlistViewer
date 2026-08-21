@@ -662,6 +662,7 @@ public class FrontendService : IFrontendService
 			Typeface = new Typeface(new FontFamily("avares://FEntwumS.Common/Assets/Fonts#Martian Mono Std Rg"))
 		};
 		nvm.RootNode = netlistRootControl;
+		nvm.NetlistId = currentNetlist;
 		
 		nvm.InitializeContent();
 		
