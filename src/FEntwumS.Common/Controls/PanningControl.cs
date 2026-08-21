@@ -207,6 +207,20 @@ public class PanningControl : UserControl
 			    ZoomBounds = null;
 		    }
 	    }
+
+	    if (e.Property == ChildProperty)
+	    {
+		    LogicalChildren.Clear();
+		    VisualChildren.Clear();
+
+		    if (e.NewValue is PositionableSubControl newChild)
+		    {
+			    LogicalChildren.Add(newChild);
+			    VisualChildren.Add(newChild);
+		    }
+		    
+		    InvalidateArrange();
+	    }
 	    
 	    base.OnPropertyChanged(e);
     }
