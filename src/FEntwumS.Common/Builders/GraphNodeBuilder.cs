@@ -50,7 +50,6 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 	{
 		_topLeftInteractionControls ??= new StackPanel()
 		{
-			Spacing = 10.0d,
 			HorizontalAlignment = HorizontalAlignment.Left,
 			VerticalAlignment = VerticalAlignment.Top,
 			Orientation = Orientation.Vertical,
@@ -65,7 +64,6 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 	{
 		_topRightInteractionControls ??= new StackPanel()
 		{
-			Spacing = 10.0d,
 			HorizontalAlignment = HorizontalAlignment.Right,
 			VerticalAlignment = VerticalAlignment.Top,
 			Orientation = Orientation.Vertical,
@@ -80,7 +78,6 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 	{
 		_topCenterInteractionControls ??= new StackPanel()
 		{
-			Spacing = 10.0d,
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Top,
 			Orientation = Orientation.Horizontal,
@@ -95,7 +92,6 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 	{
 		_centerLeftInteractionControls ??= new StackPanel()
 		{
-			Spacing = 10.0d,
 			HorizontalAlignment = HorizontalAlignment.Left,
 			VerticalAlignment = VerticalAlignment.Center,
 			Orientation = Orientation.Vertical,
@@ -110,7 +106,6 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 	{
 		_centerRightInteractionControls ??= new StackPanel()
 		{
-			Spacing = 10.0d,
 			HorizontalAlignment = HorizontalAlignment.Right,
 			VerticalAlignment = VerticalAlignment.Center,
 			Orientation = Orientation.Vertical,
@@ -125,7 +120,6 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 	{
 		_centerCenterInteractionControls ??= new StackPanel()
 		{
-			Spacing = 10.0d,
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Center,
 			Orientation = Orientation.Horizontal,
@@ -140,7 +134,6 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 	{
 		_bottomLeftInteractionControls ??= new StackPanel()
 		{
-			Spacing = 10.0d,
 			HorizontalAlignment = HorizontalAlignment.Left,
 			VerticalAlignment = VerticalAlignment.Bottom,
 			Orientation = Orientation.Vertical,
@@ -155,7 +148,6 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 	{
 		_bottomRightInteractionControls ??= new StackPanel()
 		{
-			Spacing = 10.0d,
 			HorizontalAlignment = HorizontalAlignment.Right,
 			VerticalAlignment = VerticalAlignment.Bottom,
 			Orientation = Orientation.Vertical,
@@ -170,7 +162,6 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 	{
 		_bottomCenterInteractionControls ??= new StackPanel()
 		{
-			Spacing = 10.0d,
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Bottom,
 			Orientation = Orientation.Horizontal,
@@ -255,12 +246,10 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 		{
 			Button jumpToSourceButton = new Button()
 			{
-				Padding = new Thickness(5.0d),
 				CornerRadius = new CornerRadius(3.0d),
 				BorderThickness = new Thickness(1.0d),
 				VerticalAlignment = VerticalAlignment.Top,
-				HorizontalAlignment = HorizontalAlignment.Center,
-				Margin = new Thickness(5.0d)
+				HorizontalAlignment = HorizontalAlignment.Center
 			};
 
 			jumpToSourceButton.Initialized += (sender, args) =>
@@ -342,20 +331,54 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 		{
 			Button expandCollapseButton = new Button()
 			{
-				Padding = new Thickness(5.0d),
 				CornerRadius = new CornerRadius(3.0d),
 				BorderThickness = new Thickness(1.0d),
 				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Center,
-				Margin = new Thickness(5.0d)
+				RenderTransformOrigin = new RelativePoint(0.5d, 0.0d, RelativeUnit.Relative),
 			};
 
-			expandCollapseButton.Initialized += (sender, args) =>
+			expandCollapseButton.AttachedToVisualTree += (sender, args) =>
 			{
-				bool found = expandCollapseButton.TryGetResource("FluentIcons.add_regular",
-					expandCollapseButton.ActualThemeVariant, out var contentImage);
+				// Try to find the parent graphnode
+				
+				Visual? ancestor = expandCollapseButton.GetVisualParent();
+				bool done = false;
+				GraphNodeControl? directAncestorNode = null;
 
-				int i = 0;
+				while (!done)
+				{
+					if (ancestor is null)
+					{
+						return;
+					}
+
+					if (ancestor is GraphNodeControl graphNodeControl)
+					{
+						directAncestorNode = graphNodeControl;
+						done = true;
+					}
+					else
+					{
+						ancestor = ancestor.GetVisualParent();
+					}
+				}
+
+				if (directAncestorNode is not null)
+				{
+					directAncestorNode.PropertyChanged += (o, eventArgs) =>
+					{
+						if (eventArgs.Property == PositionableSubControl.ScaleProperty &&
+						    expandCollapseButton.Content is PathIcon buttonContent)
+						{
+							double newScale = (double)eventArgs.NewValue!;
+							double oldScale = (double)eventArgs.OldValue!;
+							double scaleDifference = newScale / oldScale;
+							
+							expandCollapseButton.RenderTransform = new ScaleTransform(newScale, newScale);
+						}
+					};
+				}
 			};
 
 			expandCollapseButton.ActualThemeVariantChanged += (sender, args) =>
@@ -368,12 +391,11 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 				expandCollapseButton.Content = new PathIcon()
 				{
 					Data = AppIcons.PLUS,
-					 Height = 16.0d
+					Height = 16.0d
 				};
 			
 				((Visual)expandCollapseButton.Content).ZIndex = expandCollapseButton.ZIndex;
 
-				// jumpToSourceButton.Content = "Hallo";
 				expandCollapseButton.BorderBrush = (IBrush?)bobrush;
 				expandCollapseButton.Background = (IBrush?)bgbrush;
 
@@ -477,7 +499,7 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 			c.LocationPath =  this._locationPath;
 			c.IsHitTestVisible = true;
 			
-			int interactionControlZIndex = c.ZIndex + 1;
+			int interactionControlZIndex = c.ZIndex + 3;
 
 			if (_topLeftInteractionControls is not null)
 			{
