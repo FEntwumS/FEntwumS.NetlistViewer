@@ -1,12 +1,10 @@
 ﻿using System.Text.Json.Nodes;
 using Avalonia;
-using Avalonia.Media;
 using FEntwumS.Common.Builders;
 using FEntwumS.Common.Controls;
 using FEntwumS.Common.Interfaces;
 using FEntwumS.Common.Services;
 using FEntwumS.Common.Types;
-using FEntwumS.Common.ViewModels;
 using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Services;
 
@@ -40,11 +38,9 @@ public class JsonLoader : IJsonLoader
 	}
 
 	public GraphNodeControl ParseJson(double xRef, double yRef,
-		Stream netlistStream, UInt64 netlistId)
+		Stream netlistStream, UInt64 netlistId, string ClickedElementPath = "")
 	{
 		JsonNode? netlistRootNode = JsonNode.Parse(netlistStream);
-
-		ClickedElementPath = _viewportDimensionService!.GetClickedElementPath(netlistId);
 
 		if (ClickedElementPath == null)
 		{
@@ -259,6 +255,7 @@ public class JsonLoader : IJsonLoader
 						.WithCellName(cellname)
 						.WithCellType(celltype)
 						.WithExpandCollapseInteractionControlIf(celltype == "HDL_ENTITY" && depth >= 2)
+						.WithLocationPath(path)
 						.WithX(xRef + x)
 						.WithY(yRef + y)
 						.WithWidth(nWidth)

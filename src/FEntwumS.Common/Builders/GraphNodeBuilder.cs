@@ -4,9 +4,11 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
-using CommunityToolkit.Mvvm.Input;
+using Avalonia.VisualTree;
 using FEntwumS.Common.Assets;
 using FEntwumS.Common.Controls;
+using FEntwumS.Common.Interfaces;
+using FEntwumS.Common.Services;
 
 namespace FEntwumS.Common.Builders;
 
@@ -385,11 +387,77 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 
 		return this;
 	}
-	
+
 	private void ExpandCollapseButtonOnClick(object? sender, RoutedEventArgs e)
 	{
-		return;
-		throw new NotImplementedException();
+		if (sender is Button expandCollapseButton)
+		{
+			bool done = false;
+			
+			Visual? sendingControl = expandCollapseButton.GetVisualParent();
+			GraphNodeControl? sendingNode = null;
+			PanningNetlistControl? sendingPanningNetlist = null;
+
+			while (!done)
+			{
+				if (sendingControl is GraphNodeControl graphNode)
+				{
+					done = true;
+					sendingNode = graphNode;
+				}
+
+				if (sendingControl is null)
+				{
+					return;
+				}
+				else
+				{
+					sendingControl = sendingControl.GetVisualParent();
+				}
+			}
+
+			done = false;
+			
+			sendingControl = sendingNode.GetVisualParent();
+
+			while (!done)
+			{
+				if (sendingControl is PanningNetlistControl netlistControl)
+				{
+					done = true;
+					sendingPanningNetlist = netlistControl;
+				}
+
+				if (sendingControl is null)
+				{
+					return;
+				}
+				else
+				{
+					sendingControl = sendingControl.GetVisualParent();
+				}
+			}
+			var f = (async () =>
+			{
+				GenericGraphElementControl? newGraphNode = null;
+				
+				newGraphNode = await ServiceManager.GetService<IFrontendService>()
+					.ExpandNodeAsync(sendingNode.LocationPath, sendingPanningNetlist.NetlistId);
+				
+				if (newGraphNode is not null)
+				{
+					Dispatcher.UIThread.Invoke(() =>
+					{
+						sendingPanningNetlist.Child = newGraphNode;
+					});
+
+				}
+			});
+
+			_ = f.Invoke();
+		}
+	return;
+	throw new NotImplementedException();
 	}
 
 	public GraphNodeBuilder WithLocationPath(string locationPath)

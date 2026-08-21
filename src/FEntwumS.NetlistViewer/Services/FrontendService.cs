@@ -675,30 +675,33 @@ public class FrontendService : IFrontendService
 		_applicationStateService.RemoveState(proc);
 	}
 
-	public async Task ExpandNodeAsync(string? nodePath, FrontendViewModel vm)
+	public async Task<GenericGraphElementControl?> ExpandNodeAsync(string? nodePath, ulong netlistId)
 	{
 		ApplicationProcess expandProc = _applicationStateService.AddState("Layouting in progress", AppState.Loading);
 
 		_logger.Log("Sending request to ExpandNode");
 
-		var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + Uri.EscapeDataString(nodePath), null);
+		var resp = await PostAsync("/expandNode?hash=" + netlistId + "&nodePath=" + Uri.EscapeDataString(nodePath), null);
 
 		if (resp is not { IsSuccessStatusCode: true })
 		{
 			_applicationStateService.RemoveState(expandProc);
 
-			return;
+			return null;
 		}
-
-		vm.File = await resp.Content.ReadAsStreamAsync();
-
+		
 		_logger.Log("Answer received");
-
-		await vm.OpenFileImplAsync();
+		
+		GraphNodeControl netlistRootControl = new GraphNodeControl();
+		
+		await Task.Run(() => netlistRootControl = ServiceManager.GetService<IJsonLoader>()
+			.ParseJson(0, 0, resp.Content.ReadAsStream(), currentNetlist, nodePath));
 
 		_logger.Log("Done");
 
 		_applicationStateService.RemoveState(expandProc);
+		
+		return netlistRootControl;
 	}
 
 	// Source:

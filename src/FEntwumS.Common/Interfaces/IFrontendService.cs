@@ -1,4 +1,4 @@
-﻿using FEntwumS.Common.ViewModels;
+﻿using FEntwumS.Common.Controls;
 using OneWare.Essentials.Models;
 
 namespace FEntwumS.Common.Interfaces;
@@ -13,7 +13,7 @@ public interface IFrontendService : ISettingsSubscriber
 
 	public Task ShowViewerAsync(IProjectFile json);
 
-	public Task ExpandNodeAsync(string? nodePath, FrontendViewModel vm);
+	public Task<GenericGraphElementControl?> ExpandNodeAsync(string? nodePath, ulong netlistId);
 
 	public Task<bool> StartBackendIfNotStartedAsync();
 

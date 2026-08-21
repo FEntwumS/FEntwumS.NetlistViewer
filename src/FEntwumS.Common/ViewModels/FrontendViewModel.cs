@@ -182,7 +182,7 @@ public class FrontendViewModel : ExtendedTool
 
 	public async Task ClickedElementPathChangedAsync()
 	{
-		await _frontendService.ExpandNodeAsync(clickedElementPath, this);
+		//await _frontendService.ExpandNodeAsync(clickedElementPath, this);
 	}
 
 	public override bool OnClose()
