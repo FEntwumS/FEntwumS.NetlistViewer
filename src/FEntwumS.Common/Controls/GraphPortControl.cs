@@ -49,7 +49,7 @@ public class GraphPortControl : GenericGraphElementControl
 			], true),
 			PortShape.Tag =>
 			new PolylineGeometry([
-				new Point(rx, ty),
+				new Point(lx, ty),
 				new Point(mx, ty),
 				new Point(rx, my),
 				new Point(mx, by),
