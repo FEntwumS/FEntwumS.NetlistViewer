@@ -5,14 +5,18 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using CommunityToolkit.Mvvm.Input;
 using FEntwumS.Common.Assets;
 using FEntwumS.Common.Controls;
 using FEntwumS.Common.Interfaces;
 using FEntwumS.Common.Services;
+using OneWare.Essentials.Helpers;
+using OneWare.Essentials.Services;
+using OneWare.Essentials.ViewModels;
 
 namespace FEntwumS.Common.Builders;
 
-public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
+public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 {
 	private string? _cellName;
 	private string? _cellType;
@@ -25,6 +29,7 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 	private StackPanel? _bottomLeftInteractionControls;
 	private StackPanel? _bottomRightInteractionControls;
 	private StackPanel? _bottomCenterInteractionControls;
+	private ContextMenu? _contextMenu;
 	private string? _locationPath;
 	
 	public new static GraphNodeBuilder Create()
@@ -381,6 +386,7 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 							double scaleDifference = newScale / oldScale;
 							
 							expandCollapseButton.RenderTransform = new ScaleTransform(newScale, newScale);
+							// TODO apply rendertransform to stackpanel to greatly simplify layout when several interactioncontrols are used in one location
 						}
 					};
 				}
@@ -462,6 +468,7 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 					sendingControl = sendingControl.GetVisualParent();
 				}
 			}
+			
 			var f = (async () =>
 			{
 				GenericGraphElementControl? newGraphNode = null;
@@ -488,6 +495,165 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 		this._locationPath = locationPath;
 		return this;
 	}
+
+	public GraphNodeBuilder WithJumpToSourceContextMenuAction()
+	{
+		if (_contextMenu is null)
+		{
+			Dispatcher.UIThread.Invoke(() =>
+			{
+				_contextMenu = new ContextMenu();
+			});
+		}
+
+		Dispatcher.UIThread.Invoke(() =>
+		{
+			var currentMenuItems = _contextMenu.ItemsSource;
+
+			if (currentMenuItems is null)
+			{
+				_contextMenu.ItemsSource = new[]
+				{
+					new MenuItem() { Header = "Jump To Source", Command = JumpToSourceCommand }
+				};
+			}
+			else
+			{
+
+			}
+		});
+
+		return this;
+	}
+
+	[RelayCommand]
+	private async void JumpToSource(object? parameter)
+	{
+		if (parameter is GraphNodeControl graphNodeControl)
+		{
+			Visual? sendingControl = graphNodeControl.GetVisualParent();
+			PanningNetlistControl? sendingPanningNetlist = null;
+			bool done = false;
+			
+			while (!done)
+			{
+				if (sendingControl is PanningNetlistControl netlistControl)
+				{
+					done = true;
+					sendingPanningNetlist = netlistControl;
+				}
+
+				if (sendingControl is null)
+				{
+					return;
+				}
+				else
+				{
+					sendingControl = sendingControl.GetVisualParent();
+				}
+			}
+
+			if (sendingPanningNetlist is null)
+			{
+				return;
+			}
+			
+			
+			string srcLine = graphNodeControl.srcLocation;
+
+			ulong NetlistID = sendingPanningNetlist.NetlistId;
+			
+			
+			if (srcLine is null || srcLine == "")
+	        {
+	            return;
+	        }
+
+	        string?[] srclineSplit = srcLine.Split('|');
+
+	        srcLine = srclineSplit.First();
+
+	        int lastpos = -1;
+
+	        if (PlatformHelper.Platform is PlatformId.WinArm64 or PlatformId.WinX64)
+	        {
+	            lastpos = srcLine!.LastIndexOfAny([':']);
+	        } else if (PlatformHelper.Platform is not PlatformId.Unknown or PlatformId.Wasm)
+	        {
+	            lastpos = srcLine!.IndexOf(':');
+	        }
+	        
+	        if (lastpos == -1)
+	        {
+	            lastpos = srcLine!.Length - 1;
+	        }
+
+	        long line = 1;
+	        string filename = "";
+
+	        // PMUXes somehow have the actual src attribute set two times; While both contain the correct source file, the
+	        // first does not contain the line number. Only the second does
+
+	        for (int i = 0; i < 2; i++)
+	        {
+	            filename = srcLine!.Substring(0, lastpos);
+	            string lines = srcLine.Substring(lastpos + 1);
+	            string[] linesSplit = lines.Split('.');
+
+	            if (linesSplit.Length > 0)
+	            {
+	                try
+	                {
+	                    line = long.Parse(linesSplit[0]);
+	                }
+	                catch (Exception)
+	                {
+	                    line = 1;
+	                }
+	            }
+
+	            if (line == 0)
+	            {
+	                if (srclineSplit.Length > 1)
+	                {
+	                    srcLine = srclineSplit[1];
+	                }
+	            }
+	            else
+	            {
+	                break;
+	            }
+	        }
+
+	        (string vhdlFilename, long vhdlLine, bool success) = ServiceManager.GetService<ICcVhdlFileIndexService>()
+	            .GetActualSource(line, NetlistID);
+
+	        if (success)
+	        {
+	            filename = vhdlFilename;
+	            line = vhdlLine;
+	        }
+
+	        // if (filename[0] != '/' && filename.Substring(1, 2) != ":\\")
+	        // {
+		       //  filename = Path.Combine(ProjectRootFolder, filename);
+	        // }
+
+	        if (File.Exists(filename))
+	        {
+		        var ds = ServiceManager.GetService<IMainDockService>();
+
+		        var document = await ds.OpenFileAsync(filename);
+
+		        (document as IEditor)?.JumpToLine((int)line);
+	        }
+		}
+	}
+
+	// private ICommand? JumpToSourceCommand = new AsyncRelayCommand(async (x) =>
+	// {
+	// 	int i = 0;
+	// });
 
 	public GraphNodeControl Build()
 	{
@@ -590,6 +756,19 @@ public class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
 				}
 				
 				c._interactionControls.Add(_centerCenterInteractionControls);
+			}
+
+			if (_contextMenu is not null)
+			{
+				foreach (var i in _contextMenu.ItemsSource)
+				{
+					if (i is MenuItem menuItem)
+					{
+						menuItem.CommandParameter = c;
+					}
+				}
+				
+				c.ContextMenu = _contextMenu;
 			}
 		});
 

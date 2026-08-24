@@ -255,6 +255,7 @@ public class JsonLoader : IJsonLoader
 						.WithCellName(cellname)
 						.WithCellType(celltype)
 						.WithExpandCollapseInteractionControlIf(celltype == "HDL_ENTITY" && depth >= 2)
+						.WithJumpToSourceContextMenuAction()
 						.WithLocationPath(path)
 						.WithX(xRef + x)
 						.WithY(yRef + y)

@@ -230,8 +230,15 @@ public class PanningControl : UserControl
 	    //Content = Child;
 	    if (Child is not null)
 	    {
-		    LogicalChildren.Add(Child);
-		    VisualChildren.Add(Child);
+		    if (!LogicalChildren.Contains(Child))
+		    {
+			    LogicalChildren.Add(Child);
+		    }
+
+		    if (!VisualChildren.Contains(Child))
+		    {
+			    VisualChildren.Add(Child);
+		    }
 	    }
 
 	    base.OnLoaded(e);
