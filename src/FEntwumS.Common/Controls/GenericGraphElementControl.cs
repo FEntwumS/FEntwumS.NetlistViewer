@@ -4,7 +4,7 @@ using FEntwumS.Common.Types;
 
 namespace FEntwumS.Common.Controls;
 
-public class GenericGraphElementControl : PositionableSubControl
+public abstract class GenericGraphElementControl : PositionableSubControl
 {
 	#region Properties
 

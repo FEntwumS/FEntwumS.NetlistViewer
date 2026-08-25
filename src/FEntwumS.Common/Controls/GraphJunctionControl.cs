@@ -77,33 +77,19 @@ public class GraphJunctionControl : GenericGraphElementControl, ICustomHitTest
 		base.OnInitialized();
 	}
 
-	protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
-	{
-		if (e.Property == NetlistThemeProperty)
-		{
-			RegenerateDrawnElements();
-		}
-		
-		if (e.Property == ScaleProperty && NetlistTheme is not null)
-		{
-			RegenerateDrawnElements();
-		}
-		
-		base.OnPropertyChanged(e);
-	}
-
 	#endregion
 
 	#region Rendering
 
 	public override void Render(DrawingContext context)
 	{
-		context.DrawGeometry(NetlistTheme.EdgeBrush, null, _contentGeometry);
-		
-		base.Render(context);
+		if (_contentGeometry.Bounds.Height >= 2.0d)
+		{
+			context.DrawGeometry(NetlistTheme.EdgeBrush, null, _contentGeometry);
+		}
 	}
 
-	private void RegenerateDrawnElements()
+	protected override void RegenerateDrawnElements()
 	{
 		_contentGeometry.Transform = new ScaleTransform(Scale, Scale);
 	}

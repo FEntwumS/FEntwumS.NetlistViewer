@@ -4,7 +4,7 @@ using Avalonia.Data;
 
 namespace FEntwumS.Common.Controls;
 
-public class PositionableSubControl : UserControl
+public abstract class PositionableSubControl : UserControl
 {
     #region Properties
 
@@ -71,10 +71,16 @@ public class PositionableSubControl : UserControl
 		    this.Height *=  scaleDifference;
 		    this.X *= scaleDifference;
 		    this.Y *= scaleDifference;
+		    
+		    RegenerateDrawnElements();
+
+		    return;
 	    }
 	    
 	    base.OnPropertyChanged(e);
     }
+
+    protected abstract void RegenerateDrawnElements();
 
     #endregion
 }

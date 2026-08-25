@@ -146,6 +146,7 @@ public class PanningControl : UserControl
 	    // Update the scale
 	    if (Child is not null)
 	    {
+		    Child.IsHitTestVisible = false;
 		    Child.Scale *= deltaScaleToApply;
 		    newScale = Child.Scale;
 	    }
@@ -161,6 +162,8 @@ public class PanningControl : UserControl
 	    ScaleChangedCommand?.Execute(newScale);
 	    
 	    InvalidateArrange();
+	    
+	    Child?.IsHitTestVisible = true;
     }
     
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)

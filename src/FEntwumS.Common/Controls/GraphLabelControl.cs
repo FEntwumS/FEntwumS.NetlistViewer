@@ -47,49 +47,26 @@ public class GraphLabelControl : GenericGraphElementControl
 
     #region Event handling
 
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property == ContentProperty)
-        {
-            if (e.NewValue is string newContent && NetlistTheme is not null)
-            {
-                _formattedContent = new FormattedText(newContent,
-                    CultureInfo.InvariantCulture,
-                    FlowDirection.LeftToRight,
-                    NetlistTheme.Typeface,
-                    Fontsize * Scale,
-                    NetlistTheme.TextBrush);
-            }
-        } else if (e.Property == NetlistThemeProperty && e.NewValue is not null)
-        {
-	        _formattedContent = new FormattedText(Content ?? "",
-		        CultureInfo.InvariantCulture,
-		        FlowDirection.LeftToRight,
-		        NetlistTheme.Typeface,
-		        Fontsize * Scale,
-		        NetlistTheme.TextBrush);
-        }
-
-        if (e.Property == ScaleProperty && NetlistTheme is not null)
-        {
-	        _formattedContent = new FormattedText(Content ?? "",
-		        CultureInfo.InvariantCulture,
-		        FlowDirection.LeftToRight,
-		        NetlistTheme.Typeface,
-		        Fontsize * Scale,
-		        NetlistTheme.TextBrush);
-        }
-        
-        base.OnPropertyChanged(e);
-    }
-
     #endregion
     
     #region Rendering
 
     public override void Render(DrawingContext context)
     {
-	    context.DrawText(_formattedContent, new Point(0, 0));
+	    if (Scale >= 0.2d)
+	    {
+		    context.DrawText(_formattedContent, new Point(0, 0));
+	    }
+    }
+
+    protected override void RegenerateDrawnElements()
+    {
+	    _formattedContent = new FormattedText(Content ?? "",
+		    CultureInfo.InvariantCulture,
+		    FlowDirection.LeftToRight,
+		    NetlistTheme.Typeface,
+		    Fontsize * Scale,
+		    NetlistTheme.TextBrush);
     }
 
     #endregion

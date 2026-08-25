@@ -114,21 +114,6 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		base.OnInitialized();
 	}
 
-	protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
-	{
-		if (e.Property == NetlistThemeProperty && e.NewValue is not null)
-		{
-			RegenerateDrawnElements();
-		}
-
-		if (e.Property == ScaleProperty && NetlistTheme is not null)
-		{
-			RegenerateDrawnElements();
-		}
-		
-		base.OnPropertyChanged(e);
-	}
-
 	protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
 	{
 		VisualChildren.Clear();
@@ -252,15 +237,13 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 	
 	public override void Render(DrawingContext context)
 	{
-		context.DrawGeometry(NetlistTheme.FillBrush, NetlistTheme.BorderPen, _contentGeometry);
-
-		foreach (Control child in _interactionControls)
+		if (_contentGeometry.Bounds.Height >= 2.0d)
 		{
-			//child.Render(context);
+			context.DrawGeometry(NetlistTheme.FillBrush, NetlistTheme.BorderPen, _contentGeometry);
 		}
 	}
 
-	private void RegenerateDrawnElements()
+	protected override void RegenerateDrawnElements()
 	{
 		_contentGeometry.Transform = new ScaleTransform(Scale, Scale);
 	}

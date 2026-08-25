@@ -24,7 +24,7 @@ public class NetlistViewModel : ExtendedTool
 		}
 	}
 
-	private GenericGraphElementControl _rootNode = new();
+	private GenericGraphElementControl _rootNode = new GraphNodeControl();
 
 	public GenericGraphElementControl RootNode
 	{

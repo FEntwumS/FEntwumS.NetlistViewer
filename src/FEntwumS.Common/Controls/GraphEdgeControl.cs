@@ -48,21 +48,6 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 		base.OnInitialized();
 	}
 
-	protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
-	{
-		if (e.Property == NetlistThemeProperty)
-		{
-			RegenerateDrawnElements();
-		}
-
-		if (e.Property == ScaleProperty && NetlistTheme is not null)
-		{
-			RegenerateDrawnElements();
-		}
-		
-		base.OnPropertyChanged(e);
-	}
-
 	#endregion
 
 	#region Rendering
@@ -73,7 +58,7 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 		context.DrawGeometry(null, linePen, _contentGeometry);
 	}
 
-	private void RegenerateDrawnElements()
+	protected override void RegenerateDrawnElements()
 	{
 		_contentGeometry.Transform = new ScaleTransform(Scale, Scale);
 	}
