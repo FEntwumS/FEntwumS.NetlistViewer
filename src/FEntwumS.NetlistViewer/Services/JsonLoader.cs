@@ -756,8 +756,8 @@ public class JsonLoader : IJsonLoader
 				.WithJunctionShape(junctionShape)
 				.WithX(xRef + x)
 				.WithY(yRef + y)
-				.WithWidth(10.0d)
-				.WithHeight(10.0d)
+				.WithWidth(7.5d)
+				.WithHeight(7.5d)
 				.WithZIndex(depth) as GraphJunctionBuilder)
 				.Build()
 				);
