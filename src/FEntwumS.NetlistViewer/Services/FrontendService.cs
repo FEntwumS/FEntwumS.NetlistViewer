@@ -556,14 +556,7 @@ public class FrontendService : IFrontendService
 		_logger.Log("Path hash: " + pathHash);
 		_logger.Log("Full file hash is: " + contenthash);
 		_logger.Log("Combined hash is: " + combinedHash);
-
-		_viewportDimensionService.SetClickedElementPath(combinedHash, string.Empty);
-		_viewportDimensionService.SetCurrentElementCount(combinedHash, 0);
-		_viewportDimensionService.SetZoomElementDimensions(combinedHash, null);
-
-		FrontendViewModel vm = new FrontendViewModel();
-		vm.InitializeContent();
-		vm.Title = $"Netlist: {top}";
+		
 		_logger.Log("Selected file: " + json.FullPath);
 
 		FileStream jsonFileStream = File.Open(json.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -611,8 +604,6 @@ public class FrontendService : IFrontendService
 
 			return;
 		}
-		
-		//vm.File = await resp.Content.ReadAsStreamAsync();
 
 		ApplicationProcess indexProc = _applicationStateService.AddState("Indexing", AppState.Loading);
 
@@ -669,9 +660,6 @@ public class FrontendService : IFrontendService
 		
 		_dockService.Show(nvm, DockShowLocation.Document);
 		_dockService.InitializeContent();
-		vm.ProjectRootFolder = json.Root.RootFolderPath;
-		vm.NetlistId = currentNetlist;
-		await vm.OpenFileImplAsync();
 
 		_applicationStateService.RemoveState(proc);
 	}
