@@ -472,15 +472,45 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 			var f = (async () =>
 			{
 				GenericGraphElementControl? newGraphNode = null;
+				GraphNodeControl? clickedNode = null;
 				
-				newGraphNode = await ServiceManager.GetService<IFrontendService>()
+				(newGraphNode, clickedNode) = await ServiceManager.GetService<IFrontendService>()
 					.ExpandNodeAsync(sendingNode.LocationPath, sendingPanningNetlist.NetlistId);
 				
 				if (newGraphNode is not null)
 				{
-					Dispatcher.UIThread.Invoke(() =>
+					await Dispatcher.UIThread.InvokeAsync(() =>
 					{
 						sendingPanningNetlist.Child = newGraphNode;
+
+						if (clickedNode is not null)
+						{
+							double absoluteX = clickedNode.X,  absoluteY = clickedNode.Y;
+							bool done = false;
+							Visual? parent = clickedNode.GetVisualParent();
+
+							while (!done)
+							{
+								if (parent is not GraphNodeControl parentNode)
+								{
+									done = true;
+								}
+								else
+								{
+									absoluteX += parentNode.X;
+									absoluteY += parentNode.Y;
+									
+									parent = parentNode.GetVisualParent();
+								}
+							}
+
+							sendingPanningNetlist.ZoomBounds = new Rect(new Point(absoluteX, absoluteY),
+								new Size(clickedNode.Width, clickedNode.Height));
+						}
+						else
+						{
+							sendingPanningNetlist.ZoomToFit();
+						}
 					});
 
 				}

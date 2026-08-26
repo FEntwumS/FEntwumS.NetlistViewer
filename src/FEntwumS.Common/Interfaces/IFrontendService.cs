@@ -13,7 +13,7 @@ public interface IFrontendService : ISettingsSubscriber
 
 	public Task ShowViewerAsync(IProjectFile json);
 
-	public Task<GenericGraphElementControl?> ExpandNodeAsync(string? nodePath, ulong netlistId);
+	public Task<(GenericGraphElementControl?, GraphNodeControl?)> ExpandNodeAsync(string? nodePath, ulong netlistId);
 
 	public Task<bool> StartBackendIfNotStartedAsync();
 

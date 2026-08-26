@@ -7,11 +7,11 @@ namespace FEntwumS.Common.Interfaces;
 public interface IJsonLoader
 {
 
-	public GraphNodeControl ParseJson(double xRef, double yRef,
-		Stream netlistStream, UInt64 netlistId, string ClickedElementPath = "");
+	public (GraphNodeControl, GraphNodeControl?) ParseJson(double xRef, double yRef,
+		Stream netlistStream, UInt64 netlistId, string clickedElementPath = "");
 
-	public void CreateNode(JsonNode node, GraphNodeControl parent, double xRef, double
-		yRef, ushort depth);
+	public (GraphNodeControl?, GraphNodeControl?) CreateNode(JsonNode node, GraphNodeControl parent, double xRef, double
+		yRef, ushort depth, string clickedElementPath, string clickedElementParentPath);
 
 	public void CreateLabels(JsonArray labels, GraphNodeControl parent, double xRef,
 		double yRef, ushort depth);

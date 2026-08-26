@@ -24,9 +24,7 @@ public class JsonLoader : IJsonLoader
 	private long BendCnt { get; set; }
 	private long CharCnt { get; set; }
 	private readonly ILogger _logger;
-
-	private string? ClickedElementPath { get; set; }
-	private string? ClickedElementParentPath { get; set; }
+	
 	private DRect? ClickedElementRect { get; set; }
 	private DRect? ClickedElementParentRect { get; set; }
 	private readonly IViewportDimensionService? _viewportDimensionService;
@@ -37,25 +35,27 @@ public class JsonLoader : IJsonLoader
 		_logger = ServiceManager.GetService<ILogger>();
 	}
 
-	public GraphNodeControl ParseJson(double xRef, double yRef,
-		Stream netlistStream, UInt64 netlistId, string ClickedElementPath = "")
+	public (GraphNodeControl, GraphNodeControl?) ParseJson(double xRef, double yRef,
+		Stream netlistStream, UInt64 netlistId, string clickedElementPath = "")
 	{
 		JsonNode? netlistRootNode = JsonNode.Parse(netlistStream);
+		GraphNodeControl? clickedNode = null;
+		string clickedElementParentPath = string.Empty;
 
-		if (ClickedElementPath == null)
+		if (clickedElementPath == null)
 		{
-			ClickedElementPath = string.Empty;
+			clickedElementPath = string.Empty;
 		}
 
-		var clickedElementPathSplit = ClickedElementPath.Split(' ');
+		var clickedElementPathSplit = clickedElementPath.Split(' ');
 
 		if (clickedElementPathSplit.Length < 2)
 		{
-			ClickedElementParentPath = string.Empty;
+			clickedElementParentPath = string.Empty;
 		}
 		else
 		{
-			ClickedElementParentPath = string.Join(" ", clickedElementPathSplit, 0, clickedElementPathSplit.Length - 1);
+			clickedElementParentPath = string.Join(" ", clickedElementPathSplit, 0, clickedElementPathSplit.Length - 1);
 		}
 
 		_logger.Log("Start loading elements");
@@ -95,9 +95,19 @@ public class JsonLoader : IJsonLoader
 			.WithZIndex(0)
 			.Build();
 
-		if (netlistRootNode is null) return rootNode;
+		if (netlistRootNode is null) return (rootNode, clickedNode);
 
-		CreateNode(netlistRootNode, rootNode, xRef, yRef, 0);
+		var (clickedNodeCandidate, clickedNodeParentCandidate) = CreateNode(netlistRootNode, rootNode, xRef, yRef, 0, clickedElementPath, clickedElementParentPath);
+
+		if (clickedNodeCandidate is not null && clickedNodeCandidate.Items
+			    .Any(c => c is GraphNodeControl))
+		{
+			clickedNode = clickedNodeCandidate;
+		}
+		else
+		{
+			clickedNode = clickedNodeParentCandidate;
+		}
 
 		// check for clicked elements
 		// TODO was anything clicked????
@@ -147,11 +157,11 @@ public class JsonLoader : IJsonLoader
 		_logger.Log("Max width: " + MaxWidth);
 		_logger.Log("Max height: " + MaxHeight);
 
-		return rootNode;
+		return (rootNode, clickedNode);
 	}
 
-	public void CreateNode(JsonNode node, GraphNodeControl parent, double xRef, double yRef,
-		ushort depth)
+	public (GraphNodeControl?, GraphNodeControl?) CreateNode(JsonNode node, GraphNodeControl parent, double xRef, double yRef,
+		ushort depth, string clickedElementPath, string clickedElementParentPath)
 	{
 		JsonArray? children = node["children"] as JsonArray;
 		double x = 0;
@@ -163,6 +173,9 @@ public class JsonLoader : IJsonLoader
 		string cellname = "";
 		string path = "";
 		string src = "";
+
+		GraphNodeControl? clickedNode = null,
+			clickedNodeParent = null;
 
 		bool isScaffolding = false;
 
@@ -220,17 +233,17 @@ public class JsonLoader : IJsonLoader
 
 		if (path != string.Empty)
 		{
-			if (path == ClickedElementPath)
+			if (path == clickedElementPath)
 			{
 				ClickedElementRect = new DRect(xRef + x, yRef + y, nWidth, nHeight, depth, null);
 			}
-			else if (path == ClickedElementParentPath)
+			else if (path == clickedElementParentPath)
 			{
 				ClickedElementParentRect = new DRect(xRef + x, yRef + y, nWidth, nHeight, depth, null);
 			}
 		}
-		else if (ClickedElementPath is not null && ClickedElementPath.Length > 0 &&
-		         ClickedElementParentPath == string.Empty && depth == 1)
+		else if (!string.IsNullOrEmpty(clickedElementPath) &&
+		         clickedElementParentPath == string.Empty && depth == 1)
 		{
 			ClickedElementParentRect = new DRect(0, 0, MaxWidth, MaxHeight, depth, null);
 		}
@@ -264,6 +277,18 @@ public class JsonLoader : IJsonLoader
 						.WithSrclocation(src)
 						.WithZIndex(depth) as GraphNodeBuilder)
 					.Build();
+				
+				if (path != string.Empty)
+				{
+					if (path == clickedElementPath)
+					{
+						clickedNode = parent;
+					}
+					else if (path == clickedElementParentPath)
+					{
+						clickedNodeParent = parent;
+					}
+				}
 
 				prevParent.Items.Add(parent);
 
@@ -299,14 +324,26 @@ public class JsonLoader : IJsonLoader
 			}
 		}
 
-		if (children == null) return;
+		if (children == null) return (clickedNode, clickedNodeParent);
 		foreach (JsonNode? child in children)
 		{
 			if (child is not null)
 			{
-				CreateNode(child, parent, 0, 0, newDepth);
+				var (childClickedNodeCandidate, childClickedNodeParentCandidate) = CreateNode(child, parent, 0, 0, newDepth, clickedElementPath, clickedElementParentPath);
+
+				if (clickedNode is null && childClickedNodeCandidate is not null)
+				{
+					clickedNode = childClickedNodeCandidate;
+				}
+
+				if (clickedNodeParent is null && childClickedNodeParentCandidate is not null)
+				{
+					clickedNodeParent = childClickedNodeParentCandidate;
+				}
 			}
 		}
+		
+		return (clickedNode, clickedNodeParent);
 	}
 
 	public void CreateLabels(JsonArray labels, GraphNodeControl parent, double xRef,

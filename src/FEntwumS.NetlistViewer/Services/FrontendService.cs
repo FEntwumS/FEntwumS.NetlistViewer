@@ -641,7 +641,7 @@ public class FrontendService : IFrontendService
 
 		GraphNodeControl netlistRootControl = new GraphNodeControl();
 
-		await Task.Run(() => netlistRootControl = ServiceManager.GetService<IJsonLoader>()
+		await Task.Run(() => (netlistRootControl, _) = ServiceManager.GetService<IJsonLoader>()
 			.ParseJson(0, 0, resp.Content.ReadAsStream(), currentNetlist));
 
 		nvm.NetlistTheme = new NetlistTheme()
@@ -664,7 +664,7 @@ public class FrontendService : IFrontendService
 		_applicationStateService.RemoveState(proc);
 	}
 
-	public async Task<GenericGraphElementControl?> ExpandNodeAsync(string? nodePath, ulong netlistId)
+	public async Task<(GenericGraphElementControl?, GraphNodeControl?)> ExpandNodeAsync(string? nodePath, ulong netlistId)
 	{
 		ApplicationProcess expandProc = _applicationStateService.AddState("Layouting in progress", AppState.Loading);
 
@@ -676,21 +676,22 @@ public class FrontendService : IFrontendService
 		{
 			_applicationStateService.RemoveState(expandProc);
 
-			return null;
+			return (null, null);
 		}
 		
 		_logger.Log("Answer received");
 		
 		GraphNodeControl netlistRootControl = new GraphNodeControl();
+		GraphNodeControl? clickedNode = null;
 		
-		await Task.Run(() => netlistRootControl = ServiceManager.GetService<IJsonLoader>()
+		await Task.Run(() => (netlistRootControl, clickedNode)  = ServiceManager.GetService<IJsonLoader>()
 			.ParseJson(0, 0, resp.Content.ReadAsStream(), currentNetlist, nodePath));
 
 		_logger.Log("Done");
 
 		_applicationStateService.RemoveState(expandProc);
 		
-		return netlistRootControl;
+		return (netlistRootControl, clickedNode);
 	}
 
 	// Source:
