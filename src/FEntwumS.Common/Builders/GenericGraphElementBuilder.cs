@@ -74,8 +74,7 @@ public class GenericGraphElementBuilder<T> where T: GenericGraphElementControl, 
 				Height = this._height,
 				srcLocation = this._srclocation,
 				ZIndex = _zIndex,
-				ClipToBounds = false,
-				//IsHitTestVisible = false
+				ClipToBounds = false
 			};
 
 			if (this._netlistTheme is not null)

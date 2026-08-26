@@ -34,6 +34,7 @@ public class GraphLabelBuilder : GenericGraphElementBuilder<GraphLabelControl>
 			c = base.Build();
 			c.Content = this._content;
 			c.Fontsize = this._fontSize;
+			c.IsHitTestVisible = false;
 		});
 		
 		return c;

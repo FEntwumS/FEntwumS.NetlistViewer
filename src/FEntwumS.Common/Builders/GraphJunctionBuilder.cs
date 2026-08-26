@@ -27,6 +27,7 @@ public class GraphJunctionBuilder : GenericGraphElementBuilder<GraphJunctionCont
 		{
 			c = base.Build();
 			c._junctionShape = this._junctionShape;
+			c.IsHitTestVisible = false;
 		});
 		
 		return c;

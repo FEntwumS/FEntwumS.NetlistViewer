@@ -27,6 +27,7 @@ public class GraphPortBuilder : GenericGraphElementBuilder<GraphPortControl>
 		{
 			c = base.Build();
 			c._portShape = this._portShape;
+			c.IsHitTestVisible = false;
 		});
 		
 		return c;

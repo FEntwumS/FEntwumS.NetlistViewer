@@ -54,6 +54,7 @@ public class GraphEdgeBuilder : GenericGraphElementBuilder<GraphEdgeControl>
 				c._points.AddRange(_points);
 			}
 			c._isThick = this._isThick;
+			c.IsHitTestVisible = false;
 		});
 		
 		return c;
