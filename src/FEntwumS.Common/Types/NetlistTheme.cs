@@ -76,10 +76,10 @@ public class NetlistTheme : INotifyPropertyChanged
         // Then, update pens with appropriate scale
         BorderPen = new Pen(BorderBrush, BorderThickness * scale);
         DropShadowPen = new Pen(DropShadowBrush, DropShadowThickness * scale);
-        EdgePen = new Pen(EdgeBrush, EdgeThickness * scale, lineCap: PenLineCap.Round);
-        BundledEdgePen = new Pen(BorderBrush, BundledEdgeThickness * scale, lineCap: PenLineCap.Round);
-        NotConnectedPen = new Pen(NotConnectedBrush, NotConnectedThickness * scale, lineCap: PenLineCap.Round);
-        HighLightPen = new Pen(HighlightBrush, HighlightThickness * scale, lineCap: PenLineCap.Round);
+        EdgePen = new Pen(EdgeBrush, EdgeThickness * scale, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
+        BundledEdgePen = new Pen(BorderBrush, BundledEdgeThickness * scale, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
+        NotConnectedPen = new Pen(NotConnectedBrush, NotConnectedThickness * scale, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
+        HighLightPen = new Pen(HighlightBrush, HighlightThickness * scale, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
         
         OnPropertyChanged(nameof(NetlistTheme));
     }
