@@ -907,7 +907,7 @@ public class FrontendService : IFrontendService
 		}
 		else if (PlatformHelper.Platform is PlatformId.OsxX64 or PlatformId.OsxArm64)
 		{
-			prefix += "/Content/Home";
+			prefix += "/Contents/Home";
 		}
 
 		prefix += "/bin";
