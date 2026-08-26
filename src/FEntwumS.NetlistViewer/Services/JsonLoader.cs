@@ -698,7 +698,7 @@ public class JsonLoader : IJsonLoader
 				if (!isScaffolding)
 				{
 					parent.Items.Add((GraphEdgeBuilder.Create()
-							.WithIsThick(false)
+							.WithIsThick(signaltype == "BUNDLED" || signaltype == "BUNDLED_CONSTANT")
 							.WithPoints(pointList)
 							.WithX(xRef)
 							.WithY(yRef)
