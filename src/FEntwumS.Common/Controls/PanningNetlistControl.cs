@@ -18,6 +18,16 @@ public class PanningNetlistControl : PanningControl
     public static readonly StyledProperty<ulong> NetlistIdProperty =
         AvaloniaProperty.Register<PanningNetlistControl, ulong>(nameof(NetlistId),
             defaultBindingMode: BindingMode.TwoWay);
+    
+    public string ProjectRootFolder
+    {
+	    get => GetValue(ProjectRootFolderProperty);
+	    set => SetValue(ProjectRootFolderProperty, value);
+    }
+    
+    public static readonly  StyledProperty<string> ProjectRootFolderProperty =
+	    AvaloniaProperty.Register<PanningNetlistControl, string>(nameof(ProjectRootFolder),
+		    defaultBindingMode: BindingMode.TwoWay);
 
     #endregion
     

@@ -663,6 +663,7 @@ public class FrontendService : IFrontendService
 		};
 		nvm.RootNode = netlistRootControl;
 		nvm.NetlistId = currentNetlist;
+		nvm.ProjectRootFolder = json.Root.RootFolderPath;
 		
 		nvm.InitializeContent();
 		

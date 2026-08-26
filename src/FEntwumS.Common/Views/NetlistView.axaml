@@ -35,6 +35,7 @@
                 FontFamily="{StaticResource MartianMono}"
                 Child="{Binding RootNode}"
                 ScaleChangedCommand="{Binding ScaleChangedCommand}"
+                ProjectRootFolder="{Binding ProjectRootFolder}"
                 >
                 
             </controls:PanningNetlistControl>

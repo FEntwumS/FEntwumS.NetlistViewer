@@ -558,7 +558,6 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 				return;
 			}
 			
-			
 			string srcLine = graphNodeControl.srcLocation;
 
 			ulong NetlistID = sendingPanningNetlist.NetlistId;
@@ -634,10 +633,10 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 	            line = vhdlLine;
 	        }
 
-	        // if (filename[0] != '/' && filename.Substring(1, 2) != ":\\")
-	        // {
-		       //  filename = Path.Combine(ProjectRootFolder, filename);
-	        // }
+	        if (filename[0] != '/' && filename.Substring(1, 2) != ":\\")
+	        {
+		        filename = Path.Combine(sendingPanningNetlist.ProjectRootFolder, filename);
+	        }
 
 	        if (File.Exists(filename))
 	        {

@@ -51,6 +51,18 @@ public class NetlistViewModel : ExtendedTool
 		}
 	}
 	
+	public string ProjectRootFolder
+	{
+		get => _projectRootFolder;
+		set
+		{
+			_projectRootFolder = value;
+			OnPropertyChanged();
+		}
+	}
+	
+	[DataMember] private string _projectRootFolder { get; set; }
+	
 	private ICommand _scaleChangedCommand;
 
 	public ICommand ScaleChangedCommand
