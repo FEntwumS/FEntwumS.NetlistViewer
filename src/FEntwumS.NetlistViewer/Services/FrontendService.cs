@@ -662,6 +662,22 @@ public class FrontendService : IFrontendService
 		_dockService.InitializeContent();
 
 		_applicationStateService.RemoveState(proc);
+		
+		// Close netlist view on shutdown since state is NOT persisted
+		_applicationStateService.RegisterShutdownAction(() =>
+		{
+			try
+			{
+				_dockService.CloseDockable(nvm);
+				
+				// Save the layout manually, since the automatic layout save on shutdown occurs BEFORE this action is executed
+				_dockService.SaveLayout();
+			}
+			catch (Exception _)
+			{
+				// Catch all exceptions, but don't do anything with them to ensure the shutdown actually commpletes
+			}
+		});
 	}
 
 	public async Task<(GenericGraphElementControl?, GraphNodeControl?)> ExpandNodeAsync(string? nodePath, ulong netlistId)
