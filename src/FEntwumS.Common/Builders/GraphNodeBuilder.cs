@@ -549,7 +549,12 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 			}
 			else
 			{
+				List<MenuItem> newItems = new List<MenuItem>();
+				
+				newItems.AddRange(_contextMenu.ItemsSource as IEnumerable<MenuItem> ?? Array.Empty<MenuItem>());
+				newItems.Add(new MenuItem() { Header = "Jump To Source", Command = JumpToSourceCommand });
 
+				_contextMenu.ItemsSource = newItems;
 			}
 		});
 
