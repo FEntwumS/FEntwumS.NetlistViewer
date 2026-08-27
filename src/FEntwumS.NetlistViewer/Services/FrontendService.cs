@@ -4,6 +4,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Asmichi.ProcessManagement;
 using Avalonia.Collections;
+using Avalonia.Media;
+using FEntwumS.Common.Controls;
 using FEntwumS.Common.Interfaces;
 using FEntwumS.Common.Services;
 using FEntwumS.Common.Types;
@@ -554,14 +556,7 @@ public class FrontendService : IFrontendService
 		_logger.Log("Path hash: " + pathHash);
 		_logger.Log("Full file hash is: " + contenthash);
 		_logger.Log("Combined hash is: " + combinedHash);
-
-		_viewportDimensionService.SetClickedElementPath(combinedHash, string.Empty);
-		_viewportDimensionService.SetCurrentElementCount(combinedHash, 0);
-		_viewportDimensionService.SetZoomElementDimensions(combinedHash, null);
-
-		FrontendViewModel vm = new FrontendViewModel();
-		vm.InitializeContent();
-		vm.Title = $"Netlist: {top}";
+		
 		_logger.Log("Selected file: " + json.FullPath);
 
 		FileStream jsonFileStream = File.Open(json.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -609,8 +604,6 @@ public class FrontendService : IFrontendService
 
 			return;
 		}
-		
-		vm.File = await resp.Content.ReadAsStreamAsync();
 
 		ApplicationProcess indexProc = _applicationStateService.AddState("Indexing", AppState.Loading);
 
@@ -643,40 +636,78 @@ public class FrontendService : IFrontendService
 		}
 
 		_applicationStateService.RemoveState(indexProc);
+		var nvm = new NetlistViewModel();
+		nvm.Title = $"Netlist: {top} test";
 
-		_dockService.Show(vm, DockShowLocation.Document);
+		GraphNodeControl netlistRootControl = new GraphNodeControl();
+
+		await Task.Run(() => (netlistRootControl, _) = ServiceManager.GetService<IJsonLoader>()
+			.ParseJson(0, 0, resp.Content.ReadAsStream(), currentNetlist));
+
+		nvm.NetlistTheme = new NetlistTheme()
+		{
+			Typeface = new Typeface(new FontFamily("avares://FEntwumS.Common/Assets/Fonts#Martian Mono Std Rg"))
+		};
+		netlistRootControl.NetlistTheme = new NetlistTheme()
+		{
+			Typeface = new Typeface(new FontFamily("avares://FEntwumS.Common/Assets/Fonts#Martian Mono Std Rg"))
+		};
+		nvm.RootNode = netlistRootControl;
+		nvm.NetlistId = currentNetlist;
+		nvm.ProjectRootFolder = json.Root.RootFolderPath;
+		
+		nvm.InitializeContent();
+		
+		_dockService.Show(nvm, DockShowLocation.Document);
 		_dockService.InitializeContent();
-		vm.ProjectRootFolder = json.Root.RootFolderPath;
-		vm.NetlistId = currentNetlist;
-		await vm.OpenFileImplAsync();
 
 		_applicationStateService.RemoveState(proc);
+		
+		// Close netlist view on shutdown since state is NOT persisted
+		_applicationStateService.RegisterShutdownAction(() =>
+		{
+			try
+			{
+				_dockService.CloseDockable(nvm);
+				
+				// Save the layout manually, since the automatic layout save on shutdown occurs BEFORE this action is executed
+				_dockService.SaveLayout();
+			}
+			catch (Exception _)
+			{
+				// Catch all exceptions, but don't do anything with them to ensure the shutdown actually commpletes
+			}
+		});
 	}
 
-	public async Task ExpandNodeAsync(string? nodePath, FrontendViewModel vm)
+	public async Task<(GenericGraphElementControl?, GraphNodeControl?)> ExpandNodeAsync(string? nodePath, ulong netlistId)
 	{
 		ApplicationProcess expandProc = _applicationStateService.AddState("Layouting in progress", AppState.Loading);
 
 		_logger.Log("Sending request to ExpandNode");
 
-		var resp = await PostAsync("/expandNode?hash=" + vm.NetlistId + "&nodePath=" + Uri.EscapeDataString(nodePath), null);
+		var resp = await PostAsync("/expandNode?hash=" + netlistId + "&nodePath=" + Uri.EscapeDataString(nodePath), null);
 
 		if (resp is not { IsSuccessStatusCode: true })
 		{
 			_applicationStateService.RemoveState(expandProc);
 
-			return;
+			return (null, null);
 		}
-
-		vm.File = await resp.Content.ReadAsStreamAsync();
-
+		
 		_logger.Log("Answer received");
-
-		await vm.OpenFileImplAsync();
+		
+		GraphNodeControl netlistRootControl = new GraphNodeControl();
+		GraphNodeControl? clickedNode = null;
+		
+		await Task.Run(() => (netlistRootControl, clickedNode)  = ServiceManager.GetService<IJsonLoader>()
+			.ParseJson(0, 0, resp.Content.ReadAsStream(), currentNetlist, nodePath));
 
 		_logger.Log("Done");
 
 		_applicationStateService.RemoveState(expandProc);
+		
+		return (netlistRootControl, clickedNode);
 	}
 
 	// Source:

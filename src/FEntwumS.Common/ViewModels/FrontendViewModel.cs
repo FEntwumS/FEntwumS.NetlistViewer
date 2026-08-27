@@ -182,7 +182,7 @@ public class FrontendViewModel : ExtendedTool
 
 	public async Task ClickedElementPathChangedAsync()
 	{
-		await _frontendService.ExpandNodeAsync(clickedElementPath, this);
+		//await _frontendService.ExpandNodeAsync(clickedElementPath, this);
 	}
 
 	public override bool OnClose()
@@ -224,8 +224,8 @@ public class FrontendViewModel : ExtendedTool
 
 				ApplicationProcess loadProc = _applicationStateService.AddState("Loading JSON", AppState.Loading);
 
-				Task t = jsonLoader.OpenJsonAsync(File, netlistId);
-				t.Wait();
+				//Task t = jsonLoader.OpenJsonAsync(File, netlistId);
+				//t.Wait();
 
 				_applicationStateService.RemoveState(loadProc);
 
@@ -235,7 +235,7 @@ public class FrontendViewModel : ExtendedTool
 
 				Items.Clear();
 
-				Items.AddRange(jsonLoader.ParseJsonAsync(0, 0, this, netlistId).Result);
+				//Items.AddRange(jsonLoader.ParseJsonAsync(0, 0, this, netlistId).Result);
 
 				UpdateScaleImpl();
 

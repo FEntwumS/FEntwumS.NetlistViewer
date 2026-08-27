@@ -4,7 +4,7 @@ using Avalonia.Media;
 using FEntwumS.Common.Interfaces;
 using FEntwumS.Common.Services;
 using FEntwumS.Common.Types.HierarchyView;
-using FEntwumS.NetlistViewer.Assets;
+using FEntwumS.Common.Assets;
 using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Services;
 

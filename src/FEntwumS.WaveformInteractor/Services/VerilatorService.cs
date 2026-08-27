@@ -156,10 +156,10 @@ public class VerilatorService : IVerilatorService
             _projectExplorerService.ActiveProject?.Root is UniversalFpgaProjectRoot project)
         {
             // dont add to OneWare Testbenches, if already present
-            if (!project.TestBenches.Any(tb => tb.Name.Equals(file.Name)))
-            {
-                project?.RegisterTestBench(file);
-            }
+            // if (!project.TestBenches.Any(tb => tb.Name.Equals(file.Name)))
+            // {
+            //     project?.RegisterTestBench(file);
+            // }
 
             if (project != null)
             {
@@ -177,7 +177,7 @@ public class VerilatorService : IVerilatorService
     public void UnregisterTestbench(IProjectFile file)
     {
         var project = _projectExplorerService.ActiveProject?.Root as UniversalFpgaProjectRoot;
-        project?.UnregisterTestBench(file);
+        // project?.UnregisterTestBench(file);
         if (project != null)
         {
             _ = _projectExplorerService.SaveProjectAsync(project);
@@ -237,7 +237,7 @@ public class VerilatorService : IVerilatorService
             return;
         }
         
-        var path = projectRoot.TopEntity!.RelativePath;
+        var path = projectRoot.TopEntity;
         var topFile = projectRoot.GetFile(path);
 
         if (topFile != null && Testbench != null)

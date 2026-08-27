@@ -25,8 +25,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="0.41.4" ExcludeAssets="runtime;Native" />
-      <PackageReference Include="OneWare.Vcd.Viewer" Version="1.0.19" ExcludeAssets="runtime;Native" />
+      <PackageReference Include="OneWare.UniversalFpgaProjectSystem" Version="1.0.27.1" ExcludeAssets="runtime;Native" />
+      <PackageReference Include="OneWare.Vcd.Viewer" Version="1.0.27.1" ExcludeAssets="runtime;Native" />
     </ItemGroup>
 
     <ItemGroup>
@@ -34,6 +34,20 @@
         <DependentUpon>FrontendView.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Views\NetlistView.axaml.cs">
+        <DependentUpon>NetlistView.axaml.axaml</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Assets\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AvaloniaResource Include="Assets\Fonts\MartianMono-LICENSE.txt" />
+      <AvaloniaResource Include="Assets\Fonts\MartianMono-StdRg.ttf" />
+      <AvaloniaResource Include="Assets\Icons\AppIcons.cs" />
+      <AvaloniaResource Include="Assets\Icons\fluentui-system-icons-LICENSE.txt" />
     </ItemGroup>
 
     <!--    pushing to local nuget repo    -->
