@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 
@@ -45,6 +46,39 @@ public class PanningNetlistControl : PanningControl
 	    if (Child is not null)
 	    {
 		    ZoomToFit();
+	    }
+    }
+
+    protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
+    {
+	    base.OnPointerWheelChanged(e);
+
+	    UpdateViewPort();
+    }
+
+    protected override void OnPointerMoved(PointerEventArgs e)
+    {
+	    base.OnPointerMoved(e);
+
+	    if (e.Properties.IsLeftButtonPressed)
+	    {
+		    UpdateViewPort();
+	    }
+    }
+
+    private void UpdateViewPort()
+    {
+	    if (Child is GraphRootNodeControl graphRootNodeControl)
+	    {
+		    double horizontalOffset = this.Bounds.Width * 0.1d;
+		    double verticalOffset = this.Bounds.Height * 0.1d;
+
+		    double viewPortX = -OffsetX - horizontalOffset;
+		    double viewPortY = -OffsetY - verticalOffset;
+		    double viewPortWidth = this.Bounds.Width + 2 * horizontalOffset;
+		    double viewPortHeight = this.Bounds.Height + 2 *verticalOffset;
+		    
+		    graphRootNodeControl.CurrentViewPort = new Rect(viewPortX, viewPortY, viewPortWidth, viewPortHeight);
 	    }
     }
 

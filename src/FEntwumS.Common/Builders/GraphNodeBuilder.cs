@@ -16,7 +16,7 @@ using OneWare.Essentials.ViewModels;
 
 namespace FEntwumS.Common.Builders;
 
-public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
+public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T: GraphNodeControl, new()
 {
 	private string? _cellName;
 	private string? _cellType;
@@ -32,18 +32,18 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 	private ContextMenu? _contextMenu;
 	private string? _locationPath;
 	
-	public new static GraphNodeBuilder Create()
+	public new static GraphNodeBuilder<T> Create()
 	{
-		return new GraphNodeBuilder();
+		return new GraphNodeBuilder<T>();
 	}
 
-	public GraphNodeBuilder WithCellName(string cellName)
+	public GraphNodeBuilder<T> WithCellName(string cellName)
 	{
 		this._cellName = cellName;
 		return this;
 	}
 
-	public GraphNodeBuilder WithCellType(string cellType)
+	public GraphNodeBuilder<T> WithCellType(string cellType)
 	{
 		this._cellType = cellType;
 		return this;
@@ -51,7 +51,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 	
 	#region Interaction control addition
 
-	public GraphNodeBuilder WithTopLeftInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithTopLeftInteractionControl(Button button)
 	{
 		_topLeftInteractionControls ??= new StackPanel()
 		{
@@ -65,7 +65,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		return this;
 	}
 
-	public GraphNodeBuilder WithTopRightInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithTopRightInteractionControl(Button button)
 	{
 		_topRightInteractionControls ??= new StackPanel()
 		{
@@ -79,7 +79,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		return this;
 	}
 
-	public GraphNodeBuilder WithTopCenterInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithTopCenterInteractionControl(Button button)
 	{
 		_topCenterInteractionControls ??= new StackPanel()
 		{
@@ -93,7 +93,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		return this;
 	}
 	
-	public GraphNodeBuilder WithCenterLeftInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithCenterLeftInteractionControl(Button button)
 	{
 		_centerLeftInteractionControls ??= new StackPanel()
 		{
@@ -107,7 +107,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		return this;
 	}
 
-	public GraphNodeBuilder WithCenterRightInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithCenterRightInteractionControl(Button button)
 	{
 		_centerRightInteractionControls ??= new StackPanel()
 		{
@@ -121,7 +121,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		return this;
 	}
 
-	public GraphNodeBuilder WithCenterCenterInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithCenterCenterInteractionControl(Button button)
 	{
 		_centerCenterInteractionControls ??= new StackPanel()
 		{
@@ -135,7 +135,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		return this;
 	}
 	
-	public GraphNodeBuilder WithBottomLeftInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithBottomLeftInteractionControl(Button button)
 	{
 		_bottomLeftInteractionControls ??= new StackPanel()
 		{
@@ -149,7 +149,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		return this;
 	}
 
-	public GraphNodeBuilder WithBottomRightInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithBottomRightInteractionControl(Button button)
 	{
 		_bottomRightInteractionControls ??= new StackPanel()
 		{
@@ -163,7 +163,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		return this;
 	}
 
-	public GraphNodeBuilder WithBottomCenterInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithBottomCenterInteractionControl(Button button)
 	{
 		_bottomCenterInteractionControls ??= new StackPanel()
 		{
@@ -177,7 +177,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		return this;
 	}
 
-	public GraphNodeBuilder WithInteractionControl(Button button,
+	public GraphNodeBuilder<T> WithInteractionControl(Button button,
 		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
 		VerticalAlignment verticalAlignment = VerticalAlignment.Top)
 	{
@@ -238,7 +238,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 	
 	#endregion
 
-	public GraphNodeBuilder WithJumpToSourceInteractionControl(
+	public GraphNodeBuilder<T> WithJumpToSourceInteractionControl(
 		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
 		VerticalAlignment verticalAlignment = VerticalAlignment.Top)
 	{
@@ -309,7 +309,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		throw new NotImplementedException();
 	}
 
-	public GraphNodeBuilder WithExpandCollapseInteractionControlIf(bool condition,
+	public GraphNodeBuilder<T> WithExpandCollapseInteractionControlIf(bool condition,
 		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
 		VerticalAlignment verticalAlignment = VerticalAlignment.Top)
 	{
@@ -321,7 +321,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		return this;
 	}
 
-	public GraphNodeBuilder WithExpandCollapseInteractionControl(
+	public GraphNodeBuilder<T> WithExpandCollapseInteractionControl(
 		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
 		VerticalAlignment verticalAlignment = VerticalAlignment.Top)
 	{
@@ -520,13 +520,13 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		}
 	}
 
-	public GraphNodeBuilder WithLocationPath(string locationPath)
+	public GraphNodeBuilder<T> WithLocationPath(string locationPath)
 	{
 		this._locationPath = locationPath;
 		return this;
 	}
 
-	public GraphNodeBuilder WithJumpToSourceContextMenuAction()
+	public GraphNodeBuilder<T> WithJumpToSourceContextMenuAction()
 	{
 		if (_contextMenu is null)
 		{
@@ -684,14 +684,9 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		}
 	}
 
-	// private ICommand? JumpToSourceCommand = new AsyncRelayCommand(async (x) =>
-	// {
-	// 	int i = 0;
-	// });
-
-	public GraphNodeControl Build()
+	public T Build()
 	{
-		GraphNodeControl c = null;
+		T c = null;
 		Dispatcher.UIThread.Invoke(() =>
 		{
 			c = base.Build();

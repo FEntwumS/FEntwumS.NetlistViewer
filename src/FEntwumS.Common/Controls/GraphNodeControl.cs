@@ -159,9 +159,9 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 			child.Measure(availableSize);
 		}
 
-		foreach (Control interaactionControl in _interactionControls)
+		foreach (Control interactionControl in _interactionControls)
 		{
-			interaactionControl.Measure(availableSize);
+			interactionControl.Measure(availableSize);
 		}
 
 		return new Size();

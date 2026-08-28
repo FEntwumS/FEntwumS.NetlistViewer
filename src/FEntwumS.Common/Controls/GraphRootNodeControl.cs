@@ -2,7 +2,7 @@
 
 namespace FEntwumS.Common.Controls;
 
-public class GraphRootNodeControl : GraphNodeControl
+public class GraphRootNodeControl : GraphEntityNodeControl
 {
 	#region Rendering
 
