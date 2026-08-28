@@ -3,5 +3,7 @@
 public enum PortShape
 {
 	Square,
-	Tag
+	Tag,
+	CircleSquare,
+	SquareCircle
 }

@@ -34,7 +34,8 @@ public class GraphPortControl : GenericGraphElementControl
 	{
 		double lx = 0.0d,
 			rx = 0.0d + Width,
-			mx = rx - 5.0d,
+			rox = rx - 5.0d,
+			mx = rx - (Width / 2.0d),
 			ty = 0.0d,
 			by = 0.0d + Height,
 			my = by - (Height / 2.0d);
@@ -50,11 +51,25 @@ public class GraphPortControl : GenericGraphElementControl
 			PortShape.Tag =>
 			new PolylineGeometry([
 				new Point(lx, ty),
-				new Point(mx, ty),
+				new Point(rox, ty),
 				new Point(rx, my),
-				new Point(mx, by),
+				new Point(rox, by),
 				new Point(lx, by)
 			], true),
+			PortShape.SquareCircle => new GeometryGroup()
+			{
+				Children = [
+					new RectangleGeometry(new Rect(lx, ty, Width / 2.0d, Height)),
+					new EllipseGeometry(new Rect(mx + 1.0d, ty + 1.0d, (Width / 2.0d) - 2.0d, Height - 2.0d))
+				]
+			},
+			PortShape.CircleSquare => new GeometryGroup()
+			{
+				Children = [
+					new EllipseGeometry(new Rect(lx + 1.0d, ty + 1.0d, (Width / 2.0d) - 2.0d, Height - 2.0d)),
+					new RectangleGeometry(new Rect(mx, ty, Width / 2.0d, Height))
+				]
+			},
 			_ => throw new ArgumentOutOfRangeException()
 		};
 		
