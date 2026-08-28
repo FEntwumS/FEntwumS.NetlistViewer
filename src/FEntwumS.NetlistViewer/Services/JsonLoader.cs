@@ -497,6 +497,12 @@ public class JsonLoader : IJsonLoader
 					} else if (shapeString == "TAG")
 					{
 						portShape = PortShape.Tag;
+					} else if (shapeString == "CIRCLE_SQUARE")
+					{
+						portShape = PortShape.CircleSquare;
+					} else if (shapeString == "SQUARE_CIRCLE")
+					{
+						portShape = PortShape.SquareCircle;
 					}
 				}
 			}
