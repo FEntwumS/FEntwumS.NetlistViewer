@@ -13,7 +13,7 @@ public class PanningControl : UserControl
 {
     #region Properties
 
-    private double OffsetX
+    public double OffsetX
     {
 	    get => GetValue(OffsetXProperty);
 	    set => SetValue(OffsetXProperty, value);
@@ -24,7 +24,7 @@ public class PanningControl : UserControl
 		    defaultBindingMode: BindingMode.TwoWay,
 		    defaultValue: 0.0d);
 
-    private double OffsetY
+    public double OffsetY
     {
 	    get => GetValue(OffsetYProperty);
 	    set => SetValue(OffsetYProperty, value);

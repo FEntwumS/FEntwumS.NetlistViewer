@@ -87,7 +87,7 @@ public class JsonLoader : IJsonLoader
 			}
 		}
 
-		var rootNode = GraphNodeBuilder.Create()
+		var rootNode = GenericGraphElementBuilder<GraphRootNodeControl>.Create()
 			.WithX(0.0d)
 			.WithY(0.0d)
 			.WithWidth(rootwidth)
@@ -264,20 +264,39 @@ public class JsonLoader : IJsonLoader
 		{
 			if (!isScaffolding)
 			{
-				parent = (GraphNodeBuilder.Create()
-						.WithCellName(cellname)
-						.WithCellType(celltype)
-						.WithExpandCollapseInteractionControlIf(celltype == "HDL_ENTITY" && depth >= 2)
-						.WithJumpToSourceContextMenuAction()
-						.WithLocationPath(path)
-						.WithX(xRef + x)
-						.WithY(yRef + y)
-						.WithWidth(nWidth)
-						.WithHeight(nHeight)
-						.WithSrclocation(src)
-						.WithZIndex(depth) as GraphNodeBuilder)
-					.Build();
-				
+				if (celltype == "HDL_ENTITY")
+				{
+					parent = (GraphNodeBuilder<GraphEntityNodeControl>.Create()
+							.WithCellName(cellname)
+							.WithCellType(celltype)
+							.WithExpandCollapseInteractionControlIf(celltype == "HDL_ENTITY" && depth >= 2)
+							.WithJumpToSourceContextMenuAction()
+							.WithLocationPath(path)
+							.WithX(xRef + x)
+							.WithY(yRef + y)
+							.WithWidth(nWidth)
+							.WithHeight(nHeight)
+							.WithSrclocation(src)
+							.WithZIndex(depth) as GraphNodeBuilder<GraphEntityNodeControl>)
+						.Build();
+				}
+				else
+				{
+					parent = (GraphNodeBuilder<GraphNodeControl>.Create()
+							.WithCellName(cellname)
+							.WithCellType(celltype)
+							.WithExpandCollapseInteractionControlIf(celltype == "HDL_ENTITY" && depth >= 2)
+							.WithJumpToSourceContextMenuAction()
+							.WithLocationPath(path)
+							.WithX(xRef + x)
+							.WithY(yRef + y)
+							.WithWidth(nWidth)
+							.WithHeight(nHeight)
+							.WithSrclocation(src)
+							.WithZIndex(depth) as GraphNodeBuilder<GraphNodeControl>)
+						.Build();
+				}
+
 				if (path != string.Empty)
 				{
 					if (path == clickedElementPath)

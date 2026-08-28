@@ -8,33 +8,21 @@ public abstract class PositionableSubControl : UserControl
 {
     #region Properties
 
+    private double _x = 0.0d;
+    
     public double X
     {
-	    get => GetValue(XProperty);
-	    set => SetValue(XProperty, value);
+	    get => _x;
+	    set => _x = value;
     }
-
-    /// <summary>
-    /// The x-coordinate of the top-left corner relative to the parent element
-    /// </summary>
-    public static readonly StyledProperty<double> XProperty =
-        AvaloniaProperty.Register<PositionableSubControl, double>(nameof(X),
-            defaultBindingMode: BindingMode.TwoWay,
-            defaultValue: 0.0d);
+    
+    private double _y = 0.0d;
 
     public double Y
     {
-	    get => GetValue(YProperty);
-	    set => SetValue(YProperty, value);
+	    get => _y;
+	    set => _y = value;
     }
-
-    /// <summary>
-    /// The y-coordinate of the top-left corner relative to the parent element
-    /// </summary>
-    public static readonly StyledProperty<double> YProperty =
-        AvaloniaProperty.Register<PositionableSubControl, double>(nameof(Y),
-            defaultBindingMode: BindingMode.TwoWay,
-            defaultValue: 0.0d);
 
     public double Scale
     {

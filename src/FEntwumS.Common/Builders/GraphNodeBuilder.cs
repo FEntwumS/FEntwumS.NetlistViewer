@@ -16,7 +16,7 @@ using OneWare.Essentials.ViewModels;
 
 namespace FEntwumS.Common.Builders;
 
-public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeControl>
+public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T: GraphNodeControl, new()
 {
 	private string? _cellName;
 	private string? _cellType;
@@ -32,18 +32,18 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 	private ContextMenu? _contextMenu;
 	private string? _locationPath;
 	
-	public new static GraphNodeBuilder Create()
+	public new static GraphNodeBuilder<T> Create()
 	{
-		return new GraphNodeBuilder();
+		return new GraphNodeBuilder<T>();
 	}
 
-	public GraphNodeBuilder WithCellName(string cellName)
+	public GraphNodeBuilder<T> WithCellName(string cellName)
 	{
 		this._cellName = cellName;
 		return this;
 	}
 
-	public GraphNodeBuilder WithCellType(string cellType)
+	public GraphNodeBuilder<T> WithCellType(string cellType)
 	{
 		this._cellType = cellType;
 		return this;
@@ -51,133 +51,142 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 	
 	#region Interaction control addition
 
-	public GraphNodeBuilder WithTopLeftInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithTopLeftInteractionControl(Button button)
 	{
 		_topLeftInteractionControls ??= new StackPanel()
 		{
 			HorizontalAlignment = HorizontalAlignment.Left,
 			VerticalAlignment = VerticalAlignment.Top,
 			Orientation = Orientation.Vertical,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(0.0d, 0.0d, RelativeUnit.Relative),
+			 ClipToBounds = false
 		};
 		
 		_topLeftInteractionControls.Children.Add(button);
 		return this;
 	}
 
-	public GraphNodeBuilder WithTopRightInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithTopRightInteractionControl(Button button)
 	{
 		_topRightInteractionControls ??= new StackPanel()
 		{
 			HorizontalAlignment = HorizontalAlignment.Right,
 			VerticalAlignment = VerticalAlignment.Top,
 			Orientation = Orientation.Vertical,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(1.0d, 0.0d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 		
 		_topRightInteractionControls.Children.Add(button);
 		return this;
 	}
 
-	public GraphNodeBuilder WithTopCenterInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithTopCenterInteractionControl(Button button)
 	{
 		_topCenterInteractionControls ??= new StackPanel()
 		{
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Top,
 			Orientation = Orientation.Horizontal,
-			//IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(0.5d, 0.0d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 		
 		_topCenterInteractionControls.Children.Add(button);
 		return this;
 	}
 	
-	public GraphNodeBuilder WithCenterLeftInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithCenterLeftInteractionControl(Button button)
 	{
 		_centerLeftInteractionControls ??= new StackPanel()
 		{
 			HorizontalAlignment = HorizontalAlignment.Left,
 			VerticalAlignment = VerticalAlignment.Center,
 			Orientation = Orientation.Vertical,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(0.0d, 0.5d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 		
 		_centerLeftInteractionControls.Children.Add(button);
 		return this;
 	}
 
-	public GraphNodeBuilder WithCenterRightInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithCenterRightInteractionControl(Button button)
 	{
 		_centerRightInteractionControls ??= new StackPanel()
 		{
 			HorizontalAlignment = HorizontalAlignment.Right,
 			VerticalAlignment = VerticalAlignment.Center,
 			Orientation = Orientation.Vertical,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(1.0d, 0.5d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 		
 		_centerRightInteractionControls.Children.Add(button);
 		return this;
 	}
 
-	public GraphNodeBuilder WithCenterCenterInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithCenterCenterInteractionControl(Button button)
 	{
 		_centerCenterInteractionControls ??= new StackPanel()
 		{
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Center,
 			Orientation = Orientation.Horizontal,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(0.5d, 0.5d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 
 		_centerCenterInteractionControls.Children.Add(button);
 		return this;
 	}
 	
-	public GraphNodeBuilder WithBottomLeftInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithBottomLeftInteractionControl(Button button)
 	{
 		_bottomLeftInteractionControls ??= new StackPanel()
 		{
 			HorizontalAlignment = HorizontalAlignment.Left,
 			VerticalAlignment = VerticalAlignment.Bottom,
 			Orientation = Orientation.Vertical,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(0.0d, 1.0d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 		
 		_bottomLeftInteractionControls.Children.Add(button);
 		return this;
 	}
 
-	public GraphNodeBuilder WithBottomRightInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithBottomRightInteractionControl(Button button)
 	{
 		_bottomRightInteractionControls ??= new StackPanel()
 		{
 			HorizontalAlignment = HorizontalAlignment.Right,
 			VerticalAlignment = VerticalAlignment.Bottom,
 			Orientation = Orientation.Vertical,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(1.0d, 1.0d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 		
 		_bottomRightInteractionControls.Children.Add(button);
 		return this;
 	}
 
-	public GraphNodeBuilder WithBottomCenterInteractionControl(Button button)
+	public GraphNodeBuilder<T> WithBottomCenterInteractionControl(Button button)
 	{
 		_bottomCenterInteractionControls ??= new StackPanel()
 		{
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Bottom,
 			Orientation = Orientation.Horizontal,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(0.5d, 1.0d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 
 		_bottomCenterInteractionControls.Children.Add(button);
 		return this;
 	}
 
-	public GraphNodeBuilder WithInteractionControl(Button button,
+	public GraphNodeBuilder<T> WithInteractionControl(Button button,
 		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
 		VerticalAlignment verticalAlignment = VerticalAlignment.Top)
 	{
@@ -238,7 +247,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 	
 	#endregion
 
-	public GraphNodeBuilder WithJumpToSourceInteractionControl(
+	public GraphNodeBuilder<T> WithJumpToSourceInteractionControl(
 		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
 		VerticalAlignment verticalAlignment = VerticalAlignment.Top)
 	{
@@ -254,7 +263,8 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 				CornerRadius = new CornerRadius(3.0d),
 				BorderThickness = new Thickness(1.0d),
 				VerticalAlignment = VerticalAlignment.Top,
-				HorizontalAlignment = HorizontalAlignment.Center
+				HorizontalAlignment = HorizontalAlignment.Center,
+				ClipToBounds = false
 			};
 
 			jumpToSourceButton.Initialized += (sender, args) =>
@@ -309,7 +319,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		throw new NotImplementedException();
 	}
 
-	public GraphNodeBuilder WithExpandCollapseInteractionControlIf(bool condition,
+	public GraphNodeBuilder<T> WithExpandCollapseInteractionControlIf(bool condition,
 		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
 		VerticalAlignment verticalAlignment = VerticalAlignment.Top)
 	{
@@ -321,7 +331,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		return this;
 	}
 
-	public GraphNodeBuilder WithExpandCollapseInteractionControl(
+	public GraphNodeBuilder<T> WithExpandCollapseInteractionControl(
 		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
 		VerticalAlignment verticalAlignment = VerticalAlignment.Top)
 	{
@@ -340,7 +350,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 				BorderThickness = new Thickness(1.0d),
 				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Center,
-				RenderTransformOrigin = new RelativePoint(0.5d, 0.0d, RelativeUnit.Relative),
+				ClipToBounds = false
 			};
 
 			expandCollapseButton.AttachedToVisualTree += (sender, args) =>
@@ -385,8 +395,7 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 							double oldScale = (double)eventArgs.OldValue!;
 							double scaleDifference = newScale / oldScale;
 							
-							expandCollapseButton.RenderTransform = new ScaleTransform(newScale, newScale);
-							// TODO apply rendertransform to stackpanel to greatly simplify layout when several interactioncontrols are used in one location
+							expandCollapseButton.GetVisualParent<StackPanel>()?.RenderTransform = new ScaleTransform(newScale, newScale);
 						}
 					};
 				}
@@ -520,13 +529,13 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		}
 	}
 
-	public GraphNodeBuilder WithLocationPath(string locationPath)
+	public GraphNodeBuilder<T> WithLocationPath(string locationPath)
 	{
 		this._locationPath = locationPath;
 		return this;
 	}
 
-	public GraphNodeBuilder WithJumpToSourceContextMenuAction()
+	public GraphNodeBuilder<T> WithJumpToSourceContextMenuAction()
 	{
 		if (_contextMenu is null)
 		{
@@ -684,14 +693,9 @@ public partial class GraphNodeBuilder : GenericGraphElementBuilder<GraphNodeCont
 		}
 	}
 
-	// private ICommand? JumpToSourceCommand = new AsyncRelayCommand(async (x) =>
-	// {
-	// 	int i = 0;
-	// });
-
-	public GraphNodeControl Build()
+	public T Build()
 	{
-		GraphNodeControl c = null;
+		T c = null;
 		Dispatcher.UIThread.Invoke(() =>
 		{
 			c = base.Build();
