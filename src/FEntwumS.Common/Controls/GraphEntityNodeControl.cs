@@ -7,7 +7,7 @@ public class GraphEntityNodeControl : GraphNodeControl
 {
 	#region Properties
 
-	private Rect _currentViewPort= new Rect(0, 0, 3980, 2160);
+	private Rect _currentViewPort= new Rect(0, 0, 3840, 2160);
 
 	public Rect CurrentViewPort
 	{

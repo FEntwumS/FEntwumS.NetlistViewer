@@ -58,7 +58,8 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 			HorizontalAlignment = HorizontalAlignment.Left,
 			VerticalAlignment = VerticalAlignment.Top,
 			Orientation = Orientation.Vertical,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(0.0d, 0.0d, RelativeUnit.Relative),
+			 ClipToBounds = false
 		};
 		
 		_topLeftInteractionControls.Children.Add(button);
@@ -72,7 +73,8 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 			HorizontalAlignment = HorizontalAlignment.Right,
 			VerticalAlignment = VerticalAlignment.Top,
 			Orientation = Orientation.Vertical,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(1.0d, 0.0d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 		
 		_topRightInteractionControls.Children.Add(button);
@@ -86,7 +88,8 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Top,
 			Orientation = Orientation.Horizontal,
-			//IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(0.5d, 0.0d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 		
 		_topCenterInteractionControls.Children.Add(button);
@@ -100,7 +103,8 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 			HorizontalAlignment = HorizontalAlignment.Left,
 			VerticalAlignment = VerticalAlignment.Center,
 			Orientation = Orientation.Vertical,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(0.0d, 0.5d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 		
 		_centerLeftInteractionControls.Children.Add(button);
@@ -114,7 +118,8 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 			HorizontalAlignment = HorizontalAlignment.Right,
 			VerticalAlignment = VerticalAlignment.Center,
 			Orientation = Orientation.Vertical,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(1.0d, 0.5d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 		
 		_centerRightInteractionControls.Children.Add(button);
@@ -128,7 +133,8 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Center,
 			Orientation = Orientation.Horizontal,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(0.5d, 0.5d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 
 		_centerCenterInteractionControls.Children.Add(button);
@@ -142,7 +148,8 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 			HorizontalAlignment = HorizontalAlignment.Left,
 			VerticalAlignment = VerticalAlignment.Bottom,
 			Orientation = Orientation.Vertical,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(0.0d, 1.0d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 		
 		_bottomLeftInteractionControls.Children.Add(button);
@@ -156,7 +163,8 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 			HorizontalAlignment = HorizontalAlignment.Right,
 			VerticalAlignment = VerticalAlignment.Bottom,
 			Orientation = Orientation.Vertical,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(1.0d, 1.0d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 		
 		_bottomRightInteractionControls.Children.Add(button);
@@ -170,7 +178,8 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Bottom,
 			Orientation = Orientation.Horizontal,
-			IsHitTestVisible = false
+			RenderTransformOrigin = new RelativePoint(0.5d, 1.0d, RelativeUnit.Relative),
+			ClipToBounds = false
 		};
 
 		_bottomCenterInteractionControls.Children.Add(button);
@@ -254,7 +263,8 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 				CornerRadius = new CornerRadius(3.0d),
 				BorderThickness = new Thickness(1.0d),
 				VerticalAlignment = VerticalAlignment.Top,
-				HorizontalAlignment = HorizontalAlignment.Center
+				HorizontalAlignment = HorizontalAlignment.Center,
+				ClipToBounds = false
 			};
 
 			jumpToSourceButton.Initialized += (sender, args) =>
@@ -340,7 +350,7 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 				BorderThickness = new Thickness(1.0d),
 				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Center,
-				RenderTransformOrigin = new RelativePoint(0.5d, 0.0d, RelativeUnit.Relative),
+				ClipToBounds = false
 			};
 
 			expandCollapseButton.AttachedToVisualTree += (sender, args) =>
@@ -385,8 +395,7 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 							double oldScale = (double)eventArgs.OldValue!;
 							double scaleDifference = newScale / oldScale;
 							
-							expandCollapseButton.RenderTransform = new ScaleTransform(newScale, newScale);
-							// TODO apply rendertransform to stackpanel to greatly simplify layout when several interactioncontrols are used in one location
+							expandCollapseButton.GetVisualParent<StackPanel>()?.RenderTransform = new ScaleTransform(newScale, newScale);
 						}
 					};
 				}
