@@ -78,10 +78,11 @@ When you have your backend up and running, you will need to enter the backends I
 Now that you have installed the plugin, you can start viewing and interacting with your HDL designs. By simply
 right-clicking your top level entity and choosing the "View RTL for [insert your entity here]", the plugin will
 automatically generate a netlist using yosys and then display it in a new tab. You can zoom using your mouse wheel,
-clicking and dragging with the left mouse button pans the view and left-clicking on an entity will either expand or
-collapse it (depending on whether the entity is collapsed or not).
+clicking and dragging with the left mouse button pans the view.
 
-Left-clicking on a cell will open the corresponding HDL file.
+To expand an entity instance, simply left-click the "plus"-button in the top center. To collapse the entity, left-click
+the "minus"-button in the top center. By right clicking a cell or an entity instance, you can open the context menu. The
+context menu allows you to jump to the source code location where the cell/entity instance originated.
 
 ### Viewing a generated netlist
 
