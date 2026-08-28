@@ -87,7 +87,7 @@ public class JsonLoader : IJsonLoader
 			}
 		}
 
-		var rootNode = GraphNodeBuilder.Create()
+		var rootNode = GenericGraphElementBuilder<GraphRootNodeControl>.Create()
 			.WithX(0.0d)
 			.WithY(0.0d)
 			.WithWidth(rootwidth)
