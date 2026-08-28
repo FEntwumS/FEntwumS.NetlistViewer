@@ -33,7 +33,7 @@ jobs:
         run: nuget-license -i ./src/FEntwumS.NetlistViewer/FEntwumS.NetlistViewer.csproj -override ./src/FEntwumS.NetlistViewer/override-third-party.json -t -o Table -d ./publish/THIRD-PARTY-LICENSES -fo ./publish/THIRD-PARTY-NOTICE.txt
       - name: Copy font license
         id: font-license
-        run: cp ./src/FEntwumS.NetlistViewer/Assets/Fonts/MartianMono-LICENSE.txt ./publish/THIRD-PARTY-LICENSES/Martian-Mono-License.txt
+        run: cp ./src/FEntwumS.Common/Assets/Fonts/MartianMono-LICENSE.txt ./publish/THIRD-PARTY-LICENSES/Martian-Mono-License.txt
       - name : Copy icons license
         id: icons-license
         run: cp ./src/FEntwumS.NetlistViewer/Assets/Icons/fluentui-system-icons-LICENSE.txt ./publish/THIRD-PARTY-LICENSES/fluentui-system-icons-LICENSE.txt
