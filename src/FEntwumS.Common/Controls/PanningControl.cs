@@ -93,7 +93,8 @@ public class PanningControl : UserControl
     {
 	    if (Child is not null)
 	    {
-		    Child.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+		    //Child.InvalidateMeasure();
+		    Child.Measure(new Size(Child.ElementWidth, Child.ElementHeight));
 	    }
 
 	    return new Size();
@@ -161,7 +162,7 @@ public class PanningControl : UserControl
 	    
 	    ScaleChangedCommand?.Execute(newScale);
 	    
-	    InvalidateArrange();
+	    InvalidateMeasure();
 	    
 	    Child?.IsHitTestVisible = true;
     }
@@ -265,8 +266,8 @@ public class PanningControl : UserControl
 
 		    var invariantBounds = new Rect(Child.X * invariantScaleFactor,
 			    Child.Y * invariantScaleFactor,
-			    Child.Width * invariantScaleFactor,
-			    Child.Height * invariantScaleFactor);
+			    Child.ElementWidth * invariantScaleFactor,
+			    Child.ElementHeight * invariantScaleFactor);
 		    ZoomToRect(invariantBounds);
 	    }
     }

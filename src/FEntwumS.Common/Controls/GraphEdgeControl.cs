@@ -58,9 +58,9 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 		context.DrawGeometry(null, linePen, _contentGeometry);
 	}
 
-	protected override void RegenerateDrawnElements()
+	protected override void RegenerateDrawnElements(double newScale)
 	{
-		_contentGeometry.Transform = new ScaleTransform(Scale, Scale);
+		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
 	}
 
 	#endregion

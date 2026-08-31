@@ -36,11 +36,11 @@ public class GraphJunctionControl : GenericGraphElementControl, ICustomHitTest
 
 	protected override void OnInitialized()
 	{
-		double rh = Width / 2.0d,
-			rv =  Height / 2.0d;
+		double rh = ElementWidth / 2.0d,
+			rv =  ElementHeight / 2.0d;
 
-		double ow = Width * 1.4d,
-			oh = Height * 1.4d;
+		double ow = ElementWidth * 1.4d,
+			oh = ElementHeight * 1.4d;
 
 		double orh = ow / 2.0d,
 			orv = oh / 2.0d;
@@ -56,8 +56,8 @@ public class GraphJunctionControl : GenericGraphElementControl, ICustomHitTest
 			oby = orv;
 		_contentGeometry = _junctionShape switch
 		{
-			JunctionShape.Circle => new EllipseGeometry(new Rect(ilx, ity, Width, Height)),
-			JunctionShape.Square => new RectangleGeometry(new Rect(ilx, ity, Width, Height)),
+			JunctionShape.Circle => new EllipseGeometry(new Rect(ilx, ity, ElementWidth, ElementHeight)),
+			JunctionShape.Square => new RectangleGeometry(new Rect(ilx, ity, ElementWidth, ElementHeight)),
 			JunctionShape.Diamond => new PolylineGeometry([
 				new Point(0.0d, oty),
 				new Point(orx, 0.0d),
@@ -83,15 +83,15 @@ public class GraphJunctionControl : GenericGraphElementControl, ICustomHitTest
 
 	public override void Render(DrawingContext context)
 	{
-		if (_contentGeometry.Bounds.Height >= 2.0d)
+		if (ElementHeight >= 2.0d)
 		{
 			context.DrawGeometry(NetlistTheme.EdgeBrush, null, _contentGeometry);
 		}
 	}
 
-	protected override void RegenerateDrawnElements()
+	protected override void RegenerateDrawnElements(double newScale)
 	{
-		_contentGeometry.Transform = new ScaleTransform(Scale, Scale);
+		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
 	}
 
 	#endregion

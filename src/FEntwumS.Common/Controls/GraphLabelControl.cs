@@ -59,13 +59,13 @@ public class GraphLabelControl : GenericGraphElementControl
 	    }
     }
 
-    protected override void RegenerateDrawnElements()
+    protected override void RegenerateDrawnElements(double newScale)
     {
 	    _formattedContent = new FormattedText(Content ?? "",
 		    CultureInfo.InvariantCulture,
 		    FlowDirection.LeftToRight,
 		    NetlistTheme.Typeface,
-		    Fontsize * Scale,
+		    Fontsize * newScale,
 		    NetlistTheme.TextBrush);
     }
 

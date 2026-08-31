@@ -83,7 +83,7 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 
 	protected override void OnInitialized()
 	{
-		var contentRect = new Rect(0.0d, 0.0d, Width, Height);
+		var contentRect = new Rect(0.0d, 0.0d, ElementWidth, ElementHeight);
 		
 		// double l = ((NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
 		// double r = l + Width;
@@ -137,6 +137,21 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		AddChildrenToVisualTree();
 	}
 
+	protected override void UpdateScale(double newScale)
+	{
+		foreach (Control v in _interactionControls)
+		{
+			v.RenderTransform = new ScaleTransform(newScale, newScale);
+		}
+
+		foreach (PositionableSubControl child in Items)
+		{
+			child.Scale = newScale;
+		}
+		
+		base.UpdateScale(newScale);
+	}
+
 	#endregion
 
 	#region Rendering
@@ -152,7 +167,7 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 
 	protected override Size MeasureOverride(Size availableSize)
 	{
-		availableSize = new Size(double.PositiveInfinity, double.PositiveInfinity);
+		availableSize = new Size(ElementWidth, ElementHeight);
 
 		foreach (PositionableSubControl child in Items)
 		{
@@ -190,15 +205,15 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		double offset = (NetlistTheme.BorderThickness + 2.0d) * Scale;
 		double x = interactionControl.HorizontalAlignment switch
 		{
-			HorizontalAlignment.Center => availableSize.Width / 2.0d - (interactionControl.DesiredSize.Width / 2.0d) - offset,
-			HorizontalAlignment.Right => availableSize.Width - interactionControl.DesiredSize.Width,
+			HorizontalAlignment.Center => ElementWidth / 2.0d - (interactionControl.DesiredSize.Width / 2.0d) - offset,
+			HorizontalAlignment.Right => ElementWidth - interactionControl.DesiredSize.Width,
 			_ => offset
 		};
 
 		double y = interactionControl.VerticalAlignment switch
 		{
-			VerticalAlignment.Center => availableSize.Height / 2.0d - (interactionControl.DesiredSize.Height / 2.0d) - offset,
-			VerticalAlignment.Bottom => availableSize.Height - interactionControl.DesiredSize.Height,
+			VerticalAlignment.Center => ElementHeight / 2.0d - (interactionControl.DesiredSize.Height / 2.0d) - offset,
+			VerticalAlignment.Bottom => ElementHeight - interactionControl.DesiredSize.Height,
 			_ => offset
 		};
 		
@@ -243,9 +258,9 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		}
 	}
 
-	protected override void RegenerateDrawnElements()
+	protected override void RegenerateDrawnElements(double newScale)
 	{
-		_contentGeometry.Transform = new ScaleTransform(Scale, Scale);
+		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
 	}
 
 	#endregion

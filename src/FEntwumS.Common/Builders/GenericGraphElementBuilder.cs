@@ -70,8 +70,8 @@ public class GenericGraphElementBuilder<T> where T: GenericGraphElementControl, 
 			{
 				X = this._x,
 				Y = this._y,
-				Width = this._width,
-				Height = this._height,
+				ElementWidth = this._width,
+				ElementHeight = this._height,
 				srcLocation = this._srclocation,
 				ZIndex = _zIndex,
 				ClipToBounds = false
