@@ -485,10 +485,13 @@ public class FrontendService : IFrontendService
 
 		if (!success)
 		{
+			_logger.Error("Netlist generation did not complete due to errors");
 			_applicationStateService.RemoveState(proc, "Error: The netlist could not be generated");
 
 			return null;
 		}
+		
+		_logger.Log("Netlist successfully generated", true);
 
 		success = await ServerStartedAsync();
 
@@ -523,7 +526,6 @@ public class FrontendService : IFrontendService
 	{
 		if (json is null)
 		{
-			_logger.Error("No netlist was generated");
 			return;
 		}
 
@@ -576,6 +578,8 @@ public class FrontendService : IFrontendService
 		ApplicationProcess waitForBackendProc =
 			_applicationStateService.AddState("Layouting in progress", AppState.Loading);
 
+		_logger.Log("Starting processing and layouting on the backend...", true);
+		
 		resp = await PostAsync(
 			"/graphRemoteFile" + $"?hash={combinedHash}" + $"&entityLabelFontSize={_entityLabelFontSize}"
 			+ $"&cellLabelFontSize={_cellLabelFontSize}" + $"&edgeLabelFontSize={_edgeLabelFontSize}"
@@ -593,6 +597,7 @@ public class FrontendService : IFrontendService
 
 		if (resp == null)
 		{
+			_logger.Error("No response received from backend");
 			_applicationStateService.RemoveState(proc, "Error: No response from backend");
 
 			return;
@@ -600,6 +605,8 @@ public class FrontendService : IFrontendService
 
 		if (!resp.IsSuccessStatusCode)
 		{
+			_logger.Error($"The backend encountered the following issue:\n{await resp.Content.ReadAsStringAsync()}");
+			_logger.Error("Please file a bug report");
 			_applicationStateService.RemoveState(proc, "Error: The backend returned an error");
 
 			return;
@@ -621,17 +628,18 @@ public class FrontendService : IFrontendService
 		if (File.Exists(ccVhdlFilePath))
 		{
 			_logger.Log($"Found cross-compiled Verilog at {ccVhdlFilePath}");
+			_logger.Log("Generating Verilog to VHDL source mapping...", true);
 			
 			success = await ServiceManager.GetService<ICcVhdlFileIndexService>()
 				.IndexFileAsync(ccVhdlFilePath, combinedHash);
 
 			if (success)
 			{
-				_logger.Log($"Successfully indexed {top}");
+				_logger.Log($"Successfully indexed {top}", true);
 			}
 			else
 			{
-				_logger.Log($"Failed to index {top}");
+				_logger.Log($"Failed to index {top}", true);
 			}
 		}
 
@@ -682,6 +690,11 @@ public class FrontendService : IFrontendService
 
 	public async Task<(GenericGraphElementControl?, GraphNodeControl?)> ExpandNodeAsync(string? nodePath, ulong netlistId)
 	{
+		if (nodePath is null)
+		{
+			return (null, null);
+		}
+		
 		ApplicationProcess expandProc = _applicationStateService.AddState("Layouting in progress", AppState.Loading);
 
 		_logger.Log("Sending request to ExpandNode");
