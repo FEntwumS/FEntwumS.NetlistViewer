@@ -33,12 +33,12 @@ public class GraphPortControl : GenericGraphElementControl
 	protected override void OnInitialized()
 	{
 		double lx = 0.0d,
-			rx = 0.0d + Width,
+			rx = 0.0d + ElementWidth,
 			rox = rx - 5.0d,
-			mx = rx - (Width / 2.0d),
+			mx = rx - (ElementWidth / 2.0d),
 			ty = 0.0d,
-			by = 0.0d + Height,
-			my = by - (Height / 2.0d);
+			by = 0.0d + ElementHeight,
+			my = by - (ElementHeight / 2.0d);
 		
 		_contentGeometry = _portShape switch
 		{
@@ -88,9 +88,9 @@ public class GraphPortControl : GenericGraphElementControl
 		}
 	}
 
-	protected override void RegenerateDrawnElements()
+	protected override void RegenerateDrawnElements(double newScale)
 	{
-		_contentGeometry.Transform = new ScaleTransform(Scale, Scale);
+		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
 	}
 
 	#endregion

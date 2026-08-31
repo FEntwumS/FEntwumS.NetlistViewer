@@ -24,20 +24,33 @@ public abstract class PositionableSubControl : UserControl
 	    set => _y = value;
     }
 
-    public double Scale
+    private double _elementWidth = 1.0d;
+
+    public double ElementWidth
     {
-	    get => GetValue(ScaleProperty);
-	    set => SetValue(ScaleProperty, value);
+	    get => _elementWidth;
+	    set => _elementWidth = value;
     }
     
-    /// <summary>
-    /// The scale of the element. Since the scale is inherited, it only needs to be set on the root element
-    /// </summary>
-    public static readonly StyledProperty<double> ScaleProperty =
-	    AvaloniaProperty.Register<PositionableSubControl, double>(nameof(Scale),
-		    defaultBindingMode: BindingMode.TwoWay,
-		    defaultValue: 1.0d,
-		    inherits: true);
+    private double _elementHeight = 1.0d;
+
+    public double ElementHeight
+    {
+	    get => _elementHeight;
+	    set => _elementHeight = value;
+    }
+    
+    private double _scale = 1.0d;
+
+    public double Scale
+    {
+	    get => _scale;
+	    set
+	    {
+		    UpdateScale(value);
+		    _scale = value;
+	    }
+    }
 
     #endregion
     
@@ -49,26 +62,19 @@ public abstract class PositionableSubControl : UserControl
     
     #region Event handling
 
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
+    protected virtual void UpdateScale(double newScale)
     {
-	    if (e.Property == ScaleProperty)
-	    {
-		    double scaleDifference = ((double)e.NewValue!) / ((double)e.OldValue!);
+	    double scaleDifference = newScale / _scale;
 		    
-		    this.Width *=  scaleDifference;
-		    this.Height *=  scaleDifference;
-		    this.X *= scaleDifference;
-		    this.Y *= scaleDifference;
+	    this.ElementWidth *=  scaleDifference;
+	    this.ElementHeight *=  scaleDifference;
+	    this.X *= scaleDifference;
+	    this.Y *= scaleDifference;
 		    
-		    RegenerateDrawnElements();
-
-		    return;
-	    }
-	    
-	    base.OnPropertyChanged(e);
+	    RegenerateDrawnElements(newScale);
     }
 
-    protected abstract void RegenerateDrawnElements();
+    protected abstract void RegenerateDrawnElements(double newScale);
 
     #endregion
 }
