@@ -514,7 +514,7 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 							}
 
 							sendingPanningNetlist.ZoomBounds = new Rect(new Point(absoluteX, absoluteY),
-								new Size(clickedNode.Width, clickedNode.Height));
+								new Size(clickedNode.ElementWidth, clickedNode.ElementHeight));
 						}
 						else
 						{
