@@ -59,15 +59,15 @@ public class GraphPortControl : GenericGraphElementControl
 			PortShape.SquareCircle => new GeometryGroup()
 			{
 				Children = [
-					new RectangleGeometry(new Rect(lx, ty, Width / 2.0d, Height)),
-					new EllipseGeometry(new Rect(mx + 1.0d, ty + 1.0d, (Width / 2.0d) - 2.0d, Height - 2.0d))
+					new RectangleGeometry(new Rect(lx, ty, ElementWidth / 2.0d, ElementHeight)),
+					new EllipseGeometry(new Rect(mx + 1.0d, ty + 1.0d, (ElementWidth / 2.0d) - 2.0d, ElementHeight - 2.0d))
 				]
 			},
 			PortShape.CircleSquare => new GeometryGroup()
 			{
 				Children = [
-					new EllipseGeometry(new Rect(lx + 1.0d, ty + 1.0d, (Width / 2.0d) - 2.0d, Height - 2.0d)),
-					new RectangleGeometry(new Rect(mx, ty, Width / 2.0d, Height))
+					new EllipseGeometry(new Rect(lx + 1.0d, ty + 1.0d, (ElementWidth / 2.0d) - 2.0d, ElementHeight - 2.0d)),
+					new RectangleGeometry(new Rect(mx, ty, ElementWidth / 2.0d, ElementHeight))
 				]
 			},
 			_ => throw new ArgumentOutOfRangeException()
