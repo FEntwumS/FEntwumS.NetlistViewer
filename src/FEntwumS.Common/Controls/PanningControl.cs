@@ -304,7 +304,7 @@ public class PanningControl : UserControl
 		    OffsetY = shownBounds.Y * -scaleY;
 	    }
 	    
-	    InvalidateArrange();
+	    InvalidateMeasure();
     }
     
     #endregion
