@@ -22,7 +22,7 @@ public class GraphEntityNodeControl : GraphNodeControl
 			{
 				foreach (GraphEntityNodeControl childEntity in _childEntities)
 				{
-					childEntity.CurrentViewPort = _currentViewPort;
+					childEntity.CurrentViewPort = new Rect(_currentViewPort.X - childEntity.X, _currentViewPort.Y - childEntity.Y, _currentViewPort.Width, _currentViewPort.Height);
 				}
 			}
 		}
