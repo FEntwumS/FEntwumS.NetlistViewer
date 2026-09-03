@@ -57,7 +57,20 @@ public class NetlistGenerator : INetlistGenerator
 
 		if (vhdlProject.Root is UniversalFpgaProjectRoot root)
 		{
-			return await ghdlService.SynthAsync(root, "verilog", outputDir);
+			_logger.Log("Synthesizing VHDL to Verilog...", true);
+			
+			bool success = await ghdlService.SynthAsync(root, "verilog", outputDir);
+
+			if (success)
+			{
+				_logger.Log("VHDL to Verilog synthesis completed successfully", true);
+			}
+			else
+			{
+				_logger.Error("VHDL to Verilog Synthesis did not complete due to errors");
+			}
+
+			return success;
 		}
 		else
 		{
@@ -70,6 +83,8 @@ public class NetlistGenerator : INetlistGenerator
 		IYosysService yosysService = ServiceManager.GetService<IYosysService>();
 		bool success;
 
+		_logger.Log("Generating netlist from Verilog...");
+		
 		success = await yosysService.LoadVerilogAsync(verilogProject, topEntityName);
 
 		return success;
