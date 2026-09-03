@@ -36,6 +36,7 @@
                 Child="{Binding RootNode}"
                 ScaleChangedCommand="{Binding ScaleChangedCommand}"
                 ProjectRootFolder="{Binding ProjectRootFolder}"
+                ZoomBounds="{Binding ZoomBounds}"
                 >
                 
             </controls:PanningNetlistControl>

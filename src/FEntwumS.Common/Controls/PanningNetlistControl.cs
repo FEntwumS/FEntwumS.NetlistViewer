@@ -45,7 +45,7 @@ public class PanningNetlistControl : PanningControl
 
 	    if (Child is not null)
 	    {
-		    ZoomToFit();
+		    // ZoomToFit();
 	    }
     }
 
