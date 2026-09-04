@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Data;
+using Avalonia.Interactivity;
 using FEntwumS.Common.Services;
 using OneWare.Essentials.Services;
 
@@ -40,14 +41,14 @@ public class GraphEntityNodeControl : GraphNodeControl
 	
 	#region Event handling
 
-	protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+	protected override void OnLoaded(RoutedEventArgs e)
 	{
 		_childEntities.Clear();
 		_childEntities.AddRange(this.VisualChildren.OfType<GraphEntityNodeControl>());
 		
 		_hasEntityChildren = _childEntities.Count > 0;
 		
-		base.OnAttachedToVisualTree(e);
+		base.OnLoaded(e);
 	}
 
 	protected void CheckChildVisibility()
