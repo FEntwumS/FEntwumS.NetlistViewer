@@ -948,6 +948,11 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		// These settings are not displayed to the user; They store internal extension state
 		ServiceManager.GetService<ISettingsService>().Register(FentwumSNetlistViewerSettingsHelper.FentwumsSettingVersionKey, -1);
 		ServiceManager.GetService<ISettingsService>().Register(FentwumSNetlistViewerSettingsHelper.NetlistGenerationSettingsChangedKey, "");
+		
+		#if DEBUG
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.FreezeGUIStateKey, new CheckBoxSetting("Freeze GUI state", false));
+		#endif
 
 		ServiceManager.GetService<ILogger>().Log("Registered custom settings");
 	}

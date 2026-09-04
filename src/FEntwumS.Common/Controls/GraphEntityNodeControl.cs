@@ -1,5 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Data;
+using FEntwumS.Common.Services;
+using OneWare.Essentials.Services;
 
 namespace FEntwumS.Common.Controls;
 
@@ -54,6 +56,13 @@ public class GraphEntityNodeControl : GraphNodeControl
 		{
 			return;
 		}
+		
+		#if DEBUG
+		if (ServiceManager.GetService<ISettingsService>().GetSettingValue<bool>("NetlistViewer_FreezeGUIState"))
+		{
+			return;
+		}
+		#endif
 		
 		foreach (GraphEntityNodeControl childEntity in _childEntities)
 		{
