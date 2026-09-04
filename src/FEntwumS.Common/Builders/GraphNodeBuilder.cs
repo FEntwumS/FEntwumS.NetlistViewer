@@ -386,18 +386,18 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 						(expandCollapseButton.Content as PathIcon)?.Data = AppIcons.MINUS;
 					}
 					
-					directAncestorNode.PropertyChanged += (o, eventArgs) =>
-					{
-						if (eventArgs.Property == PositionableSubControl.ScaleProperty &&
-						    expandCollapseButton.Content is PathIcon buttonContent)
-						{
-							double newScale = (double)eventArgs.NewValue!;
-							double oldScale = (double)eventArgs.OldValue!;
-							double scaleDifference = newScale / oldScale;
-							
-							expandCollapseButton.GetVisualParent<StackPanel>()?.RenderTransform = new ScaleTransform(newScale, newScale);
-						}
-					};
+					// directAncestorNode.PropertyChanged += (o, eventArgs) =>
+					// {
+					// 	if (eventArgs.Property == PositionableSubControl.ScaleProperty &&
+					// 	    expandCollapseButton.Content is PathIcon buttonContent)
+					// 	{
+					// 		double newScale = (double)eventArgs.NewValue!;
+					// 		double oldScale = (double)eventArgs.OldValue!;
+					// 		double scaleDifference = newScale / oldScale;
+					// 		
+					// 		expandCollapseButton.GetVisualParent<StackPanel>()?.RenderTransform = new ScaleTransform(newScale, newScale);
+					// 	}
+					// };
 				}
 			};
 
@@ -514,7 +514,7 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 							}
 
 							sendingPanningNetlist.ZoomBounds = new Rect(new Point(absoluteX, absoluteY),
-								new Size(clickedNode.Width, clickedNode.Height));
+								new Size(clickedNode.ElementWidth, clickedNode.ElementHeight));
 						}
 						else
 						{
