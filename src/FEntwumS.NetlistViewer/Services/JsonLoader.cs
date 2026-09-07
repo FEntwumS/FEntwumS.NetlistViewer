@@ -319,14 +319,14 @@ public class JsonLoader : IJsonLoader
 
 		if (labels != null)
 		{
-			CreateLabels(labels, parent, 0, 0, newDepth);
+			CreateLabels(labels, prevParent, xRef + x, yRef + y, newDepth);
 		}
 
 		JsonArray? ports = node["ports"] as JsonArray;
 
 		if (ports != null)
 		{
-			CreatePorts(ports, prevParent, x, y, newDepth);
+			CreatePorts(ports, prevParent, parent, x, y, newDepth);
 		}
 
 		JsonArray? edges = node["edges"] as JsonArray;
@@ -443,7 +443,7 @@ public class JsonLoader : IJsonLoader
 		}
 	}
 
-	public void CreatePorts(JsonArray ports, GraphNodeControl parent, double xRef,
+	public void CreatePorts(JsonArray ports, GraphNodeControl parent, GraphNodeControl attachedTo, double xRef,
 		double yRef, ushort depth)
 	{
 		double x = 0;
@@ -491,7 +491,7 @@ public class JsonLoader : IJsonLoader
 
 			if (labels is not null)
 			{
-				CreateLabels(labels, parent, xRef + x, yRef + y, (ushort)(depth + 1));
+				CreateLabels(labels, attachedTo, x, y, (ushort)(depth + 1));
 			}
 
 			if (layoutOptions is not null)
