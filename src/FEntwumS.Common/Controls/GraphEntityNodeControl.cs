@@ -9,36 +9,13 @@ namespace FEntwumS.Common.Controls;
 public class GraphEntityNodeControl : GraphNodeControl
 {
 	#region Properties
-
-	private Rect _currentViewPort= new Rect(0, 0, 3840, 2160);
-
-	public Rect CurrentViewPort
-	{
-
-		get => _currentViewPort;
-		set
-		{
-			_currentViewPort = value;
-			CheckChildVisibility();
-
-			if (_hasEntityChildren)
-			{
-				foreach (GraphEntityNodeControl childEntity in _childEntities)
-				{
-					childEntity.CurrentViewPort = new Rect(_currentViewPort.X - childEntity.X, _currentViewPort.Y - childEntity.Y, _currentViewPort.Width, _currentViewPort.Height);
-				}
-			}
-		}
-	}
 	
 	#endregion
 	
 	#region Variables
 
 	private List<GraphEntityNodeControl> _childEntities = new List<GraphEntityNodeControl>();
-	private List<GraphLabelControl> _childLabels = new List<GraphLabelControl>();
 	private bool _hasEntityChildren = true;
-	private bool _hasLabelChildren = true;
 	#endregion
 	
 	#region Event handling
@@ -50,15 +27,23 @@ public class GraphEntityNodeControl : GraphNodeControl
 		
 		_hasEntityChildren = _childEntities.Count > 0;
 		
-		_childLabels.Clear();
-		_childLabels.AddRange(this.VisualChildren.OfType<GraphLabelControl>());
-		
-		_hasLabelChildren = _childLabels.Count > 0;
-		
 		base.OnLoaded(e);
 	}
 
-	protected void CheckChildVisibility()
+	protected override void OnViewPortChanged()
+	{
+		if (_hasEntityChildren)
+		{
+			foreach (GraphEntityNodeControl childEntity in _childEntities)
+			{
+				childEntity.CurrentViewPort = new Rect(CurrentViewPort.X - childEntity.X, CurrentViewPort.Y - childEntity.Y, CurrentViewPort.Width, CurrentViewPort.Height);;
+			}
+		}
+		
+		base.OnViewPortChanged();
+	}
+
+	protected override void CheckChildVisibility()
 	{
 #if DEBUG
 		if (ServiceManager.GetService<ISettingsService>().GetSettingValue<bool>("NetlistViewer_FreezeGUIState"))
@@ -67,20 +52,7 @@ public class GraphEntityNodeControl : GraphNodeControl
 		}
 #endif
 		
-		if (_hasLabelChildren)
-		{
-			foreach (GraphLabelControl childLabel in _childLabels)
-			{
-				Rect childArea = new Rect(childLabel.X, childLabel.Y,
-					childLabel.ElementWidth,  childLabel.ElementHeight);
-			
-				bool isVisible = CurrentViewPort.Contains(childArea)
-				                 || childArea.Intersects(CurrentViewPort)
-				                 || childArea.Contains(CurrentViewPort);
-			
-				childLabel.IsVisible = isVisible;
-			}
-		}
+		base.CheckChildVisibility();
 		
 		if (!_hasEntityChildren)
 		{
