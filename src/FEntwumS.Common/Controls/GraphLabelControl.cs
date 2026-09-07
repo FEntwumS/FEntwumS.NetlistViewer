@@ -67,6 +67,9 @@ public class GraphLabelControl : GenericGraphElementControl
 		    NetlistTheme.Typeface,
 		    Fontsize * newScale,
 		    NetlistTheme.TextBrush);
+	    
+	    cullingOriginX = X;
+	    cullingOriginY = Y;
     }
 
     #endregion

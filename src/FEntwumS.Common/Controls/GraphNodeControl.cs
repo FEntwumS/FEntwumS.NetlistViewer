@@ -71,18 +71,6 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		AvaloniaProperty.Register<GraphNodeControl, string?>(nameof(LocationPath),
 			defaultBindingMode: BindingMode.TwoWay);
 	
-	private Rect _currentViewPort= new Rect(0, 0, 3840, 2160);
-	
-	public Rect CurrentViewPort
-	{
-
-		get => _currentViewPort;
-		set
-		{
-			_currentViewPort = value;
-			OnViewPortChanged();
-		}
-	}
 
 	#endregion
 
@@ -92,9 +80,6 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 	{
 		Children = new GeometryCollection([new RectangleGeometry(new Rect(0, 0, 100, 100))])
 	};
-	
-	private List<GraphLabelControl> _childLabels = new List<GraphLabelControl>();
-	private bool _hasLabelChildren = true;
 
 	#endregion
 
@@ -133,16 +118,6 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		base.OnInitialized();
 	}
 
-	protected override void OnLoaded(RoutedEventArgs e)
-	{
-		_childLabels.Clear();
-		_childLabels.AddRange(this.VisualChildren.OfType<GraphLabelControl>());
-		
-		_hasLabelChildren = _childLabels.Count > 0;
-		
-		base.OnLoaded(e);
-	}
-
 	protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
 	{
 		VisualChildren.Clear();
@@ -179,11 +154,6 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		}
 		
 		base.UpdateScale(newScale);
-	}
-
-	protected virtual void OnViewPortChanged()
-	{
-		CheckChildVisibility();
 	}
 
 	#endregion
@@ -295,6 +265,8 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 	protected override void RegenerateDrawnElements(double newScale)
 	{
 		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
+		cullingOriginX = X;
+		cullingOriginY = Y;
 	}
 
 	#endregion
@@ -326,31 +298,6 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 				
 			LogicalChildren.Add(interactionControl);
 			VisualChildren.Add(interactionControl);
-		}
-	}
-
-	protected virtual void CheckChildVisibility()
-	{
-#if DEBUG
-		if (ServiceManager.GetService<ISettingsService>().GetSettingValue<bool>("NetlistViewer_FreezeGUIState"))
-		{
-			return;
-		}
-#endif
-
-		if (_hasLabelChildren)
-		{
-			foreach (GraphLabelControl childLabel in _childLabels)
-			{
-				Rect childArea = new Rect(childLabel.X, childLabel.Y,
-					childLabel.ElementWidth, childLabel.ElementHeight);
-
-				bool isVisible = CurrentViewPort.Contains(childArea)
-				                 || childArea.Intersects(CurrentViewPort)
-				                 || childArea.Contains(CurrentViewPort);
-
-				childLabel.IsVisible = isVisible;
-			}
 		}
 	}
 }

@@ -61,6 +61,12 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 	protected override void RegenerateDrawnElements(double newScale)
 	{
 		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
+		Rect newBounds = _contentGeometry.Bounds;
+		
+		ElementWidth = newBounds.Width;
+		ElementHeight = newBounds.Height;
+		cullingOriginX = newBounds.X + X;
+		cullingOriginY = newBounds.Y + Y;
 	}
 
 	#endregion

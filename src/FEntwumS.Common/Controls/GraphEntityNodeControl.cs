@@ -10,12 +10,28 @@ public class GraphEntityNodeControl : GraphNodeControl
 {
 	#region Properties
 	
+	private Rect _currentViewPort= new Rect(0, 0, 3840, 2160);
+	
+	public Rect CurrentViewPort
+	{
+
+		get => _currentViewPort;
+		set
+		{
+			_currentViewPort = value;
+			OnViewPortChanged();
+		}
+	}
+	
 	#endregion
 	
 	#region Variables
 
 	private List<GraphEntityNodeControl> _childEntities = new List<GraphEntityNodeControl>();
 	private bool _hasEntityChildren = true;
+
+	private List<GenericGraphElementControl> _childElements = new List<GenericGraphElementControl>();
+	private bool _hasChildElements = true;
 	#endregion
 	
 	#region Event handling
@@ -27,23 +43,33 @@ public class GraphEntityNodeControl : GraphNodeControl
 		
 		_hasEntityChildren = _childEntities.Count > 0;
 		
+		_childElements.Clear();
+		_childElements.AddRange(this.VisualChildren.OfType<GenericGraphElementControl>());
+		
+		_hasChildElements = _childElements.Count > 0;
+		
 		base.OnLoaded(e);
 	}
 
-	protected override void OnViewPortChanged()
+	protected virtual void OnViewPortChanged()
 	{
+		if (!this.IsVisible)
+		{
+			return;
+		}
+		
+		CheckChildVisibility();
+		
 		if (_hasEntityChildren)
 		{
 			foreach (GraphEntityNodeControl childEntity in _childEntities)
 			{
-				childEntity.CurrentViewPort = new Rect(CurrentViewPort.X - childEntity.X, CurrentViewPort.Y - childEntity.Y, CurrentViewPort.Width, CurrentViewPort.Height);;
+				childEntity.CurrentViewPort = new Rect(CurrentViewPort.X - childEntity.X, CurrentViewPort.Y - childEntity.Y, CurrentViewPort.Width, CurrentViewPort.Height);
 			}
 		}
-		
-		base.OnViewPortChanged();
 	}
 
-	protected override void CheckChildVisibility()
+	protected virtual void CheckChildVisibility()
 	{
 #if DEBUG
 		if (ServiceManager.GetService<ISettingsService>().GetSettingValue<bool>("NetlistViewer_FreezeGUIState"))
@@ -51,24 +77,22 @@ public class GraphEntityNodeControl : GraphNodeControl
 			return;
 		}
 #endif
-		
-		base.CheckChildVisibility();
-		
-		if (!_hasEntityChildren)
+
+		if (!_hasChildElements)
 		{
 			return;
 		}
-		
-		foreach (GraphEntityNodeControl childEntity in _childEntities)
+
+		foreach (GenericGraphElementControl childElement in _childElements)
 		{
-			Rect childArea = new Rect(childEntity.X, childEntity.Y,
-				childEntity.ElementWidth,  childEntity.ElementHeight);
+			Rect childArea = new Rect(childElement.cullingOriginX, childElement.cullingOriginY,
+				childElement.ElementWidth,  childElement.ElementHeight);
 			
 			bool isVisible = CurrentViewPort.Contains(childArea)
-				|| childArea.Intersects(CurrentViewPort)
-				|| childArea.Contains(CurrentViewPort);
+			                 || childArea.Intersects(CurrentViewPort)
+			                 || childArea.Contains(CurrentViewPort);
 			
-			childEntity.IsVisible = isVisible;
+			childElement.IsVisible = isVisible;
 		}
 	}
 

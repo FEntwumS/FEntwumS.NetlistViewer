@@ -32,6 +32,9 @@ public abstract class GenericGraphElementControl : PositionableSubControl
 		AvaloniaProperty.Register<GenericGraphElementControl, string>(nameof(srcLocation),
 			defaultBindingMode: BindingMode.TwoWay,
 			defaultValue: "");
+
+	public double cullingOriginX = 0.0d;
+	public double cullingOriginY = 0.0d;
 	
 	#endregion
 
