@@ -36,7 +36,9 @@ public class GraphEntityNodeControl : GraphNodeControl
 	#region Variables
 
 	private List<GraphEntityNodeControl> _childEntities = new List<GraphEntityNodeControl>();
+	private List<GraphLabelControl> _childLabels = new List<GraphLabelControl>();
 	private bool _hasEntityChildren = true;
+	private bool _hasLabelChildren = true;
 	#endregion
 	
 	#region Event handling
@@ -48,22 +50,42 @@ public class GraphEntityNodeControl : GraphNodeControl
 		
 		_hasEntityChildren = _childEntities.Count > 0;
 		
+		_childLabels.Clear();
+		_childLabels.AddRange(this.VisualChildren.OfType<GraphLabelControl>());
+		
+		_hasLabelChildren = _childLabels.Count > 0;
+		
 		base.OnLoaded(e);
 	}
 
 	protected void CheckChildVisibility()
 	{
-		if (!_hasEntityChildren)
-		{
-			return;
-		}
-		
-		#if DEBUG
+#if DEBUG
 		if (ServiceManager.GetService<ISettingsService>().GetSettingValue<bool>("NetlistViewer_FreezeGUIState"))
 		{
 			return;
 		}
-		#endif
+#endif
+		
+		if (_hasLabelChildren)
+		{
+			foreach (GraphLabelControl childLabel in _childLabels)
+			{
+				Rect childArea = new Rect(childLabel.X, childLabel.Y,
+					childLabel.ElementWidth,  childLabel.ElementHeight);
+			
+				bool isVisible = CurrentViewPort.Contains(childArea)
+				                 || childArea.Intersects(CurrentViewPort)
+				                 || childArea.Contains(CurrentViewPort);
+			
+				childLabel.IsVisible = isVisible;
+			}
+		}
+		
+		if (!_hasEntityChildren)
+		{
+			return;
+		}
 		
 		foreach (GraphEntityNodeControl childEntity in _childEntities)
 		{
