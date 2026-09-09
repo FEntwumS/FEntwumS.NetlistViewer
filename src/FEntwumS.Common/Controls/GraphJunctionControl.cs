@@ -91,6 +91,11 @@ public class GraphJunctionControl : GenericGraphElementControl, ICustomHitTest
 
 	protected override void RegenerateDrawnElements(double newScale)
 	{
+		if (!this.IsVisible)
+		{
+			return;
+		}
+		
 		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
 		cullingOriginX = X;
 		cullingOriginY = Y;

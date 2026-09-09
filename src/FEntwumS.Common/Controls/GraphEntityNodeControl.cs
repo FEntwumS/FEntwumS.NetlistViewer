@@ -91,8 +91,18 @@ public class GraphEntityNodeControl : GraphNodeControl
 			bool isVisible = CurrentViewPort.Contains(childArea)
 			                 || childArea.Intersects(CurrentViewPort)
 			                 || childArea.Contains(CurrentViewPort);
-			
-			childElement.IsVisible = isVisible;
+			if (!childElement.IsVisible && isVisible)
+			{
+				childElement.IsVisible = true;
+				
+				childElement.Scale = this.Scale;
+				
+				childElement.InvalidateMeasure();
+			}
+			else
+			{
+				childElement.IsVisible = isVisible;
+			}
 		}
 	}
 

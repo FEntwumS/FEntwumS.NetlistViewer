@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Data;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 using FEntwumS.Common.Types;
 
 namespace FEntwumS.Common.Controls;
@@ -90,6 +91,11 @@ public class GraphPortControl : GenericGraphElementControl
 
 	protected override void RegenerateDrawnElements(double newScale)
 	{
+		if (!this.IsVisible)
+		{
+			return;
+		}
+		
 		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
 		cullingOriginX = X;
 		cullingOriginY = Y;

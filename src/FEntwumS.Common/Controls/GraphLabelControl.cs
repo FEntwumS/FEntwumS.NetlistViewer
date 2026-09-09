@@ -2,6 +2,7 @@
 using Avalonia;
 using Avalonia.Data;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 
 namespace FEntwumS.Common.Controls;
 
@@ -53,6 +54,11 @@ public class GraphLabelControl : GenericGraphElementControl
 
     public override void Render(DrawingContext context)
     {
+	    if (!this.GetVisualParent().IsVisible || !this.IsVisible)
+	    {
+		    return;
+	    }
+	    
 	    if (Scale >= 0.2d)
 	    {
 		    context.DrawText(_formattedContent, new Point(0, 0));
@@ -61,6 +67,11 @@ public class GraphLabelControl : GenericGraphElementControl
 
     protected override void RegenerateDrawnElements(double newScale)
     {
+	    if (!this.GetVisualParent().IsVisible || !this.IsVisible)
+	    {
+		    return;
+	    }
+	    
 	    _formattedContent = new FormattedText(Content ?? "",
 		    CultureInfo.InvariantCulture,
 		    FlowDirection.LeftToRight,
