@@ -66,6 +66,14 @@ public class PanningNetlistControl : PanningControl
 	    }
     }
 
+    protected override void ZoomToRect(Rect shownBounds)
+    {
+	    base.ZoomToRect(shownBounds);
+	    
+	    UpdateViewPort();
+	    InvalidateMeasure();
+    }
+
     private void UpdateViewPort()
     {
 	    if (Child is GraphRootNodeControl graphRootNodeControl)

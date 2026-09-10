@@ -272,7 +272,7 @@ public class PanningControl : UserControl
 	    }
     }
 
-    private void ZoomToRect(Rect shownBounds)
+    protected virtual void ZoomToRect(Rect shownBounds)
     {
 	    if (Child is null)
 	    {
