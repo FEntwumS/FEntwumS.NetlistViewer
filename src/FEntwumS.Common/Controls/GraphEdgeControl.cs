@@ -58,6 +58,18 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 		context.DrawGeometry(null, linePen, _contentGeometry);
 	}
 
+	protected override void UpdateScale(double newScale)
+	{
+		double scaleDifference = newScale / Scale;
+		
+		base.UpdateScale(newScale);
+		
+		cullingOriginX *= scaleDifference;
+		cullingOriginY *= scaleDifference;
+		ElementWidth *= scaleDifference;
+		ElementHeight *= scaleDifference;
+	}
+
 	protected override void RegenerateDrawnElements(double newScale)
 	{
 		if (!this.IsVisible)
@@ -70,8 +82,6 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 		
 		ElementWidth = newBounds.Width;
 		ElementHeight = newBounds.Height;
-		cullingOriginX = newBounds.X + X;
-		cullingOriginY = newBounds.Y + Y;
 	}
 
 	#endregion

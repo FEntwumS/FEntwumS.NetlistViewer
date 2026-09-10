@@ -89,6 +89,14 @@ public class GraphJunctionControl : GenericGraphElementControl, ICustomHitTest
 		}
 	}
 
+	protected override void UpdateScale(double newScale)
+	{
+		base.UpdateScale(newScale);
+		
+		cullingOriginX = X;
+		cullingOriginY = Y;
+	}
+
 	protected override void RegenerateDrawnElements(double newScale)
 	{
 		if (!this.IsVisible)
@@ -97,8 +105,6 @@ public class GraphJunctionControl : GenericGraphElementControl, ICustomHitTest
 		}
 		
 		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
-		cullingOriginX = X;
-		cullingOriginY = Y;
 	}
 
 	#endregion
