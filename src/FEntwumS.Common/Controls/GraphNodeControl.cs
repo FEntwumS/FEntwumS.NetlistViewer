@@ -136,6 +136,19 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		base.OnAttachedToVisualTree(e);
 	}
 
+	protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+	{
+		if (this is not GraphEntityNodeControl && change.Property == IsVisibleProperty)
+		{
+			foreach (PositionableSubControl childControl in Items)
+			{
+				childControl.InvalidateMeasure();
+			}
+		} 
+		
+		base.OnPropertyChanged(change);
+	}
+
 	private void ItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
 	{
 		AddChildrenToVisualTree();
