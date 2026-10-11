@@ -276,6 +276,17 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		{
 			context.DrawGeometry(NetlistTheme.FillBrush, NetlistTheme.BorderPen, _contentGeometry);
 		}
+
+		#if DEBUG
+		if (ServiceManager.GetService<ISettingsService>().GetSettingValue<bool>("NetlistViewer_FillEdgeAABB"))
+		{
+			foreach (var e in Items.Where(i => i.IsVisible).Where(i => i is GraphEdgeControl))
+			{
+				context.DrawRectangle(new SolidColorBrush(new Color(128, 255, 0, 0)), null,
+					new Rect(e.X, e.Y, e.ElementWidth, e.ElementHeight));
+			}
+		}
+		#endif
 	}
 
 	protected override void RegenerateDrawnElements(double newScale)

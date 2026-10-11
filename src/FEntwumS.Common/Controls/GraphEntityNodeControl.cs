@@ -85,7 +85,7 @@ public class GraphEntityNodeControl : GraphNodeControl
 
 		foreach (GenericGraphElementControl childElement in _childElements)
 		{
-			Rect childArea = new Rect(childElement.cullingOriginX, childElement.cullingOriginY,
+			Rect childArea = new Rect(childElement.X, childElement.Y,
 				childElement.ElementWidth,  childElement.ElementHeight);
 			
 			bool isVisible = CurrentViewPort.Contains(childArea)

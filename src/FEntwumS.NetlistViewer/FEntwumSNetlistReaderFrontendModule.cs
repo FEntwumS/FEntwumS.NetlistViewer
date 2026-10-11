@@ -653,7 +653,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			{
 				string synthFilePath = Path.Combine(vhdlFile.Root.FullPath, "build", "synth.json");
 
-				if (vhdlFile is { Root: UniversalFpgaProjectRoot root, Icon.Overlays.Length: > 0 } && !root.IsTestBench(vhdlFile.FullPath))
+				if (vhdlFile is { Root: UniversalFpgaProjectRoot { TopEntityFilePath: not null } root } && !root.IsTestBench(vhdlFile.FullPath) && vhdlFile.RelativePath.Replace(Path.DirectorySeparatorChar, '/').Replace(Path.AltDirectorySeparatorChar, '/') == root.TopEntityFilePath.Replace(Path.DirectorySeparatorChar, '/').Replace(Path.AltDirectorySeparatorChar, '/'))
 				{
 					
 					menuItems.Add(new MenuItemModel("NetlistViewer_CreateNetlist")
@@ -952,6 +952,10 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		#if DEBUG
 		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
 			FentwumSNetlistViewerSettingsHelper.FreezeGUIStateKey, new CheckBoxSetting("Freeze GUI state", false));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.ShowEdgeAABB, new CheckBoxSetting("Show edge AABB", false));
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Experimental",
+			FentwumSNetlistViewerSettingsHelper.FillEdgeAABB, new CheckBoxSetting("Fill edge AABB", false));
 		#endif
 
 		ServiceManager.GetService<ILogger>().Log("Registered custom settings");

@@ -3,6 +3,8 @@ using Avalonia.Collections;
 using Avalonia.Data;
 using Avalonia.Media;
 using Avalonia.Rendering;
+using FEntwumS.Common.Services;
+using OneWare.Essentials.Services;
 
 namespace FEntwumS.Common.Controls;
 
@@ -44,6 +46,24 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 	protected override void OnInitialized()
 	{
 		_contentGeometry = new PolylineGeometry(_points, false);
+
+		var b = _contentGeometry.Bounds;
+
+		X += b.X;
+		Y += b.Y;
+		ElementWidth = b.Width;
+		ElementHeight = b.Height;
+
+		AvaloniaList<Point> offsetPoints = new(_points.Count);
+
+		foreach (Point p in _points)
+		{
+			offsetPoints.Add(new Point(p.X - b.X,  p.Y - b.Y));
+		}
+		
+		_points = offsetPoints;
+		
+		_contentGeometry = new PolylineGeometry(_points, false);
 		
 		base.OnInitialized();
 	}
@@ -54,6 +74,12 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 
 	public override void Render(DrawingContext context)
 	{
+		#if DEBUG
+		if (ServiceManager.GetService<ISettingsService>().GetSettingValue<bool>("NetlistViewer_ShowEdgeAABB"))
+		{
+			context.DrawRectangle(null, NetlistTheme.HighLightPen, new Rect(0, 0, ElementWidth, ElementHeight));
+		}
+#endif
 		Pen linePen = _isThick ? NetlistTheme.BundledEdgePen : NetlistTheme.EdgePen;
 		context.DrawGeometry(null, linePen, _contentGeometry);
 	}
@@ -62,12 +88,12 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 	{
 		double scaleDifference = newScale / Scale;
 		
-		base.UpdateScale(newScale);
-		
 		cullingOriginX *= scaleDifference;
 		cullingOriginY *= scaleDifference;
 		ElementWidth *= scaleDifference;
 		ElementHeight *= scaleDifference;
+		
+		base.UpdateScale(newScale);
 	}
 
 	protected override void RegenerateDrawnElements(double newScale)
@@ -82,6 +108,8 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 		
 		ElementWidth = newBounds.Width;
 		ElementHeight = newBounds.Height;
+		cullingOriginX = newBounds.X + X;
+		cullingOriginY = newBounds.Y + Y;
 	}
 
 	#endregion

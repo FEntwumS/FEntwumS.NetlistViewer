@@ -58,6 +58,8 @@ public class FentwumSNetlistViewerSettingsHelper
 	
 	#if DEBUG
 	public static readonly string FreezeGUIStateKey = "NetlistViewer_FreezeGUIState";
+	public static readonly string ShowEdgeAABB = "NetlistViewer_ShowEdgeAABB";
+	public static readonly string FillEdgeAABB = "NetlistViewer_FillEdgeAABB";
 	#endif
 
 	public static readonly string AutomaticNetlistGenerationIntervalKey =
