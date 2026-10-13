@@ -68,9 +68,6 @@ public class GraphLabelControl : GenericGraphElementControl
     protected override void UpdateScale(double newScale)
     {
 	    base.UpdateScale(newScale);
-	    
-	    cullingOriginX = X;
-	    cullingOriginY = Y;
     }
 
     protected override void RegenerateDrawnElements(double newScale)

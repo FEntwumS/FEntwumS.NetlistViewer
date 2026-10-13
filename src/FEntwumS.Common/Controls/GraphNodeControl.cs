@@ -167,9 +167,6 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		}
 		
 		base.UpdateScale(newScale);
-		
-		cullingOriginX = X;
-		cullingOriginY = Y;
 	}
 
 	#endregion

@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Data;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using FEntwumS.Common.Services;
 using OneWare.Essentials.Services;
 
@@ -107,4 +108,11 @@ public class GraphEntityNodeControl : GraphNodeControl
 	}
 
 	#endregion
+
+	public override void Render(DrawingContext context)
+	{
+		//context.DrawRectangle(new SolidColorBrush(new Color(128, 0, 255, 0)), null, CurrentViewPort);
+		
+		base.Render(context);
+	}
 }
