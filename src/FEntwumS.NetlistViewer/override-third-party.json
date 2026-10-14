@@ -349,7 +349,7 @@
   },
   {
     "Id": "OneWare.OmniSharp.Extensions.JsonRpc",
-    "Version": "1.0.1",
+    "Version": "1.0.2",
     "ProjectUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol",
     "Copyright": "Copyright OmniSharp and contributors © 2018, OneWare © 2026",
     "Authors": "OneWare, David Driscoll and contributors",
@@ -359,7 +359,7 @@
   },
   {
     "Id": "OneWare.OmniSharp.Extensions.JsonRpc.Generators",
-    "Version": "1.0.1",
+    "Version": "1.0.2",
     "ProjectUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol",
     "Copyright": "Copyright OmniSharp and contributors © 2018, OneWare © 2026",
     "Authors": "OneWare, David Driscoll and contributors",
@@ -369,7 +369,7 @@
   },
   {
     "Id": "OneWare.OmniSharp.Extensions.LanguageClient",
-    "Version": "1.0.1",
+    "Version": "1.0.2",
     "ProjectUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol",
     "Copyright": "Copyright OmniSharp and contributors © 2018, OneWare © 2026",
     "Authors": "OneWare, David Driscoll and contributors",
@@ -379,7 +379,7 @@
   },
   {
     "Id": "OneWare.OmniSharp.Extensions.LanguageProtocol",
-    "Version": "1.0.1",
+    "Version": "1.0.2",
     "ProjectUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol",
     "Copyright": "Copyright OmniSharp and contributors © 2018, OneWare © 2026",
     "Authors": "OneWare, David Driscoll and contributors",
@@ -389,7 +389,7 @@
   },
   {
     "Id": "OneWare.OmniSharp.Extensions.LanguageServer.Shared",
-    "Version": "1.0.1",
+    "Version": "1.0.2",
     "ProjectUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol",
     "Copyright": "Copyright OmniSharp and contributors © 2018, OneWare © 2026",
     "Authors": "OneWare, David Driscoll and contributors",
