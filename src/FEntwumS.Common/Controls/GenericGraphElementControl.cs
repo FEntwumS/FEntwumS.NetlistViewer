@@ -37,32 +37,13 @@ public abstract class GenericGraphElementControl : PositionableSubControl
 
 	#region Event Handling
 
-	protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs e)
-	{
-		if (e.Property == ParentProperty)
-		{
-			var newParent = e.NewValue;
-
-			if (newParent is PanningControl { Child: GenericGraphElementControl childControl })
-				childControl.PropertyChanged += (sender, args) =>
-				{
-					if (args.Property == ScaleProperty && args.NewValue is double newScale)
-					{
-						childControl.NetlistTheme.RegenerateBrushesAndPens(newScale);
-					}
-				};
-		}
-		
-		base.OnPropertyChanged(e);
-	}
-
 	#endregion
 	
 	#region Rendering
 
 	protected override Size MeasureCore(Size availableSize)
 	{
-		return Double.IsNaN(Width) || Double.IsNaN(Height) ? new Size(100, 100) : new Size(Width, Height);
+		return Double.IsNaN(ElementWidth) || Double.IsNaN(ElementHeight) ? new Size(100, 100) : new Size(ElementWidth, ElementHeight);
 	}
 
 	protected override void ArrangeCore(Rect finalRect)

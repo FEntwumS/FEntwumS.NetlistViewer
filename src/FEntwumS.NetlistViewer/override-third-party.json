@@ -299,7 +299,7 @@
   },
   {
     "Id": "OneWare.GhdlExtension",
-    "Version": "1.0.4",
+    "Version": "1.0.6",
     "ProjectUrl": "https://github.com/one-ware/OneWare.GhdlExtension",
     "Copyright": "Protop Solutions UG",
     "Authors": "Hendrik Mennen",
@@ -325,6 +325,76 @@
     "Authors": "Wiesław Šoltés",
     "License": "MIT",
     "LicenseUrl": "https://raw.githubusercontent.com/wieslawsoltes/TreeDataGrid/refs/heads/master/licence.md",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "MediatR",
+    "Version": "14.1.0",
+    "ProjectUrl": "https://github.com/LuckyPennySoftware/MediatR",
+    "Copyright": "Lucky Penny Software",
+    "Authors": "Lucky Penny Software",
+    "License": "RPL-1.5",
+    "LicenseUrl": "https://opensource.org/license/rpl-1-5/",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "Microsoft.ML.OnnxRuntime.Managed",
+    "Version": "1.28.0",
+    "ProjectUrl": "https://github.com/microsoft/onnxruntime",
+    "Copyright": "Copyright (c) Microsoft Corporation",
+    "Authors": "Microsoft",
+    "License": "MIT",
+    "LicenseUrl": "https://github.com/microsoft/onnxruntime/blob/a5e205be24752d13bfe9ad38ea7722f1eeec9fed/LICENSE",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OneWare.OmniSharp.Extensions.JsonRpc",
+    "Version": "1.0.2",
+    "ProjectUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol",
+    "Copyright": "Copyright OmniSharp and contributors © 2018, OneWare © 2026",
+    "Authors": "OneWare, David Driscoll and contributors",
+    "License": "MIT",
+    "LicenseUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol/blob/55281b5bb54d4a27c023689017d8a18adf217be5/LICENSE",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OneWare.OmniSharp.Extensions.JsonRpc.Generators",
+    "Version": "1.0.2",
+    "ProjectUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol",
+    "Copyright": "Copyright OmniSharp and contributors © 2018, OneWare © 2026",
+    "Authors": "OneWare, David Driscoll and contributors",
+    "License": "MIT",
+    "LicenseUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol/blob/55281b5bb54d4a27c023689017d8a18adf217be5/LICENSE",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OneWare.OmniSharp.Extensions.LanguageClient",
+    "Version": "1.0.2",
+    "ProjectUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol",
+    "Copyright": "Copyright OmniSharp and contributors © 2018, OneWare © 2026",
+    "Authors": "OneWare, David Driscoll and contributors",
+    "License": "MIT",
+    "LicenseUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol/blob/55281b5bb54d4a27c023689017d8a18adf217be5/LICENSE",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OneWare.OmniSharp.Extensions.LanguageProtocol",
+    "Version": "1.0.2",
+    "ProjectUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol",
+    "Copyright": "Copyright OmniSharp and contributors © 2018, OneWare © 2026",
+    "Authors": "OneWare, David Driscoll and contributors",
+    "License": "MIT",
+    "LicenseUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol/blob/55281b5bb54d4a27c023689017d8a18adf217be5/LICENSE",
+    "LicenseInformationOrigin": 1
+  },
+  {
+    "Id": "OneWare.OmniSharp.Extensions.LanguageServer.Shared",
+    "Version": "1.0.2",
+    "ProjectUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol",
+    "Copyright": "Copyright OmniSharp and contributors © 2018, OneWare © 2026",
+    "Authors": "OneWare, David Driscoll and contributors",
+    "License": "MIT",
+    "LicenseUrl": "https://github.com/hendrikmennen/csharp-language-server-protocol/blob/55281b5bb54d4a27c023689017d8a18adf217be5/LICENSE",
     "LicenseInformationOrigin": 1
   }
 ]

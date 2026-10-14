@@ -12,4 +12,11 @@ public class GraphRootNodeControl : GraphEntityNodeControl
 	}
 
 	#endregion
+
+	protected override void UpdateScale(double newScale)
+	{
+		NetlistTheme.RegenerateBrushesAndPens(newScale);
+		
+		base.UpdateScale(newScale);
+	}
 }
