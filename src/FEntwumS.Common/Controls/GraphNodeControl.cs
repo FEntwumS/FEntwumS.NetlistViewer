@@ -3,9 +3,12 @@ using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Rendering;
+using FEntwumS.Common.Services;
+using OneWare.Essentials.Services;
 
 namespace FEntwumS.Common.Controls;
 
@@ -67,6 +70,7 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 	public static readonly StyledProperty<string?> LocationPathProperty =
 		AvaloniaProperty.Register<GraphNodeControl, string?>(nameof(LocationPath),
 			defaultBindingMode: BindingMode.TwoWay);
+	
 
 	#endregion
 
@@ -83,7 +87,7 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 
 	protected override void OnInitialized()
 	{
-		var contentRect = new Rect(0.0d, 0.0d, Width, Height);
+		var contentRect = new Rect(0.0d, 0.0d, ElementWidth, ElementHeight);
 		
 		// double l = ((NetlistTheme.BorderThickness + NetlistTheme.DropShadowThickness) / 2) * Scale;
 		// double r = l + Width;
@@ -132,9 +136,37 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		base.OnAttachedToVisualTree(e);
 	}
 
+	protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+	{
+		if (this is not GraphEntityNodeControl && change.Property == IsVisibleProperty)
+		{
+			foreach (PositionableSubControl childControl in Items)
+			{
+				childControl.InvalidateMeasure();
+			}
+		} 
+		
+		base.OnPropertyChanged(change);
+	}
+
 	private void ItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
 	{
 		AddChildrenToVisualTree();
+	}
+
+	protected override void UpdateScale(double newScale)
+	{
+		foreach (Control v in _interactionControls)
+		{
+			v.RenderTransform = new ScaleTransform(newScale, newScale);
+		}
+
+		foreach (PositionableSubControl child in Items)
+		{
+			child.Scale = newScale;
+		}
+		
+		base.UpdateScale(newScale);
 	}
 
 	#endregion
@@ -152,7 +184,7 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 
 	protected override Size MeasureOverride(Size availableSize)
 	{
-		availableSize = new Size(double.PositiveInfinity, double.PositiveInfinity);
+		availableSize = new Size(ElementWidth, ElementHeight);
 
 		foreach (PositionableSubControl child in Items)
 		{
@@ -190,15 +222,15 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		double offset = (NetlistTheme.BorderThickness + 2.0d) * Scale;
 		double x = interactionControl.HorizontalAlignment switch
 		{
-			HorizontalAlignment.Center => availableSize.Width / 2.0d - (interactionControl.DesiredSize.Width / 2.0d) - offset,
-			HorizontalAlignment.Right => availableSize.Width - interactionControl.DesiredSize.Width,
+			HorizontalAlignment.Center => ElementWidth / 2.0d - (interactionControl.DesiredSize.Width / 2.0d) - offset,
+			HorizontalAlignment.Right => ElementWidth - interactionControl.DesiredSize.Width,
 			_ => offset
 		};
 
 		double y = interactionControl.VerticalAlignment switch
 		{
-			VerticalAlignment.Center => availableSize.Height / 2.0d - (interactionControl.DesiredSize.Height / 2.0d) - offset,
-			VerticalAlignment.Bottom => availableSize.Height - interactionControl.DesiredSize.Height,
+			VerticalAlignment.Center => ElementHeight / 2.0d - (interactionControl.DesiredSize.Height / 2.0d) - offset,
+			VerticalAlignment.Bottom => ElementHeight - interactionControl.DesiredSize.Height,
 			_ => offset
 		};
 		
@@ -241,11 +273,27 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		{
 			context.DrawGeometry(NetlistTheme.FillBrush, NetlistTheme.BorderPen, _contentGeometry);
 		}
+
+		#if DEBUG
+		if (ServiceManager.GetService<ISettingsService>().GetSettingValue<bool>("NetlistViewer_FillEdgeAABB"))
+		{
+			foreach (var e in Items.Where(i => i.IsVisible).Where(i => i is GraphEdgeControl))
+			{
+				context.DrawRectangle(new SolidColorBrush(new Color(128, 255, 0, 0)), null,
+					new Rect(e.X, e.Y, e.ElementWidth, e.ElementHeight));
+			}
+		}
+		#endif
 	}
 
-	protected override void RegenerateDrawnElements()
+	protected override void RegenerateDrawnElements(double newScale)
 	{
-		_contentGeometry.Transform = new ScaleTransform(Scale, Scale);
+		if (!this.IsVisible)
+		{
+			return;
+		}
+		
+		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
 	}
 
 	#endregion

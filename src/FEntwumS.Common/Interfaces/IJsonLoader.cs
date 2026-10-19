@@ -16,7 +16,7 @@ public interface IJsonLoader
 	public void CreateLabels(JsonArray labels, GraphNodeControl parent, double xRef,
 		double yRef, ushort depth);
 
-	public void CreatePorts(JsonArray ports, GraphNodeControl parent, double xRef,
+	public void CreatePorts(JsonArray ports, GraphNodeControl parent, GraphNodeControl attachedTo, double xRef,
 		double yRef, ushort depth);
 
 	public void CreateEdges(JsonArray edges, GraphNodeControl parent, double xRef,

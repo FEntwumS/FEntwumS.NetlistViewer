@@ -3,6 +3,8 @@ using Avalonia.Collections;
 using Avalonia.Data;
 using Avalonia.Media;
 using Avalonia.Rendering;
+using FEntwumS.Common.Services;
+using OneWare.Essentials.Services;
 
 namespace FEntwumS.Common.Controls;
 
@@ -45,6 +47,25 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 	{
 		_contentGeometry = new PolylineGeometry(_points, false);
 		
+
+		var b = _contentGeometry.Bounds;
+
+		X += b.X;
+		Y += b.Y;
+		ElementWidth = b.Width;
+		ElementHeight = b.Height;
+
+		AvaloniaList<Point> offsetPoints = new(_points.Count);
+
+		foreach (Point p in _points)
+		{
+			offsetPoints.Add(new Point(p.X - b.X,  p.Y - b.Y));
+		}
+		
+		_points = offsetPoints;
+		
+		_contentGeometry = new PolylineGeometry(_points, false);
+		
 		base.OnInitialized();
 	}
 
@@ -54,13 +75,25 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 
 	public override void Render(DrawingContext context)
 	{
+		#if DEBUG
+		if (ServiceManager.GetService<ISettingsService>().GetSettingValue<bool>("NetlistViewer_ShowEdgeAABB"))
+		{
+			context.DrawRectangle(null, NetlistTheme.HighLightPen, new Rect(0, 0, ElementWidth, ElementHeight));
+		}
+#endif
 		Pen linePen = _isThick ? NetlistTheme.BundledEdgePen : NetlistTheme.EdgePen;
 		context.DrawGeometry(null, linePen, _contentGeometry);
 	}
 
-	protected override void RegenerateDrawnElements()
+	protected override void RegenerateDrawnElements(double newScale)
 	{
-		_contentGeometry.Transform = new ScaleTransform(Scale, Scale);
+		if (!this.IsVisible)
+		{
+			return;
+		}
+		
+		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
+		Rect newBounds = _contentGeometry.Bounds;
 	}
 
 	#endregion

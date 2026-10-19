@@ -1,14 +1,18 @@
 ﻿using Avalonia;
 using Avalonia.Data;
+using Avalonia.Interactivity;
+using Avalonia.Media;
+using FEntwumS.Common.Services;
+using OneWare.Essentials.Services;
 
 namespace FEntwumS.Common.Controls;
 
 public class GraphEntityNodeControl : GraphNodeControl
 {
 	#region Properties
-
+	
 	private Rect _currentViewPort= new Rect(0, 0, 3840, 2160);
-
+	
 	public Rect CurrentViewPort
 	{
 
@@ -16,15 +20,7 @@ public class GraphEntityNodeControl : GraphNodeControl
 		set
 		{
 			_currentViewPort = value;
-			CheckChildVisibility();
-
-			if (_hasEntityChildren)
-			{
-				foreach (GraphEntityNodeControl childEntity in _childEntities)
-				{
-					childEntity.CurrentViewPort = new Rect(_currentViewPort.X - childEntity.X, _currentViewPort.Y - childEntity.Y, _currentViewPort.Width, _currentViewPort.Height);
-				}
-			}
+			OnViewPortChanged();
 		}
 	}
 	
@@ -34,39 +30,89 @@ public class GraphEntityNodeControl : GraphNodeControl
 
 	private List<GraphEntityNodeControl> _childEntities = new List<GraphEntityNodeControl>();
 	private bool _hasEntityChildren = true;
+
+	private List<GenericGraphElementControl> _childElements = new List<GenericGraphElementControl>();
+	private bool _hasChildElements = true;
 	#endregion
 	
 	#region Event handling
 
-	protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+	protected override void OnLoaded(RoutedEventArgs e)
 	{
 		_childEntities.Clear();
 		_childEntities.AddRange(this.VisualChildren.OfType<GraphEntityNodeControl>());
 		
 		_hasEntityChildren = _childEntities.Count > 0;
 		
-		base.OnAttachedToVisualTree(e);
+		_childElements.Clear();
+		_childElements.AddRange(this.VisualChildren.OfType<GenericGraphElementControl>());
+		
+		_hasChildElements = _childElements.Count > 0;
+		
+		base.OnLoaded(e);
 	}
 
-	protected void CheckChildVisibility()
+	protected virtual void OnViewPortChanged()
 	{
-		if (!_hasEntityChildren)
+		if (!this.IsVisible)
 		{
 			return;
 		}
 		
-		foreach (GraphEntityNodeControl childEntity in _childEntities)
+		CheckChildVisibility();
+		
+		if (_hasEntityChildren)
 		{
-			Rect childArea = new Rect(childEntity.X, childEntity.Y,
-				childEntity.Width,  childEntity.Height);
+			foreach (GraphEntityNodeControl childEntity in _childEntities)
+			{
+				childEntity.CurrentViewPort = new Rect(CurrentViewPort.X - childEntity.X, CurrentViewPort.Y - childEntity.Y, CurrentViewPort.Width, CurrentViewPort.Height);
+			}
+		}
+	}
+
+	protected virtual void CheckChildVisibility()
+	{
+#if DEBUG
+		if (ServiceManager.GetService<ISettingsService>().GetSettingValue<bool>("NetlistViewer_FreezeGUIState"))
+		{
+			return;
+		}
+#endif
+
+		if (!_hasChildElements)
+		{
+			return;
+		}
+
+		foreach (GenericGraphElementControl childElement in _childElements)
+		{
+			Rect childArea = new Rect(childElement.X, childElement.Y,
+				childElement.ElementWidth,  childElement.ElementHeight);
 			
 			bool isVisible = CurrentViewPort.Contains(childArea)
-				|| childArea.Intersects(CurrentViewPort)
-				|| childArea.Contains(CurrentViewPort);
-			
-			childEntity.IsVisible = isVisible;
+			                 || childArea.Intersects(CurrentViewPort)
+			                 || childArea.Contains(CurrentViewPort);
+			if (!childElement.IsVisible && isVisible)
+			{
+				childElement.IsVisible = true;
+				
+				childElement.Scale = this.Scale;
+				
+				childElement.InvalidateMeasure();
+			}
+			else
+			{
+				childElement.IsVisible = isVisible;
+			}
 		}
 	}
 
 	#endregion
+
+	public override void Render(DrawingContext context)
+	{
+		//context.DrawRectangle(new SolidColorBrush(new Color(128, 0, 255, 0)), null, CurrentViewPort);
+		
+		base.Render(context);
+	}
 }

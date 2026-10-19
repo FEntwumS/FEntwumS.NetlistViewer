@@ -55,6 +55,12 @@ public class FentwumSNetlistViewerSettingsHelper
 	public static readonly string LayoutEffortKey = "NetlistViewer_LayoutEffort";
 	public static readonly string ShowUnconnectedPortsKey = "NetlistViewer_ShowUnconnectedPorts";
 	public static readonly string OnlyShowUserGeneratedSignalNamesKey = "NetlistViewer_OnlyShowUserGeneratedSignalNames";
+	
+	#if DEBUG
+	public static readonly string FreezeGUIStateKey = "NetlistViewer_FreezeGUIState";
+	public static readonly string ShowEdgeAABB = "NetlistViewer_ShowEdgeAABB";
+	public static readonly string FillEdgeAABB = "NetlistViewer_FillEdgeAABB";
+	#endif
 
 	public static readonly string AutomaticNetlistGenerationIntervalKey =
 		"NetlistViewer_AutomaticNetlistGenerationInterval";

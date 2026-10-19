@@ -32,6 +32,12 @@ public class PanningNetlistControl : PanningControl
 
     #endregion
     
+    #region Variables
+
+    private bool hasBeenLoadedBefore = false;
+    
+    #endregion
+    
     #region Event Handling
 
     protected override void OnLoaded(RoutedEventArgs e)
@@ -43,8 +49,10 @@ public class PanningNetlistControl : PanningControl
 		    Child = null;
 	    }
 
-	    if (Child is not null)
+	    if (!hasBeenLoadedBefore && Child is not null)
 	    {
+		    hasBeenLoadedBefore = true;
+		    
 		    ZoomToFit();
 	    }
     }
@@ -64,6 +72,14 @@ public class PanningNetlistControl : PanningControl
 	    {
 		    UpdateViewPort();
 	    }
+    }
+
+    protected override void ZoomToRect(Rect shownBounds)
+    {
+	    base.ZoomToRect(shownBounds);
+	    
+	    UpdateViewPort();
+	    InvalidateMeasure();
     }
 
     private void UpdateViewPort()

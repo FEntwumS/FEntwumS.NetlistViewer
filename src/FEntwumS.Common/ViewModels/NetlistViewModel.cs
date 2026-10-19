@@ -1,6 +1,7 @@
 ﻿
 using System.Runtime.Serialization;
 using System.Windows.Input;
+using Avalonia;
 using Avalonia.Data;
 using CommunityToolkit.Mvvm.Input;
 using FEntwumS.Common.Controls;
@@ -62,6 +63,18 @@ public class NetlistViewModel : ExtendedTool
 	}
 	
 	[DataMember] private string _projectRootFolder { get; set; }
+
+	private Rect? _zoomBounds;
+
+	public Rect? ZoomBounds
+	{
+		get => _zoomBounds;
+		set
+		{
+			_zoomBounds = value;
+			OnPropertyChanged(nameof(ZoomBounds));
+		}
+	}
 	
 	private ICommand _scaleChangedCommand;
 
