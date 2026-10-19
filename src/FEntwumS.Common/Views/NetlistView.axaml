@@ -14,45 +14,42 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm1:NetlistViewModel />
     </Design.DataContext>
-
-    <Panel ClipToBounds="True">
+    
+    <Panel ClipToBounds="True" Background="{DynamicResource ThemeControlLowBrush}">
         <Panel.Resources>
             <!--<ResourceDictionary>
-                <ResourceDictionary.MergedDictionaries>
-                    <MergeResourceInclude Source="avares://FEntwumS.NetlistViewer/Styles/Icons.axaml"></MergeResourceInclude>
-                </ResourceDictionary.MergedDictionaries>
-            </ResourceDictionary>-->
+            <ResourceDictionary.MergedDictionaries>
+                <MergeResourceInclude Source="avares://FEntwumS.NetlistViewer/Styles/Icons.axaml"></MergeResourceInclude>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>-->
             <FontFamily x:Key="MartianMono">avares://FEntwumS.NetlistViewer/Assets/Fonts#Martian Mono Std Rg</FontFamily>
         </Panel.Resources>
-
-        <Panel ClipToBounds="True" Background="{DynamicResource ThemeControlLowBrush}">
+        
+        <controls:PanningNetlistControl
+            x:Name="PanningNetlistControl"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            NetlistId="{Binding NetlistId}"
+            FontFamily="{StaticResource MartianMono}"
+            Child="{Binding RootNode}"
+            ScaleChangedCommand="{Binding ScaleChangedCommand}"
+            ProjectRootFolder="{Binding ProjectRootFolder}"
+            ZoomBounds="{Binding ZoomBounds}"
+            >
             
-            <controls:PanningNetlistControl
-                x:Name="PanningNetlistControl"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                NetlistId="{Binding NetlistId}"
-                FontFamily="{StaticResource MartianMono}"
-                Child="{Binding RootNode}"
-                ScaleChangedCommand="{Binding ScaleChangedCommand}"
-                ProjectRootFolder="{Binding ProjectRootFolder}"
-                ZoomBounds="{Binding ZoomBounds}"
-                >
-                
-            </controls:PanningNetlistControl>
-            
-            <Button x:Name="ZoomToFitButton"
-                    Background="{DynamicResource ThemeBackgroundBrush}"
-                    Padding="5"
-                    CornerRadius="3"
-                    BorderBrush="{DynamicResource ThemeBorderLowBrush}"
-                    BorderThickness="1"
-                    VerticalAlignment="Top"
-                    HorizontalAlignment="Right"
-                    Margin="5"
-                    Click="ZoomToFitButton_OnClick">
-                <Image Source="{DynamicResource FluentIconsFilled.FullScreenZoomFilled}" Height="16"/>
-            </Button>
-        </Panel>
+        </controls:PanningNetlistControl>
+        
+        <Button x:Name="ZoomToFitButton"
+                Background="{DynamicResource ThemeBackgroundBrush}"
+                Padding="5"
+                CornerRadius="3"
+                BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+                BorderThickness="1"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Right"
+                Margin="5"
+                Click="ZoomToFitButton_OnClick">
+            <Image Source="{DynamicResource FluentIconsFilled.FullScreenZoomFilled}" Height="16"/>
+        </Button>
     </Panel>
 </UserControl>
