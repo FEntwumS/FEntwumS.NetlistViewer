@@ -707,6 +707,15 @@
           "target": "all"
         }
       ]
+    },
+    {
+      "version": "0.18.2",
+      "minStudioVersion": "1.0.45.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
     }
   ]
 }
