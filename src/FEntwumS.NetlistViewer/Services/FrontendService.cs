@@ -21,6 +21,8 @@ using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.PackageManager;
 using OneWare.Essentials.PackageManager.Compatibility;
+using OneWare.Essentials.ToolEngine;
+using OneWare.Essentials.ToolEngine.Strategies;
 using OneWare.UniversalFpgaProjectSystem.Models;
 using StreamContent = System.Net.Http.StreamContent;
 
@@ -75,7 +77,7 @@ public class FrontendService : IFrontendService
 
 	// Used to store the process handle of the backend process. If the handle is not stored, the process will be
 	// automatically terminated
-	private static IChildProcess? backendProcess;
+	private static Guid? backendProcess;
 
 	static FrontendService()
 	{
@@ -846,7 +848,7 @@ public class FrontendService : IFrontendService
 
 	public async Task<bool> StartBackendIfNotStartedAsync()
 	{
-		if (backendProcess != null && !await backendProcess.WaitForExitAsync(TimeSpan.Zero))
+		if (backendProcess != null && ServiceManager.GetService<IToolExecutionDispatcherService>().IsProcessRunning((Guid) backendProcess))
 		{
 			return true;
 		}
@@ -960,12 +962,31 @@ public class FrontendService : IFrontendService
 		string javaBinaryFile = Path.Combine(_javaBinaryFolder, $"{prefix}/java{suffix}");
 
 		var serverJarFile = enumeratedResults.Last();
+		
+		ServiceManager.GetService<IToolService>().RegisterStrategy(new NativeStrategy());
+
+		var command = ServiceManager.GetService<IToolExecutionDispatcherService>()
+			.CreateToolCommandBuilder("java")
+			.WithExecutable(javaBinaryFile)
+			.AddRange(_extraJarArgs.Split(' '))
+			.Add("-jar")
+			.Add($"{serverJarFile}")
+			.Add($"--server.port={_backendPort}")
+			.WithWorkingDirectory(Path.GetDirectoryName(serverJarFile))
+			.WithOutputHandler(s =>
+			{
+				_logger.Log(s, true);
+				return true;
+			})
+			.Build();
+		
+		backendProcess = ServiceManager.GetService<IToolExecutionDispatcherService>().StartProcess(command);
 
 		// Start server to run independently
-		backendProcess = ServiceManager.GetService<IToolExecuterService>()
-			.ExecuteBackgroundProcess(javaBinaryFile,
-				_extraJarArgs.Split(' ').Concat(["-jar", serverJarFile, $"--server.port={_backendPort}"]).ToArray(),
-				Path.GetDirectoryName(serverJarFile));
+		// backendProcess = ServiceManager.GetService<IToolExecuterService>()
+		// 	.ExecuteBackgroundProcess(javaBinaryFile,
+		// 		_extraJarArgs.Split(' ').Concat(["-jar", serverJarFile, $"--server.port={_backendPort}"]).ToArray(),
+		// 		Path.GetDirectoryName(serverJarFile));
 
 		_logger.Log($"Starting server at address {_backendAddress} on port {_backendPort}", true);
 
@@ -1020,7 +1041,7 @@ public class FrontendService : IFrontendService
 
 			if (res is null || !res.IsSuccessStatusCode)
 			{
-				if (backendProcess is not null && await backendProcess.WaitForExitAsync(TimeSpan.Zero))
+				if (backendProcess is not null && !ServiceManager.GetService<IToolExecutionDispatcherService>().IsProcessRunning((Guid) backendProcess))
 				{
 					// If the local backend process exits, the backend has failed to start
 					// The most likely cause is another service listening on the specified port

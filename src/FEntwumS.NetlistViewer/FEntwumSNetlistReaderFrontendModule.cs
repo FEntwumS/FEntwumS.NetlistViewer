@@ -18,6 +18,7 @@ using OneWare.Essentials.PackageManager;
 using OneWare.Essentials.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using OneWare.Essentials.ToolEngine;
 using OneWare.ProjectSystem.Models;
 using OneWare.UniversalFpgaProjectSystem.Services;
 using OneWare.UniversalFpgaProjectSystem.Models;
@@ -618,6 +619,9 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		RegisterMigrations();
 		SubscribeToSettings();
 		RegisterShutdownActions();
+		
+		// Register java tool
+		ServiceManager.GetService<IToolService>().Register(new ToolContext("java", "JDK", "java", preferredStrategyKeys: ["NativeStrategy"]));
 
 		// Subscribe to the setting that enables/disables the hierarchy viewer. The value is used to determine whether
 		// the context menu option for the hierarchy viewer is to be shown to the user 
