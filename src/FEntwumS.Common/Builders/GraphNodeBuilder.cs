@@ -320,7 +320,7 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 	}
 
 	public GraphNodeBuilder<T> WithExpandCollapseInteractionControlIf(bool condition,
-		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
+		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Left,
 		VerticalAlignment verticalAlignment = VerticalAlignment.Top)
 	{
 		if (condition)
@@ -332,7 +332,7 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 	}
 
 	public GraphNodeBuilder<T> WithExpandCollapseInteractionControl(
-		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center,
+		HorizontalAlignment horizontalAlignment = HorizontalAlignment.Left,
 		VerticalAlignment verticalAlignment = VerticalAlignment.Top)
 	{
 		
@@ -347,9 +347,11 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 			Button expandCollapseButton = new Button()
 			{
 				CornerRadius = new CornerRadius(3.0d),
-				BorderThickness = new Thickness(1.0d),
+				BorderThickness = new Thickness(0.0d),
 				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Center,
+				RenderTransformOrigin = new RelativePoint(0, 0, RelativeUnit.Relative),
+				RenderTransform = new ScaleTransform(0.35d, 0.35d),
 				ClipToBounds = false
 			};
 
