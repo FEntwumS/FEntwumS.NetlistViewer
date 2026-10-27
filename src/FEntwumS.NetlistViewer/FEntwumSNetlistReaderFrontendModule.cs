@@ -651,8 +651,6 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			}
 			else if (selected is [IProjectFile { Extension: ".vhd" } vhdlFile])
 			{
-				string synthFilePath = Path.Combine(vhdlFile.Root.FullPath, "build", "synth.json");
-
 				if (vhdlFile is { Root: UniversalFpgaProjectRoot { TopEntityFilePath: not null } root } && !root.IsTestBench(vhdlFile.FullPath) && vhdlFile.RelativePath.Replace(Path.DirectorySeparatorChar, '/').Replace(Path.AltDirectorySeparatorChar, '/') == root.TopEntityFilePath.Replace(Path.DirectorySeparatorChar, '/').Replace(Path.AltDirectorySeparatorChar, '/'))
 				{
 					
@@ -662,17 +660,6 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 						Command = new AsyncRelayCommand(() =>
 							ServiceManager.GetService<FrontendService>().CreateVhdlNetlistAsync(vhdlFile, Path.GetFileNameWithoutExtension(vhdlFile.FullPath)))
 					});
-					
-					if (File.Exists(synthFilePath))
-					{
-						menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
-						{
-							Header = $"View Post-Synthesis Netlist for {vhdlFile.Header}",
-							Command = new AsyncRelayCommand(() =>
-								ServiceManager.GetService<FrontendService>().ShowViewerAsync(
-									new ProjectFile($"{synthFilePath}", vhdlFile.TopFolder!)))
-						});
-					}
 				}
 			}
 			else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
@@ -776,6 +763,22 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 							ServiceManager.GetService<FrontendService>().ShowViewerAsync(
 								new ProjectFile($"{synthFilePath}",
 									systemVerilogFile.TopFolder!)))
+					});
+				}
+			}
+			
+			if (selected is [IProjectFile { Root: UniversalFpgaProjectRoot projectRoot } projectFile] && projectRoot.IsTopEntityFile(projectFile))
+			{
+				string synthFilePath = Path.Combine(projectFile.Root.FullPath, "build", "synth.json");
+				
+				if (File.Exists(synthFilePath))
+				{
+					menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
+					{
+						Header = $"View Post-Synthesis Netlist for {projectFile.Header}",
+						Command = new AsyncRelayCommand(() =>
+							ServiceManager.GetService<FrontendService>().ShowViewerAsync(
+								new ProjectFile($"{synthFilePath}", projectFile.TopFolder!)))
 					});
 				}
 			}
