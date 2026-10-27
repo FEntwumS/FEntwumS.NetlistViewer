@@ -219,7 +219,7 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 
 	private void ArrangeInteractionControl(Control interactionControl, Size availableSize)
 	{
-		double offset = (NetlistTheme.BorderThickness + 2.0d) * Scale;
+		double offset = (NetlistTheme.BorderThickness) * Scale;
 		double x = interactionControl.HorizontalAlignment switch
 		{
 			HorizontalAlignment.Center => ElementWidth / 2.0d - (interactionControl.DesiredSize.Width / 2.0d) - offset,
