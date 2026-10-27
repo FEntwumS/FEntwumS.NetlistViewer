@@ -12,6 +12,7 @@ using FEntwumS.NetlistViewer.Helpers.Validators;
 using FEntwumS.NetlistViewer.Services;
 using FEntwumS.NetlistViewer.ViewModels;
 using OneWare.Essentials.Enums;
+using OneWare.Essentials.Extensions;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Models;
 using OneWare.Essentials.PackageManager;
@@ -653,7 +654,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			{
 				string synthFilePath = Path.Combine(vhdlFile.Root.FullPath, "build", "synth.json");
 
-				if (vhdlFile is { Root: UniversalFpgaProjectRoot { TopEntityFilePath: not null } root } && !root.IsTestBench(vhdlFile.FullPath) && vhdlFile.RelativePath.Replace(Path.DirectorySeparatorChar, '/').Replace(Path.AltDirectorySeparatorChar, '/') == root.TopEntityFilePath.Replace(Path.DirectorySeparatorChar, '/').Replace(Path.AltDirectorySeparatorChar, '/'))
+				if (IsTopEntityFile(vhdlFile))
 				{
 					
 					menuItems.Add(new MenuItemModel("NetlistViewer_CreateNetlist")
@@ -715,7 +716,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 					}
 				}
 
-				if (verilogFile is { Root: UniversalFpgaProjectRoot root, Icon.Overlays.Length: > 0 } && !root.IsTestBench(verilogFile.FullPath) && File.Exists(synthFilePath))
+				if (IsTopEntityFile(verilogFile) && File.Exists(synthFilePath))
 				{
 					menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
 					{
@@ -767,7 +768,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 					}
 				}
 
-				if (systemVerilogFile is { Root: UniversalFpgaProjectRoot root, Icon.Overlays.Length: > 0 } && !root.IsTestBench(systemVerilogFile.FullPath) && File.Exists(synthFilePath))
+				if (IsTopEntityFile(systemVerilogFile) && File.Exists(synthFilePath))
 				{
 					menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
 					{
@@ -821,6 +822,12 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		});
 
 		ServiceManager.GetService<ILogger>().Log("Registered custom context menu entries");
+	}
+	
+	private static bool IsTopEntityFile(IProjectFile file)
+	{
+		return file.Root is UniversalFpgaProjectRoot root && !root.IsTestBench(file.RelativePath) &&
+		       file.RelativePath.EqualPaths(root.TopEntityFilePath);
 	}
 
 	private void RegisterSettings()
