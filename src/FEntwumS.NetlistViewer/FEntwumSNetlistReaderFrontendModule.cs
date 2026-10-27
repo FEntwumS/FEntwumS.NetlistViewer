@@ -621,7 +621,10 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 		RegisterShutdownActions();
 		
 		// Register java tool
-		ServiceManager.GetService<IToolService>().Register(new ToolContext("java", "JDK", "java", preferredStrategyKeys: ["NativeStrategy"]));
+		ServiceManager.GetService<IToolService>().Register(new ToolContext("java", "JDK", "java", preferredStrategyKeys: ["NativeStrategy"], strategyConfiguration: new Dictionary<string, string>
+		{
+			["docker.image"] = "eclipse-temurin:25"
+		}));
 
 		// Subscribe to the setting that enables/disables the hierarchy viewer. The value is used to determine whether
 		// the context menu option for the hierarchy viewer is to be shown to the user 

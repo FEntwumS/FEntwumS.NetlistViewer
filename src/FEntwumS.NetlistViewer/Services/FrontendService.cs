@@ -973,6 +973,7 @@ public class FrontendService : IFrontendService
 			.Add($"{serverJarFile}")
 			.Add($"--server.port={_backendPort}")
 			.WithWorkingDirectory(Path.GetDirectoryName(serverJarFile))
+			.AddPortMapping(Convert.ToInt32(_backendPort), Convert.ToInt32(_backendPort))
 			.WithOutputHandler(s =>
 			{
 				_logger.Log(s, true);

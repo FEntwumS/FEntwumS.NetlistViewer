@@ -109,8 +109,6 @@ public class YosysService : IYosysService
 				_logger.Error(x);
 				return true;
 			})
-			.Add("-m")
-			.Add("slang")
 			.Add("-p")
 			.AddScript("read_verilog -sv -nooverwrite {verilogFiles} {systemVerilogFiles}; "
 			           + "scratchpad -set flatten.separator \";\"; " // Use the semicolon as hierarchy separator; See https://yosyshq.readthedocs.io/projects/yosys/en/v0.55/cmd/flatten.html
@@ -126,11 +124,11 @@ public class YosysService : IYosysService
 			           + "clean; "
 			           + "write_json -compat-int {topEntityName}-flat.json", // Write flattened JSON netlist to disk
 				("{verilogFiles}",
-					$"{(verilogFileList.Count > 0 ? "\"" + string.Join("\" \"", verilogFileList) + "\"" : "")}"),
+					$"{(verilogFileList.Count > 0 ? "\"" + string.Join("\" \"", verilogFileList) + "\"" : "")}", true),
 				("{systemVerilogFiles}",
-					$"{(systemVerilogFileList.Count > 0 ? "\"" + string.Join("\" \"", systemVerilogFileList) + "\"" : "")}"),
-				("{blackBoxLoadingCommand}", $"{_fpgaBbService.getBbCommand(file)}"),
-				("{topEntityName}", $"{topEntityName}"))
+					$"{(systemVerilogFileList.Count > 0 ? "\"" + string.Join("\" \"", systemVerilogFileList) + "\"" : "")}", true),
+				("{blackBoxLoadingCommand}", $"{_fpgaBbService.getBbCommand(file)}", false),
+				("{topEntityName}", $"{topEntityName}", false))
 			.Build();
 
 		(bool success, _) =
