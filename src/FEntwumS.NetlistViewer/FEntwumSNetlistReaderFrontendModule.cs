@@ -861,6 +861,11 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			{
 				Validator = new GlobalFpgaDeviceFamilyValidator()
 			});
+		
+		ServiceManager.GetService<ISettingsService>().RegisterSettingSubCategory("Netlist Viewer", "Netlist generation configuration");
+		
+		ServiceManager.GetService<ISettingsService>().RegisterSetting("Netlist Viewer", "Netlist generation configuration",
+			FentwumSNetlistViewerSettingsHelper.CollectionIncludedFileTypesKey, new ListBoxSetting("Included file types", ["*.v", "*.sv", "*.vh"]));
 
 		ServiceManager.GetService<ISettingsService>().RegisterSettingSubCategory("Netlist Viewer", "Backend");
 

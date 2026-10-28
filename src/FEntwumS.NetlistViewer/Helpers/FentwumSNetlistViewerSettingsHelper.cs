@@ -34,6 +34,7 @@ public class FentwumSNetlistViewerSettingsHelper
 
 	public static readonly string FpgaManufacturerKey = "NetlistViewer_Fpga_Manufacturer";
 	public static readonly string FpgaDeviceFamilyKey = "NetlistViewer_Fpga_Device_Family";
+	public static readonly string CollectionIncludedFileTypesKey = "NetlistViewer_CollectionIncludedFileTypes";
 
 	public static readonly string BackendAddressKey = "NetlistViewer_Backend_Address";
 	public static readonly string BackendPortKey = "NetlistViewer_Backend_Port";
