@@ -716,6 +716,15 @@
           "target": "all"
         }
       ]
+    },
+    {
+      "version": "0.18.3",
+      "minStudioVersion": "1.0.46.0",
+      "targets": [
+        {
+          "target": "all"
+        }
+      ]
     }
   ]
 }
