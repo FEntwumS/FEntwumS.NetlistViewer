@@ -523,6 +523,19 @@ public class FrontendService : IFrontendService
 	{
 		await ShowViewerAsync(await GenerateNetlistAsync(sVerilog, NetlistLanguage.System_Verilog, netlistType, topEntityName));
 	}
+	
+	public async Task ShowPostSynthesisNetlistAsync(UniversalFpgaProjectRoot root)
+	{
+		string synthFilePath = FentwumSNetlistViewerSettingsHelper.GetPostSynthesisNetlistPath(root);
+
+		if (!File.Exists(synthFilePath))
+		{
+			_logger.Warning($"No post-synthesis netlist found for {root.Header}. Run synthesis first!");
+			return;
+		}
+
+		await ShowViewerAsync(new ProjectFile(synthFilePath, root));
+	}
 
 	public async Task ShowViewerAsync(IProjectFile? json)
 	{
@@ -1074,19 +1087,6 @@ public class FrontendService : IFrontendService
 	{
 		await ShowHierarchyAsync((await GenerateNetlistAsync(systemVerilogFile, NetlistLanguage.System_Verilog,
 			NetlistType.Hier, Path.GetFileNameWithoutExtension(systemVerilogFile.FullPath)))!);
-	}
-
-	public async Task ShowPostSynthesisNetlistAsync(UniversalFpgaProjectRoot root)
-	{
-		string synthFilePath = FentwumSNetlistViewerSettingsHelper.GetPostSynthesisNetlistPath(root);
-
-		if (!File.Exists(synthFilePath))
-		{
-			_logger.Warning($"No post-synthesis netlist found for {root.Header}. Run synthesis first!");
-			return;
-		}
-
-		await ShowViewerAsync(new ProjectFile(synthFilePath, root));
 	}
 	
 	private async Task<bool> ShowHierarchyAsync(IProjectFile netlistFile)

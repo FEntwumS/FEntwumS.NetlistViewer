@@ -662,8 +662,6 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 			}
 			else if (selected is [IProjectFile { Extension: ".v" } verilogFile])
 			{
-				string synthFilePath = Path.Combine(verilogFile.Root.FullPath, "build", "synth.json");
-				
 				var verilogNodeProvider = ServiceManager.GetService<FpgaService>().GetNodeProviderByExtension(verilogFile.Extension);
 
 				if (verilogNodeProvider is null)
@@ -699,23 +697,9 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 						});
 					}
 				}
-
-				if (verilogFile is { Root: UniversalFpgaProjectRoot root, Icon.Overlays.Length: > 0 } && !root.IsTestBench(verilogFile.RelativePath) && File.Exists(synthFilePath))
-				{
-					menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
-					{
-						Header = $"View Post-Synthesis Netlist for {verilogFile.Header}",
-						Command = new AsyncRelayCommand(() =>
-							ServiceManager.GetService<IFrontendService>().ShowViewerAsync(
-								new ProjectFile($"{synthFilePath}",
-									verilogFile.TopFolder!)))
-					});
-				}
 			}
 			else if (selected is [IProjectFile { Extension: ".sv" } systemVerilogFile])
 			{
-				string synthFilePath = Path.Combine(systemVerilogFile.Root.FullPath, "build", "synth.json");
-				
 				var verilogNodeProvider = ServiceManager.GetService<FpgaService>().GetNodeProviderByExtension(systemVerilogFile.Extension);
 
 				if (verilogNodeProvider is null)
@@ -750,18 +734,6 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 							Items = entityMenuEntries
 						});
 					}
-				}
-
-				if (systemVerilogFile is { Root: UniversalFpgaProjectRoot root, Icon.Overlays.Length: > 0 } && !root.IsTestBench(systemVerilogFile.FullPath) && File.Exists(synthFilePath))
-				{
-					menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
-					{
-						Header = $"View Post-Synthesis Netlist for {systemVerilogFile.Header}",
-						Command = new AsyncRelayCommand(() =>
-							ServiceManager.GetService<IFrontendService>().ShowViewerAsync(
-								new ProjectFile($"{synthFilePath}",
-									systemVerilogFile.TopFolder!)))
-					});
 				}
 			}
 			
