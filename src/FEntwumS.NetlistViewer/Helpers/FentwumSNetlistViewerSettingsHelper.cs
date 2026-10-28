@@ -116,6 +116,11 @@ public class FentwumSNetlistViewerSettingsHelper
 
 		return Path.Combine(GetBuildDirectory(json), $"{top}-{suffix}.json");
 	}
+	
+	public static string GetPostSynthesisNetlistPath(IProjectRoot root)
+	{
+		return Path.Combine(root.FullPath, "build", "synth.json");
+	}
 
 	#endregion
 

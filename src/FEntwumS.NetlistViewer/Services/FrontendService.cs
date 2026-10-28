@@ -21,6 +21,7 @@ using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.PackageManager;
 using OneWare.Essentials.PackageManager.Compatibility;
+using OneWare.ProjectSystem.Models;
 using OneWare.UniversalFpgaProjectSystem.Models;
 using StreamContent = System.Net.Http.StreamContent;
 
@@ -1075,6 +1076,19 @@ public class FrontendService : IFrontendService
 			NetlistType.Hier, Path.GetFileNameWithoutExtension(systemVerilogFile.FullPath)))!);
 	}
 
+	public async Task ShowPostSynthesisNetlistAsync(UniversalFpgaProjectRoot root)
+	{
+		string synthFilePath = FentwumSNetlistViewerSettingsHelper.GetPostSynthesisNetlistPath(root);
+
+		if (!File.Exists(synthFilePath))
+		{
+			_logger.Warning($"No post-synthesis netlist found for {root.Header}. Run synthesis first!");
+			return;
+		}
+
+		await ShowViewerAsync(new ProjectFile(synthFilePath, root));
+	}
+	
 	private async Task<bool> ShowHierarchyAsync(IProjectFile netlistFile)
 	{
 		if (netlistFile == null)
