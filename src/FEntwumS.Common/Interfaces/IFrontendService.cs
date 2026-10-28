@@ -1,5 +1,6 @@
 ﻿using FEntwumS.Common.Controls;
 using OneWare.Essentials.Models;
+using OneWare.UniversalFpgaProjectSystem.Models;
 
 namespace FEntwumS.Common.Interfaces;
 
@@ -24,4 +25,6 @@ public interface IFrontendService : ISettingsSubscriber
 	public Task CreateVhdlHierarchyAsync(IProjectFile vhdlFile);
 	public Task CreateVerilogHierarchyAsync(IProjectFile verilogFile);
 	public Task CreateSystemVerilogHierarchyAsync(IProjectFile systemVerilogFile);
+	
+	public Task ShowPostSynthesisNetlistAsync(UniversalFpgaProjectRoot root);
 }
