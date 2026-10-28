@@ -1,4 +1,5 @@
-﻿using Avalonia.Media;
+﻿using System.Collections.ObjectModel;
+using Avalonia.Media;
 using FEntwumS.Common.Interfaces;
 using FEntwumS.Common.Services;
 using FEntwumS.NetlistViewer.Helpers;
@@ -66,18 +67,22 @@ public class YosysService : IYosysService
 		else
 		{
 			if (file.Root is not UniversalFpgaProjectRoot root) return false;
-			IEnumerable<string> verilogFiles = root.GetFiles("*.v")
-				.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
-				.Where(x => !root.IsTestBench(x)) // Exclude testbenches
-				.Select(x => Path.Combine(root.TopFolder.FullPath, x));
-			
-			IEnumerable<string> systemVerilogFiles = root.GetFiles("*.sv")
-				.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
-				.Where(x => !root.IsTestBench(x)) // Exclude testbenches
-				.Select(x => Path.Combine(root.TopFolder.FullPath, x));
 
-			verilogFileList.AddRange(verilogFiles);
-			systemVerilogFileList.AddRange(systemVerilogFiles);
+			List<string> includedFiles = new();
+
+			foreach (var filetype in ServiceManager.GetService<ISettingsService>()
+				         .GetSettingValue<ObservableCollection<string>>(FentwumSNetlistViewerSettingsHelper
+					         .CollectionIncludedFileTypesKey))
+			{
+				var filesToAdd = root.GetFiles(filetype)
+					.Where(x => !root.IsCompileExcluded(x)) // Exclude excluded files
+					.Where(x => !root.IsTestBench(x)) // Exclude testbenches
+					.Select(x => Path.Combine(root.TopFolder.FullPath, x));
+				
+				includedFiles.AddRange(filesToAdd);
+			}
+
+			verilogFileList.AddRange(includedFiles);
 		}
 
 		if (verilogFileList.Count == 0 && systemVerilogFileList.Count == 0)
