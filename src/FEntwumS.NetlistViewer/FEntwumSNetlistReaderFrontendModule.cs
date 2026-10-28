@@ -737,8 +737,7 @@ public class FEntwumSNetlistReaderFrontendModule : OneWareModuleBase
 				}
 			}
 			
-			if (selected is [IProjectFile { Root: UniversalFpgaProjectRoot projectRoot } projectFile] && projectRoot.IsTopEntityFile(projectFile) &&
-			    File.Exists(FentwumSNetlistViewerSettingsHelper.GetPostSynthesisNetlistPath(projectRoot)))
+			if (selected is [IProjectFile { Root: UniversalFpgaProjectRoot projectRoot } projectFile] && projectRoot.IsTopEntityFile(projectFile))
 			{
 				menuItems.Add(new MenuItemModel("NetlistViewer_ViewPostSynth")
 				{
