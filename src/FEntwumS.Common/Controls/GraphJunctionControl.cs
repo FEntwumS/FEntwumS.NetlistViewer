@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System.Text;
+using Avalonia;
 using Avalonia.Data;
 using Avalonia.Media;
 using Avalonia.Rendering;
@@ -102,6 +103,51 @@ public class GraphJunctionControl : GenericGraphElementControl, ICustomHitTest
 		}
 		
 		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
+	}
+
+	public override void ToSVG(FileStream svgFileStream, bool isTop, double offsetX, double offsetY, double width,
+		double height)
+	{
+		double invariantScale = 1.0d / Scale;
+		double baseX = offsetX + X * invariantScale;
+		double baseY = offsetY + Y * invariantScale;
+		StringBuilder svgStringBuilder = new();
+
+		if (_contentGeometry is EllipseGeometry ellipseGeometry)
+		{
+			svgStringBuilder.Append($"<ellipse cx=\"{baseX + ellipseGeometry.Center.X * invariantScale}\" cy=\"{baseY + ellipseGeometry.Center.Y * invariantScale}\" rx=\"{ellipseGeometry.Rect.Width / 2.0d}\" ry=\"{ellipseGeometry.Rect.Height / 2.0d}\" fill=\"{NetlistTheme.EdgeColor.ToString().ToLower()}\" style=\"fill:#{Convert.ToString(NetlistTheme.EdgeColor.R, 16)}{Convert.ToString(NetlistTheme.EdgeColor.G, 16)}{Convert.ToString(NetlistTheme.EdgeColor.B, 16)};fill-opacity:{NetlistTheme.EdgeColor.A / 256.0d}\"/>\n");
+		} else if (_contentGeometry is RectangleGeometry rectangleGeometry)
+		{
+			svgStringBuilder.Append(
+				$"<rect x=\"{baseX + rectangleGeometry.Rect.X * invariantScale}\" y=\"{baseY + rectangleGeometry.Rect.Y * invariantScale}\" width=\"{rectangleGeometry.Rect.Width}\" height=\"{rectangleGeometry.Rect.Height}\" fill=\"{NetlistTheme.EdgeColor.ToString().ToLower()}\" style=\"fill:#{Convert.ToString(NetlistTheme.EdgeColor.R, 16)}{Convert.ToString(NetlistTheme.EdgeColor.G, 16)}{Convert.ToString(NetlistTheme.EdgeColor.B, 16)};fill-opacity:{NetlistTheme.EdgeColor.A / 256.0d}\"/>\n");
+		} else if (_contentGeometry is PolylineGeometry polylineGeometry)
+		{
+			svgStringBuilder.Append("<path d=\"M");
+			
+			bool first = true;
+
+			foreach (Point point in polylineGeometry.Points)
+			{
+				if (!first)
+				{
+					svgStringBuilder.Append(" L");
+				}
+				
+				svgStringBuilder.Append($"{baseX + point.X} {baseY + point.Y}");
+				
+				first = false;
+			}
+
+			svgStringBuilder.Append($"Z\" fill=\"{NetlistTheme.EdgeColor.ToString().ToLower()}\" style=\"fill:#{Convert.ToString(NetlistTheme.EdgeColor.R, 16)}{Convert.ToString(NetlistTheme.EdgeColor.G, 16)}{Convert.ToString(NetlistTheme.EdgeColor.B, 16)};fill-opacity:{NetlistTheme.EdgeColor.A / 256.0d}\"/>\n");
+		}
+		else
+		{
+			return;
+		}
+		
+		var svgBytes = new UTF8Encoding(true).GetBytes(svgStringBuilder.ToString());
+		
+		svgFileStream.Write(svgBytes);
 	}
 
 	#endregion

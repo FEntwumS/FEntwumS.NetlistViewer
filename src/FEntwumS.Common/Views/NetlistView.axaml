@@ -39,17 +39,30 @@
             
         </controls:PanningNetlistControl>
         
-        <Button x:Name="ZoomToFitButton"
-                Background="{DynamicResource ThemeBackgroundBrush}"
-                Padding="5"
-                CornerRadius="3"
-                BorderBrush="{DynamicResource ThemeBorderLowBrush}"
-                BorderThickness="1"
-                VerticalAlignment="Top"
-                HorizontalAlignment="Right"
-                Margin="5"
-                Click="ZoomToFitButton_OnClick">
-            <Image Source="{DynamicResource FluentIconsFilled.FullScreenZoomFilled}" Height="16"/>
-        </Button>
+        <StackPanel Orientation="Horizontal"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Right"
+                    Margin="5"
+                    Spacing="5">
+            <Button x:Name="ExportToSVGButton"
+                    Background="{DynamicResource ThemeBackgroundBrush}"
+                    Padding="5"
+                    CornerRadius="3"
+                    BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+                    BorderThickness="1"
+                    Click="ExportToSVGButton_OnClick">
+                <PathIcon Data="{DynamicResource Icon.Save}" />
+            </Button>
+            
+            <Button x:Name="ZoomToFitButton"
+                    Background="{DynamicResource ThemeBackgroundBrush}"
+                    Padding="5"
+                    CornerRadius="3"
+                    BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+                    BorderThickness="1"
+                    Click="ZoomToFitButton_OnClick">
+                <Image Source="{DynamicResource FluentIconsFilled.FullScreenZoomFilled}" Height="16"/>
+            </Button>
+        </StackPanel>
     </Panel>
 </UserControl>

@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System.Text;
+using Avalonia;
 using Avalonia.Data;
 using Avalonia.Media;
 using Avalonia.VisualTree;
@@ -102,6 +103,57 @@ public class GraphPortControl : GenericGraphElementControl
 		}
 		
 		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
+	}
+
+	public override void ToSVG(FileStream svgFileStream, bool isTop, double offsetX, double offsetY, double width,
+		double height)
+	{
+		double invariantScale = 1.0d / Scale;
+		double baseX = offsetX + X * invariantScale;
+		double baseY = offsetY + Y * invariantScale;
+		StringBuilder svgStringBuilder = new();
+
+		if (_contentGeometry is PolylineGeometry polylineGeometry)
+		{
+			svgStringBuilder.Append("<path d=\"M");
+			
+			bool first = true;
+
+			foreach (Point point in polylineGeometry.Points)
+			{
+				if (!first)
+				{
+					svgStringBuilder.Append(" ");
+				}
+				
+				svgStringBuilder.Append($"{baseX + point.X} {baseY + point.Y}");
+				
+				first = false;
+			}
+
+			svgStringBuilder.Append($"Z\" stroke=\"{NetlistTheme.BorderColor.ToString().ToLower()}\" stroke-width=\"{NetlistTheme.BorderThickness}\" fill=\"{NetlistTheme.FillColor.ToString().ToLower()}\" style=\"fill:#{Convert.ToString(NetlistTheme.FillColor.R, 16)}{Convert.ToString(NetlistTheme.FillColor.G, 16)}{Convert.ToString(NetlistTheme.FillColor.B, 16)};fill-opacity:{NetlistTheme.FillColor.A / 256.0d}\"/>\n");
+		} else if (_contentGeometry is GeometryGroup geometryGroup)
+		{
+			foreach (Geometry geometry in geometryGroup.Children)
+			{
+				if (geometry is RectangleGeometry rectangleGeometry)
+				{
+					svgStringBuilder.Append(
+						$"<rect x=\"{baseX + rectangleGeometry.Rect.X * invariantScale}\" y=\"{baseY + rectangleGeometry.Rect.Y * invariantScale}\" width=\"{rectangleGeometry.Rect.Width * invariantScale}\" height=\"{rectangleGeometry.Rect.Height * invariantScale}\" stroke=\"{NetlistTheme.BorderColor.ToString().ToLower()}\" stroke-width=\"{NetlistTheme.BorderThickness}\" fill=\"{NetlistTheme.FillColor.ToString().ToLower()}\" style=\"fill:#{Convert.ToString(NetlistTheme.FillColor.R, 16)}{Convert.ToString(NetlistTheme.FillColor.G, 16)}{Convert.ToString(NetlistTheme.FillColor.B, 16)};fill-opacity:{NetlistTheme.FillColor.A / 256.0d}\"/>\n");
+				} else if (geometry is EllipseGeometry ellipseGeometry)
+				{
+					svgStringBuilder.Append($"<ellipse cx=\"{baseX + ellipseGeometry.Center.X * invariantScale}\" cy=\"{baseY + ellipseGeometry.Center.Y * invariantScale}\" rx=\"{ellipseGeometry.RadiusX * invariantScale}\" ry=\"{ellipseGeometry.RadiusY * invariantScale}\" stroke=\"{NetlistTheme.BorderColor.ToString().ToLower()}\" stroke-width=\"{NetlistTheme.BorderThickness}\" fill=\"{NetlistTheme.FillColor.ToString().ToLower()}\" style=\"fill:#{Convert.ToString(NetlistTheme.FillColor.R, 16)}{Convert.ToString(NetlistTheme.FillColor.G, 16)}{Convert.ToString(NetlistTheme.FillColor.B, 16)};fill-opacity:{NetlistTheme.FillColor.A / 256.0d}\"/>\n");
+				}
+			}
+		}
+		else
+		{
+			return;
+		}
+		
+		var svgBytes = new UTF8Encoding(true).GetBytes(svgStringBuilder.ToString());
+		
+		svgFileStream.Write(svgBytes);
 	}
 
 	#endregion

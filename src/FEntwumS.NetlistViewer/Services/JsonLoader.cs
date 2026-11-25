@@ -271,6 +271,7 @@ public class JsonLoader : IJsonLoader
 							.WithCellType(celltype)
 							.WithExpandCollapseInteractionControlIf(celltype == "HDL_ENTITY" && depth >= 2)
 							.WithJumpToSourceContextMenuAction()
+							.WithSaveToSVGContextMenuAction()
 							.WithLocationPath(path)
 							.WithX(xRef + x)
 							.WithY(yRef + y)
@@ -317,16 +318,25 @@ public class JsonLoader : IJsonLoader
 
 		JsonArray? labels = node["labels"] as JsonArray;
 
+		List<GraphLabelControl> createdlabels = new();
+		
 		if (labels != null)
 		{
-			CreateLabels(labels, prevParent, xRef + x, yRef + y, newDepth);
+			createdlabels = CreateLabels(labels, prevParent, xRef + x, yRef + y, newDepth);
 		}
 
 		JsonArray? ports = node["ports"] as JsonArray;
+		List<GraphPortControl> createdPorts = new();
 
 		if (ports != null)
 		{
-			CreatePorts(ports, prevParent, parent, x, y, newDepth);
+			createdPorts = CreatePorts(ports, prevParent, parent, x, y, newDepth);
+		}
+
+		if (!isScaffolding && celltype == "HDL_ENTITY" && parent is GraphEntityNodeControl entityControl)
+		{
+			entityControl.associatedPortsAndLabels.AddRange(createdlabels);
+			entityControl.associatedPortsAndLabels.AddRange(createdPorts);
 		}
 
 		JsonArray? edges = node["edges"] as JsonArray;
@@ -365,7 +375,7 @@ public class JsonLoader : IJsonLoader
 		return (clickedNode, clickedNodeParent);
 	}
 
-	public void CreateLabels(JsonArray labels, GraphNodeControl parent, double xRef,
+	public List<GraphLabelControl> CreateLabels(JsonArray labels, GraphNodeControl parent, double xRef,
 		double yRef, ushort depth)
 	{
 		double x = 0;
@@ -375,6 +385,8 @@ public class JsonLoader : IJsonLoader
 		string text = "";
 		double fontSize = 10.0d;
 		JsonNode? layoutOptions;
+		List<GraphLabelControl> createdLabels = new();
+		
 		foreach (JsonNode? label in labels)
 		{
 			if (label is null) continue;
@@ -429,21 +441,27 @@ public class JsonLoader : IJsonLoader
 				continue;
 			}
 
-			parent.Items.Add((GraphLabelBuilder.Create()
-				.WithContent(text)
-				.WithFontSize(fontSize)
-				.WithX(xRef + x)
-				.WithY(yRef + y)
-				.WithWidth(w)
-				.WithHeight(h)
-				.WithZIndex(depth) as GraphLabelBuilder)
-				.Build());
+			GraphLabelControl newLabel = (GraphLabelBuilder.Create()
+					.WithContent(text)
+					.WithFontSize(fontSize)
+					.WithX(xRef + x)
+					.WithY(yRef + y)
+					.WithWidth(w)
+					.WithHeight(h)
+					.WithZIndex(depth) as GraphLabelBuilder)
+				.Build(); 
+
+			parent.Items.Add(newLabel);
+			
+			createdLabels.Add(newLabel);
 
 			LabelCnt++;
 		}
+
+		return createdLabels;
 	}
 
-	public void CreatePorts(JsonArray ports, GraphNodeControl parent, GraphNodeControl attachedTo, double xRef,
+	public List<GraphPortControl> CreatePorts(JsonArray ports, GraphNodeControl parent, GraphNodeControl attachedTo, double xRef,
 		double yRef, ushort depth)
 	{
 		double x = 0;
@@ -453,6 +471,7 @@ public class JsonLoader : IJsonLoader
 		bool notConnected = false;
 		bool isScaffolding = false;
 		PortShape portShape = PortShape.Square;
+		List<GraphPortControl> createdPorts = new();
 
 		foreach (JsonNode? port in ports)
 		{
@@ -533,18 +552,24 @@ public class JsonLoader : IJsonLoader
 
 			if (!isScaffolding)
 			{
-				parent.Items.Add((GraphPortBuilder.Create()
+				GraphPortControl newPort = (GraphPortBuilder.Create()
 						.WithPortShape(portShape)
 						.WithX(xRef + x)
 						.WithY(yRef + y)
 						.WithWidth(w)
 						.WithHeight(h)
 						.WithZIndex(depth) as GraphPortBuilder)
-					.Build());
+					.Build();
+				
+				parent.Items.Add(newPort);
+				
+				createdPorts.Add(newPort);
 
 				PortCnt++;
 			}
 		}
+		
+		return createdPorts;
 	}
 
 	public void CreateEdges(JsonArray edges, GraphNodeControl parent, double xRef,

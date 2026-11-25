@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text;
 using Avalonia;
 using Avalonia.Data;
 using Avalonia.Media;
@@ -83,6 +84,19 @@ public class GraphLabelControl : GenericGraphElementControl
 		    NetlistTheme.Typeface,
 		    Fontsize * newScale,
 		    NetlistTheme.TextBrush);
+    }
+
+    public override void ToSVG(FileStream svgFileStream, bool isTop, double offsetX, double offsetY, double width,
+	    double height)
+    {
+	    double invariantScale = 1.0d / Scale;
+	    double baseX = offsetX + X * invariantScale;
+	    double baseY = offsetY + Y * invariantScale + Fontsize;
+	    string svgString = $"<text x=\"{baseX}\" y=\"{baseY}\" font-family=\"monospace\" font-size=\"{Fontsize}\">{Content}</text>";
+		
+	    var svgBytes = new UTF8Encoding(true).GetBytes(svgString);
+		
+	    svgFileStream.Write(svgBytes);
     }
 
     #endregion

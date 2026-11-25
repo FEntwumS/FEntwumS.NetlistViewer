@@ -1,4 +1,5 @@
 ﻿using System.Collections.Specialized;
+using System.Text;
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
@@ -294,6 +295,27 @@ public class GraphNodeControl : GenericGraphElementControl/*, ICustomHitTest*/
 		}
 		
 		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
+	}
+
+	public override void ToSVG(FileStream svgFileStream, bool isTop, double offsetX, double offsetY, double width,
+		double height)
+	{
+		double invariantScale = 1.0d / Scale;
+		double baseX = offsetX + X * invariantScale;
+		double baseY = offsetY + Y * invariantScale;
+		string svgString = $"<rect x=\"{baseX}\" y=\"{baseY}\" width=\"{(ElementWidth) * invariantScale}\" height=\"{(ElementHeight) * invariantScale}\" fill=\"{NetlistTheme.FillColor.ToString()}\" stroke=\"{NetlistTheme.BorderColor.ToString().ToLower()}\" stroke-width=\"{NetlistTheme.BorderThickness}\" style=\"fill:#{Convert.ToString(NetlistTheme.FillColor.R, 16)}{Convert.ToString(NetlistTheme.FillColor.G, 16)}{Convert.ToString(NetlistTheme.FillColor.B, 16)};fill-opacity:{NetlistTheme.FillColor.A / 256.0d}\"/>\n";
+		
+		var svgBytes = new UTF8Encoding(true).GetBytes(svgString);
+		
+		svgFileStream.Write(svgBytes);
+		
+		foreach (PositionableSubControl childElement in Items)
+		{
+			if (childElement is GenericGraphElementControl graphChild)
+			{
+				graphChild.ToSVG(svgFileStream, false, offsetX + X * invariantScale, offsetY + Y * invariantScale, width, height);
+			}
+		}
 	}
 
 	#endregion

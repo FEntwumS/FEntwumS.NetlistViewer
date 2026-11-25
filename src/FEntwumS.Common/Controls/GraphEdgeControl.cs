@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System.Text;
+using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Data;
 using Avalonia.Media;
@@ -94,6 +95,39 @@ public class GraphEdgeControl : GenericGraphElementControl, ICustomHitTest
 		
 		_contentGeometry.Transform = new ScaleTransform(newScale, newScale);
 		Rect newBounds = _contentGeometry.Bounds;
+	}
+
+	public override void ToSVG(FileStream svgFileStream, bool isTop, double offsetX, double offsetY, double width,
+		double height)
+	{
+		if (_contentGeometry is PolylineGeometry polylineGeometry)
+		{
+			double invariantScale = 1.0d / Scale;
+			double baseX = offsetX + X * invariantScale;
+			double baseY = offsetY + Y * invariantScale;
+			StringBuilder svgStringBuilder = new("<path d=\"M");
+
+			bool first = true;
+			// Add individual points
+			foreach (Point p in polylineGeometry.Points)
+			{
+				if (!first)
+				{
+					svgStringBuilder.Append(" ");
+				}
+
+				svgStringBuilder.Append($"{baseX + p.X} {baseY + p.Y}");
+
+				first = false;
+			}
+
+			svgStringBuilder.Append(
+				$"\" stroke=\"{NetlistTheme.EdgeColor.ToString().ToLower()}\" stroke-width=\"{(_isThick ? NetlistTheme.BundledEdgeThickness : NetlistTheme.EdgeThickness)}\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n");
+
+			var svgBytes = new UTF8Encoding(true).GetBytes(svgStringBuilder.ToString());
+
+			svgFileStream.Write(svgBytes);
+		}
 	}
 
 	#endregion
