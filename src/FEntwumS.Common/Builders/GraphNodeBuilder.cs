@@ -2,7 +2,9 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.Input;
@@ -10,6 +12,7 @@ using FEntwumS.Common.Assets;
 using FEntwumS.Common.Controls;
 using FEntwumS.Common.Interfaces;
 using FEntwumS.Common.Services;
+using Microsoft.Extensions.Logging;
 using OneWare.Essentials.Helpers;
 using OneWare.Essentials.Services;
 using OneWare.Essentials.ViewModels;
@@ -692,6 +695,88 @@ public partial class GraphNodeBuilder<T> : GenericGraphElementBuilder<T> where T
 
 		        (document as IEditor)?.JumpToLine((int)line);
 	        }
+		}
+	}
+	
+	public GraphNodeBuilder<T> WithSaveToSVGContextMenuAction()
+	{
+		if (_contextMenu is null)
+		{
+			Dispatcher.UIThread.Invoke(() =>
+			{
+				_contextMenu = new ContextMenu();
+			});
+		}
+
+		Dispatcher.UIThread.Invoke(() =>
+		{
+			var currentMenuItems = _contextMenu.ItemsSource;
+
+			if (currentMenuItems is null)
+			{
+				_contextMenu.ItemsSource = new[]
+				{
+					new MenuItem() { Header = "Save to SVG", Command = SaveToSVGCommand }
+				};
+			}
+			else
+			{
+				List<MenuItem> newItems = new List<MenuItem>();
+				
+				newItems.AddRange(_contextMenu.ItemsSource as IEnumerable<MenuItem> ?? Array.Empty<MenuItem>());
+				newItems.Add(new MenuItem() { Header = "Save to SVG", Command = SaveToSVGCommand});
+
+				_contextMenu.ItemsSource = newItems;
+			}
+		});
+
+		return this;
+	}
+	
+	[RelayCommand]
+	private async void SaveToSVG(object? parameter)
+	{
+		if (parameter is GraphEntityNodeControl graphNodeControl)
+		{
+			_ = SaveToSVGAsync(graphNodeControl);
+		}
+	}
+
+	private async Task SaveToSVGAsync(GraphEntityNodeControl graphNodeControl)
+	{
+		// Get the toplevel visual
+		if (TopLevel.GetTopLevel(graphNodeControl) is not { } toplevelVisual)
+		{
+			return;
+		}
+		
+		// Get the save file path through the file picker
+		var path = await StorageProviderHelper.SelectSaveFileAsync(toplevelVisual,
+			"Export netlist to SVG",
+			null,
+			".svg",
+			"netlist.svg",
+			true,
+			new FilePickerFileType("SVG Image") {Patterns = ["*.svg"]});
+
+		if (path == null)
+		{
+			return;
+		}
+
+		try
+		{
+			var file = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+			
+			// Actually write SVG
+			graphNodeControl.ToSVG(file, true, 0.0d, 0.0d, 100.0d, 100.0d);
+			
+			file.Close();
+		}
+		catch (Exception exception)
+		{
+			// Todo improve error handling with better messages
+			ServiceManager.GetService<ILogger>().Error(exception.Message,  exception);
 		}
 	}
 

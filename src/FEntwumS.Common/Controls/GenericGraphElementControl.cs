@@ -51,6 +51,11 @@ public abstract class GenericGraphElementControl : PositionableSubControl
 		Bounds = finalRect;
 	}
 
+	public virtual void ToSVG(FileStream svgFileStream, bool isTop, double offsetX, double offsetY, double width, double height)
+	{
+		
+	}
+
 	#endregion
 
 }

@@ -13,10 +13,10 @@ public interface IJsonLoader
 	public (GraphNodeControl?, GraphNodeControl?) CreateNode(JsonNode node, GraphNodeControl parent, double xRef, double
 		yRef, ushort depth, string clickedElementPath, string clickedElementParentPath);
 
-	public void CreateLabels(JsonArray labels, GraphNodeControl parent, double xRef,
+	public List<GraphLabelControl> CreateLabels(JsonArray labels, GraphNodeControl parent, double xRef,
 		double yRef, ushort depth);
 
-	public void CreatePorts(JsonArray ports, GraphNodeControl parent, GraphNodeControl attachedTo, double xRef,
+	public List<GraphPortControl> CreatePorts(JsonArray ports, GraphNodeControl parent, GraphNodeControl attachedTo, double xRef,
 		double yRef, ushort depth);
 
 	public void CreateEdges(JsonArray edges, GraphNodeControl parent, double xRef,
