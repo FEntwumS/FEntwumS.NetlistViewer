@@ -92,7 +92,9 @@ public class GraphLabelControl : GenericGraphElementControl
 	    double invariantScale = 1.0d / Scale;
 	    double baseX = offsetX + X * invariantScale;
 	    double baseY = offsetY + Y * invariantScale + Fontsize;
-	    string svgString = $"<text x=\"{baseX}\" y=\"{baseY}\" font-family=\"monospace\" font-size=\"{Fontsize}\">{Content}</text>";
+	    
+	    // Font sizes in SVG seem to render roughly twenty percent smaller than in OWS/Avalonia. This is corrected for better exports
+	    string svgString = $"<text x=\"{baseX}\" y=\"{baseY}\" font-family=\"MartianMono, monospace\" font-size=\"{Fontsize * 1.25d}px\">{Content}</text>";
 		
 	    var svgBytes = new UTF8Encoding(true).GetBytes(svgString);
 		

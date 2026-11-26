@@ -1,8 +1,10 @@
-﻿using System.Text;
+﻿using System.Buffers.Text;
+using System.Text;
 using Avalonia;
 using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using FEntwumS.Common.Assets.Fonts;
 using FEntwumS.Common.Services;
 using OneWare.Essentials.Services;
 
@@ -137,7 +139,20 @@ public class GraphEntityNodeControl : GraphNodeControl
 				height = h;
 			}
 
-			string svgString = $"<svg width=\"{width}\" height=\"{height}\" xmlns=\"http://www.w3.org/2000/svg\">\n";
+			string svgString = $"<svg width=\"{width}\" height=\"{height}\" xmlns=\"http://www.w3.org/2000/svg\">\n" +
+			                   $"<!--\n" +
+			                   $"{Base64FontProvider.MartianMonoLicense}\n" +
+			                   $"-->" +
+			                   $"<style>\n" +
+			                   $"@font-face {{ \n" +
+			                   $"font-family: \"MartianMono\";\n" +
+			                   $"src: url(\"data::font/ttf;base64,{Base64FontProvider.MartianMonoStdRg}\") format(\"ttf\");\n" +
+			                   $"}} \n" +
+			                   $".label {{ \n" +
+			                   $"font-family: \"MartianMono\", monospace;\n" +
+			                   $"font-size: 12px;\n" +
+			                   $"}} \n" +
+			                   $"</style>";
 			var svgBytes = new UTF8Encoding(true).GetBytes(svgString);
 		
 			svgFileStream.Write(svgBytes);
